@@ -19,6 +19,7 @@ class Base
 private:
   BWTA::BaseLocation* baseLocation;
   BWAPI::Unit* resourceDepot;
+  std::set<BWAPI::Unit*> minerals;
   bool active;
   bool beingConstructed;
 };

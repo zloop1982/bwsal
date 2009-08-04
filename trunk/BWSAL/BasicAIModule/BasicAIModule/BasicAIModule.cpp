@@ -35,7 +35,12 @@ void BasicAIModule::onFrame()
     {
       if (!(*u)->isTraining())
       {
-        (*u)->train(*(Broodwar->self()->getRace().getWorker()));
+        BWAPI::UnitType workerType=*(Broodwar->self()->getRace().getWorker());
+        if (BWAPI::Broodwar->self()->minerals()>=workerType.mineralPrice() &&
+            BWAPI::Broodwar->self()->gas()>=workerType.gasPrice())
+        {
+          (*u)->train(workerType);
+        }
       }
     }
   }
