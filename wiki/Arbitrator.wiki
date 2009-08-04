@@ -1,0 +1,3 @@
+#sidebar TableOfContents
+
+The Arbitrator facilitates cooperation between controllers (add-ons that order units around) and decides which controller gets which units.
