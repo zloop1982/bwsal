@@ -1,0 +1,5 @@
+  * [Arbitrator]
+  * [WorkerManager]
+  * [BuildingPlacer]
+  * [ConstructionManager]
+  * [SupplyManager]
