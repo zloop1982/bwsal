@@ -25,9 +25,26 @@ void BaseManager::update()
       }
       if ((*b)->getResourceDepot()!=NULL)
       {
-        if ((*b)->getResourceDepot()->isCompleted())
+        if ((*b)->getResourceDepot()->isCompleted() || (*b)->getResourceDepot()->getRemainingBuildTime()<250)
         {
           (*b)->setActive(true);
+        }
+      }
+    }
+  }
+
+  //check to see if any new base locations need to be added
+  for(std::set<BWTA::BaseLocation*>::const_iterator bl=BWTA::getBaseLocations().begin();bl!=BWTA::getBaseLocations().end();bl++)
+  {
+    if (location2base.find(*bl)==location2base.end())
+    {
+      BWAPI::TilePosition tile=(*bl)->getTilePosition();
+      std::set<BWAPI::Unit*> units=BWAPI::Broodwar->unitsOnTile(tile.x(),tile.y());
+      for(std::set<BWAPI::Unit*>::iterator u=units.begin();u!=units.end();u++)
+      {
+        if ((*u)->getPlayer()==BWAPI::Broodwar->self() && (*u)->getType().isResourceDepot())
+        {
+          addBase(*bl);
         }
       }
     }
@@ -35,7 +52,9 @@ void BaseManager::update()
 }
 void BaseManager::addBase(BWTA::BaseLocation* location)
 {
-  allBases.insert(new Base(location));
+  Base* newBase=new Base(location);
+  allBases.insert(newBase);
+  this->location2base[location]=newBase;
 }
 std::set<Base*> BaseManager::getActiveBases() const
 {
