@@ -1,0 +1,3 @@
+#sidebar TableOfContents
+
+Keeps track of each base and handles requests to activate and deactivate individual bases (useful to react to storm drops).
