@@ -185,10 +185,6 @@
 				RelativePath=".\BasicAIModule.h"
 				>
 			</File>
-			<File
-				RelativePath=".\RectangleArray.h"
-				>
-			</File>
 		</Filter>
 		<Filter
 			Name="Resource Files"
@@ -219,7 +215,11 @@
 					>
 				</File>
 				<File
-					RelativePath="..\..\include\BuildingPlacer.h"
+					RelativePath="..\..\include\BuildingPlacer\BuildingPlacer.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\include\BuildingPlacer\RectangleArray.h"
 					>
 				</File>
 			</Filter>
@@ -280,6 +280,26 @@
 				</File>
 				<File
 					RelativePath="..\..\include\ConstructionManager.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="BaseManager"
+				>
+				<File
+					RelativePath=".\Base.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\include\BaseManager\Base.h"
+					>
+				</File>
+				<File
+					RelativePath=".\BaseManager.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\include\BaseManager\BaseManager.h"
 					>
 				</File>
 			</Filter>

@@ -1,8 +1,7 @@
 #pragma once
 #include <Arbitrator.h>
 #include <BWAPI.h>
-#include "BuildingPlacer.h"
-#include "ConstructionManager.h"
+#include <ConstructionManager.h>
 class SupplyManager
 {
   public:

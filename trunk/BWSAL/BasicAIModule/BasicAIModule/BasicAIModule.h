@@ -2,10 +2,11 @@
 #include <BWAPI.h>
 #include <BWTA.h>
 #include <Arbitrator.h>
-#include "BuildingPlacer.h"
-#include "ConstructionManager.h"
-#include "WorkerManager.h"
-#include "SupplyManager.h"
+#include <BuildingPlacer.h>
+#include <ConstructionManager.h>
+#include <WorkerManager.h>
+#include <SupplyManager.h>
+#include <BaseManager.h>
 class BasicAIModule : public BWAPI::AIModule
 {
 public:
@@ -24,5 +25,6 @@ public:
   WorkerManager* workerManager;
   ConstructionManager* constructionManager;
   SupplyManager* supplyManager;
+  BaseManager* baseManager;
   BuildingPlacer placer;
 };
