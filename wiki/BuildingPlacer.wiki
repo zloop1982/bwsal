@@ -1,0 +1,3 @@
+#sidebar TableOfContents
+
+Finds a suitable build position for a given unit type.
