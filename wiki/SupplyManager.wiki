@@ -1,0 +1,3 @@
+#sidebar TableOfContents
+
+Keeps an eye on the supply count provided and supply count used, and orders the ConstructionManager to build more supply providing units as needed to ensure that the AI never gets supply blocked.
