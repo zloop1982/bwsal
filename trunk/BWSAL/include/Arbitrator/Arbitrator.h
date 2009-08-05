@@ -11,6 +11,7 @@ namespace Arbitrator
     bool accept(Controller<_Tp,_Val>* c, _Tp obj, _Val bid);
     bool accept(Controller<_Tp,_Val>* c, _Tp obj);
     bool decline(Controller<_Tp,_Val>* c, _Tp obj, _Val bid);
+    bool hasBid(_Tp obj) const;
     const std::pair<Controller<_Tp,_Val>*, _Val>& getHighestBidder(_Tp obj) const;
     const std::set<_Tp>& getObjects(Controller<_Tp,_Val>* c) const;
     void onRemoveObject(_Tp obj);
@@ -79,6 +80,12 @@ namespace Arbitrator
     owner[obj] = c;
     objects[c].insert(obj);
     updatedObjects.insert(obj);
+  }
+
+  template <class _Tp,class _Val>
+  bool Arbitrator<_Tp,_Val>::hasBid(_Tp obj) const
+  {
+    return (bids.find(obj)!=bids.end());
   }
 
   template <class _Tp,class _Val>

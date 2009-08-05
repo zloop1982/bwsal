@@ -90,7 +90,7 @@ void WorkerManager::update()
   std::set<BWAPI::Unit*> myPlayerUnits=BWAPI::Broodwar->self()->getUnits();
   for(std::set<BWAPI::Unit*>::iterator u = myPlayerUnits.begin(); u != myPlayerUnits.end(); u++)
   {
-    if ((*u)->getType().isWorker())
+    if ((*u)->isCompleted() && (*u)->getType().isWorker())
     {
       arbitrator->setBid(this, *u, 10);
     }

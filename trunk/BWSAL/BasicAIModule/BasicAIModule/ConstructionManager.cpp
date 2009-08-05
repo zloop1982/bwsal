@@ -37,16 +37,12 @@ void ConstructionManager::onOffer(std::set<BWAPI::Unit*> units)
   for(std::set<BWAPI::Unit*>::iterator u = units.begin(); u != units.end(); u++)
     arbitrator->decline(this, *u, 0);
 }
+
 void ConstructionManager::onRevoke(BWAPI::Unit* unit, double bid)
 {
-  if (builders.find(unit) != builders.end())
-  {
-    Building* building = builders.find(unit)->second;
-    if (building != NULL)
-      building->builderUnit = NULL;
-    builders.erase(unit);
-  }
+  this->onRemoveUnit(unit);
 }
+
 void ConstructionManager::onRemoveUnit(BWAPI::Unit* unit)
 {
   if (builders.find(unit) != builders.end())
@@ -56,9 +52,6 @@ void ConstructionManager::onRemoveUnit(BWAPI::Unit* unit)
       building->builderUnit = NULL;
     builders.erase(unit);
   }
-  for(int i = 0; i < (int)this->incompleteBuildings.size(); i++)
-    if (unit == incompleteBuildings[i]->buildingUnit)
-      incompleteBuildings[i]->buildingUnit = NULL;
 }
 
 void ConstructionManager::update()
@@ -67,7 +60,7 @@ void ConstructionManager::update()
   {
     std::set<BWAPI::Unit*> myPlayerUnits = BWAPI::Broodwar->self()->getUnits();
     for(std::set<BWAPI::Unit*>::iterator u = myPlayerUnits.begin(); u != myPlayerUnits.end(); u++)
-      if ((*u)->getType().isWorker() && (*u)->isCompleted())
+      if ((*u)->isCompleted() && (*u)->getType().isWorker() && this->builders.find(*u)==this->builders.end())
       {
         double min_dist=1000000;
         for(std::set<Building*>::iterator b = buildingsNeedingBuilders.begin(); b != buildingsNeedingBuilders.end(); b++)
@@ -156,7 +149,7 @@ void ConstructionManager::update()
       }
       else
       {
-        if (s->getType().getRace() != BWAPI::Races::Terran)
+        if (b->type.getRace() != BWAPI::Races::Terran)
         {
           if (u != NULL)
           {
@@ -196,6 +189,7 @@ bool ConstructionManager::build(BWAPI::UnitType type)
   this->incompleteBuildings.push_back(newBuilding);
   return true;
 }
+
 std::string ConstructionManager::getName()
 {
   return "Construction Manager";
