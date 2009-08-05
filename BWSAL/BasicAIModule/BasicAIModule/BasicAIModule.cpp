@@ -36,8 +36,7 @@ void BasicAIModule::onFrame()
       if (!(*u)->isTraining())
       {
         BWAPI::UnitType workerType=*(Broodwar->self()->getRace().getWorker());
-        if (BWAPI::Broodwar->self()->minerals()>=workerType.mineralPrice() &&
-            BWAPI::Broodwar->self()->gas()>=workerType.gasPrice())
+        if (BWAPI::Broodwar->canMake(*u,workerType))
         {
           (*u)->train(workerType);
         }
@@ -102,6 +101,7 @@ void BasicAIModule::onRemoveUnit(BWAPI::Unit* unit)
 {
   this->arbitrator.onRemoveObject(unit);
   this->constructionManager->onRemoveUnit(unit);
+  this->workerManager->onRemoveUnit(unit);
   this->supplyManager->onRemoveUnit(unit);
 }
 bool BasicAIModule::onSendText(std::string text)

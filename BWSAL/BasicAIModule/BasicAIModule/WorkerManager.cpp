@@ -30,6 +30,10 @@ void WorkerManager::onOffer(std::set<BWAPI::Unit*> units)
 }
 void WorkerManager::onRevoke(BWAPI::Unit* unit, double bid)
 {
+  this->onRemoveUnit(unit);
+}
+void WorkerManager::onRemoveUnit(BWAPI::Unit* unit)
+{
   workers.erase(unit);
 }
 
