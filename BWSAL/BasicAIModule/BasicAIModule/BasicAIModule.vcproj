@@ -58,7 +58,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="../../lib/BWAPI.lib"
+				AdditionalDependencies="../../lib/BWAPI.lib ../../lib/BWTA.lib"
 				GenerateDebugInformation="true"
 				TargetMachine="1"
 			/>
@@ -300,6 +300,18 @@
 				</File>
 				<File
 					RelativePath="..\..\include\BaseManager\BaseManager.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="ProductionManager"
+				>
+				<File
+					RelativePath=".\ProductionManager.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\include\ProductionManager.h"
 					>
 				</File>
 			</Filter>

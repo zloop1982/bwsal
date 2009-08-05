@@ -4,6 +4,7 @@
 #include <Arbitrator.h>
 #include <BuildingPlacer.h>
 #include <ConstructionManager.h>
+#include <ProductionManager.h>
 #include <WorkerManager.h>
 #include <SupplyManager.h>
 #include <BaseManager.h>
@@ -24,6 +25,7 @@ public:
   Arbitrator::Arbitrator<BWAPI::Unit*,double> arbitrator;
   WorkerManager* workerManager;
   ConstructionManager* constructionManager;
+  ProductionManager* productionManager;
   SupplyManager* supplyManager;
   BaseManager* baseManager;
   BuildingPlacer placer;

@@ -13,36 +13,29 @@ void BasicAIModule::onStart()
   this->baseManager=new BaseManager(this->constructionManager);
   this->baseManager->addBase(BWTA::getStartLocation(BWAPI::Broodwar->self()));
   this->workerManager=new WorkerManager(&this->arbitrator,baseManager);
+  this->productionManager=new ProductionManager(&this->arbitrator);
 
   Broodwar->printf("Hello world!");
   Broodwar->printf("The map is %s, a %d player map",Broodwar->mapName().c_str(),Broodwar->getStartLocations().size());
+
+  BWAPI::UnitType workerType=*(Broodwar->self()->getRace().getWorker());
+  for(int i=0;i<20;i++)
+  {
+    this->productionManager->train(workerType);
+  }
 }
 void BasicAIModule::onFrame()
 {
   if (Broodwar->inReplay()) return;
 
-  baseManager->update();
-  workerManager->update();
-  constructionManager->update();
-  supplyManager->update();
-  arbitrator.update();
+  this->baseManager->update();
+  this->workerManager->update();
+  this->constructionManager->update();
+  this->supplyManager->update();
+  this->productionManager->update();
+  this->arbitrator.update();
   std::set<Unit*> units=Broodwar->self()->getUnits();
 
-  //Basic worker pump
-  for(std::set<Unit*>::iterator u=units.begin();u!=units.end();u++)
-  {
-    if ((*u)->getType()==*(Broodwar->self()->getRace().getWorker()->whatBuilds().first))
-    {
-      if (!(*u)->isTraining())
-      {
-        BWAPI::UnitType workerType=*(Broodwar->self()->getRace().getWorker());
-        if (BWAPI::Broodwar->canMake(*u,workerType))
-        {
-          (*u)->train(workerType);
-        }
-      }
-    }
-  }
   //we will iterate through all the base locations, and draw their outlines.
   for(std::set<BWTA::BaseLocation*>::const_iterator i=BWTA::getBaseLocations().begin();i!=BWTA::getBaseLocations().end();i++)
   {
@@ -109,7 +102,14 @@ bool BasicAIModule::onSendText(std::string text)
   UnitType type=UnitTypes::getUnitType(text);
   if (type!=UnitTypes::Unknown)
   {
-    this->constructionManager->build(type);
+    if (type.isBuilding())
+    {
+      this->constructionManager->build(type);
+    }
+    else
+    {
+      this->productionManager->train(type);
+    }
   }
   else
   {
