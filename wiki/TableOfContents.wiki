@@ -2,5 +2,6 @@
   * [WorkerManager Worker Manager]
   * [BuildingPlacer Building Placer]
   * [ConstructionManager Construction Manager]
+  * [ProductionManager Production Manager]
   * [SupplyManager Supply Manager]
   * [BaseManager Base Manager]
