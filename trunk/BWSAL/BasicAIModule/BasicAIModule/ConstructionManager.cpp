@@ -156,8 +156,7 @@ void ConstructionManager::update()
                 {
                   if (BWAPI::Broodwar->canBuildHere(u,b->tilePosition,b->type))
                   {
-                    if (BWAPI::Broodwar->self()->minerals()>=b->type.mineralPrice() &&
-                        BWAPI::Broodwar->self()->gas()>=b->type.gasPrice())
+                    if (BWAPI::Broodwar->canMake(u,b->type))
                     {
                       u->build(b->tilePosition,b->type);
                     }

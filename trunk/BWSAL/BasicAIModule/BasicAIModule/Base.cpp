@@ -5,15 +5,6 @@ Base::Base(BWTA::BaseLocation* location)
   this->resourceDepot=NULL;
   this->active=false;
   this->beingConstructed=false;
-  std::set<BWAPI::Unit*> allMinerals=BWAPI::Broodwar->getMinerals();
-  BWAPI::Position position=this->baseLocation->getPosition();
-  for(std::set<BWAPI::Unit*>::iterator m=allMinerals.begin();m!=allMinerals.end();m++)
-  {
-    if ((*m)->getPosition().getDistance(position)<32*10)
-    {
-      minerals.insert(*m);
-    }
-  }
 }
 
 BWTA::BaseLocation* Base::getBaseLocation() const
@@ -28,22 +19,12 @@ BWAPI::Unit* Base::getResourceDepot() const
 
 std::set<BWAPI::Unit*> Base::getMinerals() const
 {
-  return this->minerals;
+  return this->baseLocation->getMinerals();
 }
 
 std::set<BWAPI::Unit*> Base::getGeysers() const
 {
-  std::set<BWAPI::Unit*> myGeysers;
-  std::set<BWAPI::Unit*> allGeysers=BWAPI::Broodwar->getGeysers();
-  BWAPI::Position position=this->baseLocation->getPosition();
-  for(std::set<BWAPI::Unit*>::iterator g=allGeysers.begin();g!=allGeysers.end();g++)
-  {
-    if ((*g)->getPosition().getDistance(position)<32*10)
-    {
-      myGeysers.insert(*g);
-    }
-  }
-  return myGeysers;
+  return this->baseLocation->getGeysers();
 }
 bool Base::isActive() const
 {
