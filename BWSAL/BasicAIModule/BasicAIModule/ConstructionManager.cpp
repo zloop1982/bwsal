@@ -67,7 +67,7 @@ void ConstructionManager::update()
   {
     std::set<BWAPI::Unit*> myPlayerUnits = BWAPI::Broodwar->self()->getUnits();
     for(std::set<BWAPI::Unit*>::iterator u = myPlayerUnits.begin(); u != myPlayerUnits.end(); u++)
-      if ((*u)->getType().isWorker())
+      if ((*u)->getType().isWorker() && (*u)->isCompleted())
       {
         double min_dist=1000000;
         for(std::set<Building*>::iterator b = buildingsNeedingBuilders.begin(); b != buildingsNeedingBuilders.end(); b++)
@@ -87,6 +87,25 @@ void ConstructionManager::update()
   for(int i = 0; i < (int)this->incompleteBuildings.size();)
   {
     Building* b    = this->incompleteBuildings[i];
+    if (b->builderUnit!=NULL && !b->builderUnit->exists())
+      b->builderUnit=NULL;
+    if (b->buildingUnit!=NULL && (!b->buildingUnit->exists() || b->buildingUnit->getType()!=b->type))
+      b->buildingUnit=NULL;
+
+    if (b->buildingUnit == NULL)
+    {
+      std::set<BWAPI::Unit*> unitsOnTile = BWAPI::Broodwar->unitsOnTile(b->tilePosition.x(), b->tilePosition.y());
+      for(std::set<BWAPI::Unit*>::iterator t = unitsOnTile.begin(); t != unitsOnTile.end(); t++)
+        if ((*t)->getType().isBuilding() && (*t)->getType() == b->type && !(*t)->isCompleted())
+        {
+          b->buildingUnit = *t;
+          break;
+        }
+      if (b->buildingUnit == NULL && b->builderUnit!=NULL && b->builderUnit->getType().isBuilding())
+      {
+        b->buildingUnit = b->builderUnit;
+      }
+    }
     BWAPI::Unit* u = b->builderUnit;
     BWAPI::Unit* s = b->buildingUnit;
     if (s != NULL && s->isCompleted())
@@ -104,22 +123,6 @@ void ConstructionManager::update()
     {
       if (s == NULL)
       {
-        std::set<BWAPI::Unit*> unitsOnTile = BWAPI::Broodwar->unitsOnTile(b->tilePosition.x(), b->tilePosition.y());
-        for(std::set<BWAPI::Unit*>::iterator t = unitsOnTile.begin(); t != unitsOnTile.end(); t++)
-          if ((*t)->getType().isBuilding() && (*t)->getType() == b->type && !(*t)->isCompleted())
-          {
-            b->buildingUnit = *t;
-            s = b->buildingUnit;
-            break;
-          }
-      }
-      if (s == NULL && u!=NULL && u->getType().isBuilding())
-      {
-        b->buildingUnit = u;
-        s = b->buildingUnit;
-      }
-      if (s == NULL)
-      {
         if (BWAPI::Broodwar->canMake(NULL,b->type))
         {
           if (u == NULL)
@@ -135,8 +138,10 @@ void ConstructionManager::update()
                 if (BWAPI::Broodwar->getFrameCount() % 4)
                 {
                   if (BWAPI::Broodwar->canBuildHere(u, b->tilePosition, b->type))
+                  {
                     if (BWAPI::Broodwar->canMake(u, b->type))
                       u->build(b->tilePosition, b->type);
+                  }
                   else
                   {
                     this->placer->freeTiles(b->tilePosition, b->type.tileWidth(), b->type.tileHeight());
@@ -152,23 +157,22 @@ void ConstructionManager::update()
       else
       {
         if (s->getType().getRace() != BWAPI::Races::Terran)
+        {
           if (u != NULL)
           {
             this->builders.erase(u);
             arbitrator->setBid(this, u, 0);
-            b->builderUnit = NULL;           
+            b->builderUnit = NULL;  
+            u = b->builderUnit;
           }
+        }
         else
         {
           if (u == NULL)
             buildingsNeedingBuilders.insert(b);
           else
-            if (!u->isConstructing() || u->getBuildUnit() != s)
-            {
-              if (u->getBuildUnit() != s)
-                u->stop();
+            if (!u->isConstructing() || !s->isBeingConstructed())
               u->rightClick(s);
-            }
         }
       }
       i++;
