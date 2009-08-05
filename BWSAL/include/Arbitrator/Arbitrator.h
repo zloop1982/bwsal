@@ -26,7 +26,8 @@ namespace Arbitrator
   template <class _Tp,class _Val>
   bool Arbitrator<_Tp,_Val>::setBid(Controller<_Tp,_Val>* c, _Tp obj, _Val bid)
   {
-    if (c==NULL || obj==NULL) return false;
+    if (c == NULL || obj == NULL)
+      return false;
     bids[obj].set(c,bid);
     updatedObjects.insert(obj);
     return true;
@@ -36,9 +37,11 @@ namespace Arbitrator
   template <class _Tp,class _Val>
   bool Arbitrator<_Tp,_Val>::decline(Controller<_Tp,_Val>* c, _Tp obj, _Val bid)
   {
-    if (c==NULL || obj==NULL) return false;
-    if (bids[obj].top().first!=c) return false;
-    bids[obj].set(c,bid);
+    if (c == NULL || obj == NULL)
+      return false;
+    if (bids[obj].top().first != c)
+      return false;
+    bids[obj].set(c, bid);
     updatedObjects.insert(obj);
     return true;
   }
@@ -46,14 +49,16 @@ namespace Arbitrator
   template <class _Tp,class _Val>
   bool Arbitrator<_Tp,_Val>::accept(Controller<_Tp,_Val>* c, _Tp obj)
   {
-    if (c==NULL || obj==NULL) return false;
-    if (bids[obj].top().first!=c) return false;
+    if (c == NULL || obj == NULL)
+      return false;
+    if (bids[obj].top().first != c)
+      return false;
     if (owner[obj])
     {
       owner[obj]->onRevoke(obj,bids[obj].top().second);
       objects[owner[obj]].erase(obj);
     }
-    owner[obj]=c;
+    owner[obj] = c;
     objects[c].insert(obj);
     return true;
   }
@@ -61,15 +66,17 @@ namespace Arbitrator
   template <class _Tp,class _Val>
   bool Arbitrator<_Tp,_Val>::accept(Controller<_Tp,_Val>* c, _Tp obj, _Val bid)
   {
-    if (c==NULL || obj==NULL) return false;
-    if (bids[obj].top().first!=c) return false;
+    if (c == NULL || obj == NULL)
+      return false;
+    if (bids[obj].top().first != c)
+      return false;
     if (owner[obj])
     {
-      owner[obj]->onRevoke(obj,bids[obj].top().second);
+      owner[obj]->onRevoke(obj, bids[obj].top().second);
       objects[owner[obj]].erase(obj);
     }
     bids[obj].set(c,bid);
-    owner[obj]=c;
+    owner[obj] = c;
     objects[c].insert(obj);
     updatedObjects.insert(obj);
   }
@@ -108,20 +115,12 @@ namespace Arbitrator
   void Arbitrator<_Tp,_Val>::update()
   {
     std::map<Controller<_Tp,_Val>*, std::set<_Tp> > objectsToOffer;
-    for(std::set<_Tp>::iterator i=updatedObjects.begin();i!=updatedObjects.end();i++)
-    {
+    for(std::set<_Tp>::iterator i = updatedObjects.begin(); i != updatedObjects.end(); i++)
       if (!bids[*i].empty())
-      {
-        if (owner.find(*i)==owner.end() || bids[*i].top().first!=owner[*i])
-        {
+        if (owner.find(*i) == owner.end() || bids[*i].top().first != owner[*i])
           objectsToOffer[bids[*i].top().first].insert(*i);
-        }
-      }
-    }
     updatedObjects.clear();
-    for(std::map< Controller<_Tp,_Val>*, std::set<_Tp> >::iterator i=objectsToOffer.begin();i!=objectsToOffer.end();i++)
-    {
+    for(std::map< Controller<_Tp,_Val>*, std::set<_Tp> >::iterator i = objectsToOffer.begin(); i != objectsToOffer.end(); i++)
       (*i).first->onOffer((*i).second);
-    }
   }
 }
