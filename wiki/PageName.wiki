@@ -1,3 +1,0 @@
-#sidebar TableOfContents
-
-Given a unit type, the production manager will attempt to get a suitable factory and train the given unit type.
