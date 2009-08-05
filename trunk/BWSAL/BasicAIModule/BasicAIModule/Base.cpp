@@ -1,10 +1,10 @@
 #include <BaseManager.h>
 Base::Base(BWTA::BaseLocation* location)
 {
-  this->baseLocation=location;
-  this->resourceDepot=NULL;
-  this->active=false;
-  this->beingConstructed=false;
+  this->baseLocation     = location;
+  this->resourceDepot    = NULL;
+  this->active           = false;
+  this->beingConstructed = false;
 }
 
 BWTA::BaseLocation* Base::getBaseLocation() const
@@ -37,9 +37,9 @@ bool Base::isBeingConstructed() const
 
 void Base::setResourceDepot(BWAPI::Unit* unit)
 {
-  this->resourceDepot=unit;
+  this->resourceDepot = unit;
 }
 void Base::setActive(bool active)
 {
-  this->active=active;
+  this->active = active;
 }
