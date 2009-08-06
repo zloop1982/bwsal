@@ -77,9 +77,29 @@ void ConstructionManager::update()
         arbitrator->setBid(this, *u, bid);
       }
   }
-  for(int i = 0; i < (int)this->incompleteBuildings.size();)
+  std::list<Building*>::iterator i_next;
+  int index=0;
+  for(std::list<Building*>::iterator i=this->incompleteBuildings.begin();i!=this->incompleteBuildings.end();i=i_next)
   {
-    Building* b    = this->incompleteBuildings[i];
+    index++;
+    i_next=i;
+    i_next++;
+    Building* b = *i;
+    if (b->tilePosition==BWAPI::TilePositions::None)
+    {
+      if ((BWAPI::Broodwar->getFrameCount()+index)%25==0 && BWAPI::Broodwar->canMake(NULL,b->type))
+      {
+        b->tilePosition = this->placer->getBuildLocationNear(BWAPI::Broodwar->self()->getStartLocation(), b->type);
+        if (b->tilePosition!=BWAPI::TilePositions::None)
+        {
+          b->position = BWAPI::Position(b->tilePosition.x()*32 + b->type.tileWidth()*16, b->tilePosition.y()*32 + b->type.tileHeight()*16);
+          this->placer->reserveTiles(b->tilePosition, b->type.tileWidth(), b->type.tileHeight());
+        }
+      }
+      if (b->tilePosition==BWAPI::TilePositions::None)
+        continue;
+    }
+
     if (b->builderUnit!=NULL && !b->builderUnit->exists())
       b->builderUnit=NULL;
     if (b->buildingUnit!=NULL && (!b->buildingUnit->exists() || b->buildingUnit->getType()!=b->type))
@@ -104,7 +124,7 @@ void ConstructionManager::update()
     if (s != NULL && s->isCompleted())
     {
       //If the building is complete, we can forget about it.
-      this->incompleteBuildings.erase(this->incompleteBuildings.begin() + i);
+      this->incompleteBuildings.erase(i);
       if (u != NULL)
       {
         this->builders.erase(u);
@@ -136,9 +156,8 @@ void ConstructionManager::update()
                 else
                 {
                   this->placer->freeTiles(b->tilePosition, b->type.tileWidth(), b->type.tileHeight());
-                  b->tilePosition = this->placer->getBuildLocationNear(b->tilePosition, b->type);
-                  b->position     = BWAPI::Position(b->tilePosition.x()*32 + b->type.tileWidth()*16, b->tilePosition.y()*32 + b->type.tileHeight()*16);
-                  this->placer->reserveTiles(b->tilePosition, b->type.tileWidth(), b->type.tileHeight());
+                  b->tilePosition = BWAPI::TilePositions::None;
+                  b->position = BWAPI::Positions::None;
                 }
             }
           }
@@ -197,16 +216,12 @@ void ConstructionManager::update()
 bool ConstructionManager::build(BWAPI::UnitType type)
 {
   if (!type.isBuilding()) return false;
-  BWAPI::TilePosition buildLocation = this->placer->getBuildLocationNear(BWAPI::Broodwar->self()->getStartLocation(), type);
-  if (buildLocation == BWAPI::TilePositions::None)
-    return false;
   Building* newBuilding     = new Building();
   newBuilding->type         = type;
-  newBuilding->tilePosition = buildLocation;
+  newBuilding->tilePosition = BWAPI::TilePositions::None;
   newBuilding->builderUnit  = NULL;
   newBuilding->buildingUnit = NULL;
-  newBuilding->position     = BWAPI::Position(newBuilding->tilePosition.x()*32 + type.tileWidth()*16, newBuilding->tilePosition.y()*32 + type.tileHeight()*16);
-  this->placer->reserveTiles(newBuilding->tilePosition, type.tileWidth(), type.tileHeight());
+  newBuilding->position     = BWAPI::Positions::None;
   this->incompleteBuildings.push_back(newBuilding);
   return true;
 }
