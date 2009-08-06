@@ -9,7 +9,10 @@ SupplyManager::SupplyManager(ConstructionManager* builder)
 
 void SupplyManager::onRemoveUnit(BWAPI::Unit* unit)
 {
-  this->plannedSupply -= unit->getType().supplyProvided();
+  if (unit->isCompleted())
+  {
+    this->plannedSupply -= unit->getType().supplyProvided();
+  }
 }
 
 void SupplyManager::update()
