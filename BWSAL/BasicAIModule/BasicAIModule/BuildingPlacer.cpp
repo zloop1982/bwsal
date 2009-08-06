@@ -26,7 +26,7 @@ bool BuildingPlacer::canBuildHereWithSpace(BWAPI::TilePosition position, BWAPI::
       std::set<BWAPI::Unit*> units = BWAPI::Broodwar->unitsOnTile(x, y);
       std::set<BWAPI::Unit*> buildings;
       for(std::set<BWAPI::Unit*>::iterator i = units.begin(); i != units.end(); i++)
-        if ((*i)->getType().isBuilding())
+        if ((*i)->getType().isBuilding() && !(*i)->isLifted())
           buildings.insert(*i);
       if (!type.isRefinery() && (!BWAPI::Broodwar->buildable(x, y) || !buildings.empty()))
         return false;

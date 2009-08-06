@@ -13,7 +13,7 @@ void BasicAIModule::onStart()
   this->baseManager=new BaseManager(this->constructionManager);
   this->baseManager->addBase(BWTA::getStartLocation(BWAPI::Broodwar->self()));
   this->workerManager=new WorkerManager(&this->arbitrator,baseManager);
-  this->productionManager=new ProductionManager(&this->arbitrator);
+  this->productionManager=new ProductionManager(&this->arbitrator,&placer);
 
   Broodwar->printf("Hello world!");
   Broodwar->printf("The map is %s, a %d player map",Broodwar->mapName().c_str(),Broodwar->getStartLocations().size());
@@ -94,6 +94,7 @@ void BasicAIModule::onRemoveUnit(BWAPI::Unit* unit)
 {
   this->arbitrator.onRemoveObject(unit);
   this->constructionManager->onRemoveUnit(unit);
+  this->productionManager->onRemoveUnit(unit);
   this->workerManager->onRemoveUnit(unit);
   this->supplyManager->onRemoveUnit(unit);
 }
@@ -108,7 +109,10 @@ bool BasicAIModule::onSendText(std::string text)
     }
     else
     {
-      this->productionManager->train(type);
+      for(int i=0;i<20;i++)
+      {
+        this->productionManager->train(type);
+      }
     }
   }
   else
