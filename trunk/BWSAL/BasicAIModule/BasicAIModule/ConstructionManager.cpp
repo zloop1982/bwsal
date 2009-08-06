@@ -89,7 +89,7 @@ void ConstructionManager::update()
     {
       std::set<BWAPI::Unit*> unitsOnTile = BWAPI::Broodwar->unitsOnTile(b->tilePosition.x(), b->tilePosition.y());
       for(std::set<BWAPI::Unit*>::iterator t = unitsOnTile.begin(); t != unitsOnTile.end(); t++)
-        if ((*t)->getType().isBuilding() && (*t)->getType() == b->type && !(*t)->isCompleted())
+        if ((*t)->getType().isBuilding() && (*t)->getType() == b->type && !(*t)->isCompleted() && !(*t)->isLifted())
         {
           b->buildingUnit = *t;
           break;
@@ -128,20 +128,17 @@ void ConstructionManager::update()
               if (distance > 100)
                 u->rightClick(b->position);
               else
-                if (BWAPI::Broodwar->getFrameCount() % 4)
+                if (BWAPI::Broodwar->canBuildHere(u, b->tilePosition, b->type))
                 {
-                  if (BWAPI::Broodwar->canBuildHere(u, b->tilePosition, b->type))
-                  {
-                    if (BWAPI::Broodwar->canMake(u, b->type))
-                      u->build(b->tilePosition, b->type);
-                  }
-                  else
-                  {
-                    this->placer->freeTiles(b->tilePosition, b->type.tileWidth(), b->type.tileHeight());
-                    b->tilePosition = this->placer->getBuildLocationNear(b->tilePosition, b->type);
-                    b->position     = BWAPI::Position(b->tilePosition.x()*32 + b->type.tileWidth()*16, b->tilePosition.y()*32 + b->type.tileHeight()*16);
-                    this->placer->reserveTiles(b->tilePosition, b->type.tileWidth(), b->type.tileHeight());
-                  }
+                  if (BWAPI::Broodwar->canMake(u, b->type))
+                    u->build(b->tilePosition, b->type);
+                }
+                else
+                {
+                  this->placer->freeTiles(b->tilePosition, b->type.tileWidth(), b->type.tileHeight());
+                  b->tilePosition = this->placer->getBuildLocationNear(b->tilePosition, b->type);
+                  b->position     = BWAPI::Position(b->tilePosition.x()*32 + b->type.tileWidth()*16, b->tilePosition.y()*32 + b->type.tileHeight()*16);
+                  this->placer->reserveTiles(b->tilePosition, b->type.tileWidth(), b->type.tileHeight());
                 }
             }
           }
@@ -164,8 +161,32 @@ void ConstructionManager::update()
           if (u == NULL)
             buildingsNeedingBuilders.insert(b);
           else
-            if (!u->isConstructing() || !s->isBeingConstructed())
-              u->rightClick(s);
+          {
+            if (BWAPI::Broodwar->getFrameCount()%(4*BWAPI::Broodwar->getLatency())==0)
+            {
+              /*
+              int sx=s->getPosition().x();
+              int sy=s->getPosition().y();
+              int ux=u->getPosition().x();
+              int uy=u->getPosition().y();
+              BWAPI::Broodwar->text(BWAPI::CoordinateType::Map,sx,sy,"%s",s->getOrder().getName().c_str());
+              BWAPI::Broodwar->text(BWAPI::CoordinateType::Map,sx,sy+20,"%s",s->getType().getName().c_str());
+              BWAPI::Broodwar->text(BWAPI::CoordinateType::Map,sx,sy+40,"isCompleted: %s",s->isCompleted() ? "true" : "false");
+              BWAPI::Broodwar->text(BWAPI::CoordinateType::Map,sx,sy+60,"isBeingConstructed: %s",s->isBeingConstructed() ? "true" : "false");
+              BWAPI::Broodwar->text(BWAPI::CoordinateType::Map,ux,uy,"%s",u->getOrder().getName().c_str());
+              BWAPI::Broodwar->text(BWAPI::CoordinateType::Map,ux,uy+20,"isConstructing: %s",u->isConstructing() ? "true" : "false");
+              */
+              if (!u->isConstructing() || !s->isBeingConstructed())
+              {
+                /*
+                BWAPI::Broodwar->drawBox(BWAPI::CoordinateType::Map,sx-32,sy-32,sx+32,sy+32,BWAPI::Colors::Green,false);
+                BWAPI::Broodwar->drawBox(BWAPI::CoordinateType::Map,ux-32,uy-32,ux+32,uy+32,BWAPI::Colors::Blue,false);
+                BWAPI::Broodwar->printf("rightClick: u: 0x%x, s: 0x%x",u,s);
+                */
+                u->rightClick(s);
+              }
+            }
+          }
         }
       }
       i++;
