@@ -1,10 +1,18 @@
 #pragma once
 #include <Arbitrator.h>
 #include <BWAPI.h>
+#include <BuildingPlacer.h>
 class ProductionManager : public Arbitrator::Controller<BWAPI::Unit*,double>
 {
   public:
-    ProductionManager(Arbitrator::Arbitrator<BWAPI::Unit*,double>* arbitrator);
+    class Unit
+    {
+      public:
+        BWAPI::UnitType type;
+        int lastAttemptFrame;
+        BWAPI::Unit* unit;
+    };
+    ProductionManager(Arbitrator::Arbitrator<BWAPI::Unit*,double>* arbitrator, BuildingPlacer* placer);
     virtual void onOffer(std::set<BWAPI::Unit*> units);
     virtual void onRevoke(BWAPI::Unit* unit, double bid);
     virtual void update();
@@ -14,4 +22,6 @@ class ProductionManager : public Arbitrator::Controller<BWAPI::Unit*,double>
     Arbitrator::Arbitrator<BWAPI::Unit*,double>* arbitrator;
     std::map<BWAPI::UnitType,std::list<BWAPI::Unit*> > factories;
     std::map<BWAPI::UnitType,std::list<BWAPI::UnitType> > factoriesQueues;
+    std::map<BWAPI::Unit*,Unit> factoryBuildUnit;
+    BuildingPlacer* placer;
 };
