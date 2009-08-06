@@ -24,6 +24,6 @@ class ConstructionManager : public Arbitrator::Controller<BWAPI::Unit*,double>
     Arbitrator::Arbitrator<BWAPI::Unit*,double>* arbitrator;
     BuildingPlacer* placer;
     std::map<BWAPI::Unit*,Building*> builders;
-    std::vector<Building*> incompleteBuildings;
+    std::list<Building*> incompleteBuildings;
     std::set<Building*> buildingsNeedingBuilders;
 };
