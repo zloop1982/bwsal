@@ -1,3 +1,8 @@
 #sidebar TableOfContents
 
-The build manager is used to build units and buildings. To start building a new unit, simply call BuildManager::build([http://code.google.com/p/bwapi/wiki/UnitType UnitType] type)
+The build manager is used to build units and buildings. To start building a new unit, simply call BuildManager::build([http://code.google.com/p/bwapi/wiki/UnitType UnitType] type).
+
+When a new unit type request comes in, the build manager will pass the unit type off to one of the three sub-build managers:
+  * [ConstructionManager Construction Manager] - handles creating new buildings and add-ons
+  * [ProductionManager Production Manager] - handles training units from production buildings
+  * [MorphManager Morph Manager] - handles morphing units in to other units.
