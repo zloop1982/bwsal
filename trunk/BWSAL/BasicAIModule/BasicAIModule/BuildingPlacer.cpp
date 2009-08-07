@@ -20,17 +20,44 @@ bool BuildingPlacer::canBuildHereWithSpace(BWAPI::TilePosition position, BWAPI::
     return false;
   if (position.x() < 2 || position.y() < 2 || position.x() >= BWAPI::Broodwar->mapWidth() - 2 || position.y() >= BWAPI::Broodwar->mapHeight() - 2)
     return false;
-  for(int x = position.x() - 1; x < position.x() + type.tileWidth() + 1; x++)
-    for(int y = position.y() - 1; y < position.y() + type.tileHeight() + 1; y++)
+  int width=type.tileWidth();
+  int height=type.tileHeight();
+  if (type==BWAPI::UnitTypes::Terran_Command_Center ||
+    type==BWAPI::UnitTypes::Terran_Factory || 
+    type==BWAPI::UnitTypes::Terran_Starport ||
+    type==BWAPI::UnitTypes::Terran_Science_Facility)
+  {
+    width+=2;
+  }
+  for(int x = position.x() - 1; x < position.x() + width + 1; x++)
+    for(int y = position.y() - 1; y < position.y() + height + 1; y++)
     {
-      std::set<BWAPI::Unit*> units = BWAPI::Broodwar->unitsOnTile(x, y);
-      std::set<BWAPI::Unit*> buildings;
-      for(std::set<BWAPI::Unit*>::iterator i = units.begin(); i != units.end(); i++)
-        if ((*i)->getType().isBuilding() && !(*i)->isLifted())
-          buildings.insert(*i);
-      if (!type.isRefinery() && (!BWAPI::Broodwar->buildable(x, y) || !buildings.empty()))
-        return false;
+      if (!type.isRefinery())
+        if (!buildable(x, y))
+          return false;
     }
+  if (position.x()>3)
+  {
+    for(int x = position.x() - 3; x < position.x(); x++)
+      for(int y = position.y() - 1; y < position.y() + height; y++)
+      {
+        std::set<BWAPI::Unit*> units = BWAPI::Broodwar->unitsOnTile(x, y);
+        for(std::set<BWAPI::Unit*>::iterator i = units.begin(); i != units.end(); i++)
+        {
+          if (!(*i)->isLifted())
+          {
+            BWAPI::UnitType type=(*i)->getType();
+            if (type==BWAPI::UnitTypes::Terran_Command_Center ||
+              type==BWAPI::UnitTypes::Terran_Factory || 
+              type==BWAPI::UnitTypes::Terran_Starport ||
+              type==BWAPI::UnitTypes::Terran_Science_Facility)
+            {
+              return false;
+            }
+          }
+        }
+      }
+  }
   return true;
 }
 BWAPI::TilePosition BuildingPlacer::getBuildLocation(BWAPI::UnitType type) const
@@ -78,12 +105,24 @@ BWAPI::TilePosition BuildingPlacer::getBuildLocationNear(BWAPI::TilePosition pos
   }
   return BWAPI::TilePositions::None;
 }
+
+bool BuildingPlacer::buildable(int x, int y) const
+{
+  if (!BWAPI::Broodwar->buildable(x,y)) return false;
+  std::set<BWAPI::Unit*> units = BWAPI::Broodwar->unitsOnTile(x, y);
+  for(std::set<BWAPI::Unit*>::iterator i = units.begin(); i != units.end(); i++)
+    if ((*i)->getType().isBuilding() && !(*i)->isLifted())
+      return false;
+  return true;
+}
+
 void BuildingPlacer::reserveTiles(BWAPI::TilePosition position, int width, int height)
 {
   for(int x = position.x(); x < position.x() + width && x < (int)reserveMap.getWidth(); x++)
     for(int y = position.y(); y < position.y() + height && y < (int)reserveMap.getHeight(); y++)
       reserveMap[x][y] = true;
 }
+
 void BuildingPlacer::freeTiles(BWAPI::TilePosition position, int width, int height)
 {
   for(int x = position.x(); x < position.x() + width && x < (int)reserveMap.getWidth(); x++)

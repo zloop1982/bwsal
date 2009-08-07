@@ -13,6 +13,7 @@ class ConstructionManager : public Arbitrator::Controller<BWAPI::Unit*,double>
         BWAPI::UnitType type;
         BWAPI::Unit* buildingUnit;
         BWAPI::Unit* builderUnit;
+        int lastOrderFrame;
     };
     ConstructionManager(Arbitrator::Arbitrator<BWAPI::Unit*,double>* arbitrator, BuildingPlacer* placer);
     virtual void onOffer(std::set<BWAPI::Unit*> units);
@@ -24,6 +25,7 @@ class ConstructionManager : public Arbitrator::Controller<BWAPI::Unit*,double>
     Arbitrator::Arbitrator<BWAPI::Unit*,double>* arbitrator;
     BuildingPlacer* placer;
     std::map<BWAPI::Unit*,Building*> builders;
-    std::list<Building*> incompleteBuildings;
-    std::set<Building*> buildingsNeedingBuilders;
+    std::list<Building> incompleteBuildings;
+    std::map<BWAPI::UnitType,std::set<Building*> > buildingsNeedingBuilders;
+
 };

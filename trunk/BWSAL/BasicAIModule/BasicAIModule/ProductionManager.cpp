@@ -117,7 +117,9 @@ void ProductionManager::onRemoveUnit(BWAPI::Unit* unit)
 
 bool ProductionManager::train(BWAPI::UnitType type)
 {
-  if (!type.whatBuilds().first->isBuilding() || !type.whatBuilds().first->canProduce() || type.isBuilding())
+  if (!type.whatBuilds().first->canProduce() || type.isBuilding())
+    return false;
+  if (!type.whatBuilds().first->isBuilding() && type.getRace()==BWAPI::Races::Zerg)
     return false;
   factoriesQueues[*type.whatBuilds().first].push_back(type);
   return true;
