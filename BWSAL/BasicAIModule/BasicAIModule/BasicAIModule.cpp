@@ -32,6 +32,7 @@ void BasicAIModule::onFrame()
   this->buildManager->update();
   this->supplyManager->update();
   this->arbitrator.update();
+
   std::set<Unit*> units=Broodwar->self()->getUnits();
 
   //we will iterate through all the base locations, and draw their outlines.
