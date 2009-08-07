@@ -1,18 +1,10 @@
-#include "SupplyManager.h"
+#include <SupplyManager.h>
 
-SupplyManager::SupplyManager(ConstructionManager* builder)
+SupplyManager::SupplyManager(BuildManager* builder)
 {
   this->builder        = builder;
   this->plannedSupply  = BWAPI::Broodwar->self()->supplyTotal();
   this->lastFrameCheck = 0;
-}
-
-void SupplyManager::onRemoveUnit(BWAPI::Unit* unit)
-{
-  if (unit->isCompleted())
-  {
-    this->plannedSupply -= unit->getType().supplyProvided();
-  }
 }
 
 void SupplyManager::update()
@@ -35,7 +27,15 @@ void SupplyManager::update()
   }
 }
 
-std::string SupplyManager::getName()
+std::string SupplyManager::getName() const
 {
   return "Supply Manager";
+}
+
+void SupplyManager::onRemoveUnit(BWAPI::Unit* unit)
+{
+  if (unit->isCompleted())
+  {
+    this->plannedSupply -= unit->getType().supplyProvided();
+  }
 }

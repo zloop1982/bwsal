@@ -29,10 +29,6 @@ void WorkerManager::onRevoke(BWAPI::Unit* unit, double bid)
 {
   this->onRemoveUnit(unit);
 }
-void WorkerManager::onRemoveUnit(BWAPI::Unit* unit)
-{
-  workers.erase(unit);
-}
 
 bool mineralCompare (const std::pair<BWAPI::Unit*, int> i, const std::pair<BWAPI::Unit*, int> j) { return (i.second>j.second); }
 
@@ -85,6 +81,7 @@ double distanceBetweenUnits(BWAPI::Unit* i, BWAPI::Unit* j)
     return result;
   return 0;
 }
+
 void WorkerManager::update()
 {
   std::set<BWAPI::Unit*> myPlayerUnits=BWAPI::Broodwar->self()->getUnits();
@@ -211,7 +208,12 @@ void WorkerManager::update()
       }
   }
 }
-std::string WorkerManager::getName()
+std::string WorkerManager::getName() const
 {
   return "Worker Manager";
+}
+
+void WorkerManager::onRemoveUnit(BWAPI::Unit* unit)
+{
+  workers.erase(unit);
 }

@@ -2,11 +2,9 @@
 #include <BWAPI.h>
 #include <BWTA.h>
 #include <Arbitrator.h>
-#include <BuildingPlacer.h>
-#include <ConstructionManager.h>
-#include <ProductionManager.h>
 #include <WorkerManager.h>
 #include <SupplyManager.h>
+#include <BuildManager.h>
 #include <BaseManager.h>
 class BasicAIModule : public BWAPI::AIModule
 {
@@ -24,9 +22,7 @@ public:
   std::map<BWAPI::Unit*,BWAPI::UnitType> buildings;
   Arbitrator::Arbitrator<BWAPI::Unit*,double> arbitrator;
   WorkerManager* workerManager;
-  ConstructionManager* constructionManager;
-  ProductionManager* productionManager;
   SupplyManager* supplyManager;
+  BuildManager* buildManager;
   BaseManager* baseManager;
-  BuildingPlacer placer;
 };

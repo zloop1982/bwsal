@@ -4,12 +4,12 @@
 #include <BWAPI.h>
 #include <Arbitrator.h>
 #include <BWTA.h>
-#include <ConstructionManager.h>
+#include <BuildManager.h>
 #include "Base.h"
 class BaseManager
 {
   public:
-  BaseManager(ConstructionManager* builder);
+  BaseManager(BuildManager* builder);
   void update();
   void addBase(BWTA::BaseLocation* location);
   std::set<Base*> getActiveBases() const;
@@ -17,7 +17,7 @@ class BaseManager
 
   std::string getName();
   void onRemoveUnit(BWAPI::Unit* unit);
-  ConstructionManager* builder;
+  BuildManager* builder;
   std::map<BWTA::BaseLocation*,Base*> location2base;
   std::set<Base*> allBases;
 };

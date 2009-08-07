@@ -1,4 +1,4 @@
-#include "ConstructionManager.h"
+#include <ConstructionManager.h>
 
 ConstructionManager::ConstructionManager(Arbitrator::Arbitrator<BWAPI::Unit*,double>* arbitrator, BuildingPlacer* placer)
 {
@@ -41,17 +41,6 @@ void ConstructionManager::onOffer(std::set<BWAPI::Unit*> units)
 void ConstructionManager::onRevoke(BWAPI::Unit* unit, double bid)
 {
   this->onRemoveUnit(unit);
-}
-
-void ConstructionManager::onRemoveUnit(BWAPI::Unit* unit)
-{
-  if (builders.find(unit) != builders.end())
-  {
-    Building* building = builders.find(unit)->second;
-    if (building != NULL)
-      building->builderUnit = NULL;
-    builders.erase(unit);
-  }
 }
 
 void ConstructionManager::update()
@@ -213,6 +202,22 @@ void ConstructionManager::update()
   }
 }
 
+std::string ConstructionManager::getName() const
+{
+  return "Construction Manager";
+}
+
+void ConstructionManager::onRemoveUnit(BWAPI::Unit* unit)
+{
+  if (builders.find(unit) != builders.end())
+  {
+    Building* building = builders.find(unit)->second;
+    if (building != NULL)
+      building->builderUnit = NULL;
+    builders.erase(unit);
+  }
+}
+
 bool ConstructionManager::build(BWAPI::UnitType type)
 {
   if (!type.isBuilding()) return false;
@@ -224,9 +229,4 @@ bool ConstructionManager::build(BWAPI::UnitType type)
   newBuilding->position     = BWAPI::Positions::None;
   this->incompleteBuildings.push_back(newBuilding);
   return true;
-}
-
-std::string ConstructionManager::getName()
-{
-  return "Construction Manager";
 }
