@@ -1,0 +1,3 @@
+#sidebar TableOfContents
+
+The morph manager is used to morph Zerg units and buildings.
