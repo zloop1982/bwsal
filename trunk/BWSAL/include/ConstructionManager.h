@@ -18,7 +18,7 @@ class ConstructionManager : public Arbitrator::Controller<BWAPI::Unit*,double>
     virtual void onOffer(std::set<BWAPI::Unit*> units);
     virtual void onRevoke(BWAPI::Unit* unit, double bid);
     virtual void update();
-    virtual std::string getName();
+    virtual std::string getName() const;
     void onRemoveUnit(BWAPI::Unit* unit);
     bool build(BWAPI::UnitType type);
     Arbitrator::Arbitrator<BWAPI::Unit*,double>* arbitrator;

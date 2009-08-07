@@ -8,12 +8,11 @@ void BasicAIModule::onStart()
   Broodwar->enableFlag(Flag::UserInput);
   Broodwar->enableFlag(Flag::CompleteMapInformation);
   BWTA::analyze();
-  this->constructionManager=new ConstructionManager(&this->arbitrator,&placer);
-  this->supplyManager=new SupplyManager(this->constructionManager);
-  this->baseManager=new BaseManager(this->constructionManager);
+  this->buildManager=new BuildManager(&this->arbitrator);
+  this->supplyManager=new SupplyManager(this->buildManager);
+  this->baseManager=new BaseManager(this->buildManager);
   this->baseManager->addBase(BWTA::getStartLocation(BWAPI::Broodwar->self()));
   this->workerManager=new WorkerManager(&this->arbitrator,baseManager);
-  this->productionManager=new ProductionManager(&this->arbitrator,&placer);
 
   Broodwar->printf("Hello world!");
   Broodwar->printf("The map is %s, a %d player map",Broodwar->mapName().c_str(),Broodwar->getStartLocations().size());
@@ -21,7 +20,7 @@ void BasicAIModule::onStart()
   BWAPI::UnitType workerType=*(Broodwar->self()->getRace().getWorker());
   for(int i=0;i<20;i++)
   {
-    this->productionManager->train(workerType);
+    this->buildManager->build(workerType);
   }
 }
 void BasicAIModule::onFrame()
@@ -30,9 +29,8 @@ void BasicAIModule::onFrame()
 
   this->baseManager->update();
   this->workerManager->update();
-  this->constructionManager->update();
+  this->buildManager->update();
   this->supplyManager->update();
-  this->productionManager->update();
   this->arbitrator.update();
   std::set<Unit*> units=Broodwar->self()->getUnits();
 
@@ -93,8 +91,7 @@ void BasicAIModule::onFrame()
 void BasicAIModule::onRemoveUnit(BWAPI::Unit* unit)
 {
   this->arbitrator.onRemoveObject(unit);
-  this->constructionManager->onRemoveUnit(unit);
-  this->productionManager->onRemoveUnit(unit);
+  this->buildManager->onRemoveUnit(unit);
   this->workerManager->onRemoveUnit(unit);
   this->supplyManager->onRemoveUnit(unit);
 }
@@ -103,17 +100,7 @@ bool BasicAIModule::onSendText(std::string text)
   UnitType type=UnitTypes::getUnitType(text);
   if (type!=UnitTypes::Unknown)
   {
-    if (type.isBuilding())
-    {
-      this->constructionManager->build(type);
-    }
-    else
-    {
-      for(int i=0;i<20;i++)
-      {
-        this->productionManager->train(type);
-      }
-    }
+    this->buildManager->build(type);
   }
   else
   {

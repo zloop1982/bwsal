@@ -1,5 +1,5 @@
 #include <BaseManager.h>
-BaseManager::BaseManager(ConstructionManager* builder)
+BaseManager::BaseManager(BuildManager* builder)
 {
   this->builder = builder;
 }

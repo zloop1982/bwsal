@@ -1,15 +1,15 @@
 #pragma once
 #include <Arbitrator.h>
 #include <BWAPI.h>
-#include <ConstructionManager.h>
+#include <BuildManager.h>
 class SupplyManager
 {
   public:
-    SupplyManager(ConstructionManager* builder);
+    SupplyManager(BuildManager* builder);
     void update();
-    virtual std::string getName();
+    std::string getName() const;
     void onRemoveUnit(BWAPI::Unit* unit);
-    ConstructionManager* builder;
+    BuildManager* builder;
     int plannedSupply;
     int lastFrameCheck;
 };

@@ -315,6 +315,30 @@
 					>
 				</File>
 			</Filter>
+			<Filter
+				Name="MorphManager"
+				>
+				<File
+					RelativePath=".\MorphManager.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\include\MorphManager.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="BuildManager"
+				>
+				<File
+					RelativePath=".\BuildManager.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\include\BuildManager.h"
+					>
+				</File>
+			</Filter>
 		</Filter>
 	</Files>
 	<Globals>

@@ -1,4 +1,4 @@
-#include "BuildingPlacer.h"
+#include <BuildingPlacer.h>
 BuildingPlacer::BuildingPlacer()
 {
   reserveMap.resize(BWAPI::Broodwar->mapWidth(), BWAPI::Broodwar->mapHeight());
