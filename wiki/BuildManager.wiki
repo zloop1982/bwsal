@@ -1,1 +1,3 @@
 #sidebar TableOfContents
+
+The build manager is used to build units and buildings. To start building a new unit, simply call BuildManager::build([http://code.google.com/p/bwapi/wiki/UnitType UnitType] type)
