@@ -175,6 +175,10 @@
 				RelativePath=".\Dll.cpp"
 				>
 			</File>
+			<File
+				RelativePath=".\Util.cpp"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -183,6 +187,10 @@
 			>
 			<File
 				RelativePath=".\BasicAIModule.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Util.h"
 				>
 			</File>
 		</Filter>
@@ -336,6 +344,30 @@
 				</File>
 				<File
 					RelativePath="..\..\include\BuildManager.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="TechManager"
+				>
+				<File
+					RelativePath=".\TechManager.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\include\TechManager.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="UpgradeManager"
+				>
+				<File
+					RelativePath=".\UpgradeManager.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\include\UpgradeManager.h"
 					>
 				</File>
 			</Filter>

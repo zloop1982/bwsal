@@ -5,6 +5,8 @@
 #include <WorkerManager.h>
 #include <SupplyManager.h>
 #include <BuildManager.h>
+#include <TechManager.h>
+#include <UpgradeManager.h>
 #include <BaseManager.h>
 class BasicAIModule : public BWAPI::AIModule
 {
@@ -24,5 +26,8 @@ public:
   WorkerManager* workerManager;
   SupplyManager* supplyManager;
   BuildManager* buildManager;
+  TechManager* techManager;
+  UpgradeManager* upgradeManager;
   BaseManager* baseManager;
+  bool showManagerAssignments;
 };

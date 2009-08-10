@@ -20,8 +20,7 @@ class ProductionManager : public Arbitrator::Controller<BWAPI::Unit*,double>
     void onRemoveUnit(BWAPI::Unit* unit);
     bool train(BWAPI::UnitType type);
     Arbitrator::Arbitrator<BWAPI::Unit*,double>* arbitrator;
-    std::map<BWAPI::UnitType,std::list<BWAPI::Unit*> > factories;
-    std::map<BWAPI::UnitType,std::list<BWAPI::UnitType> > factoriesQueues;
-    std::map<BWAPI::Unit*,Unit> factoryBuildUnit;
+    std::map<BWAPI::UnitType,std::list<BWAPI::UnitType> > productionQueues;
+    std::map<BWAPI::Unit*,Unit> producingUnits;
     BuildingPlacer* placer;
 };
