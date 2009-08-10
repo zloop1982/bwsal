@@ -8,11 +8,13 @@ ConstructionManager::ConstructionManager(Arbitrator::Arbitrator<BWAPI::Unit*,dou
 
 void ConstructionManager::onOffer(std::set<BWAPI::Unit*> units)
 {
-  std::set<Building*> buildingsWithNewBuilders;
   for(std::map<BWAPI::UnitType,std::set<Building*> >::iterator i=this->buildingsNeedingBuilders.begin();i!=this->buildingsNeedingBuilders.end();i++)
   {
-    for(std::set<Building*>::iterator b = i->second.begin(); b != i->second.end(); b++)
+    std::set<Building*>::iterator b_next;
+    for(std::set<Building*>::iterator b = i->second.begin(); b != i->second.end(); b=b_next)
     {
+      b_next=b;
+      b_next++;
       double min_dist = 1000000;
       BWAPI::Unit* builder = NULL;
       for(std::set<BWAPI::Unit*>::iterator u = units.begin(); u != units.end(); u++)
@@ -56,16 +58,15 @@ void ConstructionManager::onOffer(std::set<BWAPI::Unit*> units)
           this->placer->reserveTiles((*b)->tilePosition+BWAPI::TilePosition(4,1), 2,2);
         }
         units.erase(builder);
-        buildingsWithNewBuilders.insert(*b);
+        i->second.erase(b);
       }
     }
   }
-  for(std::set<Building*>::iterator b = buildingsWithNewBuilders.begin(); b != buildingsWithNewBuilders.end(); b++)
-  {    
-    buildingsNeedingBuilders[*(*b)->type.whatBuilds().first].erase(*b);
-  }
   for(std::set<BWAPI::Unit*>::iterator u = units.begin(); u != units.end(); u++)
+  {
     arbitrator->decline(this, *u, 0);
+    arbitrator->removeBid(this, *u);
+  }
 }
 
 void ConstructionManager::onRevoke(BWAPI::Unit* unit, double bid)
@@ -81,6 +82,7 @@ void ConstructionManager::update()
     if (!i->second.empty())
     {
       for(std::set<BWAPI::Unit*>::iterator u = myPlayerUnits.begin(); u != myPlayerUnits.end(); u++)
+      {
         if ((*u)->isCompleted() && (*u)->getType()==i->first && (*u)->getAddon()==NULL && this->builders.find(*u)==this->builders.end())
         {
           double min_dist=1000000;
@@ -95,8 +97,12 @@ void ConstructionManager::update()
           if (min_dist > 256*32 + 10)
             min_dist = 256*32 + 10;
           double bid = 80 - (min_dist - 10)/(256*32)*60;
-          arbitrator->setBid(this, *u, bid);
+          if (!(*u)->getType().isWorker())
+            arbitrator->setBid(this, *u, 80);
+          else
+            arbitrator->setBid(this, *u, bid);
         }
+      }
     }
   }
   std::list<Building>::iterator i_next;
@@ -121,7 +127,7 @@ void ConstructionManager::update()
         if (u != NULL)
         {
           this->builders.erase(u);
-          arbitrator->setBid(this,u,0);
+          arbitrator->removeBid(this,u);
         }
         this->placer->freeTiles(b->tilePosition, 4,3);
         this->placer->freeTiles(b->tilePosition+BWAPI::TilePosition(4,1), 2,2);
@@ -215,7 +221,7 @@ void ConstructionManager::update()
       {
         std::set<BWAPI::Unit*> unitsOnTile = BWAPI::Broodwar->unitsOnTile(b->tilePosition.x(), b->tilePosition.y());
         for(std::set<BWAPI::Unit*>::iterator t = unitsOnTile.begin(); t != unitsOnTile.end(); t++)
-          if ((*t)->getType().isBuilding() && (*t)->getType() == b->type && !(*t)->isCompleted() && !(*t)->isLifted())
+          if ((*t)->getType() == b->type && !(*t)->isLifted())
           {
             b->buildingUnit = *t;
             break;
@@ -234,7 +240,7 @@ void ConstructionManager::update()
         if (u != NULL)
         {
           this->builders.erase(u);
-          arbitrator->setBid(this,u,0);
+          arbitrator->removeBid(this,u);
         }
         this->placer->freeTiles(b->tilePosition, b->type.tileWidth(), b->type.tileHeight());
       }
@@ -276,7 +282,7 @@ void ConstructionManager::update()
             if (u != NULL)
             {
               this->builders.erase(u);
-              arbitrator->setBid(this, u, 0);
+              arbitrator->removeBid(this, u);
               b->builderUnit = NULL;  
               u = b->builderUnit;
             }
@@ -292,6 +298,7 @@ void ConstructionManager::update()
                 if (!u->isConstructing() || !s->isBeingConstructed())
                 {
                   u->rightClick(s);
+                  s->rightClick(u);
                 }
               }
             }
@@ -313,6 +320,7 @@ void ConstructionManager::onRemoveUnit(BWAPI::Unit* unit)
   {
     Building* building = builders.find(unit)->second;
     building->builderUnit = NULL;
+    builders.erase(unit);
   }
 }
 

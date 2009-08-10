@@ -3,7 +3,6 @@
 #include <ConstructionManager.h>
 #include <ProductionManager.h>
 #include <MorphManager.h>
-
 BuildManager::BuildManager(Arbitrator::Arbitrator<BWAPI::Unit*,double>* arbitrator)
 {
   this->arbitrator=arbitrator;
@@ -33,6 +32,10 @@ std::string BuildManager::getName() const
   return "Build Manager";
 }
 
+BuildingPlacer* BuildManager::getBuildingPlacer() const
+{
+  return this->buildingPlacer;
+}
 void BuildManager::onRemoveUnit(BWAPI::Unit* unit)
 {
   this->constructionManager->onRemoveUnit(unit);

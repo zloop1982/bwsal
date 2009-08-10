@@ -10,16 +10,30 @@ void ProductionManager::onOffer(std::set<BWAPI::Unit*> units)
 {
   for(std::set<BWAPI::Unit*>::iterator i=units.begin();i!=units.end();i++)
   {
-    if ((*i)->getType().canProduce())
+    std::map<BWAPI::UnitType,std::list<BWAPI::UnitType> >::iterator q=productionQueues.find((*i)->getType());
+    bool used=false;
+    if (q!=productionQueues.end() && !q->second.empty())
     {
-      factories[(*i)->getType()].push_back(*i);
-      factoryBuildUnit[*i].unit=NULL;
-      factoryBuildUnit[*i].type=BWAPI::UnitTypes::None;
-      arbitrator->accept(this,*i);
-      factoriesQueues[(*i)->getType()];
+      for(std::list<BWAPI::UnitType>::iterator t=q->second.begin();t!=q->second.end();t++)
+      {
+        if (BWAPI::Broodwar->canMake(*i,*t))
+        {
+          producingUnits[*i].type=*t;
+          producingUnits[*i].unit=NULL;
+          producingUnits[*i].lastAttemptFrame=-100;
+          q->second.erase(t);
+          arbitrator->accept(this,*i);
+          arbitrator->setBid(this,*i,100.0);
+          used=true;
+          break;
+        }
+      }
     }
-    else
+    if (!used)
+    {
       arbitrator->decline(this,*i,0);
+      arbitrator->removeBid(this,*i);
+    }
   }
 }
 
@@ -32,64 +46,55 @@ void ProductionManager::update()
 {
   std::set<BWAPI::Unit*> myPlayerUnits=BWAPI::Broodwar->self()->getUnits();
   for(std::set<BWAPI::Unit*>::iterator u = myPlayerUnits.begin(); u != myPlayerUnits.end(); u++)
-    if ((*u)->getType().canProduce() && (*u)->isCompleted())
-      if ((*u)->getType().getRace()!=BWAPI::Races::Zerg || (*u)->getType()==BWAPI::UnitTypes::Zerg_Infested_Command_Center)
-        arbitrator->setBid(this, *u, 50);
-  for(std::map<BWAPI::UnitType,std::list<BWAPI::UnitType> >::iterator l=this->factoriesQueues.begin();l!=this->factoriesQueues.end();l++)
   {
-    for(std::list<BWAPI::Unit*>::iterator f=this->factories[l->first].begin();f!=this->factories[l->first].end();f++)
+    std::map<BWAPI::UnitType,std::list<BWAPI::UnitType> >::iterator p=productionQueues.find((*u)->getType());
+    if (p!=productionQueues.end() && !p->second.empty() && (*u)->isCompleted() && producingUnits.find(*u)==producingUnits.end())
+      arbitrator->setBid(this, *u, 50);
+  }
+
+
+  std::map<BWAPI::Unit*,Unit>::iterator i_next;
+  for(std::map<BWAPI::Unit*,Unit>::iterator i=producingUnits.begin();i!=producingUnits.end();i=i_next)
+  {
+    i_next=i;
+    i_next++;
+    if (i->first->isLifted())
     {
-      if ((*f)->isLifted())
+      if (i->first->isIdle())
+        i->first->land(placer->getBuildLocationNear(i->first->getTilePosition()+BWAPI::TilePosition(0,1),i->first->getType()));
+    }
+    else
+    {
+      if (i->first->isTraining() && i->first->getBuildUnit()!=NULL)
+        i->second.unit=i->first->getBuildUnit();
+
+      if (i->second.unit==NULL)
       {
-        if ((*f)->isIdle())
-          (*f)->land(placer->getBuildLocationNear((*f)->getTilePosition()+BWAPI::TilePosition(0,1),l->first));
+        if (BWAPI::Broodwar->getFrameCount()>i->second.lastAttemptFrame+BWAPI::Broodwar->getLatency()*2)
+          if (BWAPI::Broodwar->canMake(i->first,i->second.type))
+          {
+            i->first->train(i->second.type);
+            i->second.lastAttemptFrame=BWAPI::Broodwar->getFrameCount();
+          }
       }
       else
       {
-        if ((*f)->isTraining() && (*f)->getBuildUnit()!=NULL)
-          factoryBuildUnit[*f].unit=(*f)->getBuildUnit();
-        if (factoryBuildUnit[*f].type==BWAPI::UnitTypes::None)
+        if (i->second.unit->isCompleted())
         {
-          if (factoryBuildUnit[*f].unit!=NULL)
+          if (i->second.unit->getType()==i->second.type)
           {
-            (*f)->cancelTrain();
-            factoryBuildUnit[*f].unit=NULL;
+            producingUnits.erase(i);
+            arbitrator->removeBid(this, i->first);
           }
-          else
-          {
-            if (!l->second.empty() && !(*f)->isTraining() && BWAPI::Broodwar->canMake(*f,l->second.front()))
-            {
-              factoryBuildUnit[*f].type=l->second.front();
-              factoryBuildUnit[*f].lastAttemptFrame=-50;
-              l->second.pop_front();
-            }
-          }
+          i->second.unit=NULL;
         }
         else
         {
-          if (factoryBuildUnit[*f].unit==NULL)
-          {
-            if (BWAPI::Broodwar->getFrameCount()>factoryBuildUnit[*f].lastAttemptFrame+BWAPI::Broodwar->getLatency()*2)
-              if (BWAPI::Broodwar->canMake(*f,factoryBuildUnit[*f].type))
-              {
-                (*f)->train(factoryBuildUnit[*f].type);
-                factoryBuildUnit[*f].lastAttemptFrame=BWAPI::Broodwar->getFrameCount();
-              }
-          }
-          else
-          {
-            if (factoryBuildUnit[*f].unit->isCompleted())
-            {
-              if (factoryBuildUnit[*f].unit->getType()==factoryBuildUnit[*f].type)
-                factoryBuildUnit[*f].type=BWAPI::UnitTypes::None;
-              factoryBuildUnit[*f].unit=NULL;
-            }
-            else
-            {
-              if (!(*f)->isTraining())
-                factoryBuildUnit[*f].unit=NULL;
-            }
-          }
+          if (i->second.unit->exists() && i->second.unit->getType()!=i->second.type)
+            i->first->cancelTrain();
+
+          if (!i->first->isTraining())
+            i->second.unit=NULL;
         }
       }
     }
@@ -103,15 +108,11 @@ std::string ProductionManager::getName() const
 
 void ProductionManager::onRemoveUnit(BWAPI::Unit* unit)
 {
-  if (factories.find(unit->getType())!=factories.end())
+  if (producingUnits.find(unit)!=producingUnits.end())
   {
-    factories[unit->getType()].remove(unit);
-    if (factoryBuildUnit.find(unit)!=factoryBuildUnit.end())
-    {
-      if (factoryBuildUnit[unit].unit!=NULL)
-        factoriesQueues[unit->getType()].push_front(factoryBuildUnit[unit].type);
-      factoryBuildUnit.erase(unit);
-    }
+    if (productionQueues.find(unit->getType())!=productionQueues.end())
+      productionQueues[unit->getType()].push_front(producingUnits[unit].type);
+    producingUnits.erase(unit);
   }
 }
 
@@ -119,8 +120,9 @@ bool ProductionManager::train(BWAPI::UnitType type)
 {
   if (!type.whatBuilds().first->canProduce() || type.isBuilding())
     return false;
-  if (!type.whatBuilds().first->isBuilding() && type.getRace()==BWAPI::Races::Zerg)
-    return false;
-  factoriesQueues[*type.whatBuilds().first].push_back(type);
+  if (type.getRace()==BWAPI::Races::Zerg)
+    if (*type.whatBuilds().first!=BWAPI::UnitTypes::Zerg_Infested_Command_Center)
+      return false;
+  productionQueues[*type.whatBuilds().first].push_back(type);
   return true;
 }

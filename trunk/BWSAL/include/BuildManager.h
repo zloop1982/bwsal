@@ -12,6 +12,7 @@ class BuildManager
     ~BuildManager();
     void update();
     std::string getName() const;
+    BuildingPlacer* getBuildingPlacer() const;
     void onRemoveUnit(BWAPI::Unit* unit);
     bool build(BWAPI::UnitType type);
 
