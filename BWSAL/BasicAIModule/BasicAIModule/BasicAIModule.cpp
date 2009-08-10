@@ -56,6 +56,15 @@ void BasicAIModule::onFrame()
       }
     }
   }
+  /*
+  for(std::set<Unit*>::iterator i=units.begin();i!=units.end();i++)
+  {
+    int x=(*i)->getPosition().x();
+    int y=(*i)->getPosition().y();
+    Broodwar->drawCircle(CoordinateType::Map,x,y,(*i)->getType().airWeapon()->maxRange(),Colors::Blue,false);
+    Broodwar->drawCircle(CoordinateType::Map,x,y,(*i)->getType().groundWeapon()->maxRange(),Colors::Green,false);
+  }
+  */
 
   //we will iterate through all the base locations, and draw their outlines.
   for(std::set<BWTA::BaseLocation*>::const_iterator i=BWTA::getBaseLocations().begin();i!=BWTA::getBaseLocations().end();i++)

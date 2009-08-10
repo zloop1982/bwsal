@@ -32,56 +32,6 @@ void WorkerManager::onRevoke(BWAPI::Unit* unit, double bid)
 
 bool mineralCompare (const std::pair<BWAPI::Unit*, int> i, const std::pair<BWAPI::Unit*, int> j) { return (i.second>j.second); }
 
-double distanceBetweenUnits(BWAPI::Unit* i, BWAPI::Unit* j)
-{
-  if (i == j)
-    return 0;
-  double result = 0;
-  if (i->getPosition().y() - i->getType().dimensionUp() <= j->getPosition().y() + j->getType().dimensionDown())
-    if (i->getPosition().y() + i->getType().dimensionDown() >= j->getPosition().y() - j->getType().dimensionUp())
-      if (i->getPosition().x() > j->getPosition().x())
-        result = i->getPosition().x() - i->getType().dimensionLeft()  - j->getPosition().x() - j->getType().dimensionRight();
-      else
-        result = j->getPosition().x() - j->getType().dimensionRight() - i->getPosition().x() - i->getType().dimensionLeft();
-
-  if (i->getPosition().x() - i->getType().dimensionLeft() <= j->getPosition().x() + j->getType().dimensionRight())
-    if (i->getPosition().x() + i->getType().dimensionRight() >= j->getPosition().x() - j->getType().dimensionLeft())
-      if (i->getPosition().y() > j->getPosition().y())
-        result = i->getPosition().y() - i->getType().dimensionUp()   - j->getPosition().y() - j->getType().dimensionDown();
-      else
-        result = j->getPosition().y() - j->getType().dimensionDown() - i->getPosition().y() - i->getType().dimensionUp();
-
-  if (i->getPosition().x() > j->getPosition().x())
-  {
-    if (i->getPosition().y() > j->getPosition().y())
-      result = BWAPI::Position(i->getPosition().x() - i->getType().dimensionLeft(),
-                               i->getPosition().y() - i->getType().dimensionUp()).getDistance(
-               BWAPI::Position(j->getPosition().x() + j->getType().dimensionRight(),
-                               j->getPosition().y() + j->getType().dimensionDown()));
-    else
-      result = BWAPI::Position(i->getPosition().x() - i->getType().dimensionLeft(),
-                               i->getPosition().y() + i->getType().dimensionDown()).getDistance(
-               BWAPI::Position(j->getPosition().x() + j->getType().dimensionRight(),
-                               j->getPosition().y() - j->getType().dimensionUp()));
-  }
-  else
-  {
-    if (i->getPosition().y() > j->getPosition().y())
-      result = BWAPI::Position(i->getPosition().x() + i->getType().dimensionRight(),
-                               i->getPosition().y() - i->getType().dimensionUp()).getDistance(
-               BWAPI::Position(j->getPosition().x() - j->getType().dimensionLeft(),
-                               j->getPosition().y() + j->getType().dimensionDown()));
-    else
-      result = BWAPI::Position(i->getPosition().x() + i->getType().dimensionRight(),
-                               i->getPosition().y() + i->getType().dimensionDown()).getDistance(
-               BWAPI::Position(j->getPosition().x() - j->getType().dimensionLeft(),
-                               j->getPosition().y() - j->getType().dimensionUp()));
-  }
-  if (result > 0)
-    return result;
-  return 0;
-}
-
 void WorkerManager::update()
 {
   std::set<BWAPI::Unit*> myPlayerUnits=BWAPI::Broodwar->self()->getUnits();
@@ -194,7 +144,7 @@ void WorkerManager::update()
           if ((*b) != i && (*b)->getOrder() == BWAPI::Orders::MiningMinerals)
             miningBuddy = *b;
         if (i->getTarget() != mineral ||
-           (false && distanceBetweenUnits(i,mineral) <= BWAPI::Broodwar->getLatency()*3 &&
+           (false && i->getDistance(mineral) <= BWAPI::Broodwar->getLatency()*3 &&
             miningBuddy != NULL &&
             miningBuddy->getOrderTimer() >= BWAPI::Broodwar->getLatency() &&
             (
