@@ -7,3 +7,5 @@
    * [MorphManager Morph Manager]
   * [SupplyManager Supply Manager]
   * [BaseManager Base Manager]
+  * [TechManager Tech Manager]
+  * [UpgradeManager Upgrade Manager]
