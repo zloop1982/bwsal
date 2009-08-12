@@ -32,6 +32,44 @@ void WorkerManager::onRevoke(BWAPI::Unit* unit, double bid)
 
 bool mineralCompare (const std::pair<BWAPI::Unit*, int> i, const std::pair<BWAPI::Unit*, int> j) { return (i.second>j.second); }
 
+void WorkerManager::getFreeWorkers(std::set<BWAPI::Unit*> &freeWorkers)
+{
+  for(std::map<BWAPI::Unit*,WorkerData>::iterator w = this->workers.begin(); w != this->workers.end(); w++)
+    if (w->second.newMineral == NULL)
+      freeWorkers.insert(w->first);
+}
+void WorkerManager::freeSpareWorkers(std::set<BWAPI::Unit*> &freeWorkers)
+{
+  for(std::map<BWAPI::Unit*,int>::iterator i = desiredWorkerCount.begin(); i != desiredWorkerCount.end(); i++)
+    if (i->second < (int)currentWorkers[i->first].size())
+    {
+      //desired worker count is less than the current worker count for this resource, so lets remove some workers.
+      int amountToRemove = currentWorkers[i->first].size() - i->second;
+      for(int j = 0; j < amountToRemove; j++)
+      {
+        BWAPI::Unit* worker = *currentWorkers[i->first].begin();
+        freeWorkers.insert(worker);
+        workers[worker].newMineral = NULL;
+        currentWorkers[i->first].erase(worker);
+      }
+    }
+}
+void WorkerManager::assignWorkers(std::set<BWAPI::Unit*> &freeWorkers)
+{
+  for(std::map<BWAPI::Unit*,int>::iterator i = desiredWorkerCount.begin(); i != desiredWorkerCount.end(); i++)
+    if (i->second>(int)currentWorkers[i->first].size())
+    {
+      //desired worker count is more than the current worker count for this resource, so lets assign some workers
+      int amountToAdd = i->second - currentWorkers[i->first].size();
+      for(int j = 0; j < amountToAdd; j++)
+      {
+        BWAPI::Unit* worker = *freeWorkers.begin();
+        freeWorkers.erase(worker);
+        workers[worker].newMineral = i->first;
+        currentWorkers[i->first].insert(worker);
+      }
+    }
+}
 void WorkerManager::update()
 {
   std::set<BWAPI::Unit*> myPlayerUnits=BWAPI::Broodwar->self()->getUnits();
@@ -85,38 +123,11 @@ void WorkerManager::update()
           currentWorkers[w->second.newMineral].insert(w->first);
       }
     }
+    
     std::set<BWAPI::Unit*> freeWorkers;
-    for(std::map<BWAPI::Unit*,WorkerData>::iterator w = this->workers.begin(); w != this->workers.end(); w++)
-      if (w->second.newMineral == NULL)
-        freeWorkers.insert(w->first);
-
-    for(std::map<BWAPI::Unit*,int>::iterator i = desiredWorkerCount.begin(); i != desiredWorkerCount.end(); i++)
-      if (i->second < (int)currentWorkers[i->first].size())
-      {
-        //desired worker count is less than the current worker count for this resource, so lets remove some workers.
-        int amountToRemove = currentWorkers[i->first].size() - i->second;
-        for(int j = 0; j < amountToRemove; j++)
-        {
-          BWAPI::Unit* worker = *currentWorkers[i->first].begin();
-          freeWorkers.insert(worker);
-          workers[worker].newMineral = NULL;
-          currentWorkers[i->first].erase(worker);
-        }
-      }
-
-    for(std::map<BWAPI::Unit*,int>::iterator i = desiredWorkerCount.begin(); i != desiredWorkerCount.end(); i++)
-      if (i->second>(int)currentWorkers[i->first].size())
-      {
-        //desired worker count is more than the current worker count for this resource, so lets assign some workers
-        int amountToAdd = i->second - currentWorkers[i->first].size();
-        for(int j = 0; j < amountToAdd; j++)
-        {
-          BWAPI::Unit* worker = *freeWorkers.begin();
-          freeWorkers.erase(worker);
-          workers[worker].newMineral = i->first;
-          currentWorkers[i->first].insert(worker);
-        }
-      }
+    getFreeWorkers(freeWorkers);
+    freeSpareWorkers(freeWorkers);
+    assignWorkers(freeWorkers);
   }
   /*
   for(std::map<BWAPI::Unit*,int>::iterator i=desiredWorkerCount.begin();i!=desiredWorkerCount.end();i++)
