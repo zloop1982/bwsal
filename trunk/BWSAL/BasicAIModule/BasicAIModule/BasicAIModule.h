@@ -8,6 +8,7 @@
 #include <TechManager.h>
 #include <UpgradeManager.h>
 #include <BaseManager.h>
+#include <ScoutManager.h>
 class BasicAIModule : public BWAPI::AIModule
 {
 public:

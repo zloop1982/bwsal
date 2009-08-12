@@ -371,6 +371,18 @@
 					>
 				</File>
 			</Filter>
+			<Filter
+				Name="ScoutManager"
+				>
+				<File
+					RelativePath=".\ScoutManager.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\include\ScoutManager.h"
+					>
+				</File>
+			</Filter>
 		</Filter>
 	</Files>
 	<Globals>
