@@ -16,6 +16,9 @@ class BuildManager
     void onRemoveUnit(BWAPI::Unit* unit);
     bool build(BWAPI::UnitType type);
     bool build(BWAPI::UnitType type, BWAPI::TilePosition goalPosition);
+    int getPlannedCount(BWAPI::UnitType type) const;
+    int getStartedCount(BWAPI::UnitType type) const;
+    int getCompletedCount(BWAPI::UnitType type) const;
 
   private:
     Arbitrator::Arbitrator<BWAPI::Unit*,double>* arbitrator;

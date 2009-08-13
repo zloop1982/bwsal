@@ -4,6 +4,11 @@ ConstructionManager::ConstructionManager(Arbitrator::Arbitrator<BWAPI::Unit*,dou
 {
   this->arbitrator   = arbitrator;
   this->placer       = placer;
+  for(std::set<BWAPI::UnitType>::iterator i=BWAPI::UnitTypes::allUnitTypes().begin();i!=BWAPI::UnitTypes::allUnitTypes().end();i++)
+  {
+    plannedCount[*i]=0;
+    startedCount[*i]=0;
+  }
 }
 
 void ConstructionManager::onOffer(std::set<BWAPI::Unit*> units)
@@ -113,6 +118,11 @@ void ConstructionManager::update()
     i_next=i;
     i_next++;
     Building* b = &(*i);
+    if (!b->started && b->buildingUnit!=NULL)
+    {
+      startedCount[b->type]++;
+      b->started=true;
+    }
     if (b->type.isAddon())
     {
       if (b->builderUnit!=NULL)
@@ -124,6 +134,8 @@ void ConstructionManager::update()
       {
         //If the building is complete, we can forget about it.
         this->incompleteBuildings.erase(i);
+        startedCount[b->type]--;
+        plannedCount[b->type]--;
         if (u != NULL)
         {
           this->builders.erase(u);
@@ -237,6 +249,8 @@ void ConstructionManager::update()
       {
         //If the building is complete, we can forget about it.
         this->incompleteBuildings.erase(i);
+        startedCount[b->type]--;
+        plannedCount[b->type]--;
         if (u != NULL)
         {
           this->builders.erase(u);
@@ -328,13 +342,31 @@ bool ConstructionManager::build(BWAPI::UnitType type, BWAPI::TilePosition goalPo
 {
   if (!type.isBuilding()) return false;
   Building newBuilding;
-  newBuilding.type          = type;
-  newBuilding.goalPosition  = goalPosition;
-  newBuilding.tilePosition  = BWAPI::TilePositions::None;
-  newBuilding.builderUnit   = NULL;
-  newBuilding.buildingUnit  = NULL;
-  newBuilding.position      = BWAPI::Positions::None;
+  newBuilding.type           = type;
+  newBuilding.goalPosition   = goalPosition;
+  newBuilding.tilePosition   = BWAPI::TilePositions::None;
+  newBuilding.builderUnit    = NULL;
+  newBuilding.buildingUnit   = NULL;
+  newBuilding.position       = BWAPI::Positions::None;
   newBuilding.lastOrderFrame = 0;
+  newBuilding.started        = false;
+  plannedCount[type]++;
   this->incompleteBuildings.push_back(newBuilding);
   return true;
+}
+
+int ConstructionManager::getPlannedCount(BWAPI::UnitType type) const
+{
+  std::map<BWAPI::UnitType,int>::const_iterator i=plannedCount.find(type);
+  if (i!=plannedCount.end())
+    return i->second;
+  return 0;
+}
+
+int ConstructionManager::getStartedCount(BWAPI::UnitType type) const
+{
+  std::map<BWAPI::UnitType,int>::const_iterator i=startedCount.find(type);
+  if (i!=startedCount.end())
+    return i->second;
+  return 0;
 }

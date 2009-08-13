@@ -72,3 +72,34 @@ bool BuildManager::build(BWAPI::UnitType type, BWAPI::TilePosition goalPosition)
   }
   return false;
 }
+
+int BuildManager::getPlannedCount(BWAPI::UnitType type) const
+{
+  if (type.getRace()==BWAPI::Races::Zerg && type.isBuilding()==type.whatBuilds().first->isBuilding())
+    return BWAPI::Broodwar->self()->getCompletedUnits(type)+this->morphManager->getPlannedCount(type);
+  else
+  {
+    if (type.isBuilding())
+      return BWAPI::Broodwar->self()->getCompletedUnits(type)+this->constructionManager->getPlannedCount(type);
+    else
+      return BWAPI::Broodwar->self()->getCompletedUnits(type)+this->productionManager->getPlannedCount(type);
+  }
+}
+
+int BuildManager::getStartedCount(BWAPI::UnitType type) const
+{
+  if (type.getRace()==BWAPI::Races::Zerg && type.isBuilding()==type.whatBuilds().first->isBuilding())
+    return BWAPI::Broodwar->self()->getCompletedUnits(type)+this->morphManager->getStartedCount(type);
+  else
+  {
+    if (type.isBuilding())
+      return BWAPI::Broodwar->self()->getCompletedUnits(type)+this->constructionManager->getStartedCount(type);
+    else
+      return BWAPI::Broodwar->self()->getCompletedUnits(type)+this->productionManager->getStartedCount(type);
+  }
+}
+
+int BuildManager::getCompletedCount(BWAPI::UnitType type) const
+{
+  return BWAPI::Broodwar->self()->getCompletedUnits(type);
+}

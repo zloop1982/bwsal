@@ -4,6 +4,11 @@ ProductionManager::ProductionManager(Arbitrator::Arbitrator<BWAPI::Unit*,double>
 {
   this->arbitrator = arbitrator;
   this->placer = placer;
+  for(std::set<BWAPI::UnitType>::iterator i=BWAPI::UnitTypes::allUnitTypes().begin();i!=BWAPI::UnitTypes::allUnitTypes().end();i++)
+  {
+    plannedCount[*i]=0;
+    startedCount[*i]=0;
+  }
 }
 
 void ProductionManager::onOffer(std::set<BWAPI::Unit*> units)
@@ -21,6 +26,7 @@ void ProductionManager::onOffer(std::set<BWAPI::Unit*> units)
           producingUnits[*i].type=*t;
           producingUnits[*i].unit=NULL;
           producingUnits[*i].lastAttemptFrame=-100;
+          producingUnits[*i].started=false;
           q->second.erase(t);
           arbitrator->accept(this,*i);
           arbitrator->setBid(this,*i,100.0);
@@ -52,7 +58,6 @@ void ProductionManager::update()
       arbitrator->setBid(this, *u, 50);
   }
 
-
   std::map<BWAPI::Unit*,Unit>::iterator i_next;
   for(std::map<BWAPI::Unit*,Unit>::iterator i=producingUnits.begin();i!=producingUnits.end();i=i_next)
   {
@@ -79,12 +84,20 @@ void ProductionManager::update()
       }
       else
       {
+        if (!i->second.started)
+        {
+          startedCount[i->second.type]++;
+          i->second.started=true;
+        }
+
         if (i->second.unit->isCompleted())
         {
           if (i->second.unit->getType()==i->second.type)
           {
             producingUnits.erase(i);
             arbitrator->removeBid(this, i->first);
+            startedCount[i->second.type]--;
+            plannedCount[i->second.type]--;
           }
           i->second.unit=NULL;
         }
@@ -99,6 +112,8 @@ void ProductionManager::update()
       }
     }
   }
+  std::map<BWAPI::UnitType, int> startedCount;
+
 }
 
 std::string ProductionManager::getName() const
@@ -124,5 +139,22 @@ bool ProductionManager::train(BWAPI::UnitType type)
     if (*type.whatBuilds().first!=BWAPI::UnitTypes::Zerg_Infested_Command_Center)
       return false;
   productionQueues[*type.whatBuilds().first].push_back(type);
+  plannedCount[type]++;
   return true;
+}
+
+int ProductionManager::getPlannedCount(BWAPI::UnitType type) const
+{
+  std::map<BWAPI::UnitType,int>::const_iterator i=plannedCount.find(type);
+  if (i!=plannedCount.end())
+    return i->second;
+  return 0;
+}
+
+int ProductionManager::getStartedCount(BWAPI::UnitType type) const
+{
+  std::map<BWAPI::UnitType,int>::const_iterator i=startedCount.find(type);
+  if (i!=startedCount.end())
+    return i->second;
+  return 0;
 }
