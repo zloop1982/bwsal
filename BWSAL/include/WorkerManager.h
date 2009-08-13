@@ -33,7 +33,6 @@ class WorkerManager : public Arbitrator::Controller<BWAPI::Unit*,double>
     int WorkersPerGas;
     
   private:
-    void getFreeWorkers(std::set<BWAPI::Unit*> &freeWorkers);
-    void freeSpareWorkers(std::set<BWAPI::Unit*> &freeWorkers);
-    void assignWorkers(std::set<BWAPI::Unit*> &freeWorkers);
+    void rebalanceWorkers();
+    void updateWorkerAssignments();
 };
