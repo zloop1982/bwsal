@@ -5,11 +5,10 @@
 class SupplyManager
 {
   public:
-    SupplyManager(BuildManager* builder);
+    SupplyManager(BuildManager* buildManager);
     void update();
     std::string getName() const;
-    void onRemoveUnit(BWAPI::Unit* unit);
-    BuildManager* builder;
-    int plannedSupply;
+    int getPlannedSupply() const;
+    BuildManager* buildManager;
     int lastFrameCheck;
 };

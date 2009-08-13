@@ -5,6 +5,7 @@
 #include <WorkerManager.h>
 #include <SupplyManager.h>
 #include <BuildManager.h>
+#include <BuildOrderManager.h>
 #include <TechManager.h>
 #include <UpgradeManager.h>
 #include <BaseManager.h>
@@ -31,5 +32,6 @@ public:
   UpgradeManager* upgradeManager;
   BaseManager* baseManager;
   ScoutManager* scoutManager;
+  BuildOrderManager* buildOrderManager;
   bool showManagerAssignments;
 };

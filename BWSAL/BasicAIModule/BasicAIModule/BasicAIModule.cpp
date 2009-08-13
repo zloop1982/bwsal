@@ -9,23 +9,25 @@ void BasicAIModule::onStart()
   Broodwar->enableFlag(Flag::UserInput);
   Broodwar->enableFlag(Flag::CompleteMapInformation);
   BWTA::analyze();
-  this->buildManager=new BuildManager(&this->arbitrator);
-  this->techManager=new TechManager(&this->arbitrator,this->buildManager->getBuildingPlacer());
-  this->upgradeManager=new UpgradeManager(&this->arbitrator,this->buildManager->getBuildingPlacer());
-  this->supplyManager=new SupplyManager(this->buildManager);
-  this->baseManager=new BaseManager(this->buildManager);
+  this->buildManager      = new BuildManager(&this->arbitrator);
+  this->techManager       = new TechManager(&this->arbitrator,this->buildManager->getBuildingPlacer());
+  this->upgradeManager    = new UpgradeManager(&this->arbitrator,this->buildManager->getBuildingPlacer());
+  this->baseManager       = new BaseManager(this->buildManager);
+  this->workerManager     = new WorkerManager(&this->arbitrator,baseManager);
+  this->scoutManager      = new ScoutManager(&this->arbitrator);
+  this->buildOrderManager = new BuildOrderManager(this->buildManager,this->techManager,this->upgradeManager);
+  this->supplyManager     = new SupplyManager(this->buildManager);
+
   this->baseManager->addBase(BWTA::getStartLocation(BWAPI::Broodwar->self()));
-  this->workerManager=new WorkerManager(&this->arbitrator,baseManager);
-  this->scoutManager= new ScoutManager(&this->arbitrator);
 
-  Broodwar->printf("Hello world!");
-  Broodwar->printf("The map is %s, a %d player map",Broodwar->mapName().c_str(),Broodwar->getStartLocations().size());
-
+  BWAPI::UnitType workerType=*(Broodwar->self()->getRace().getWorker());
+  this->buildOrderManager->build(20,workerType,80);
 }
 void BasicAIModule::onFrame()
 {
   if (Broodwar->inReplay()) return;
   this->buildManager->update();
+  this->buildOrderManager->update();
   this->baseManager->update();
   this->workerManager->update();
   this->techManager->update();
@@ -33,13 +35,6 @@ void BasicAIModule::onFrame()
   this->supplyManager->update();
   this->scoutManager->update();
   this->arbitrator.update();
-
-  BWAPI::UnitType workerType=*(Broodwar->self()->getRace().getWorker());
-  // try to maintain a minimum of 20 workers
-  while(this->buildManager->getPlannedCount(workerType)<20)
-  {
-    this->buildManager->build(workerType);
-  }
 
   std::set<Unit*> units=Broodwar->self()->getUnits();
   if (this->showManagerAssignments)
@@ -131,7 +126,6 @@ void BasicAIModule::onRemoveUnit(BWAPI::Unit* unit)
   this->techManager->onRemoveUnit(unit);
   this->upgradeManager->onRemoveUnit(unit);
   this->workerManager->onRemoveUnit(unit);
-  this->supplyManager->onRemoveUnit(unit);
   this->scoutManager->onRemoveUnit(unit);
 }
 bool BasicAIModule::onSendText(std::string text)

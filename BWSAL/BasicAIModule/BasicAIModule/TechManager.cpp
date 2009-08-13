@@ -105,5 +105,12 @@ void TechManager::onRemoveUnit(BWAPI::Unit* unit)
 bool TechManager::research(BWAPI::TechType type)
 {
   researchQueues[*type.whatResearches()].push_back(type);
+  plannedTech.insert(type);
   return true;
+}
+
+bool TechManager::planned(BWAPI::TechType type) const
+{
+  std::set<BWAPI::TechType>::const_iterator i=plannedTech.find(type);
+  return (i!=plannedTech.end());
 }

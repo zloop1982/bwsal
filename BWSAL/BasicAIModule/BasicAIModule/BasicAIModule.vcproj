@@ -383,6 +383,18 @@
 					>
 				</File>
 			</Filter>
+			<Filter
+				Name="BuildOrderManager"
+				>
+				<File
+					RelativePath=".\BuildOrderManager.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\include\BuildOrderManager.h"
+					>
+				</File>
+			</Filter>
 		</Filter>
 	</Files>
 	<Globals>
