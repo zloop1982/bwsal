@@ -16,6 +16,7 @@ void BasicAIModule::onStart()
   this->baseManager=new BaseManager(this->buildManager);
   this->baseManager->addBase(BWTA::getStartLocation(BWAPI::Broodwar->self()));
   this->workerManager=new WorkerManager(&this->arbitrator,baseManager);
+  this->scoutManager= new ScoutManager(&this->arbitrator);
 
   Broodwar->printf("Hello world!");
   Broodwar->printf("The map is %s, a %d player map",Broodwar->mapName().c_str(),Broodwar->getStartLocations().size());
@@ -35,6 +36,7 @@ void BasicAIModule::onFrame()
   this->techManager->update();
   this->upgradeManager->update();
   this->supplyManager->update();
+  this->scoutManager->update();
   this->arbitrator.update();
 
   std::set<Unit*> units=Broodwar->self()->getUnits();
@@ -128,6 +130,7 @@ void BasicAIModule::onRemoveUnit(BWAPI::Unit* unit)
   this->upgradeManager->onRemoveUnit(unit);
   this->workerManager->onRemoveUnit(unit);
   this->supplyManager->onRemoveUnit(unit);
+  this->scoutManager->onRemoveUnit(unit);
 }
 bool BasicAIModule::onSendText(std::string text)
 {

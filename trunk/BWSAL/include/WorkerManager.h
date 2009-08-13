@@ -8,28 +8,29 @@ class WorkerManager : public Arbitrator::Controller<BWAPI::Unit*,double>
     class WorkerData
     {
       public:
-        WorkerData() {mineral = NULL; lastFrameSpam = 0;}
-        BWAPI::Unit* mineral;
-        BWAPI::Unit* newMineral;
+        WorkerData() {resource = NULL; lastFrameSpam = 0;}
+        BWAPI::Unit* resource;
+        BWAPI::Unit* newResource;
         int lastFrameSpam;
     };
     WorkerManager(Arbitrator::Arbitrator<BWAPI::Unit*,double>* arbitrator, BaseManager* baseManager);
     virtual void onOffer(std::set<BWAPI::Unit*> units);
     virtual void onRevoke(BWAPI::Unit* unit, double bid);
     virtual void update();
-
     virtual std::string getName() const;
+
     void onRemoveUnit(BWAPI::Unit* unit);
     Arbitrator::Arbitrator<BWAPI::Unit*,double>* arbitrator;
     BaseManager* baseManager;
     std::map<BWAPI::Unit*,WorkerData> workers;
     std::map<BWAPI::Unit*, std::set<BWAPI::Unit*> > currentWorkers;
-    std::map<BWAPI::Unit*, Base*> mineralBase;
+    std::map<BWAPI::Unit*, Base*> resourceBase;
     std::map<BWAPI::Unit*, int> desiredWorkerCount;
     std::vector<std::pair<BWAPI::Unit*, int> > mineralOrder;
     int mineralOrderIndex;
     int lastSCVBalance;
     std::set<Base*> basesCache;
+    int WorkersPerGas;
     
   private:
     void getFreeWorkers(std::set<BWAPI::Unit*> &freeWorkers);

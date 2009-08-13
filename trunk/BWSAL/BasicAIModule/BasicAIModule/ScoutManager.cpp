@@ -9,7 +9,7 @@ void ScoutManager::onOffer(std::set<BWAPI::Unit*> units)
 }
 void ScoutManager::onRevoke(BWAPI::Unit *unit, double bid)
 {
-  // TODO Implement
+  this->onRemoveUnit(unit);
 }
 void ScoutManager::update()
 {
@@ -18,4 +18,9 @@ void ScoutManager::update()
 std::string ScoutManager::getName() const
 {
   return "Scout Manager";
+}
+
+void ScoutManager::onRemoveUnit(BWAPI::Unit* unit)
+{
+  scouts.erase(unit);
 }

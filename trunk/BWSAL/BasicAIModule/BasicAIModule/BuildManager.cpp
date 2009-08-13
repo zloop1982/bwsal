@@ -51,7 +51,22 @@ bool BuildManager::build(BWAPI::UnitType type)
   else
   {
     if (type.isBuilding())
-      return this->constructionManager->build(type);
+      return this->constructionManager->build(type, BWAPI::Broodwar->self()->getStartLocation());
+    else
+      return this->productionManager->train(type);
+  }
+  return false;
+}
+
+bool BuildManager::build(BWAPI::UnitType type, BWAPI::TilePosition goalPosition)
+{
+  if (type==BWAPI::UnitTypes::None || type==BWAPI::UnitTypes::Unknown) return false;
+  if (type.getRace()==BWAPI::Races::Zerg && type.isBuilding()==type.whatBuilds().first->isBuilding())
+    return this->morphManager->morph(type);
+  else
+  {
+    if (type.isBuilding())
+      return this->constructionManager->build(type, goalPosition);
     else
       return this->productionManager->train(type);
   }
