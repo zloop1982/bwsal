@@ -68,7 +68,7 @@ void MorphManager::update()
   {
     i_next=i;
     i_next++;
-    if (!i->first->isMorphing())
+    if (i->first->isCompleted())
     {
       if (i->first->getType()==i->second.type)
       {
@@ -81,7 +81,7 @@ void MorphManager::update()
         if (BWAPI::Broodwar->canMake(NULL,i->second.type))
           i->first->morph(i->second.type);
     }
-    else
+    if (i->first->isMorphing())
     {
       if (!i->second.started)
       {
