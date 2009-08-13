@@ -15,6 +15,7 @@ class ConstructionManager : public Arbitrator::Controller<BWAPI::Unit*,double>
         BWAPI::Unit* buildingUnit;
         BWAPI::Unit* builderUnit;
         int lastOrderFrame;
+        bool started;
     };
     ConstructionManager(Arbitrator::Arbitrator<BWAPI::Unit*,double>* arbitrator, BuildingPlacer* placer);
     virtual void onOffer(std::set<BWAPI::Unit*> units);
@@ -24,9 +25,15 @@ class ConstructionManager : public Arbitrator::Controller<BWAPI::Unit*,double>
 
     void onRemoveUnit(BWAPI::Unit* unit);
     bool build(BWAPI::UnitType type, BWAPI::TilePosition goalPosition);
+    int getPlannedCount(BWAPI::UnitType type) const;
+    int getStartedCount(BWAPI::UnitType type) const;
+
+  private:
     Arbitrator::Arbitrator<BWAPI::Unit*,double>* arbitrator;
     BuildingPlacer* placer;
     std::map<BWAPI::Unit*,Building*> builders;
     std::list<Building> incompleteBuildings;
     std::map<BWAPI::UnitType,std::set<Building*> > buildingsNeedingBuilders;
+    std::map<BWAPI::UnitType, int> plannedCount;
+    std::map<BWAPI::UnitType, int> startedCount;
 };

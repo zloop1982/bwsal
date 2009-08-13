@@ -141,6 +141,7 @@ void WorkerManager::rebalanceWorkers()
   //update the worker assignments so the actual workers per resource is the same as the desired workers per resource
   updateWorkerAssignments();
 }
+
 void WorkerManager::update()
 {
   //bid a constant value of 10 on all completed workers

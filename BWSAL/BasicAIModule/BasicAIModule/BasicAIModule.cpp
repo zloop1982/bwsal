@@ -21,23 +21,25 @@ void BasicAIModule::onStart()
   Broodwar->printf("Hello world!");
   Broodwar->printf("The map is %s, a %d player map",Broodwar->mapName().c_str(),Broodwar->getStartLocations().size());
 
-  BWAPI::UnitType workerType=*(Broodwar->self()->getRace().getWorker());
-  for(int i=0;i<20;i++)
-  {
-    this->buildManager->build(workerType);
-  }
 }
 void BasicAIModule::onFrame()
 {
   if (Broodwar->inReplay()) return;
+  this->buildManager->update();
   this->baseManager->update();
   this->workerManager->update();
-  this->buildManager->update();
   this->techManager->update();
   this->upgradeManager->update();
   this->supplyManager->update();
   this->scoutManager->update();
   this->arbitrator.update();
+
+  BWAPI::UnitType workerType=*(Broodwar->self()->getRace().getWorker());
+  // try to maintain a minimum of 20 workers
+  while(this->buildManager->getPlannedCount(workerType)<20)
+  {
+    this->buildManager->build(workerType);
+  }
 
   std::set<Unit*> units=Broodwar->self()->getUnits();
   if (this->showManagerAssignments)
