@@ -4,6 +4,11 @@ UpgradeManager::UpgradeManager(Arbitrator::Arbitrator<BWAPI::Unit*,double>* arbi
 {
   this->arbitrator = arbitrator;
   this->placer = placer;
+  for(std::set<BWAPI::UpgradeType>::iterator i=BWAPI::UpgradeTypes::allUpgradeTypes().begin();i!=BWAPI::UpgradeTypes::allUpgradeTypes().end();i++)
+  {
+    plannedLevel[*i]=0;
+    startedLevel[*i]=0;
+  }
 }
 
 void UpgradeManager::onOffer(std::set<BWAPI::Unit*> units)
@@ -60,6 +65,11 @@ void UpgradeManager::update()
       {
         i->first->cancelUpgrade();
       }
+      else
+      {
+        if (startedLevel[i->second.type]<i->second.level)
+          startedLevel[i->second.type]=i->second.level;
+      }
     }
     else
     {
@@ -110,5 +120,27 @@ bool UpgradeManager::upgrade(BWAPI::UpgradeType type)
   newUpgrade.type=type;
   newUpgrade.level=level;
   upgradeQueues[*type.whatUpgrades()].push_back(newUpgrade);
+  plannedLevel[type]=level;
   return true;
+}
+
+int UpgradeManager::getPlannedLevel(BWAPI::UpgradeType type) const
+{
+  std::map<BWAPI::UpgradeType, int>::const_iterator i=plannedLevel.find(type);
+  if (i!=plannedLevel.end())
+    return i->second;
+  return 0;
+}
+
+int UpgradeManager::getStartedLevel(BWAPI::UpgradeType type) const
+{
+  std::map<BWAPI::UpgradeType, int>::const_iterator i=startedLevel.find(type);
+  if (i!=startedLevel.end())
+    return i->second;
+  return 0;
+}
+
+int UpgradeManager::getCompletedLevel(BWAPI::UpgradeType type) const
+{
+  return BWAPI::Broodwar->self()->upgradeLevel(type);
 }

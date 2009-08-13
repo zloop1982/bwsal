@@ -12,8 +12,10 @@ class TechManager : public Arbitrator::Controller<BWAPI::Unit*,double>
     virtual std::string getName() const;
     void onRemoveUnit(BWAPI::Unit* unit);
     bool research(BWAPI::TechType type);
+    bool planned(BWAPI::TechType type) const;
     Arbitrator::Arbitrator<BWAPI::Unit*,double>* arbitrator;
     BuildingPlacer* placer;
     std::map<BWAPI::UnitType,std::list<BWAPI::TechType> > researchQueues;
     std::map<BWAPI::Unit*,BWAPI::TechType> researchingUnits;
+    std::set<BWAPI::TechType> plannedTech;
 };
