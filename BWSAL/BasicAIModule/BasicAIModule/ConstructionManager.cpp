@@ -2,8 +2,8 @@
 
 ConstructionManager::ConstructionManager(Arbitrator::Arbitrator<BWAPI::Unit*,double>* arbitrator, BuildingPlacer* placer)
 {
-  this->arbitrator = arbitrator;
-  this->placer     = placer;
+  this->arbitrator   = arbitrator;
+  this->placer       = placer;
 }
 
 void ConstructionManager::onOffer(std::set<BWAPI::Unit*> units)
@@ -201,7 +201,7 @@ void ConstructionManager::update()
       {
         if ((BWAPI::Broodwar->getFrameCount()+index)%25==0 && BWAPI::Broodwar->canMake(NULL,b->type))
         {
-          b->tilePosition = this->placer->getBuildLocationNear(BWAPI::Broodwar->self()->getStartLocation(), b->type);
+          b->tilePosition = this->placer->getBuildLocationNear(b->goalPosition, b->type);
           if (b->tilePosition!=BWAPI::TilePositions::None)
           {
             b->position = BWAPI::Position(b->tilePosition.x()*32 + b->type.tileWidth()*16, b->tilePosition.y()*32 + b->type.tileHeight()*16);
@@ -324,11 +324,12 @@ void ConstructionManager::onRemoveUnit(BWAPI::Unit* unit)
   }
 }
 
-bool ConstructionManager::build(BWAPI::UnitType type)
+bool ConstructionManager::build(BWAPI::UnitType type, BWAPI::TilePosition goalPosition)
 {
   if (!type.isBuilding()) return false;
   Building newBuilding;
   newBuilding.type          = type;
+  newBuilding.goalPosition  = goalPosition;
   newBuilding.tilePosition  = BWAPI::TilePositions::None;
   newBuilding.builderUnit   = NULL;
   newBuilding.buildingUnit  = NULL;

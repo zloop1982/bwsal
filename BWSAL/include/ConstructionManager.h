@@ -8,6 +8,7 @@ class ConstructionManager : public Arbitrator::Controller<BWAPI::Unit*,double>
     class Building
     {
       public:
+        BWAPI::TilePosition goalPosition;
         BWAPI::TilePosition tilePosition;
         BWAPI::Position position;
         BWAPI::UnitType type;
@@ -20,12 +21,12 @@ class ConstructionManager : public Arbitrator::Controller<BWAPI::Unit*,double>
     virtual void onRevoke(BWAPI::Unit* unit, double bid);
     virtual void update();
     virtual std::string getName() const;
+
     void onRemoveUnit(BWAPI::Unit* unit);
-    bool build(BWAPI::UnitType type);
+    bool build(BWAPI::UnitType type, BWAPI::TilePosition goalPosition);
     Arbitrator::Arbitrator<BWAPI::Unit*,double>* arbitrator;
     BuildingPlacer* placer;
     std::map<BWAPI::Unit*,Building*> builders;
     std::list<Building> incompleteBuildings;
     std::map<BWAPI::UnitType,std::set<Building*> > buildingsNeedingBuilders;
-
 };

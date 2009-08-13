@@ -30,5 +30,6 @@ public:
   TechManager* techManager;
   UpgradeManager* upgradeManager;
   BaseManager* baseManager;
+  ScoutManager* scoutManager;
   bool showManagerAssignments;
 };

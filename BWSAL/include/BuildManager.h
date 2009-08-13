@@ -15,6 +15,7 @@ class BuildManager
     BuildingPlacer* getBuildingPlacer() const;
     void onRemoveUnit(BWAPI::Unit* unit);
     bool build(BWAPI::UnitType type);
+    bool build(BWAPI::UnitType type, BWAPI::TilePosition goalPosition);
 
   private:
     Arbitrator::Arbitrator<BWAPI::Unit*,double>* arbitrator;
