@@ -3,3 +3,8 @@
 Class header file: http://code.google.com/p/bwsal/source/browse/trunk/BWSAL/include/UpgradeManager.h
 
 Used to research upgrades.
+
+  * [UpgradeManager#upgrade upgrade]
+  * [UpgradeManager#getPlannedLevel getPlannedLevel]
+  * [UpgradeManager#getStartedLevel getStartedLevel]
+  * [UpgradeManager#getCompletedLevel getCompletedLevel]
