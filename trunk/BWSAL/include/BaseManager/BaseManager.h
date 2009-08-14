@@ -17,6 +17,7 @@ class BaseManager
 
   std::string getName();
   void onRemoveUnit(BWAPI::Unit* unit);
+
   BuildManager* builder;
   std::map<BWTA::BaseLocation*,Base*> location2base;
   std::set<Base*> allBases;
