@@ -20,6 +20,7 @@ class WorkerManager : public Arbitrator::Controller<BWAPI::Unit*,double>
     virtual std::string getName() const;
 
     void onRemoveUnit(BWAPI::Unit* unit);
+    void setWorkersPerGas(int count);
     Arbitrator::Arbitrator<BWAPI::Unit*,double>* arbitrator;
     BaseManager* baseManager;
     std::map<BWAPI::Unit*,WorkerData> workers;

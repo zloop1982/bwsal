@@ -238,3 +238,8 @@ void WorkerManager::onRemoveUnit(BWAPI::Unit* unit)
 {
   workers.erase(unit);
 }
+
+void WorkerManager::setWorkersPerGas(int count)
+{
+  this->WorkersPerGas=count;
+}
