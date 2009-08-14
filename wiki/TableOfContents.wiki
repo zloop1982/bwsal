@@ -10,3 +10,4 @@
   * [BaseManager Base Manager]
   * [TechManager Tech Manager]
   * [UpgradeManager Upgrade Manager]
+  * [ScoutManager Scout Manager]
