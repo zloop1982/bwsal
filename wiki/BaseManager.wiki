@@ -3,3 +3,7 @@
 Class header file: http://code.google.com/p/bwsal/source/browse/trunk/BWSAL/include/BaseManager.h
 
 Keeps track of each base and handles requests to activate and deactivate individual bases (useful to react to storm drops).
+
+  * [BaseManager#addBase addBase]
+  * [BaseManager#getActiveBases getActiveBases]
+  * [BaseManager#getAllBases getAllBases]
