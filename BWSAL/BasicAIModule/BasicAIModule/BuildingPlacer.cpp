@@ -3,6 +3,7 @@ BuildingPlacer::BuildingPlacer()
 {
   reserveMap.resize(BWAPI::Broodwar->mapWidth(), BWAPI::Broodwar->mapHeight());
   reserveMap.setTo(false);
+  this->buildDistance=1;
 }
 bool BuildingPlacer::canBuildHere(BWAPI::TilePosition position, BWAPI::UnitType type) const
 {
@@ -18,8 +19,6 @@ bool BuildingPlacer::canBuildHereWithSpace(BWAPI::TilePosition position, BWAPI::
 {
   if (!this->canBuildHere(position, type))
     return false;
-  if (position.x() < 2 || position.y() < 2 || position.x() >= BWAPI::Broodwar->mapWidth() - 2 || position.y() >= BWAPI::Broodwar->mapHeight() - 2)
-    return false;
   int width=type.tileWidth();
   int height=type.tileHeight();
   if (type==BWAPI::UnitTypes::Terran_Command_Center ||
@@ -29,17 +28,27 @@ bool BuildingPlacer::canBuildHereWithSpace(BWAPI::TilePosition position, BWAPI::
   {
     width+=2;
   }
-  for(int x = position.x() - 1; x < position.x() + width + 1; x++)
-    for(int y = position.y() - 1; y < position.y() + height + 1; y++)
-    {
+  int startx = position.x() - buildDistance;
+  if (startx<0) startx=0;
+  int starty = position.y() - buildDistance;
+  if (starty<0) starty=0;
+  int endx = position.x() + width + buildDistance;
+  if (endx>BWAPI::Broodwar->mapWidth()) endx=BWAPI::Broodwar->mapWidth();
+  int endy = position.y() + height + buildDistance;
+  if (endy>BWAPI::Broodwar->mapHeight()) endy=BWAPI::Broodwar->mapHeight();
+
+  for(int x = startx; x < endx; x++)
+    for(int y = starty; y < endy; y++)
       if (!type.isRefinery())
         if (!buildable(x, y))
           return false;
-    }
+
   if (position.x()>3)
   {
-    for(int x = position.x() - 3; x < position.x(); x++)
-      for(int y = position.y() - 1; y < position.y() + height; y++)
+    int startx2=startx-2;
+    if (startx2<0) startx2=0;
+    for(int x = startx2; x < startx; x++)
+      for(int y = starty; y < endy; y++)
       {
         std::set<BWAPI::Unit*> units = BWAPI::Broodwar->unitsOnTile(x, y);
         for(std::set<BWAPI::Unit*>::iterator i = units.begin(); i != units.end(); i++)
@@ -128,4 +137,13 @@ void BuildingPlacer::freeTiles(BWAPI::TilePosition position, int width, int heig
   for(int x = position.x(); x < position.x() + width && x < (int)reserveMap.getWidth(); x++)
     for(int y = position.y(); y < position.y() + height && y < (int)reserveMap.getHeight(); y++)
       reserveMap[x][y] = false;
+}
+
+void BuildingPlacer::setBuildDistance(int distance)
+{
+  this->buildDistance=distance;
+}
+int BuildingPlacer::getBuildDistance()
+{
+  return this->buildDistance;
 }

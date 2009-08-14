@@ -22,6 +22,7 @@ void BasicAIModule::onStart()
 
   BWAPI::UnitType workerType=*(Broodwar->self()->getRace().getWorker());
   this->buildOrderManager->build(20,workerType,80);
+  //this->buildManager->setBuildDistance(0);
 }
 void BasicAIModule::onFrame()
 {
