@@ -1,5 +1,7 @@
 #sidebar TableOfContents
 
+Class header file: http://code.google.com/p/bwsal/source/browse/trunk/BWSAL/include/BuildManager.h
+
 The build manager is used to build units and buildings. To start building a new unit, simply call BuildManager::build([http://code.google.com/p/bwapi/wiki/UnitType UnitType] type).
 
 When a new unit type request comes in, the build manager will pass the unit type off to one of the three sub-build managers:
