@@ -3,3 +3,8 @@
 Class header file: http://code.google.com/p/bwsal/source/browse/trunk/BWSAL/include/ConstructionManager.h
 
 Given a unit type, the construction manager will attempt to get a suitable worker and build the given unit type at the build position returned by BuildingPlacer.
+
+
+  * [ConstructionManager#build build]
+  * [ConstructionManager#getPlannedCount getPlannedCount]
+  * [ConstructionManager#getStartedCount getStartedCount]
