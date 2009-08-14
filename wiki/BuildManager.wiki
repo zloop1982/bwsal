@@ -8,3 +8,11 @@ When a new unit type request comes in, the build manager will pass the unit type
   * [ConstructionManager Construction Manager] - handles creating new buildings and add-ons
   * [ProductionManager Production Manager] - handles training units from production buildings
   * [MorphManager Morph Manager] - handles morphing units in to other units.
+
+
+  * [BuildManager#build build]
+  * [BuildManager#build_2 build]
+  * [BuildManager#getPlannedCount getPlannedCount]
+  * [BuildManager#getStartedCount getStartedCount]
+  * [BuildManager#getCompletedCount getCompletedCount]
+  * [BuildManager#setBuildDistance setBuildDistance]
