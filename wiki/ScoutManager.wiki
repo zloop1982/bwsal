@@ -1,0 +1,3 @@
+#sidebar TableOfContents
+
+Class header file: http://code.google.com/p/bwsal/source/browse/trunk/BWSAL/include/ScoutManager.h
