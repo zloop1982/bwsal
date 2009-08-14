@@ -2,8 +2,6 @@
 
 Class header file: http://code.google.com/p/bwsal/source/browse/trunk/BWSAL/include/BuildOrderManager.h
 
-  * [http://code.google.com/p/bwsal/wiki/BuildOrderManager#update update]
-  * [http://code.google.com/p/bwsal/wiki/BuildOrderManager#getName getName]
-  * [http://code.google.com/p/bwsal/wiki/BuildOrderManager#build build]
-  * [http://code.google.com/p/bwsal/wiki/BuildOrderManager#research research]
-  * [http://code.google.com/p/bwsal/wiki/BuildOrderManager#upgrade upgrade]
+  * [BuildOrderManager#build build]
+  * [BuildOrderManager#research research]
+  * [BuildOrderManager#upgrade upgrade]
