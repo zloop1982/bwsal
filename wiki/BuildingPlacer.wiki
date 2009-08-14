@@ -3,3 +3,13 @@
 Class header file: http://code.google.com/p/bwsal/source/browse/trunk/BWSAL/include/BuildingPlacer.h
 
 Finds a suitable build position for a given unit type.
+
+  * [BuildingPlacer#canBuildHere canBuildHere]
+  * [BuildingPlacer#canBuildHereWithSpace canBuildHereWithSpace]
+  * [BuildingPlacer#getBuildLocation getBuildLocation]
+  * [BuildingPlacer#getBuildLocationNear getBuildLocationNear]
+  * [BuildingPlacer#buildable buildable]
+  * [BuildingPlacer#reserveTiles reserveTiles]
+  * [BuildingPlacer#freeTiles freeTiles]
+  * [BuildingPlacer#setBuildDistance setBuildDistance]
+  * [BuildingPlacer#getBuildDistance getBuildDistance]
