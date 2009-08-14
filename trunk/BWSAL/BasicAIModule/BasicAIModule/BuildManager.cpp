@@ -103,3 +103,8 @@ int BuildManager::getCompletedCount(BWAPI::UnitType type) const
 {
   return BWAPI::Broodwar->self()->getCompletedUnits(type);
 }
+
+void BuildManager::setBuildDistance(int distance)
+{
+  this->buildingPlacer->setBuildDistance(distance);
+}
