@@ -3,3 +3,5 @@
 Class header file: http://code.google.com/p/bwsal/source/browse/trunk/BWSAL/include/WorkerManager.h
 
 The worker manager ensures that workers are mining minerals and gas at maximum capacity at each base. Transfers workers to new expansions and balances worker amounts across expansions as needed.
+
+  * [WorkerManager#setWorkersPerGas setWorkersPerGas]
