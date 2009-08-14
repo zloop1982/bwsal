@@ -3,3 +3,7 @@
 Class header file: http://code.google.com/p/bwsal/source/browse/trunk/BWSAL/include/MorphManager.h
 
 The morph manager is used to morph Zerg units and buildings.
+
+  * [MorphManager#morph morph]
+  * [MorphManager#getPlannedCount getPlannedCount]
+  * [MorphManager#getStartedCount getStartedCount]
