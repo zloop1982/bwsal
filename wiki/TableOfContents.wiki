@@ -5,6 +5,7 @@
    * [ConstructionManager Construction Manager]
    * [ProductionManager Production Manager]
    * [MorphManager Morph Manager]
+  * [BuildOrderManager]
   * [SupplyManager Supply Manager]
   * [BaseManager Base Manager]
   * [TechManager Tech Manager]
