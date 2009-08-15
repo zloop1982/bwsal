@@ -16,7 +16,7 @@ void BasicAIModule::onStart()
   this->workerManager     = new WorkerManager(&this->arbitrator,baseManager);
   this->scoutManager      = new ScoutManager(&this->arbitrator);
   this->buildOrderManager = new BuildOrderManager(this->buildManager,this->techManager,this->upgradeManager);
-  this->supplyManager     = new SupplyManager(this->buildManager);
+  this->supplyManager     = new SupplyManager(this->buildManager, this->buildOrderManager);
 
   this->baseManager->addBase(BWTA::getStartLocation(BWAPI::Broodwar->self()));
 

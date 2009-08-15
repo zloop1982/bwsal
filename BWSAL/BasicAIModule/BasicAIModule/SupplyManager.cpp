@@ -1,8 +1,9 @@
 #include <SupplyManager.h>
 
-SupplyManager::SupplyManager(BuildManager* buildManager)
+SupplyManager::SupplyManager(BuildManager* buildManager, BuildOrderManager* buildOrderManager)
 {
   this->buildManager      = buildManager;
+  this->buildOrderManager = buildOrderManager;
   this->lastFrameCheck    = 0;
 }
 
@@ -18,7 +19,10 @@ void SupplyManager::update()
       if ((*i)->getType().canProduce())
         productionCapacity += 4;
     if (getPlannedSupply() <= BWAPI::Broodwar->self()->supplyUsed() + productionCapacity)
+    {
       this->buildManager->build(*BWAPI::Broodwar->self()->getRace().getSupplyProvider());
+      this->buildOrderManager->spendResources(*BWAPI::Broodwar->self()->getRace().getSupplyProvider());
+    }
   }
 }
 
