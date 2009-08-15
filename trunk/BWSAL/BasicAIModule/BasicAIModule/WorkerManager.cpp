@@ -112,7 +112,7 @@ void WorkerManager::rebalanceWorkers()
       desiredWorkerCount[*g]=0;
       if ((*g)->getType().isRefinery() && (*g)->getPlayer()==BWAPI::Broodwar->self() && (*g)->isCompleted())
       {
-        for(int w=0;w<this->WorkersPerGas;w++)
+        for(int w=0;w<this->WorkersPerGas && remainingWorkers>0;w++)
         {
           desiredWorkerCount[*g]++;
           remainingWorkers--;
