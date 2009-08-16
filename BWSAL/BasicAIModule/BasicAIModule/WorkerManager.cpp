@@ -182,44 +182,14 @@ void WorkerManager::update()
     if (u->second.resource == NULL || (i->getTarget() != NULL && i->getTarget()->getType().isResourceDepot()))
       u->second.resource = u->second.newResource;
 
-    if (u->second.resource->getType().isRefinery())
-    {
-      //geyser micro
-      BWAPI::Unit* geyser = u->second.resource;
-      if ((
-           i->getOrder() == BWAPI::Orders::MoveToMinerals || 
-           i->getOrder() == BWAPI::Orders::WaitForMinerals || 
-           i->getOrder() == BWAPI::Orders::MoveToGas || 
-           i->getOrder() == BWAPI::Orders::WaitForGas || 
-           i->getOrder() == BWAPI::Orders::PlayerGuard))
-        if (i->getTarget() != resourceBase[geyser]->getResourceDepot())
-          if (i->getTarget() != geyser)
-            i->rightClick(geyser);
-    }
-    else
-    {
-      //mineral micro
-      BWAPI::Unit* mineral = u->second.resource;
-      BWAPI::Unit* miningBuddy = NULL;
-      if ((
-           i->isGatheringGas() ||
-           i->getOrder() == BWAPI::Orders::MoveToMinerals || 
-           i->getOrder() == BWAPI::Orders::WaitForMinerals || 
-           i->getOrder() == BWAPI::Orders::MoveToGas || 
-           i->getOrder() == BWAPI::Orders::WaitForGas || 
-           i->getOrder() == BWAPI::Orders::PlayerGuard))
-        if (i->getTarget() != resourceBase[mineral]->getResourceDepot())
-        {
-          for(std::set<BWAPI::Unit*>::iterator b = currentWorkers[mineral].begin(); b != currentWorkers[mineral].end(); b++)
-            if ((*b) != i && (*b)->getOrder() == BWAPI::Orders::MiningMinerals)
-              miningBuddy = *b;
-          if (i->getTarget() != mineral)
-          {
-            u->second.lastFrameSpam = BWAPI::Broodwar->getFrameCount();
-            i->rightClick(mineral);
-          }
-        }
-    }
+    BWAPI::Unit* resource = u->second.resource;
+    if (i->getOrder() == BWAPI::Orders::MoveToMinerals || 
+        i->getOrder() == BWAPI::Orders::WaitForMinerals || 
+        i->getOrder() == BWAPI::Orders::MoveToGas || 
+        i->getOrder() == BWAPI::Orders::WaitForGas || 
+        i->getOrder() == BWAPI::Orders::PlayerGuard)
+      if (i->getTarget() != resourceBase[resource]->getResourceDepot() && i->getTarget() != resource)
+        i->rightClick(resource);
   }
 }
 std::string WorkerManager::getName() const
