@@ -163,16 +163,6 @@ void WorkerManager::update()
     this->rebalanceWorkers();
   }
   
-  /*
-  for(std::map<BWAPI::Unit*,int>::iterator i=desiredWorkerCount.begin();i!=desiredWorkerCount.end();i++)
-  {
-    int x=(*i).first->getPosition().x();
-    int y=(*i).first->getPosition().y();
-    BWAPI::Broodwar->text(BWAPI::CoordinateType::Map,x,y,"Desired: %d",(*i).second);
-    BWAPI::Broodwar->text(BWAPI::CoordinateType::Map,x,y+20,"Actual: %d",currentWorkers[(*i).first].size());
-  }
-  */
-  
   //order workers to gather from their assigned resources
   for(std::map<BWAPI::Unit*,WorkerData>::iterator u = workers.begin(); u != workers.end(); u++)
   {
