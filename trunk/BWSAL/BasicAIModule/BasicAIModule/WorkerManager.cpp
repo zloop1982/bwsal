@@ -213,14 +213,7 @@ void WorkerManager::update()
           for(std::set<BWAPI::Unit*>::iterator b = currentWorkers[mineral].begin(); b != currentWorkers[mineral].end(); b++)
             if ((*b) != i && (*b)->getOrder() == BWAPI::Orders::MiningMinerals)
               miningBuddy = *b;
-          if (i->getTarget() != mineral ||
-             (false && i->getDistance(mineral) <= BWAPI::Broodwar->getLatency()*3 &&
-              miningBuddy != NULL &&
-              miningBuddy->getOrderTimer() >= BWAPI::Broodwar->getLatency() &&
-              (
-                miningBuddy->getOrderTimer() == BWAPI::Broodwar->getLatency()-1 ||
-                BWAPI::Broodwar->getFrameCount() - u->second.lastFrameSpam > 4
-              )))
+          if (i->getTarget() != mineral)
           {
             u->second.lastFrameSpam = BWAPI::Broodwar->getFrameCount();
             i->rightClick(mineral);
