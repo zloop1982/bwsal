@@ -94,12 +94,13 @@ void ProductionManager::update()
         {
           if (i->second.unit->getType()==i->second.type)
           {
-            producingUnits.erase(i);
             arbitrator->removeBid(this, i->first);
             startedCount[i->second.type]--;
             plannedCount[i->second.type]--;
+            producingUnits.erase(i);
           }
-          i->second.unit=NULL;
+          else
+            i->second.unit=NULL;
         }
         else
         {
