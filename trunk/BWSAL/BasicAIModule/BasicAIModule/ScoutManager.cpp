@@ -13,7 +13,7 @@ ScoutManager::ScoutManager(Arbitrator::Arbitrator<BWAPI::Unit*,double> *arbitrat
   {
     if ((*l)->getPosition() != myStartLocation->getPosition())
     {
-      positionsToScout.insert(&(*l)->getPosition());
+      positionsToScout.insert((*l)->getPosition());
     }
   }
 }
@@ -107,8 +107,7 @@ void ScoutManager::updateScoutAssignments()
   for(u = scouts.begin(); u != scouts.end(); u++)
   {
     if ( (*u).second.mode == ScoutData::Searching
-      && (*u).second.target
-      && (*u).first->getPosition().getDistance(*(*u).second.target) < 2 /* some delta */)
+      && (*u).first->getPosition().getDistance((*u).second.target) < 2 /* some delta */)
     {
       positionsToScout.erase((*u).second.target);
     }
@@ -117,7 +116,7 @@ void ScoutManager::updateScoutAssignments()
   // Set scouts to scout.
   if (positionsToScout.size() > 0) // are there still positions to scout?
   {
-    std::set<const BWAPI::Position *>::iterator p;
+    std::set<const BWAPI::Position>::iterator p;
     for( u = scouts.begin(), p = positionsToScout.begin()
          ;
          u != scouts.end() && p != positionsToScout.end()
@@ -128,7 +127,7 @@ void ScoutManager::updateScoutAssignments()
       {
         
         (*u).second.mode = ScoutData::Searching;
-        (*u).first->rightClick(**p);
+        (*u).first->rightClick(*p);
         (*u).second.target = *p;
         p++;
       }
