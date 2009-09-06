@@ -11,7 +11,7 @@ ScoutManager::ScoutManager(Arbitrator::Arbitrator<BWAPI::Unit*,double> *arbitrat
   std::set<BWTA::BaseLocation *> locations = BWTA::getBaseLocations();
   for(std::set<BWTA::BaseLocation *>::iterator l = locations.begin(); l != locations.end(); l++)
   {
-    if ((*l)->getPosition() != myStartLocation->getPosition())
+    if (myStartLocation->getGroundDistance(*l) > 0)
     {
       positionsToScout.insert((*l)->getPosition());
     }
