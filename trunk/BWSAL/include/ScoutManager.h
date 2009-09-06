@@ -17,7 +17,7 @@ class ScoutManager : public Arbitrator::Controller<BWAPI::Unit*,double>
           Fleeing
         };
         ScoutData(){ mode = Idle; target = NULL; }
-        BWAPI::Position* target;
+        const BWAPI::Position* target;
         ScoutMode mode;
     };
     ScoutManager(Arbitrator::Arbitrator<BWAPI::Unit*,double>* arbitrator);
@@ -28,6 +28,22 @@ class ScoutManager : public Arbitrator::Controller<BWAPI::Unit*,double>
     virtual std::string getName() const;
     void onRemoveUnit(BWAPI::Unit* unit);
 
+    // Non-Controller methods.
+    bool isScouting() const;
+
     std::map<BWAPI::Unit*, ScoutData> scouts;
     Arbitrator::Arbitrator<BWAPI::Unit*,double>* arbitrator;
+    
+    std::set<const BWAPI::Position *> positionsToScout;
+    BWTA::BaseLocation *myStartLocation;
+        
+  private:
+    bool isScoutTime() const;
+    bool needMoreScouts() const;
+    void requestScout(double bid);
+    void addScout(BWAPI::Unit* unit);
+    void updateScoutAssignments();
+
+    size_t desiredScoutCount;
+    int scoutingStartFrame;
 };
