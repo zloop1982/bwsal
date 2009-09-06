@@ -16,8 +16,8 @@ class ScoutManager : public Arbitrator::Controller<BWAPI::Unit*,double>
           Harassing,
           Fleeing
         };
-        ScoutData(){ mode = Idle; target = NULL; }
-        const BWAPI::Position* target;
+        ScoutData(){ mode = Idle; }
+        BWAPI::Position target;
         ScoutMode mode;
     };
     ScoutManager(Arbitrator::Arbitrator<BWAPI::Unit*,double>* arbitrator);
@@ -34,7 +34,7 @@ class ScoutManager : public Arbitrator::Controller<BWAPI::Unit*,double>
     std::map<BWAPI::Unit*, ScoutData> scouts;
     Arbitrator::Arbitrator<BWAPI::Unit*,double>* arbitrator;
     
-    std::set<const BWAPI::Position *> positionsToScout;
+    std::set<const BWAPI::Position> positionsToScout;
     BWTA::BaseLocation *myStartLocation;
         
   private:
