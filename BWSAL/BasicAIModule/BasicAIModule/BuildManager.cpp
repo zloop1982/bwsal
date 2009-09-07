@@ -45,17 +45,7 @@ void BuildManager::onRemoveUnit(BWAPI::Unit* unit)
 
 bool BuildManager::build(BWAPI::UnitType type)
 {
-  if (type==BWAPI::UnitTypes::None || type==BWAPI::UnitTypes::Unknown) return false;
-  if (type.getRace()==BWAPI::Races::Zerg && type.isBuilding()==type.whatBuilds().first->isBuilding())
-    return this->morphManager->morph(type);
-  else
-  {
-    if (type.isBuilding())
-      return this->constructionManager->build(type, BWAPI::Broodwar->self()->getStartLocation());
-    else
-      return this->productionManager->train(type);
-  }
-  return false;
+  return build(type, BWAPI::Broodwar->self()->getStartLocation());
 }
 
 bool BuildManager::build(BWAPI::UnitType type, BWAPI::TilePosition goalPosition)
