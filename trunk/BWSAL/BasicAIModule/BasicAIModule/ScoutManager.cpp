@@ -5,7 +5,7 @@ ScoutManager::ScoutManager(Arbitrator::Arbitrator<BWAPI::Unit*,double> *arbitrat
 {
   this->arbitrator = arbitrator;
   desiredScoutCount = 1;
-  scoutingStartFrame = 50;
+  scoutingStartFrame = 24*50;//send first scout after 50 seconds
 
   myStartLocation = BWTA::getStartLocation(BWAPI::Broodwar->self());
   std::set<BWTA::BaseLocation *> locations = BWTA::getBaseLocations();
@@ -34,11 +34,7 @@ void ScoutManager::onOffer(std::set<BWAPI::Unit*> units)
 
 void ScoutManager::onRevoke(BWAPI::Unit *unit, double bid)
 {
-  if (bid < 40 /* maxBid */)
-  {
-    // Try to increase the bid if cannot receive a scout.
-    requestScout(bid+1);
-  }
+  scouts.erase(unit);
 }
 
 void ScoutManager::update()
@@ -47,7 +43,7 @@ void ScoutManager::update()
   {
     if (needMoreScouts())
     {
-      requestScout(/* bid = */ 10); // Start with initial bid of 10.
+      requestScout(/* bid = */ 12); // Bid 12.
     }
 
     updateScoutAssignments();
@@ -107,9 +103,10 @@ void ScoutManager::updateScoutAssignments()
   for(u = scouts.begin(); u != scouts.end(); u++)
   {
     if ( (*u).second.mode == ScoutData::Searching
-      && (*u).first->getPosition().getDistance((*u).second.target) < 2 /* some delta */)
+      && (*u).first->getPosition().getDistance((*u).second.target) < BWAPI::TILE_SIZE*(*u).first->getType().sightRange())
     {
       positionsToScout.erase((*u).second.target);
+      (*u).second.mode = ScoutData::Idle;
     }
   }
 
