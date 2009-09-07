@@ -132,8 +132,6 @@ void ConstructionManager::update()
       BWAPI::Unit* s = b->buildingUnit;
       if (s!=NULL && s->isCompleted())
       {
-        //If the building is complete, we can forget about it.
-        this->incompleteBuildings.erase(i);
         startedCount[b->type]--;
         plannedCount[b->type]--;
         if (u != NULL)
@@ -143,6 +141,9 @@ void ConstructionManager::update()
         }
         this->placer->freeTiles(b->tilePosition, 4,3);
         this->placer->freeTiles(b->tilePosition+BWAPI::TilePosition(4,1), 2,2);
+
+        //If the building is complete, we can forget about it.
+        this->incompleteBuildings.erase(i);
       }
       else
       {
@@ -247,8 +248,6 @@ void ConstructionManager::update()
       BWAPI::Unit* s = b->buildingUnit;
       if (s != NULL && s->isCompleted())
       {
-        //If the building is complete, we can forget about it.
-        this->incompleteBuildings.erase(i);
         startedCount[b->type]--;
         plannedCount[b->type]--;
         if (u != NULL)
@@ -257,6 +256,9 @@ void ConstructionManager::update()
           arbitrator->removeBid(this,u);
         }
         this->placer->freeTiles(b->tilePosition, b->type.tileWidth(), b->type.tileHeight());
+
+        //If the building is complete, we can forget about it.
+        this->incompleteBuildings.erase(i);
       }
       else
       {
