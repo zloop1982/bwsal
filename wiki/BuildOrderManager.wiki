@@ -3,5 +3,6 @@
 Class header file: http://code.google.com/p/bwsal/source/browse/trunk/BWSAL/include/BuildOrderManager.h
 
   * [BuildOrderManager#build build]
+  * [BuildOrderManager#buildAdditional buildAdditional]
   * [BuildOrderManager#research research]
   * [BuildOrderManager#upgrade upgrade]
