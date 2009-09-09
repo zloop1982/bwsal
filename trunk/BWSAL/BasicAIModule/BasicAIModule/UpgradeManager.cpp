@@ -1,16 +1,19 @@
 #include <UpgradeManager.h>
 
-UpgradeManager::UpgradeManager(Arbitrator::Arbitrator<BWAPI::Unit*,double>* arbitrator, BuildingPlacer* placer)
+UpgradeManager::UpgradeManager(Arbitrator::Arbitrator<BWAPI::Unit*,double>* arbitrator)
 {
   this->arbitrator = arbitrator;
-  this->placer = placer;
+  this->placer = NULL;
   for(std::set<BWAPI::UpgradeType>::iterator i=BWAPI::UpgradeTypes::allUpgradeTypes().begin();i!=BWAPI::UpgradeTypes::allUpgradeTypes().end();i++)
   {
     plannedLevel[*i]=0;
     startedLevel[*i]=0;
   }
 }
-
+void UpgradeManager::setBuildingPlacer(BuildingPlacer* placer)
+{
+  this->placer = placer;
+}
 void UpgradeManager::onOffer(std::set<BWAPI::Unit*> units)
 {
   for(std::set<BWAPI::Unit*>::iterator i=units.begin();i!=units.end();i++)

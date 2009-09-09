@@ -11,7 +11,8 @@ class UpgradeManager : public Arbitrator::Controller<BWAPI::Unit*,double>
         BWAPI::UpgradeType type;
         int level;
     };
-    UpgradeManager(Arbitrator::Arbitrator<BWAPI::Unit*,double>* arbitrator, BuildingPlacer* placer);
+    UpgradeManager(Arbitrator::Arbitrator<BWAPI::Unit*,double>* arbitrator);
+    void setBuildingPlacer(BuildingPlacer* placer);
     virtual void onOffer(std::set<BWAPI::Unit*> units);
     virtual void onRevoke(BWAPI::Unit* unit, double bid);
     virtual void update();

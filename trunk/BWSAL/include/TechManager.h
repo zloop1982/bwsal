@@ -5,7 +5,9 @@
 class TechManager : public Arbitrator::Controller<BWAPI::Unit*,double>
 {
   public:
-    TechManager(Arbitrator::Arbitrator<BWAPI::Unit*,double>* arbitrator, BuildingPlacer* placer);
+    TechManager(Arbitrator::Arbitrator<BWAPI::Unit*,double>* arbitrator);
+    void setBuildingPlacer(BuildingPlacer* placer);
+
     virtual void onOffer(std::set<BWAPI::Unit*> units);
     virtual void onRevoke(BWAPI::Unit* unit, double bid);
     virtual void update();

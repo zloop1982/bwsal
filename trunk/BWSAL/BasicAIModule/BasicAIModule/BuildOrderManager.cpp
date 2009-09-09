@@ -29,15 +29,35 @@ void BuildOrderManager::update()
     i_next++;
     if (i->unitType!=BWAPI::UnitTypes::None)
     {
-      BWAPI::Broodwar->text(BWAPI::CoordinateType::Screen,5,o,"build(%d, \"%s\", %d)",i->count,i->unitType.getName().c_str(),l->first);
-      if (this->buildManager->getPlannedCount(i->unitType)>=i->count)
-        l->second.erase(i);
-      else
-        if (this->hasResources(i->unitType))
+      if (i->isAdditional)
+      {
+        BWAPI::Broodwar->text(BWAPI::CoordinateType::Screen,5,o,"buildAdditional(%d, \"%s\", %d)",i->count,i->unitType.getName().c_str(),l->first);
+        if (i->count>0)
         {
-          this->buildManager->build(i->unitType);
-          this->spendResources(i->unitType);
+          if (this->hasResources(i->unitType))
+          {
+            this->buildManager->build(i->unitType,i->seedPosition);
+            this->spendResources(i->unitType);
+            i->count--;
+          }
         }
+        else
+        {
+          l->second.erase(i);
+        }
+      }
+      else
+      {
+        BWAPI::Broodwar->text(BWAPI::CoordinateType::Screen,5,o,"build(%d, \"%s\", %d)",i->count,i->unitType.getName().c_str(),l->first);
+        if (this->buildManager->getPlannedCount(i->unitType)>=i->count)
+          l->second.erase(i);
+        else
+          if (this->hasResources(i->unitType))
+          {
+            this->buildManager->build(i->unitType,i->seedPosition);
+            this->spendResources(i->unitType);
+          }
+      }
     }
     else if (i->techType!=BWAPI::TechTypes::None)
     {
@@ -71,14 +91,35 @@ std::string BuildOrderManager::getName() const
 {
   return "Build Order Manager";
 }
-void BuildOrderManager::build(int count, BWAPI::UnitType t, int priority)
+void BuildOrderManager::build(int count, BWAPI::UnitType t, int priority, BWAPI::TilePosition seedPosition)
 {
-  if (t==BWAPI::UnitTypes::None || t==BWAPI::UnitTypes::Unknown) return;
+  if (t == BWAPI::UnitTypes::None || t == BWAPI::UnitTypes::Unknown) return;
+  if (seedPosition == BWAPI::TilePositions::None || seedPosition == BWAPI::TilePositions::Unknown)
+    seedPosition=BWAPI::Broodwar->self()->getStartLocation();
+
   BuildItem newItem;
   newItem.unitType=t;
   newItem.techType=BWAPI::TechTypes::None;
   newItem.upgradeType=BWAPI::UpgradeTypes::None;
   newItem.count=count;
+  newItem.seedPosition=seedPosition;
+  newItem.isAdditional=false;
+  items[priority].push_back(newItem);
+}
+
+void BuildOrderManager::buildAdditional(int count, BWAPI::UnitType t, int priority, BWAPI::TilePosition seedPosition)
+{
+  if (t == BWAPI::UnitTypes::None || t == BWAPI::UnitTypes::Unknown) return;
+  if (seedPosition == BWAPI::TilePositions::None || seedPosition == BWAPI::TilePositions::Unknown)
+    seedPosition=BWAPI::Broodwar->self()->getStartLocation();
+
+  BuildItem newItem;
+  newItem.unitType=t;
+  newItem.techType=BWAPI::TechTypes::None;
+  newItem.upgradeType=BWAPI::UpgradeTypes::None;
+  newItem.count=count;
+  newItem.seedPosition=seedPosition;
+  newItem.isAdditional=true;
   items[priority].push_back(newItem);
 }
 
@@ -90,6 +131,7 @@ void BuildOrderManager::research(BWAPI::TechType t, int priority)
   newItem.techType=t;
   newItem.upgradeType=BWAPI::UpgradeTypes::None;
   newItem.count=1;
+  newItem.isAdditional=false;
   items[priority].push_back(newItem);
 }
 
@@ -101,6 +143,7 @@ void BuildOrderManager::upgrade(int level, BWAPI::UpgradeType t, int priority)
   newItem.techType=BWAPI::TechTypes::None;
   newItem.upgradeType=t;
   newItem.count=level;
+  newItem.isAdditional=false;
   items[priority].push_back(newItem);
 }
 
