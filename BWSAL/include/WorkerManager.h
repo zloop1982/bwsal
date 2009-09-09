@@ -13,7 +13,8 @@ class WorkerManager : public Arbitrator::Controller<BWAPI::Unit*,double>
         BWAPI::Unit* newResource;
         int lastFrameSpam;
     };
-    WorkerManager(Arbitrator::Arbitrator<BWAPI::Unit*,double>* arbitrator, BaseManager* baseManager);
+    WorkerManager(Arbitrator::Arbitrator<BWAPI::Unit*,double>* arbitrator);
+    void setBaseManager(BaseManager* baseManager);
     virtual void onOffer(std::set<BWAPI::Unit*> units);
     virtual void onRevoke(BWAPI::Unit* unit, double bid);
     virtual void update();

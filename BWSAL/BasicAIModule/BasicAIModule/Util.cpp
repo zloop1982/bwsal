@@ -5,17 +5,16 @@
 char buffer[1024];
 void log(const char* text, ...)
 {
-  FILE * pFile;
-  pFile = fopen ("bwapi-data/logs/BasicAIModule.log","a");
-  
+  const int BUFFER_SIZE = 1024;
+  char buffer[BUFFER_SIZE];
+
   va_list ap;
   va_start(ap, text);
-  vsprintf(buffer,text,ap );
+  vsnprintf_s(buffer, BUFFER_SIZE, BUFFER_SIZE, text, ap);
   va_end(ap);
-  if (pFile!=NULL)
-  {
-    fputs (buffer,pFile);
-    fputs ("\n",pFile);
-    fclose (pFile);
-  }
+
+  FILE *outfile;
+  fopen_s(&outfile, "bwapi-data\\logs\\BWAI_Log.txt", "a+");
+  fprintf_s(outfile, buffer);
+  fclose(outfile);
 }

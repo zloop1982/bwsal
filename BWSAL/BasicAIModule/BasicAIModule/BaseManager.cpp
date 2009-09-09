@@ -1,5 +1,9 @@
 #include <BaseManager.h>
-BaseManager::BaseManager(BuildManager* builder)
+BaseManager::BaseManager()
+{
+  this->builder = NULL;
+}
+void BaseManager::setBuildOrderManager(BuildOrderManager* builder)
 {
   this->builder = builder;
 }
@@ -44,6 +48,12 @@ void BaseManager::addBase(BWTA::BaseLocation* location)
   Base* newBase = new Base(location);
   allBases.insert(newBase);
   this->location2base[location] = newBase;
+}
+
+void BaseManager::expand(BWTA::BaseLocation* location)
+{
+  addBase(location);
+  this->builder->buildAdditional(1,*BWAPI::Broodwar->self()->getRace().getCenter(),100,location->getTilePosition());
 }
 std::set<Base*> BaseManager::getActiveBases() const
 {

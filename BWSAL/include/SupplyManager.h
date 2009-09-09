@@ -6,7 +6,9 @@
 class SupplyManager
 {
   public:
-    SupplyManager(BuildManager* buildManager, BuildOrderManager* buildOrderManager);
+    SupplyManager();
+    void setBuildManager(BuildManager* buildManager);
+    void setBuildOrderManager(BuildOrderManager* buildOrderManager);
     void update();
     std::string getName() const;
     int getPlannedSupply() const;

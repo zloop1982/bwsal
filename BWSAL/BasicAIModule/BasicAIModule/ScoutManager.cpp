@@ -4,8 +4,7 @@
 ScoutManager::ScoutManager(Arbitrator::Arbitrator<BWAPI::Unit*,double> *arbitrator)
 {
   this->arbitrator = arbitrator;
-  desiredScoutCount = 1;
-  scoutingStartFrame = 24*50;//send first scout after 50 seconds
+  desiredScoutCount = 0;
 
   myStartLocation = BWTA::getStartLocation(BWAPI::Broodwar->self());
   std::set<BWTA::BaseLocation *> locations = BWTA::getBaseLocations();
@@ -39,15 +38,19 @@ void ScoutManager::onRevoke(BWAPI::Unit *unit, double bid)
 
 void ScoutManager::update()
 {
-  if (isScoutTime())
+  if (needMoreScouts())
   {
-    if (needMoreScouts())
-    {
-      requestScout(/* bid = */ 12); // Bid 12.
-    }
-
-    updateScoutAssignments();
+    requestScout(/* bid = */ 12); // Bid 12.
   }
+  else
+  {
+    while (scouts.size()>desiredScoutCount)
+    {
+      arbitrator->setBid(this, scouts.begin()->first,0);
+      scouts.erase(scouts.begin());
+    }
+  }
+  updateScoutAssignments();
 }
 
 std::string ScoutManager::getName() const
@@ -60,11 +63,9 @@ void ScoutManager::onRemoveUnit(BWAPI::Unit* unit)
   scouts.erase(unit);
 }
 
-bool ScoutManager::isScoutTime() const
+void ScoutManager::setScoutCount(int count)
 {
-  return BWAPI::Broodwar->getFrameCount() >= scoutingStartFrame;
-  // TODO: Check also if we have enough workers done to be sure that
-  // no scouting is done without good resource production first.
+  this->desiredScoutCount=count;
 }
 
 bool ScoutManager::isScouting() const

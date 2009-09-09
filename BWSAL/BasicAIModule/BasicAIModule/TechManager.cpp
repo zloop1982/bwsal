@@ -1,11 +1,14 @@
 #include <TechManager.h>
 
-TechManager::TechManager(Arbitrator::Arbitrator<BWAPI::Unit*,double>* arbitrator, BuildingPlacer* placer)
+TechManager::TechManager(Arbitrator::Arbitrator<BWAPI::Unit*,double>* arbitrator)
 {
   this->arbitrator = arbitrator;
+  this->placer = NULL;
+}
+void TechManager::setBuildingPlacer(BuildingPlacer* placer)
+{
   this->placer = placer;
 }
-
 void TechManager::onOffer(std::set<BWAPI::Unit*> units)
 {
   for(std::set<BWAPI::Unit*>::iterator i=units.begin();i!=units.end();i++)

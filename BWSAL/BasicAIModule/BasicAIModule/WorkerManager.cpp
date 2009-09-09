@@ -1,12 +1,16 @@
 #include <WorkerManager.h>
 #include <BaseManager.h>
 #include <algorithm>
-WorkerManager::WorkerManager(Arbitrator::Arbitrator<BWAPI::Unit*,double>* arbitrator, BaseManager* baseManager)
+WorkerManager::WorkerManager(Arbitrator::Arbitrator<BWAPI::Unit*,double>* arbitrator)
 {
   this->arbitrator     = arbitrator;
-  this->baseManager    = baseManager;
+  this->baseManager    = NULL;
   this->lastSCVBalance = 0;
   this->WorkersPerGas  = 3;
+}
+void WorkerManager::setBaseManager(BaseManager* baseManager)
+{
+  this->baseManager = baseManager;
 }
 void WorkerManager::onOffer(std::set<BWAPI::Unit*> units)
 {

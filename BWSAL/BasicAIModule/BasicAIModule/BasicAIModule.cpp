@@ -10,19 +10,27 @@ void BasicAIModule::onStart()
   Broodwar->enableFlag(Flag::CompleteMapInformation);
   BWTA::analyze();
   this->buildManager      = new BuildManager(&this->arbitrator);
-  this->techManager       = new TechManager(&this->arbitrator,this->buildManager->getBuildingPlacer());
-  this->upgradeManager    = new UpgradeManager(&this->arbitrator,this->buildManager->getBuildingPlacer());
-  this->baseManager       = new BaseManager(this->buildManager);
-  this->workerManager     = new WorkerManager(&this->arbitrator,baseManager);
-  this->scoutManager      = new ScoutManager(&this->arbitrator);
+  this->techManager       = new TechManager(&this->arbitrator);
+  this->upgradeManager    = new UpgradeManager(&this->arbitrator);
   this->buildOrderManager = new BuildOrderManager(this->buildManager,this->techManager,this->upgradeManager);
-  this->supplyManager     = new SupplyManager(this->buildManager, this->buildOrderManager);
+  this->scoutManager      = new ScoutManager(&this->arbitrator);
+  this->workerManager     = new WorkerManager(&this->arbitrator);
+  this->baseManager       = new BaseManager();
+  this->supplyManager     = new SupplyManager();
+
+  this->supplyManager->setBuildManager(this->buildManager);
+  this->supplyManager->setBuildOrderManager(this->buildOrderManager);
+  this->techManager->setBuildingPlacer(this->buildManager->getBuildingPlacer());
+  this->upgradeManager->setBuildingPlacer(this->buildManager->getBuildingPlacer());
+  this->workerManager->setBaseManager(this->baseManager);
+  this->baseManager->setBuildOrderManager(this->buildOrderManager);
 
   this->baseManager->addBase(BWTA::getStartLocation(BWAPI::Broodwar->self()));
 
   BWAPI::UnitType workerType=*(Broodwar->self()->getRace().getWorker());
   this->buildOrderManager->build(20,workerType,80);
   //this->buildManager->setBuildDistance(0);
+
 }
 void BasicAIModule::onFrame()
 {
@@ -36,6 +44,8 @@ void BasicAIModule::onFrame()
   this->supplyManager->update();
   this->scoutManager->update();
   this->arbitrator.update();
+  if (Broodwar->getFrameCount()>24*50)
+    scoutManager->setScoutCount(1);
 
   std::set<Unit*> units=Broodwar->self()->getUnits();
   if (this->showManagerAssignments)

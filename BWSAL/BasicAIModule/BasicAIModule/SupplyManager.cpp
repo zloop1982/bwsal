@@ -1,12 +1,20 @@
 #include <SupplyManager.h>
 
-SupplyManager::SupplyManager(BuildManager* buildManager, BuildOrderManager* buildOrderManager)
+SupplyManager::SupplyManager()
 {
-  this->buildManager      = buildManager;
-  this->buildOrderManager = buildOrderManager;
+  this->buildManager      = NULL;
+  this->buildOrderManager = NULL;
   this->lastFrameCheck    = 0;
 }
 
+void SupplyManager::setBuildManager(BuildManager* buildManager)
+{
+  this->buildManager = buildManager;
+}
+void SupplyManager::setBuildOrderManager(BuildOrderManager* buildOrderManager)
+{
+  this->buildOrderManager = buildOrderManager;
+}
 void SupplyManager::update()
 {
   if (BWAPI::Broodwar->getFrameCount()>lastFrameCheck+25)
