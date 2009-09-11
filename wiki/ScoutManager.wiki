@@ -1,3 +1,5 @@
 #sidebar TableOfContents
 
 Class header file: http://code.google.com/p/bwsal/source/browse/trunk/BWSAL/include/ScoutManager.h
+
+The scout manager takes a worker and sends it to all base locations to scout the enemy.
