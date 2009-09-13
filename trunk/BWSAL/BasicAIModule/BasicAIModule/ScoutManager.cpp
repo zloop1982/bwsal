@@ -7,7 +7,7 @@ ScoutManager::ScoutManager(Arbitrator::Arbitrator<BWAPI::Unit*,double> *arbitrat
   desiredScoutCount = 0;
 
   myStartLocation = BWTA::getStartLocation(BWAPI::Broodwar->self());
-  std::set<BWTA::BaseLocation *> locations = BWTA::getBaseLocations();
+  std::set<BWTA::BaseLocation *> locations = BWTA::getStartLocations();
   for(std::set<BWTA::BaseLocation *>::iterator l = locations.begin(); l != locations.end(); l++)
   {
     if (myStartLocation->getGroundDistance(*l) > 0)
