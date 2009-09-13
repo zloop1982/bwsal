@@ -35,7 +35,7 @@ class ScoutManager : public Arbitrator::Controller<BWAPI::Unit*,double>
     std::map<BWAPI::Unit*, ScoutData> scouts;
     Arbitrator::Arbitrator<BWAPI::Unit*,double>* arbitrator;
     
-    std::set<const BWAPI::Position> positionsToScout;
+    std::list<BWAPI::Position> positionsToScout;
     BWTA::BaseLocation *myStartLocation;
         
   private:
