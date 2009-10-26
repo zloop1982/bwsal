@@ -16,7 +16,7 @@ void WorkerManager::onOffer(std::set<BWAPI::Unit*> units)
 {
   for(std::set<BWAPI::Unit*>::iterator u = units.begin(); u != units.end(); u++)
   {
-    if ((*u)->getType().isWorker())
+    if ((*u)->getType().isWorker() && !this->mineralOrder.empty())
     {
       arbitrator->accept(this, *u);
       WorkerData temp;
@@ -91,7 +91,7 @@ void WorkerManager::updateWorkerAssignments()
 bool mineralCompare (const std::pair<BWAPI::Unit*, int> i, const std::pair<BWAPI::Unit*, int> j) { return (i.second>j.second); }
 
 void WorkerManager::rebalanceWorkers()
-{  
+{
   mineralOrder.clear();
   desiredWorkerCount.clear();
   currentWorkers.clear();
@@ -127,19 +127,20 @@ void WorkerManager::rebalanceWorkers()
   }
 
   //if no resources exist, return
-  if (resourceBase.empty())
-    return;
-
-  //order minerals by score (based on distance and resource amount)
-  std::sort(mineralOrder.begin(), mineralOrder.end(), mineralCompare);
-
-  //calculate optimal worker count for each mineral patch
-  mineralOrderIndex = 0;
-  while(remainingWorkers > 0)
+  if (!mineralOrder.empty())
   {
-    desiredWorkerCount[mineralOrder[mineralOrderIndex].first]++;
-    remainingWorkers--;
-    mineralOrderIndex = (mineralOrderIndex + 1) % mineralOrder.size();
+
+    //order minerals by score (based on distance and resource amount)
+    std::sort(mineralOrder.begin(), mineralOrder.end(), mineralCompare);
+
+    //calculate optimal worker count for each mineral patch
+    mineralOrderIndex = 0;
+    while(remainingWorkers > 0)
+    {
+      desiredWorkerCount[mineralOrder[mineralOrderIndex].first]++;
+      remainingWorkers--;
+      mineralOrderIndex = (mineralOrderIndex + 1) % mineralOrder.size();
+    }
   }
 
   //update the worker assignments so the actual workers per resource is the same as the desired workers per resource
@@ -182,7 +183,7 @@ void WorkerManager::update()
         i->getOrder() == BWAPI::Orders::MoveToGas || 
         i->getOrder() == BWAPI::Orders::WaitForGas || 
         i->getOrder() == BWAPI::Orders::PlayerGuard)
-      if (i->getTarget() != resourceBase[resource]->getResourceDepot() && i->getTarget() != resource)
+      if ((i->getTarget()==NULL || !i->getTarget()->exists() || !i->getTarget()->getType().isResourceDepot()) && i->getTarget() != resource)
         i->rightClick(resource);
   }
 }
