@@ -23,12 +23,16 @@ namespace BWAPI
   class Game
   {
     public :
-      virtual std::set< Force* > getForces() = 0;
-      virtual std::set< Player* > getPlayers() = 0;
-      virtual std::set< Unit* > getAllUnits() = 0;
-      virtual std::set< Unit* > getMinerals() = 0;
-      virtual std::set< Unit* > getGeysers() = 0;
-      virtual std::set< Unit* > getNeutralUnits() = 0;
+      virtual std::set< Force* >& getForces() = 0;
+      virtual std::set< Player* >& getPlayers() = 0;
+      virtual std::set< Unit* >& getAllUnits() = 0;
+      virtual std::set< Unit* >& getMinerals() = 0;
+      virtual std::set< Unit* >& getGeysers() = 0;
+      virtual std::set< Unit* >& getNeutralUnits() = 0;
+
+      virtual std::set< Unit* >& getStaticMinerals() = 0;
+      virtual std::set< Unit* >& getStaticGeysers() = 0;
+      virtual std::set< Unit* >& getStaticNeutralUnits() = 0;
 
       virtual Latency::Enum getLatency() = 0;
       virtual int getFrameCount() = 0;
@@ -39,7 +43,7 @@ namespace BWAPI
 
       virtual bool isFlagEnabled(Flag::Enum flag) = 0;
       virtual void enableFlag(Flag::Enum flag) = 0;
-      virtual std::set<Unit*> unitsOnTile(int x, int y) = 0;
+      virtual std::set<Unit*>& unitsOnTile(int x, int y) = 0;
       virtual Error getLastError() const = 0;
 
       virtual int mapWidth() = 0;
@@ -56,28 +60,58 @@ namespace BWAPI
       virtual bool canResearch(Unit* unit, TechType type) = 0;
       virtual bool canUpgrade(Unit* unit, UpgradeType type) = 0;
       virtual int groundHeight(int x, int y)= 0;
-      virtual std::set< TilePosition > getStartLocations() = 0;
+      virtual std::set< TilePosition >& getStartLocations() = 0;
       virtual int getMapHash() = 0;
 
       virtual void printf(const char* text, ...) = 0;
       virtual void sendText(const char* text, ...) = 0;
-      virtual void text(CoordinateType::Enum ctype, int x, int y, const char* text, ...) = 0;
       virtual void changeRace(Race race) = 0;
-      virtual bool inReplay() = 0;
+      virtual bool isMultiplayer() = 0;
+      virtual bool isPaused() = 0;
+      virtual bool isReplay() = 0;
       virtual void startGame() = 0;
       virtual void pauseGame() = 0;
       virtual void resumeGame() = 0;
       virtual void leaveGame() = 0;
-      virtual void setLocalSpeed(int speed) = 0;
-      virtual std::set<Unit*> getSelectedUnits() = 0;
+      virtual void setLocalSpeed(int speed = -1) = 0;
+      virtual std::set<Unit*>& getSelectedUnits() = 0;
       virtual Player* self() = 0;
       virtual Player* enemy() = 0;
-      virtual void drawBox(CoordinateType::Enum ctype, int left, int top, int right, int bottom, Color color, bool isSolid) = 0;
-      virtual void drawTriangle(CoordinateType::Enum ctype, int ax, int ay, int bx, int by, int cx, int cy, Color color, bool isSolid) = 0;
-      virtual void drawCircle(CoordinateType::Enum ctype, int x, int y, int radius, Color color, bool isSolid) = 0;
-      virtual void drawEllipse(CoordinateType::Enum ctype, int x, int y, int xrad, int yrad, Color color, bool isSolid) = 0;
+
+      virtual void drawText(CoordinateType::Enum ctype, int x, int y, const char* text, ...) = 0;
+      virtual void drawTextScreen(int x, int y, const char* text, ...) = 0;
+      virtual void drawTextMap(int x, int y, const char* text, ...) = 0;
+      virtual void drawTextMouse(int x, int y, const char* text, ...) = 0;
+
+      virtual void drawBox(CoordinateType::Enum ctype, int left, int top, int right, int bottom, Color color, bool isSolid = false) = 0;
+      virtual void drawScreenBox(int left, int top, int right, int bottom, Color color, bool isSolid = false) = 0;
+      virtual void drawMapBox(int left, int top, int right, int bottom, Color color, bool isSolid = false) = 0;
+      virtual void drawMouseBox(int left, int top, int right, int bottom, Color color, bool isSolid = false) = 0;
+
+      virtual void drawTriangle(CoordinateType::Enum ctype, int ax, int ay, int bx, int by, int cx, int cy, Color color, bool isSolid = false) = 0;
+      virtual void drawScreenTriangle(int ax, int ay, int bx, int by, int cx, int cy, Color color, bool isSolid = false) = 0;
+      virtual void drawMapTriangle(int ax, int ay, int bx, int by, int cx, int cy, Color color, bool isSolid = false) = 0;
+      virtual void drawMouseTriangle(int ax, int ay, int bx, int by, int cx, int cy, Color color, bool isSolid = false) = 0;
+
+      virtual void drawCircle(CoordinateType::Enum ctype, int x, int y, int radius, Color color, bool isSolid = false) = 0;
+      virtual void drawScreenCircle(int x, int y, int radius, Color color, bool isSolid = false) = 0;
+      virtual void drawMapCircle(int x, int y, int radius, Color color, bool isSolid = false) = 0;
+      virtual void drawMouseCircle(int x, int y, int radius, Color color, bool isSolid = false) = 0;
+
+      virtual void drawEllipse(CoordinateType::Enum ctype, int x, int y, int xrad, int yrad, Color color, bool isSolid = false) = 0;
+      virtual void drawScreenEllipse(int x, int y, int xrad, int yrad, Color color, bool isSolid = false) = 0;
+      virtual void drawMapEllipse(int x, int y, int xrad, int yrad, Color color, bool isSolid = false) = 0;
+      virtual void drawMouseEllipse(int x, int y, int xrad, int yrad, Color color, bool isSolid = false) = 0;
+
       virtual void drawDot(CoordinateType::Enum ctype, int x, int y, Color color) = 0;
+      virtual void drawScreenDot(int x, int y, Color color) = 0;
+      virtual void drawMapDot(int x, int y, Color color) = 0;
+      virtual void drawMouseDot(int x, int y, Color color) = 0;
+
       virtual void drawLine(CoordinateType::Enum ctype, int x1, int y1, int x2, int y2, Color color) = 0;
+      virtual void drawScreenLine(int x1, int y1, int x2, int y2, Color color) = 0;
+      virtual void drawMapLine(int x1, int y1, int x2, int y2, Color color) = 0;
+      virtual void drawMouseLine(int x1, int y1, int x2, int y2, Color color) = 0;
   };
   extern Game* Broodwar;
 }

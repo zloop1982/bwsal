@@ -11,8 +11,11 @@ namespace BWAPI
       virtual void onStart();
       virtual void onEnd();
       virtual void onFrame();
-      virtual void onAddUnit(Unit* unit);
-      virtual void onRemoveUnit(Unit* unit);
       virtual bool onSendText(std::string text);
+      virtual void onUnitCreate(Unit* unit);
+      virtual void onUnitDestroy(Unit* unit);
+      virtual void onUnitMorph(Unit* unit);
+      virtual void onUnitShow(Unit* unit);
+      virtual void onUnitHide(Unit* unit);
   };
 }

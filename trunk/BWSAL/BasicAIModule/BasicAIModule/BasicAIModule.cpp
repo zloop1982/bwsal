@@ -4,11 +4,13 @@ using namespace BWAPI;
 void BasicAIModule::onStart()
 {
   this->showManagerAssignments=false;
-  if (Broodwar->inReplay()) return;
+  if (Broodwar->isReplay()) return;
   // Enable some cheat flags
   Broodwar->enableFlag(Flag::UserInput);
   Broodwar->enableFlag(Flag::CompleteMapInformation);
+  BWTA::readMap();
   BWTA::analyze();
+  this->analyzed=true;
   this->buildManager      = new BuildManager(&this->arbitrator);
   this->techManager       = new TechManager(&this->arbitrator);
   this->upgradeManager    = new UpgradeManager(&this->arbitrator);
@@ -25,16 +27,16 @@ void BasicAIModule::onStart()
   this->workerManager->setBaseManager(this->baseManager);
   this->baseManager->setBuildOrderManager(this->buildOrderManager);
 
-  this->baseManager->addBase(BWTA::getStartLocation(BWAPI::Broodwar->self()));
-
   BWAPI::UnitType workerType=*(Broodwar->self()->getRace().getWorker());
   this->buildOrderManager->build(20,workerType,80);
-  //this->buildManager->setBuildDistance(0);
 
 }
+
+
 void BasicAIModule::onFrame()
 {
-  if (Broodwar->inReplay()) return;
+  if (Broodwar->isReplay()) return;
+  if (!this->analyzed) return;
   this->buildManager->update();
   this->buildOrderManager->update();
   this->baseManager->update();
@@ -60,7 +62,7 @@ void BasicAIModule::onFrame()
         int y_off=0;
         for(std::list< std::pair< Arbitrator::Controller<BWAPI::Unit*,double>*, double> >::iterator j=bids.begin();j!=bids.end();j++)
         {
-          Broodwar->text(CoordinateType::Map,x,y+y_off,"%s: %d",j->first->getName().c_str(),(int)j->second);
+          Broodwar->drawText(CoordinateType::Map,x,y+y_off,"%s: %d",j->first->getName().c_str(),(int)j->second);
           y_off+=20;
         }
       }
@@ -130,7 +132,7 @@ void BasicAIModule::onFrame()
   }
 }
 
-void BasicAIModule::onRemoveUnit(BWAPI::Unit* unit)
+void BasicAIModule::onUnitRemove(BWAPI::Unit* unit)
 {
   this->arbitrator.onRemoveObject(unit);
   this->buildManager->onRemoveUnit(unit);
