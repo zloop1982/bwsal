@@ -31,7 +31,7 @@ void BuildOrderManager::update()
     {
       if (i->isAdditional)
       {
-        BWAPI::Broodwar->text(BWAPI::CoordinateType::Screen,5,o,"buildAdditional(%d, \"%s\", %d)",i->count,i->unitType.getName().c_str(),l->first);
+        BWAPI::Broodwar->drawText(BWAPI::CoordinateType::Screen,5,o,"buildAdditional(%d, \"%s\", %d)",i->count,i->unitType.getName().c_str(),l->first);
         if (i->count>0)
         {
           if (this->hasResources(i->unitType))
@@ -48,7 +48,7 @@ void BuildOrderManager::update()
       }
       else
       {
-        BWAPI::Broodwar->text(BWAPI::CoordinateType::Screen,5,o,"build(%d, \"%s\", %d)",i->count,i->unitType.getName().c_str(),l->first);
+        BWAPI::Broodwar->drawText(BWAPI::CoordinateType::Screen,5,o,"build(%d, \"%s\", %d)",i->count,i->unitType.getName().c_str(),l->first);
         if (this->buildManager->getPlannedCount(i->unitType)>=i->count)
           l->second.erase(i);
         else
@@ -61,7 +61,7 @@ void BuildOrderManager::update()
     }
     else if (i->techType!=BWAPI::TechTypes::None)
     {
-      BWAPI::Broodwar->text(BWAPI::CoordinateType::Screen,5,o,"research(\"%s\", %d)",i->techType.getName().c_str(),l->first);
+      BWAPI::Broodwar->drawText(BWAPI::CoordinateType::Screen,5,o,"research(\"%s\", %d)",i->techType.getName().c_str(),l->first);
       if (this->techManager->planned(i->techType))
         l->second.erase(i);
       else
@@ -73,7 +73,7 @@ void BuildOrderManager::update()
     }
     else
     {
-      BWAPI::Broodwar->text(BWAPI::CoordinateType::Screen,5,o,"upgrade(%d, \"%s\", %d)",i->count,i->upgradeType.getName().c_str(),l->first);
+      BWAPI::Broodwar->drawText(BWAPI::CoordinateType::Screen,5,o,"upgrade(%d, \"%s\", %d)",i->count,i->upgradeType.getName().c_str(),l->first);
       if (this->upgradeManager->getPlannedLevel(i->upgradeType)>=i->count)
         l->second.erase(i);
       else
