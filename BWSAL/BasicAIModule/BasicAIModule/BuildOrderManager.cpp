@@ -77,7 +77,7 @@ void BuildOrderManager::update()
       if (this->upgradeManager->getPlannedLevel(i->upgradeType)>=i->count)
         l->second.erase(i);
       else
-        if (!BWAPI::Broodwar->self()->upgrading(i->upgradeType) && this->hasResources(i->upgradeType))
+        if (!BWAPI::Broodwar->self()->isUpgrading(i->upgradeType) && this->hasResources(i->upgradeType))
         {
           this->upgradeManager->upgrade(i->upgradeType);
           this->spendResources(i->upgradeType);
@@ -167,9 +167,9 @@ bool BuildOrderManager::hasResources(BWAPI::TechType t)
 
 bool BuildOrderManager::hasResources(BWAPI::UpgradeType t)
 {
-  if (BWAPI::Broodwar->self()->cumulativeMinerals()-this->usedMinerals< t.mineralPriceBase()+t.mineralPriceFactor()*(BWAPI::Broodwar->self()->upgradeLevel(t)-1))
+  if (BWAPI::Broodwar->self()->cumulativeMinerals()-this->usedMinerals< t.mineralPriceBase()+t.mineralPriceFactor()*(BWAPI::Broodwar->self()->getUpgradeLevel(t)-1))
     return false;
-  if (BWAPI::Broodwar->self()->cumulativeGas()-this->usedGas<t.gasPriceBase()+t.gasPriceFactor()*(BWAPI::Broodwar->self()->upgradeLevel(t)-1))
+  if (BWAPI::Broodwar->self()->cumulativeGas()-this->usedGas<t.gasPriceBase()+t.gasPriceFactor()*(BWAPI::Broodwar->self()->getUpgradeLevel(t)-1))
     return false;
   return true;
 }
@@ -188,6 +188,6 @@ void BuildOrderManager::spendResources(BWAPI::TechType t)
 
 void BuildOrderManager::spendResources(BWAPI::UpgradeType t)
 {
-  this->usedMinerals+=t.mineralPriceBase()+t.mineralPriceFactor()*(BWAPI::Broodwar->self()->upgradeLevel(t)-1);
-  this->usedGas+=t.gasPriceBase()+t.gasPriceFactor()*(BWAPI::Broodwar->self()->upgradeLevel(t)-1);
+  this->usedMinerals+=t.mineralPriceBase()+t.mineralPriceFactor()*(BWAPI::Broodwar->self()->getUpgradeLevel(t)-1);
+  this->usedGas+=t.gasPriceBase()+t.gasPriceFactor()*(BWAPI::Broodwar->self()->getUpgradeLevel(t)-1);
 }

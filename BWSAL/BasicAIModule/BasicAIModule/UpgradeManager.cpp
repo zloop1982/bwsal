@@ -76,7 +76,7 @@ void UpgradeManager::update()
     }
     else
     {
-      if (BWAPI::Broodwar->self()->upgradeLevel(i->second.type)>=i->second.level)
+      if (BWAPI::Broodwar->self()->getUpgradeLevel(i->second.type)>=i->second.level)
       {
         upgradingUnits.erase(i);
         arbitrator->removeBid(this, i->first);
@@ -109,7 +109,7 @@ void UpgradeManager::onRemoveUnit(BWAPI::Unit* unit)
   if (r!=upgradingUnits.end())
   {
     Upgrade type=r->second;
-    if (BWAPI::Broodwar->self()->upgradeLevel(type.type)<type.level)
+    if (BWAPI::Broodwar->self()->getUpgradeLevel(type.type)<type.level)
       upgradeQueues[*type.type.whatUpgrades()].push_front(type);
     upgradingUnits.erase(r);
   }
@@ -117,7 +117,7 @@ void UpgradeManager::onRemoveUnit(BWAPI::Unit* unit)
 
 bool UpgradeManager::upgrade(BWAPI::UpgradeType type)
 {
-  int level=BWAPI::Broodwar->self()->upgradeLevel(type)+1;
+  int level=BWAPI::Broodwar->self()->getUpgradeLevel(type)+1;
   if (level>type.maxRepeats()) return false;
   Upgrade newUpgrade;
   newUpgrade.type=type;
@@ -145,5 +145,5 @@ int UpgradeManager::getStartedLevel(BWAPI::UpgradeType type) const
 
 int UpgradeManager::getCompletedLevel(BWAPI::UpgradeType type) const
 {
-  return BWAPI::Broodwar->self()->upgradeLevel(type);
+  return BWAPI::Broodwar->self()->getUpgradeLevel(type);
 }
