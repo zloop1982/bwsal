@@ -66,7 +66,7 @@ void TechManager::update()
     }
     else
     {
-      if (BWAPI::Broodwar->self()->researched(i->second))
+      if (BWAPI::Broodwar->self()->hasResearched(i->second))
       {
         researchingUnits.erase(i);
         arbitrator->removeBid(this, i->first);
@@ -99,7 +99,7 @@ void TechManager::onRemoveUnit(BWAPI::Unit* unit)
   if (r!=researchingUnits.end())
   {
     BWAPI::TechType type=r->second;
-    if (!BWAPI::Broodwar->self()->researched(type))
+    if (!BWAPI::Broodwar->self()->hasResearched(type))
       researchQueues[*type.whatResearches()].push_front(type);
     researchingUnits.erase(r);
   }
