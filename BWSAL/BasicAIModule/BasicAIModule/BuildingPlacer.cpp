@@ -117,7 +117,7 @@ BWAPI::TilePosition BuildingPlacer::getBuildLocationNear(BWAPI::TilePosition pos
 
 bool BuildingPlacer::buildable(int x, int y) const
 {
-  if (!BWAPI::Broodwar->buildable(x,y)) return false;
+  if (!BWAPI::Broodwar->isBuildable(x,y)) return false;
   std::set<BWAPI::Unit*> units = BWAPI::Broodwar->unitsOnTile(x, y);
   for(std::set<BWAPI::Unit*>::iterator i = units.begin(); i != units.end(); i++)
     if ((*i)->getType().isBuilding() && !(*i)->isLifted())
