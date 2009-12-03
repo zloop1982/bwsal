@@ -132,7 +132,7 @@ void BasicAIModule::onFrame()
   }
 }
 
-void BasicAIModule::onUnitRemove(BWAPI::Unit* unit)
+void BasicAIModule::onUnitDestroy(BWAPI::Unit* unit)
 {
   this->arbitrator.onRemoveObject(unit);
   this->buildManager->onRemoveUnit(unit);
