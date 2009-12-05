@@ -34,8 +34,12 @@ Order to build the given number of units of the given type. Optionally a tile po
 == research ==
 void research(BWAPI::TechType t, int priority);
 
-== update ==
+Order to research the given tech at the given priority.
+
+== upgrade ==
 void upgrade(int level, BWAPI::UpgradeType t, int priority);
+
+Order to upgrade the given upgrade type to the given level at the given priority.
 
 == hasResources ==
   * bool hasResources(BWAPI::UnitType t);
