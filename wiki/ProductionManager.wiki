@@ -4,7 +4,39 @@ Class header file: http://code.google.com/p/bwsal/source/browse/trunk/BWSAL/incl
 
 Given a unit type, the production manager will attempt to get a suitable factory and train the given unit type.
 
+  * [#update update]
+  * [#getName getName]
+  * [#onRemoveUnit onRemoveUnit]
+  * [#train train]
+  * [#getPlannedCount getPlannedCount]
+  * [#getStartedCount getStartedCount]
 
-  * [ProductionManager#train train]
-  * [ProductionManager#getPlannedCount getPlannedCount]
-  * [ProductionManager#getStartedCount getStartedCount]
+== update ==
+virtual void update();
+
+Should be called in AIModule::onFrame.
+
+== getName ==
+virtual std::string getName() const;
+
+Returns std::string("Construction Manager");
+
+== onRemoveUnit ==
+void onRemoveUnit(BWAPI::Unit{{{*}}} unit);
+
+Should be called in AIModule::onUnitDestroy.
+
+== train ==
+bool train(BWAPI::UnitType type);
+
+Trains the given unit type.
+
+== getPlannedCount ==
+int getPlannedCount(BWAPI::UnitType type) const;
+
+Returns the planned count for the given unit type.
+
+== getStartedCount ==
+int getStartedCount(BWAPI::UnitType type) const;
+
+Returns the started count for the given unit type.
