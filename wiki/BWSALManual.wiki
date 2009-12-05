@@ -1,0 +1,18 @@
+#sidebar TableOfContents
+
+== Contents ==
+
+  * [Arbitrator Arbitrator]
+   * [Controller Controller]
+  * [WorkerManager Worker Manager]
+  * [BuildingPlacer Building Placer]
+  * [BuildManager Build Manager]
+   * [ConstructionManager Construction Manager]
+   * [ProductionManager Production Manager]
+   * [MorphManager Morph Manager]
+  * [BuildOrderManager]
+  * [SupplyManager Supply Manager]
+  * [BaseManager Base Manager]
+  * [TechManager Tech Manager]
+  * [UpgradeManager Upgrade Manager]
+  * [ScoutManager Scout Manager]
