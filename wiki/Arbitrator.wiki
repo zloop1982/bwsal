@@ -17,53 +17,53 @@ The Arbitrator facilitates cooperation between controllers (add-ons that order u
   * [#update update]
 
 == setBid ==
-bool setBid(Controller{{{<_Tp,_Val>*}}} c, _Tp obj, _Val bid);
+bool setBid(Controller<{{{_}}}Tp,{{{_}}}Val>{{{*}}} c, _Tp obj, _Val bid);
 
 Sets the bid of the given object to the given value.
 
 == removeBid ==
-bool removeBid(Controller{{{<_Tp,_Val>*}}} c, _Tp obj);
+bool removeBid(Controller<{{{_}}}Tp,{{{_}}}Val>{{{*}}} c, _Tp obj);
 
 Removes the bid for the given object.
 
 == accept ==
-bool accept(Controller{{{<_Tp,_Val>*}}} c, _Tp obj);
-bool accept(Controller{{{<_Tp,_Val>*}}} c, _Tp obj, _Val bid);
+bool accept(Controller<{{{_}}}Tp,{{{_}}}Val>{{{*}}} c, {{{_}}}Tp obj);
+bool accept(Controller<{{{_}}}Tp,{{{_}}}Val>{{{*}}} c, {{{_}}}Tp obj, {{{_}}}Val bid);
 
 Accept the given object. Only call from Controller::onOffer.
 
 == decline ==
-bool decline(Controller{{{<_Tp,_Val>*}}} c, _Tp obj, _Val bid);
+bool decline(Controller<{{{_}}}Tp,{{{_}}}Val>{{{*}}} c, {{{_}}}Tp obj, {{{_}}}Val bid);
 
 Decline the given object, with the specified new bid value. Only call from Controller::onOffer.
 
 == hasBid ==
-bool hasBid(_Tp obj) const;
+bool hasBid({{{_}}}Tp obj) const;
 
 Returns true if the given object has a bid.
 
 == getHighestBidder ==
-const std::pair<Controller{{{<_Tp,_Val>*}}}, _Val>& getHighestBidder(_Tp obj) const;
+const std::pair<Controller<{{{_}}}Tp,{{{_}}}Val>{{{*}}}, {{{_}}}Val>& getHighestBidder({{{_}}}Tp obj) const;
 
 Returns pair containing the highest bidder for the object, along with the value of the highest bid.
 
 == getAllBidders ==
-const std::list< std::pair<Controller{{{<_Tp,_Val>*}}}, _Val> > getAllBidders(_Tp obj) const;
+const std::list< std::pair<Controller<{{{_}}}Tp,{{{_}}}Val>{{{*}}}, {{{_}}}Val> > getAllBidders({{{_}}}Tp obj) const;
 
 Returns a list of all the bidders for the given object.
 
 == getObjects ==
-const std::set{{{<_Tp>&}}} getObjects(Controller<_Tp,_Val>{{{*}}} c) const;
+const std::set<{{{_}}}Tp>& getObjects(Controller<{{{_}}}Tp,{{{_}}}Val>{{{*}}} c) const;
 
 Returns all the objects own by the given controller.
 
 == onRemoveUnit ==
-void onRemoveObject(_Tp obj);
+void onRemoveObject({{{_}}}Tp obj);
 
 Must be called from AIModule::onUnitDestroy.
 
 == getBid ==
-_Val getBid(Controller{{{<_Tp,_Val>*}}} c, _Tp obj) const;
+{{{_}}}Val getBid(Controller<{{{_}}}Tp,{{{_}}}Val>{{{*}}} c, {{{_}}}Tp obj) const;
 
 Returns the bid the given controller has placed for the given object.
 
