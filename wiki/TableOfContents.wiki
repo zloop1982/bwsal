@@ -1,3 +1,4 @@
+  * [BWSALManual API]
   * [Arbitrator Arbitrator]
    * [Controller Controller]
   * [WorkerManager Worker Manager]
