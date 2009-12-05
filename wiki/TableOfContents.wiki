@@ -1,4 +1,5 @@
   * [Arbitrator Arbitrator]
+   * [Controller Controller]
   * [WorkerManager Worker Manager]
   * [BuildingPlacer Building Placer]
   * [BuildManager Build Manager]
