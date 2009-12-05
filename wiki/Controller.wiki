@@ -15,7 +15,7 @@ virtual void onOffer(std::set{{{<_Tp>}}} objects)=0;
 A callback the [Arbitrator] uses when it wants to offer units to the controller. For each unit in the set, the [Controller] should either [Arbitrator#accept accept] or [Arbitrator#decline decline] each individual unit.
 
 == onRevoke ==
-virtual void onRevoke(_Tp, _Val bid)=0;
+virtual void onRevoke(\_Tp, _Val bid)=0;
 
 A callback the [Arbitrator] uses when has to take a unit away from the [Controller], such as the case when another [Controller] has outbid this [Controller].
 
