@@ -9,6 +9,7 @@ When a new unit type request comes in, the build manager will pass the unit type
   * [ProductionManager Production Manager] - handles training units from production buildings
   * [MorphManager Morph Manager] - handles morphing units in to other units.
 
+Methods:
 
   * [#update update]
   * [#getName getName]
