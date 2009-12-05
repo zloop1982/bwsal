@@ -2,7 +2,51 @@
 
 Class header file: http://code.google.com/p/bwsal/source/browse/trunk/BWSAL/include/BuildOrderManager.h
 
+  * [#update update]
+  * [#getName getName]
   * [BuildOrderManager#build build]
   * [BuildOrderManager#buildAdditional buildAdditional]
   * [BuildOrderManager#research research]
   * [BuildOrderManager#upgrade upgrade]
+  * [#hasResources hasResources]
+  * [#spendResources spendResources]
+
+== update ==
+void update();
+
+Should be called in AIModule::onFrame.
+
+== getName ==
+std::string getName() const;
+
+Returns std::string("Build Order Manager");
+
+== build ==
+void build(int count, BWAPI::UnitType t, int priority, BWAPI::TilePosition seedPosition=BWAPI::TilePositions::None);
+
+Order to make the player have the given number of units of the given type. Optionally a tile position may be specified. For example if the player has 4 vultures, and the AI calls build(20,UnitTypes::Terran_Vulture,80) then the Build Order Manager will build vultures until the player has 20 total.
+
+== buildAdditional ==
+void buildAdditional(int count, BWAPI::UnitType t, int priority, BWAPI::TilePosition seedPosition=BWAPI::TilePositions::None);
+
+Order to build the given number of units of the given type. Optionally a tile position may be specified. For example if the player has 4 vultures, and the AI calls buildAdditional(20,UnitTypes::Terran_Vulture,80) then the Build Order Manager will build 20 additional vultures, resulting in a total of 24.
+
+== research ==
+void research(BWAPI::TechType t, int priority);
+
+== update ==
+void upgrade(int level, BWAPI::UpgradeType t, int priority);
+
+== hasResources ==
+  * bool hasResources(BWAPI::UnitType t);
+  * bool hasResources(BWAPI::TechType t);
+  * bool hasResources(BWAPI::UpgradeType t);
+
+Returns true if the player has enough resources for the given type (taking into account the Build Order Manager's resource reserve system).
+
+== spendResources ==
+  * void spendResources(BWAPI::UnitType t);
+  * void spendResources(BWAPI::TechType t);
+  * void spendResources(BWAPI::UpgradeType t);
+
+Returns true if the player has enough resources for the given type (taking into account the Build Order Manager's resource reserve system).
