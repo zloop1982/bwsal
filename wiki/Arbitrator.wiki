@@ -53,7 +53,7 @@ const std::list< std::pair<Controller<_Tp,_Val>{{{*}}}, _Val> > getAllBidders(_T
 Returns a list of all the bidders for the given object.
 
 == getObjects ==
-const std::set<_Tp>& getObjects(Controller<_Tp,_Val>{{{*}}} c) const;
+const std::set<_Tp>{{{&}}} getObjects(Controller<_Tp,_Val>{{{*}}} c) const;
 
 Returns all the objects own by the given controller.
 
