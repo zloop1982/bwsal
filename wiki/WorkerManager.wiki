@@ -4,4 +4,27 @@ Class header file: http://code.google.com/p/bwsal/source/browse/trunk/BWSAL/incl
 
 The worker manager ensures that workers are mining minerals and gas at maximum capacity at each base. Transfers workers to new expansions and balances worker amounts across expansions as needed.
 
-  * [WorkerManager#setWorkersPerGas setWorkersPerGas]
+  * [#update update]
+  * [#getName getName]
+  * [#onRemoveUnit onRemoveUnit]
+  * [#setWorkersPerGas setWorkersPerGas]
+
+== update ==
+virtual void update();
+
+Should be called during AIModule::onFrame.
+
+== getName ==
+virtual std::string getName() const;
+
+Returns std::string("Worker Manager");
+
+== onRemoveUnit ==
+void onRemoveUnit(BWAPI::Unit* unit);
+
+Should be called during AIModule::onUnitDestroy.
+
+== setWorkersPerGas ==
+void setWorkersPerGas(int count);
+
+Used to set how many workers should be used per refinery. The default value is 3 and generally this is the optimal number, but some times in the early game you may want to have only 1 worker on gas.
