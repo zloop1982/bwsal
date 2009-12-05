@@ -4,7 +4,39 @@ Class header file: http://code.google.com/p/bwsal/source/browse/trunk/BWSAL/incl
 
 Given a unit type, the construction manager will attempt to get a suitable worker and build the given unit type at the build position returned by BuildingPlacer.
 
+  * [#update update]
+  * [#getName getName]
+  * [#onRemoveUnit onRemoveUnit]
+  * [#build build]
+  * [#getPlannedCount getPlannedCount]
+  * [#getStartedCount getStartedCount]
 
-  * [ConstructionManager#build build]
-  * [ConstructionManager#getPlannedCount getPlannedCount]
-  * [ConstructionManager#getStartedCount getStartedCount]
+== update ==
+virtual void update();
+
+Should be called in AIModule::onFrame.
+
+== getName ==
+virtual std::string getName() const;
+
+Returns std::string("Construction Manager");
+
+== onRemoveUnit ==
+void onRemoveUnit(BWAPI::Unit* unit);
+
+Should be called in AIModule::onUnitDestroy.
+
+== build ==
+bool build(BWAPI::UnitType type, BWAPI::TilePosition goalPosition);
+
+Builds the given unit type near the given goal position. Unit type must be a building.
+
+== getPlannedCount ==
+int getPlannedCount(BWAPI::UnitType type) const;
+
+Returns the planned count for the given unit type.
+
+== getStartedCount ==
+int getStartedCount(BWAPI::UnitType type) const;
+
+Returns the started count for the given unit type.
