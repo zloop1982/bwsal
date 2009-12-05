@@ -10,9 +10,53 @@ When a new unit type request comes in, the build manager will pass the unit type
   * [MorphManager Morph Manager] - handles morphing units in to other units.
 
 
+  * [#update update]
+  * [#getName getName]
+  * [#onRemoveUnit onRemoveUnit]
   * [BuildManager#build build]
-  * [BuildManager#build_2 build]
   * [BuildManager#getPlannedCount getPlannedCount]
   * [BuildManager#getStartedCount getStartedCount]
   * [BuildManager#getCompletedCount getCompletedCount]
   * [BuildManager#setBuildDistance setBuildDistance]
+
+== update ==
+void update();
+
+Should be called during AIModule::onFrame.
+
+== getName ==
+std::string getName() const;
+
+Returns std::string("Build Manager");
+
+== onRemoveUnit ==
+void onRemoveUnit(BWAPI::Unit* unit);
+
+Should be called during AIModule::onUnitDestroy.
+
+== build ==
+bool build(BWAPI::UnitType type);
+
+bool build(BWAPI::UnitType type, BWAPI::TilePosition goalPosition);
+
+Call this to build a new unit of the given type. If the unit is a building, an optional goalPosition can be used to specified where the building should be placed near. If no goal position is specified, the goal position will be the player's starting position so new buildings are placed near the main base.
+
+== getPlannedCount ==
+int getPlannedCount(BWAPI::UnitType type) const;
+
+Returns the number of units planned for creation. Includes all started and completed units, so getPlannedCount >= getStartedCount >= getCompletedCount.
+
+== getStartedCount ==
+int getStartedCount(BWAPI::UnitType type) const;
+
+Returns the number of units that have started construction/training/morphing, or have been completed. Includes all completed units, so getStartedCount >= getCompletedCount.
+
+== getCompletedCount ==
+int getCompletedCount(BWAPI::UnitType type) const;
+
+Simply calls BWAPI::Broodwar->self()->completedUnitCount(type).
+
+== setBuildDistance ==
+void setBuildDistance(int distance);
+
+Sets the build distance for the building placer.
