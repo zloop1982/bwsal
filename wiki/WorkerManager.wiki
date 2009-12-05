@@ -20,7 +20,7 @@ virtual std::string getName() const;
 Returns std::string("Worker Manager");
 
 == onRemoveUnit ==
-void onRemoveUnit(BWAPI::Unit* unit);
+void onRemoveUnit(BWAPI::Unit{{{*}}} unit);
 
 Should be called during AIModule::onUnitDestroy.
 
