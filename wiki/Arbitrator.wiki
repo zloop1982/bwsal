@@ -17,18 +17,18 @@ The Arbitrator facilitates cooperation between controllers (add-ons that order u
   * [#update update]
 
 == setBid ==
-bool setBid(Controller<_Tp,_Val>{{{*}}} c, _Tp obj, _Val bid);
+bool setBid(Controller{{{<_Tp,_Val>*}}} c, _Tp obj, _Val bid);
 
 Sets the bid of the given object to the given value.
 
 == removeBid ==
-bool removeBid(Controller<_Tp,_Val>{{{*}}} c, _Tp obj);
+bool removeBid(Controller{{{<_Tp,_Val>*}}} c, _Tp obj);
 
 Removes the bid for the given object.
 
 == accept ==
-bool accept(Controller<_Tp,_Val>{{{*}}} c, _Tp obj);
-bool accept(Controller<_Tp,_Val>{{{*}}} c, _Tp obj, _Val bid);
+bool accept(Controller{{{<_Tp,_Val>*}}} c, _Tp obj);
+bool accept(Controller{{{<_Tp,_Val>*}}} c, _Tp obj, _Val bid);
 
 Accept the given object. Only call from Controller::onOffer.
 
