@@ -30,7 +30,7 @@ std::string getName() const;
 Returns std::string("Build Manager");
 
 == onRemoveUnit ==
-void onRemoveUnit(BWAPI::Unit* unit);
+void onRemoveUnit(BWAPI::Unit{{{*}}} unit);
 
 Should be called during AIModule::onUnitDestroy.
 
