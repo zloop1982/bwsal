@@ -19,7 +19,7 @@ Should be called in AIModule::onFrame.
 == getName ==
 virtual std::string getName() const;
 
-Returns std::string("Construction Manager");
+Returns std::string("Production Manager");
 
 == onRemoveUnit ==
 void onRemoveUnit(BWAPI::Unit{{{*}}} unit);
