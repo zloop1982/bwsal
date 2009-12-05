@@ -17,12 +17,12 @@ The Arbitrator facilitates cooperation between controllers (add-ons that order u
   * [#update update]
 
 == setBid ==
-bool setBid(Controller<{{{_}}}Tp,{{{_}}}Val>{{{*}}} c, _Tp obj, _Val bid);
+bool setBid(Controller<{{{_}}}Tp,{{{_}}}Val>{{{*}}} c, {{{_}}}Tp obj, {{{_}}}Val bid);
 
 Sets the bid of the given object to the given value.
 
 == removeBid ==
-bool removeBid(Controller<{{{_}}}Tp,{{{_}}}Val>{{{*}}} c, _Tp obj);
+bool removeBid(Controller<{{{_}}}Tp,{{{_}}}Val>{{{*}}} c, {{{_}}}Tp obj);
 
 Removes the bid for the given object.
 
