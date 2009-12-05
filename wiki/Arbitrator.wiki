@@ -2,4 +2,72 @@
 
 Class header file: http://code.google.com/p/bwsal/source/browse/trunk/BWSAL/include/Arbitrator.h
 
-The Arbitrator facilitates cooperation between controllers (add-ons that order units around) and decides which controller gets which units.
+The Arbitrator facilitates cooperation between controllers (add-ons that order units around) and decides which controller gets which units, however the class uses templates so it can would with any kind of object.
+
+  * [#setBid setBid]
+  * [removeBid removeBid]
+  * [#accept accept]
+  * [#decline decline]
+  * [#hasBid hasBid]
+  * [#getHighestBidder getHighestBidder]
+  * [#getAllBidders getAllBidders]
+  * [#getObjects getObjects]
+  * [#onRemoveObject onRemoveObject]
+  * [#getBid getBid]
+  * [#update update]
+
+== setBid ==
+bool setBid(Controller<_Tp,_Val>* c, _Tp obj, _Val bid);
+
+Sets the bid of the given object to the given value.
+
+== removeBid ==
+bool removeBid(Controller<_Tp,_Val>* c, _Tp obj);
+
+Removes the bid for the given object.
+
+== accept ==
+bool accept(Controller<_Tp,_Val>* c, _Tp obj);
+bool accept(Controller<_Tp,_Val>* c, _Tp obj, _Val bid);
+
+Accept the given object.
+
+== decline ==
+bool decline(Controller<_Tp,_Val>* c, _Tp obj, _Val bid);
+
+Decline the given object, with the specified new bid value.
+
+== hasBid ==
+bool hasBid(_Tp obj) const;
+
+Returns true if the given object has a bid.
+
+== getHighestBidder ==
+const std::pair<Controller<_Tp,_Val>*, _Val>& getHighestBidder(_Tp obj) const;
+
+Returns pair containing the highest bidder for the object, along with the value of the highest bid.
+
+== getAllBidders ==
+const std::list< std::pair<Controller<_Tp,_Val>*, _Val> > getAllBidders(_Tp obj) const;
+
+Returns a list of all the bidders for the given object.
+
+== getObjects ==
+const std::set<_Tp>& getObjects(Controller<_Tp,_Val>* c) const;
+
+Returns all the objects own by the given controller.
+
+== onRemoveUnit ==
+void onRemoveObject(_Tp obj);
+
+Must be called from AIModule::onUnitDestroy.
+
+== getBid ==
+_Val getBid(Controller<_Tp,_Val>* c, _Tp obj) const;
+
+Returns the bid the given controller has placed for the given object.
+
+== update ==
+void update();
+
+Must be called from AIModule::onUpdate.
