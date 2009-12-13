@@ -2,7 +2,7 @@
 
 Class header file: http://code.google.com/p/bwsal/source/browse/trunk/BWSAL/include/Arbitrator.h
 
-The Arbitrator facilitates cooperation between controllers (add-ons that order units around) and decides which controller gets which units, however the class uses templates so it can would with any kind of object.
+The Arbitrator facilitates cooperation between controllers (add-ons that order units around) and decides which controller gets which units, however the class uses templates so it can work with any kind of object.
 
   * [#setBid setBid]
   * [#removeBid removeBid]
