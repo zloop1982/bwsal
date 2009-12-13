@@ -9,7 +9,7 @@ Ideas for new BWSAL functionality, in no particular order
   * Threat Assessment Manager - determine which tiles are dangerous and how much. Also assign a priority to units that are attacking our base.
   * Transport Manager - moves units to a given position, perhaps with a priority, using the threat assessment manager to find safest paths (recalculate when new threats are discovered i.e. Missile Turrets)
 
-  * Knowledge Manager:
+  * Information Manager:
 
 For imperfect information AI, use logic to infer things. For example, if you see a Corsair, you know a Stargate was created at some point, and you can determine an upper bound on when it was created. Similarly you can infer a Cybernetics core was created with a different upper bound on its creation, etc. If you see a psionic storm you can infer the enemy has researched that tech and has a high templar.
 
