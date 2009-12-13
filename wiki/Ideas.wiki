@@ -9,7 +9,8 @@ Ideas for new BWSAL functionality, in no particular order
   * Front Manager - Not a controller, tries to calculate where our front ends and where the enemy's front begins.
   * Repair Manager - repair units that are damaged
   * Threat Assessment Manager - influence maps. Determine which tiles are dangerous and how much. Also assign a priority to units that are attacking our base.
-  * Transport Manager - transports units to a given position, perhaps with a priority, using the threat assessment manager to find safest paths (recalculate when new threats are discovered i.e. Missile Turrets)
+  * Risk Adverse Path Manager - moves units to their destination using the safest path (recalculate paths when new threats are discovered i.e. Missile Turrets)
+  * Transport Manager - transports units to a given position, perhaps with a priority, using the risk adverse path planner to find safest paths
 
   * Information Manager:
 
