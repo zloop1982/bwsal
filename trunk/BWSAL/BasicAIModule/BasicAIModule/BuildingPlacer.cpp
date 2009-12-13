@@ -98,20 +98,31 @@ BWAPI::TilePosition BuildingPlacer::getBuildLocationNear(BWAPI::TilePosition pos
   bool first = true;
   int dx     = 0;
   int dy     = 1;
-  while (length < BWAPI::Broodwar->mapWidth())
+  while (length < BWAPI::Broodwar->mapWidth()) //We'll ride the spiral to the end
   {
+    //if we can build here, return this tile position
     if (x >= 0 && x < BWAPI::Broodwar->mapWidth() && y >= 0 && y < BWAPI::Broodwar->mapHeight())
       if (this->canBuildHereWithSpace(BWAPI::TilePosition(x, y), type))
         return BWAPI::TilePosition(x, y);
+
+    //otherwise, move to another position
     x = x + dx;
     y = y + dy;
+    //count how many steps we take in this direction
     j++;
-    if (j == length)
+    if (j == length) //if we've reached the end, its time to turn
     {
+      //reset step counter
       j = 0;
+
+      //Spiral out. Keep going.
       if (!first)
-        length++;//Spiral out. Keep going.
+        length++; //increment step counter if needed
+
+      //first=true for every other turn so we spiral out at the right rate
       first =! first;
+
+      //turn counter clockwise 90 degrees:
       if (dx == 0)
       {
         dx = dy;
@@ -123,12 +134,14 @@ BWAPI::TilePosition BuildingPlacer::getBuildLocationNear(BWAPI::TilePosition pos
         dx = 0;
       }
     }
+    //Spiral out. Keep going.
   }
   return BWAPI::TilePositions::None;
 }
 
 bool BuildingPlacer::buildable(int x, int y) const
 {
+  //returns true if this tile is currently buildable, takes into account units on tile
   if (!BWAPI::Broodwar->isBuildable(x,y)) return false;
   std::set<BWAPI::Unit*> units = BWAPI::Broodwar->unitsOnTile(x, y);
   for(std::set<BWAPI::Unit*>::iterator i = units.begin(); i != units.end(); i++)
