@@ -51,6 +51,8 @@ bool BuildManager::build(BWAPI::UnitType type)
 bool BuildManager::build(BWAPI::UnitType type, BWAPI::TilePosition goalPosition)
 {
   if (type==BWAPI::UnitTypes::None || type==BWAPI::UnitTypes::Unknown) return false;
+
+  //send this order off to the right sub-manager
   if (type.getRace()==BWAPI::Races::Zerg && type.isBuilding()==type.whatBuilds().first->isBuilding())
     return this->morphManager->morph(type);
   else
