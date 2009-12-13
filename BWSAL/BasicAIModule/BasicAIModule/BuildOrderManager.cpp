@@ -23,6 +23,7 @@ void BuildOrderManager::update()
   }
   int o=5;
   std::list<BuildItem>::iterator i_next;
+  //todo: redesign priority system
   for(std::list<BuildItem>::iterator i=l->second.begin();i!=l->second.end();i=i_next)
   {
     i_next=i;

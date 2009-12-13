@@ -30,11 +30,15 @@ void ConstructionManager::onOffer(std::set<BWAPI::Unit*> units)
       //find the best builder based on distance
       for(std::set<BWAPI::Unit*>::iterator u = units.begin(); u != units.end(); u++)
       {
-        double dist = (*u)->getPosition().getDistance((*b)->position);
-        if (dist < min_dist)
+        //only consider this builder if it can build this type of building
+        if (BWAPI::Broodwar->canMake(*u,(*b)->type))
         {
-          min_dist = dist;
-          builder  = *u;
+          double dist = (*u)->getPosition().getDistance((*b)->position);
+          if (dist < min_dist)
+          {
+            min_dist = dist;
+            builder  = *u;
+          }
         }
       }
 
