@@ -7,6 +7,7 @@ BuildingPlacer::BuildingPlacer()
 }
 bool BuildingPlacer::canBuildHere(BWAPI::TilePosition position, BWAPI::UnitType type) const
 {
+  //returns true if we can build this type of unit here. Takes into account reserved tiles.
   if (!BWAPI::Broodwar->canBuildHere(NULL, position, type))
     return false;
   for(int x = position.x(); x < position.x() + type.tileWidth(); x++)
@@ -17,10 +18,17 @@ bool BuildingPlacer::canBuildHere(BWAPI::TilePosition position, BWAPI::UnitType 
 }
 bool BuildingPlacer::canBuildHereWithSpace(BWAPI::TilePosition position, BWAPI::UnitType type) const
 {
+  //returns true if we can build this type of unit here with the specified amount of space.
+  //space value is stored in this->buildDistance.
+
+  //if we can't build here, we of course can't build here with space
   if (!this->canBuildHere(position, type))
     return false;
+
   int width=type.tileWidth();
   int height=type.tileHeight();
+
+  //make sure we leave space for add-ons. These types of units can have addons:
   if (type==BWAPI::UnitTypes::Terran_Command_Center ||
     type==BWAPI::UnitTypes::Terran_Factory || 
     type==BWAPI::UnitTypes::Terran_Starport ||
@@ -71,14 +79,18 @@ bool BuildingPlacer::canBuildHereWithSpace(BWAPI::TilePosition position, BWAPI::
 }
 BWAPI::TilePosition BuildingPlacer::getBuildLocation(BWAPI::UnitType type) const
 {
+  //returns a valid build location if one exists, scans the map left to right
   for(int x = 0; x < BWAPI::Broodwar->mapWidth(); x++)
     for(int y = 0; y < BWAPI::Broodwar->mapHeight(); y++)
       if (this->canBuildHere(BWAPI::TilePosition(x, y), type))
         return BWAPI::TilePosition(x, y);
   return BWAPI::TilePositions::None;
 }
+
 BWAPI::TilePosition BuildingPlacer::getBuildLocationNear(BWAPI::TilePosition position, BWAPI::UnitType type) const
 {
+  //returns a valid build location near the specified tile position.
+  //searches outward in a spiral.
   int x      = position.x();
   int y      = position.y();
   int length = 1;
@@ -98,7 +110,7 @@ BWAPI::TilePosition BuildingPlacer::getBuildLocationNear(BWAPI::TilePosition pos
     {
       j = 0;
       if (!first)
-        length++;
+        length++;//Spiral out. Keep going.
       first =! first;
       if (dx == 0)
       {
