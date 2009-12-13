@@ -28,6 +28,8 @@ void UpgradeManager::onOffer(std::set<BWAPI::Unit*> units)
         {
           upgradingUnits.insert(std::make_pair(*i,*t));
           q->second.erase(t);
+
+          //tell the arbitrator we accept the unit, and raise the bid to hopefully prevent other managers from using it
           arbitrator->accept(this,*i);
           arbitrator->setBid(this,*i,100.0);
           used=true;
@@ -35,6 +37,7 @@ void UpgradeManager::onOffer(std::set<BWAPI::Unit*> units)
         }
       }
     }
+    //if we didnt use this unit, tell the arbitrator we decline it
     if (!used)
     {
       arbitrator->decline(this,*i,0);
@@ -58,13 +61,14 @@ void UpgradeManager::update()
       arbitrator->setBid(this, *u, 50);
   }
   std::map<BWAPI::Unit*,Upgrade>::iterator i_next;
+  //iterate through all the upgrading units
   for(std::map<BWAPI::Unit*,Upgrade>::iterator i=upgradingUnits.begin();i!=upgradingUnits.end();i=i_next)
   {
     i_next=i;
     i_next++;
     if (i->first->isUpgrading())
     {
-      if (i->first->getUpgrade()!=i->second.type)
+      if (i->first->getUpgrade()!=i->second.type) //if our unit is upgrading the wrong thing, cancel it
       {
         i->first->cancelUpgrade();
       }
@@ -76,14 +80,14 @@ void UpgradeManager::update()
     }
     else
     {
-      if (BWAPI::Broodwar->self()->getUpgradeLevel(i->second.type)>=i->second.level)
+      if (BWAPI::Broodwar->self()->getUpgradeLevel(i->second.type)>=i->second.level) //if we have reached the desired upgrade level, we are done
       {
         upgradingUnits.erase(i);
         arbitrator->removeBid(this, i->first);
       }
-      else
+      else //otherwise, we need to tell this unit to upgrade
       {
-        if (i->first->isLifted())
+        if (i->first->isLifted()) //the unit is lifted, tell it to land nearby
         {
           if (i->first->isIdle())
             i->first->land(placer->getBuildLocationNear(i->first->getTilePosition()+BWAPI::TilePosition(0,1),i->first->getType()));

@@ -23,6 +23,8 @@ void TechManager::onOffer(std::set<BWAPI::Unit*> units)
         {
           researchingUnits.insert(std::make_pair(*i,*t));
           q->second.erase(t);
+
+          //tell the arbitrator we accept the unit, and raise the bid to hopefully prevent other managers from using it
           arbitrator->accept(this,*i);
           arbitrator->setBid(this,*i,100.0);
           used=true;
@@ -30,6 +32,7 @@ void TechManager::onOffer(std::set<BWAPI::Unit*> units)
         }
       }
     }
+    //if we didnt use this unit, tell the arbitrator we decline it
     if (!used)
     {
       arbitrator->decline(this,*i,0);
@@ -53,34 +56,35 @@ void TechManager::update()
       arbitrator->setBid(this, *u, 50);
   }
   std::map<BWAPI::Unit*,BWAPI::TechType>::iterator i_next;
+  //iterate through all the researching units
   for(std::map<BWAPI::Unit*,BWAPI::TechType>::iterator i=researchingUnits.begin();i!=researchingUnits.end();i=i_next)
   {
     i_next=i;
     i_next++;
     if (i->first->isResearching())
     {
-      if (i->first->getTech()!=i->second)
+      if (i->first->getTech()!=i->second) //if the unit is researching the wrong tech, cancel it
       {
         i->first->cancelResearch();
       }
     }
-    else
+    else //if the unit is not researching
     {
-      if (BWAPI::Broodwar->self()->hasResearched(i->second))
+      if (BWAPI::Broodwar->self()->hasResearched(i->second)) //if we have researched the given tech, we are done
       {
         researchingUnits.erase(i);
         arbitrator->removeBid(this, i->first);
       }
-      else
+      else //if we haven't researched the given tech, we need to order this unit to research it
       {
-        if (i->first->isLifted())
+        if (i->first->isLifted()) //if the unit is lifted, tell it to land somewhere nearby
         {
           if (i->first->isIdle())
             i->first->land(placer->getBuildLocationNear(i->first->getTilePosition()+BWAPI::TilePosition(0,1),i->first->getType()));
         }
-        else
+        else //if its landed, we can tell it to research the given tech
         {
-          if (BWAPI::Broodwar->canResearch(i->first,i->second))
+          if (BWAPI::Broodwar->canResearch(i->first,i->second)) //only give the order if we can research it
             i->first->research(i->second);
         }
       }
@@ -107,8 +111,9 @@ void TechManager::onRemoveUnit(BWAPI::Unit* unit)
 
 bool TechManager::research(BWAPI::TechType type)
 {
-  researchQueues[*type.whatResearches()].push_back(type);
-  plannedTech.insert(type);
+  //research order starts here
+  researchQueues[*type.whatResearches()].push_back(type); //add this tech to the end of the research queue
+  plannedTech.insert(type); //add this tech to our set of planned tech
   return true;
 }
 
