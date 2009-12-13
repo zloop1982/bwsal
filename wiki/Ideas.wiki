@@ -7,7 +7,7 @@ Ideas for new BWSAL functionality, in no particular order
   * Attack Manager - attack stuff, maybe break down into smaller managers
   * Repair Manager - repair units that are damaged
   * Threat Assessment Manager - determine which tiles are dangerous and how much. Also assign a priority to units that are attacking our base.
-  * Transport Manager - moves units to a given position, perhaps with a priority, using the threat assessment manager to find safest paths (recalculate when new threats are discovered i.e. Missile Turrets)
+  * Transport Manager - transports units to a given position, perhaps with a priority, using the threat assessment manager to find safest paths (recalculate when new threats are discovered i.e. Missile Turrets)
 
   * Information Manager:
 
