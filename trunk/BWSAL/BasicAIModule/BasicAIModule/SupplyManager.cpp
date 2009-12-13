@@ -25,7 +25,8 @@ void SupplyManager::update()
 
     for(std::set<BWAPI::Unit*>::iterator i = units.begin(); i != units.end(); i++)
       if ((*i)->getType().canProduce())
-        productionCapacity += 4;
+        productionCapacity += 4; //heuristic, should replace with exact calculation at some point
+
     if (getPlannedSupply() <= BWAPI::Broodwar->self()->supplyUsed() + productionCapacity)
     {
       this->buildManager->build(*BWAPI::Broodwar->self()->getRace().getSupplyProvider());
@@ -42,6 +43,7 @@ std::string SupplyManager::getName() const
 int SupplyManager::getPlannedSupply() const
 {
   int plannedSupply=0;
+  //planned supply depends on the the amount of planned supply providers times the amount of supply they provide.
   plannedSupply+=buildManager->getPlannedCount(BWAPI::UnitTypes::Terran_Supply_Depot)*BWAPI::UnitTypes::Terran_Supply_Depot.supplyProvided();
   plannedSupply+=buildManager->getPlannedCount(BWAPI::UnitTypes::Terran_Command_Center)*BWAPI::UnitTypes::Terran_Command_Center.supplyProvided();
   plannedSupply+=buildManager->getPlannedCount(BWAPI::UnitTypes::Protoss_Pylon)*BWAPI::UnitTypes::Protoss_Pylon.supplyProvided();
