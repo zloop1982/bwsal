@@ -11,6 +11,8 @@ Ideas for new BWSAL functionality, in no particular order
 
   * Information Manager:
 
+Not a controller.
+
 For imperfect information AI, use logic to infer things. For example, if you see a Corsair, you know a Stargate was created at some point, and you can determine an upper bound on when it was created. Similarly you can infer a Cybernetics core was created with a different upper bound on its creation, etc. If you see a psionic storm you can infer the enemy has researched that tech and has a high templar.
 
 Also we can provide a reasonable guess as to the existence of units - for example you saw a unit, and never saw it die via onUnitDestroy, then it probably still exists. Or if you saw a building at a particular spot, and you can see those build tiles and the building is not there, then it was probably destroyed at some point (unless it was a Terran building that can lift, in which case it may have just moved to a different spot).
