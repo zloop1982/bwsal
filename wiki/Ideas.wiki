@@ -1,15 +1,15 @@
 #summary Ideas for new BWSAL functionality
 
-  * Rewrite the build order manager so it uses a better algorithm
+  * Rewrite the build order manager so it uses a better algorithm. For example, building 60 SCVs with priority 100 and a barracks with priority 99 shouldn't wait until you have all 60 SCVs completed before constructing the barracks. Build the barracks as soon as possible without interrupting SCV production.
   * Make the build order manager take into account dependencies (so building a factory with no barracks planned will build a barracks first)
   * Attack Manager - attack stuff, maybe break down into smaller managers
   * Repair Manager - repair units that are damaged
-  * Threat Assessment Manager - determine which tiles are dangerous
+  * Threat Assessment Manager - determine which tiles are dangerous and how much. Also assign a priority to units that are attacking our base.
   * Transport Manager - moves units to a given position, perhaps with a priority, using the threat assessment manager to find safest paths (recalculate when new threats are discovered i.e. Missile Turrets)
 
   * Knowledge Manager:
 
-For imperfect information AI, use logic to infer things. For example, if you see a Corsair, you know a Stargate was created at some point, and you can point an upper bound on when it was created. Similarly you can infer a Cybernetics core was created with a different upper bound on its creation, etc. If you see a psy storm you can infer the enemy has researched that tech.
+For imperfect information AI, use logic to infer things. For example, if you see a Corsair, you know a Stargate was created at some point, and you can determine an upper bound on when it was created. Similarly you can infer a Cybernetics core was created with a different upper bound on its creation, etc. If you see a psionic storm you can infer the enemy has researched that tech and has a high templar.
 
 Also we can provide a reasonable guess as to the existence of units - for example you saw a unit, and never saw it die via onUnitDestroy, then it probably still exists. Or if you saw a building at a particular spot, and you can see those build tiles and the building is not there, then it was probably destroyed at some point (unless it was a Terran building that can lift, in which case it may have just moved to a different spot).
 
@@ -17,4 +17,4 @@ Also keeps track of last seen positions and the time the unit was last seen. May
 
   * Improve the scout manager so that it tries to stay alive as long as possible inside the enemy base once it finds the enemy base
 
-  * Add a function to the building placer which takes a list of unit types and a choke point and returns a list of unit type - build position pairs that can be used to block off the choke point.
+  * Add a function to the building placer which takes a choke point and list of building unit types (possibly with repetitions) and returns a list of unit type - build position pairs that can be used to block off the choke point.
