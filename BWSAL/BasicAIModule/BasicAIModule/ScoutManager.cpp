@@ -55,7 +55,7 @@ void ScoutManager::onOffer(std::set<BWAPI::Unit*> units)
   std::set<BWAPI::Unit*> allUnits=units;
   for(std::set<BWAPI::Unit*>::iterator u = allUnits.begin(); u != allUnits.end(); u++)
   {
-  	if ((*u)->getType() == BWAPI::UnitTypes::Zerg_Overlord && needMoreScouts())
+    if ((*u)->getType() == BWAPI::UnitTypes::Zerg_Overlord && needMoreScouts())
     {
       arbitrator->accept(this, *u);
       addScout(*u);
@@ -65,7 +65,7 @@ void ScoutManager::onOffer(std::set<BWAPI::Unit*> units)
 
   for(std::set<BWAPI::Unit*>::iterator u = units.begin(); u != units.end(); u++)
   {
-	if ((*u)->getType().isWorker() && needMoreScouts())
+    if ((*u)->getType().isWorker() && needMoreScouts())
     {
       arbitrator->accept(this, *u);
       addScout(*u);
@@ -128,7 +128,7 @@ void ScoutManager::requestScout(double bid)
   std::set<BWAPI::Unit*> myPlayerUnits=BWAPI::Broodwar->self()->getUnits();
   for(std::set<BWAPI::Unit*>::iterator u = myPlayerUnits.begin(); u != myPlayerUnits.end(); u++)
   {
-	if ((*u)->isCompleted() && ((*u)->getType().isWorker() || (*u)->getType() == BWAPI::UnitTypes::Zerg_Overlord))
+    if ((*u)->isCompleted() && ((*u)->getType().isWorker() || (*u)->getType() == BWAPI::UnitTypes::Zerg_Overlord))
     {
       arbitrator->setBid(this, *u, bid);
     }
