@@ -26,10 +26,12 @@ void BasicAIModule::onStart()
   this->upgradeManager->setBuildingPlacer(this->buildManager->getBuildingPlacer());
   this->workerManager->setBaseManager(this->baseManager);
   this->baseManager->setBuildOrderManager(this->buildOrderManager);
-
-  BWAPI::UnitType workerType=*(Broodwar->self()->getRace().getWorker());
+  
+  BWAPI::Race race = Broodwar->self()->getRace();
+  BWAPI::UnitType workerType=*(race.getWorker());
   this->buildOrderManager->build(20,workerType,80);
-
+  if (race == BWAPI::Races::Zerg)
+    this->scoutManager->setScoutCount(1);
 }
 
 
