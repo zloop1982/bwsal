@@ -2,7 +2,16 @@
 
 Ideas for new BWSAL functionality, in no particular order
 
-  * Rewrite the build order manager so it uses a better algorithm. For example, building 60 SCVs with priority 100 and a barracks with priority 99 shouldn't wait until you have all 60 SCVs completed before constructing the barracks. Build the barracks as soon as possible without delaying/interrupting SCV production.
+  * Rewrite the build order manager so it uses a better algorithm.
+
+For example, building 60 SCVs with priority 100 and a barracks with priority 99 shouldn't wait until you have all 60 SCVs completed before constructing the barracks. Build the barracks as soon as possible without delaying/interrupting SCV production.
+
+Build Order Manager should assume constant rate of mineral gathering, and should recalculate build order as needed. For example, assuming a constant rate of mineral increase, here is a build order plan for 20 SCVs at priority 100, 25 Marines at priority 90, and 2 Barracks at priority 80:
+
+http://i.imgur.com/n4aYX.png
+
+The algorithm probably doesn't need to calculate the entire plan, just the next minute or so. Also calculating the whole plan is probably not worthwhile since new build orders may come it at any time from the player, and the actual rate of mineral gathering isn't constant.
+
   * Make the build order manager take into account dependencies (so building a factory with no barracks planned will build a barracks first)
   * Attack Manager - attack stuff, maybe break down into smaller managers
   * Contain Manager - contains the enemy with siege tanks, lurkers, etc.
