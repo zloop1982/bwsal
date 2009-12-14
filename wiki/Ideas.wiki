@@ -12,11 +12,11 @@ http://i.imgur.com/n4aYX.png
 
 The algorithm probably doesn't need to calculate the entire plan, just the next minute or so. Also calculating the whole plan is probably not worthwhile since new build orders may come it at any time from the player, and the actual rate of mineral gathering isn't constant.
 
-Within a priority level, order by: Tech, Upgrades, Building construction, Unit production. (morphs could be filed under building construction or unit production based on what kind of morph it is). For now, skip invalid orders until they become valid. For example:
+Within a priority level, order by: Tech, Upgrades, Building construction, Unit production. (morphs could be filed under building construction or unit production based on what kind of morph it is). For now, skip invalid orders until they become valid. For example a build order set of:
 
-Priority 100: 100 Marines
-Priority 90: 100 SCVs
-Priority 80: 1 Barracks
+  * Priority 100: 100 Marines
+  * Priority 90: 100 SCVs
+  * Priority 80: 1 Barracks
 
 Should start building SCVs since there is no barracks. As soon as a barracks can be made without interrupting SCV production, the barracks should be constructed. Once the barracks is constructed, marines should be trained without interruption, and the rest of the SCVs can be made as soon as possible without interrupting marine production.
 
