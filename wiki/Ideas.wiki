@@ -2,7 +2,7 @@
 
 Ideas for new BWSAL functionality, in no particular order
 
-== Rewrite the build order manager so it uses a better algorithm ==
+= Rewrite the build order manager so it uses a better algorithm =
 
 For example, building 60 SCVs with priority 100 and a barracks with priority 99 shouldn't wait until you have all 60 SCVs completed before constructing the barracks. Build the barracks as soon as possible without delaying/interrupting SCV production.
 
@@ -10,9 +10,9 @@ Build Order Manager should assume constant rate of mineral gathering, and should
 
 http://i.imgur.com/n4aYX.png
 
-The algorithm probably doesn't need to calculate the entire plan, just the next minute or so. Also calculating the whole plan is probably not worthwhile since new build orders may come it at any time from the player, and the actual rate of mineral gathering isn't constant.
+The algorithm probably doesn't need to calculate the entire plan, just the next minute or so (perhaps we can calculate it just in time). Also calculating the whole plan is probably not worthwhile since new build orders may come it at any time from the player, and the actual rate of mineral gathering isn't constant.
 
-Within a priority level, order by: Tech, Upgrades, Building construction, Unit production. (morphs could be filed under building construction or unit production based on what kind of morph it is). For now, skip invalid orders until they become valid. For example a build order set of:
+Within a priority level, orders are prioritized in descending order by: Tech, Upgrades, Building construction, and Unit production. (morphs could be filed under building construction or unit production based on what kind of morph it is). For now, skip invalid orders until they become valid. For example a build order set of:
 
   * Priority 100: 100 Marines
   * Priority 90: 100 SCVs
@@ -20,8 +20,34 @@ Within a priority level, order by: Tech, Upgrades, Building construction, Unit p
 
 Should start building SCVs since there is no barracks. As soon as a barracks can be made without interrupting SCV production, the barracks should be constructed. Once the barracks is constructed, marines should be trained without interruption, and the rest of the SCVs can be made as soon as possible without interrupting marine production.
 
+As we iterate through each priority level and sub-priority level in descending order, we will either be able to execute the build order immediately (unlikely) or be limited by units (i.e. number of factories) or by resources. If we are unit-limited, temporarily reserve sufficient resources for the build item and continue looking at lower priority build orders. If we are resource-limited, don't consider lower priority build orders (since resources are our limiting factor).
 
-== Information Manager ==
+Another scenario: (Limited resource gather rate with high current amount of resources) Suppose we have sufficient supply and 1 Barracks and 1 Factory, 500 minerals, 10000 gas, but only 1 SCV mining minerals. The following build order:
+
+  * Priority 100: 20 Siege Tanks
+  * Priority 90: 20 Marines
+
+Should produce siege tanks and marines as fast as possible until minerals start to run out, and then only siege tanks should be produced. Rate of siege tank production will be severely limited since only 1 scv is mining. Once all siege tanks are produced, the rest of the marines should be produced. The other possibility (which I don't plan to implement since it seems less useful) would be to only produce tanks to ensure uninterrupted tank production for as long as possible.
+
+Within a priority the 4 sub-priority levels are Tech, Upgrades, Building construction, and Unit Production. The following defines how build orders will be ordered within each group:
+
+=== Tech ===
+
+Each building type that can research will have its own set of techs. Order the sets from largest to smallest. For each set, iterate from cheapest to most expensive and try to find a building that can research the tech, otherwise defer. If we are resource-limited, return without further processing. Otherwise, if we are unit-limited, reserve enough resources for the next tech and continue, else we are neither unit- nor resource-limited so execute and continue.
+
+=== Upgrades ===
+
+Each building type that can upgrade will have its own set of upgrades. Order the sets from longest to shortest. For each set, iterate from cheapest to most expensive and try to find a building that can research the upgrade, otherwise defer. If we are resource-limited, return without further processing. Otherwise, if we are unit-limited, reserve enough resources for the next upgrade and continue, else we are neither unit- nor resource-limited so execute and continue.
+
+=== Building construction ===
+
+Group building types by builder type (only needs to be taken into account for add-ons). Order building types in ascending order by tech level. If we are resource-limited, return without further processing. Otherwise, if we are unit-limited, reserve enough resources for the next unit and continue, else we are neither unit- nor resource-limited so execute and continue.
+
+=== Unit production ===
+
+Iterate through each type of production unit type. For each type, build the unit type with the most amount queued up (so if we have 20 marines and 10 medics, we produce marines from all barracks until we have 10 marines, then alternate between marines and medics). Units that require add-ons get higher priority for factories that have addons (siege tanks, dropships, etc). If we are unit-limited, reserve enough resources for the next unit and continue, else we are resource-limited so return without further processing.
+
+= Information Manager =
 
 Not a controller.
 
@@ -31,7 +57,7 @@ Also we can provide a reasonable guess as to the existence of units - for exampl
 
 Also keeps track of last seen positions and the time the unit was last seen. Maybe do some stuff to calculate probability unit is at tile X,Y, assuming the unit began a random walk when it went out of sight. Though this might be too calculation intensive to do in real time for every movable unit.
 
-== Other Ideas ==
+== Other Ideas 
 
   * Make the build order manager take into account dependencies (so building a factory with no barracks planned will build a barracks first)
   * Attack Manager - attack stuff, maybe break down into smaller managers
