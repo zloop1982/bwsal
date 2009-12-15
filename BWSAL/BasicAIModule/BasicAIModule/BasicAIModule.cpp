@@ -7,7 +7,7 @@ void BasicAIModule::onStart()
   if (Broodwar->isReplay()) return;
   // Enable some cheat flags
   Broodwar->enableFlag(Flag::UserInput);
-  Broodwar->enableFlag(Flag::CompleteMapInformation);
+  //Broodwar->enableFlag(Flag::CompleteMapInformation);
   BWTA::readMap();
   BWTA::analyze();
   this->analyzed=true;
