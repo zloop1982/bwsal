@@ -30,8 +30,28 @@ void BasicAIModule::onStart()
   BWAPI::Race race = Broodwar->self()->getRace();
   BWAPI::UnitType workerType=*(race.getWorker());
   this->buildOrderManager->build(20,workerType,80);
+  //make the basic production facility
   if (race == BWAPI::Races::Zerg)
+  {
+    //send an overlord out if Zerg
     this->scoutManager->setScoutCount(1);
+    this->buildManager->build(BWAPI::UnitTypes::Zerg_Spawning_Pool);
+    this->buildManager->build(BWAPI::UnitTypes::Zerg_Zergling);
+    this->buildManager->build(BWAPI::UnitTypes::Zerg_Zergling);
+    this->buildManager->build(BWAPI::UnitTypes::Zerg_Zergling);
+  }
+  else if (race == BWAPI::Races::Terran)
+  {
+    this->buildManager->build(BWAPI::UnitTypes::Terran_Barracks);
+    this->buildManager->build(BWAPI::UnitTypes::Terran_Marine);
+    this->buildManager->build(BWAPI::UnitTypes::Terran_Marine);
+  }
+  else if (race == BWAPI::Races::Protoss)
+  {
+    this->buildManager->build(BWAPI::UnitTypes::Protoss_Gateway);
+    this->buildManager->build(BWAPI::UnitTypes::Protoss_Zealot);
+  }
+ 
 }
 
 
