@@ -55,16 +55,24 @@ void ScoutManager::onOffer(std::set<BWAPI::Unit*> units)
   std::set<BWAPI::Unit*> allUnits=units;
   for(std::set<BWAPI::Unit*>::iterator u = allUnits.begin(); u != allUnits.end(); u++)
   {
+    //ignore if its already a scout
+    if (scouts.find(*u) != scouts.end())
+      continue;
     if ((*u)->getType() == BWAPI::UnitTypes::Zerg_Overlord && needMoreScouts())
     {
       arbitrator->accept(this, *u);
       addScout(*u);
       units.erase(u);
     }
+    else
+      arbitrator->decline(this, *u, 0);
   }
 
   for(std::set<BWAPI::Unit*>::iterator u = units.begin(); u != units.end(); u++)
   {
+    //ignore if its already a scout
+    if (scouts.find(*u) != scouts.end())
+      continue;
     if ((*u)->getType().isWorker() && needMoreScouts())
     {
       arbitrator->accept(this, *u);
@@ -77,7 +85,12 @@ void ScoutManager::onOffer(std::set<BWAPI::Unit*> units)
 
 void ScoutManager::onRevoke(BWAPI::Unit *unit, double bid)
 {
-  scouts.erase(unit);
+  BWAPI::Position lostTarget = scouts[unit].target;
+  if (positionsExplored.find(lostTarget) == positionsExplored.end())
+  {
+    positionsToScout.push_back(lostTarget);
+  }
+ scouts.erase(unit);
 }
 
 void ScoutManager::update()
