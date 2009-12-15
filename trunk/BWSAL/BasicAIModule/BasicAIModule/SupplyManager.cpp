@@ -29,8 +29,7 @@ void SupplyManager::update()
 
     if (getPlannedSupply() <= BWAPI::Broodwar->self()->supplyUsed() + productionCapacity)
     {
-      this->buildManager->build(*BWAPI::Broodwar->self()->getRace().getSupplyProvider());
-      this->buildOrderManager->spendResources(*BWAPI::Broodwar->self()->getRace().getSupplyProvider());
+      this->buildOrderManager->buildAdditional(1,*BWAPI::Broodwar->self()->getRace().getSupplyProvider(),1000);
     }
   }
 }
@@ -44,13 +43,13 @@ int SupplyManager::getPlannedSupply() const
 {
   int plannedSupply=0;
   //planned supply depends on the the amount of planned supply providers times the amount of supply they provide.
-  plannedSupply+=buildManager->getPlannedCount(BWAPI::UnitTypes::Terran_Supply_Depot)*BWAPI::UnitTypes::Terran_Supply_Depot.supplyProvided();
-  plannedSupply+=buildManager->getPlannedCount(BWAPI::UnitTypes::Terran_Command_Center)*BWAPI::UnitTypes::Terran_Command_Center.supplyProvided();
-  plannedSupply+=buildManager->getPlannedCount(BWAPI::UnitTypes::Protoss_Pylon)*BWAPI::UnitTypes::Protoss_Pylon.supplyProvided();
-  plannedSupply+=buildManager->getPlannedCount(BWAPI::UnitTypes::Protoss_Nexus)*BWAPI::UnitTypes::Protoss_Nexus.supplyProvided();
-  plannedSupply+=buildManager->getPlannedCount(BWAPI::UnitTypes::Zerg_Overlord)*BWAPI::UnitTypes::Zerg_Overlord.supplyProvided();
-  plannedSupply+=buildManager->getPlannedCount(BWAPI::UnitTypes::Zerg_Hatchery)*BWAPI::UnitTypes::Zerg_Hatchery.supplyProvided();
-  plannedSupply+=buildManager->getPlannedCount(BWAPI::UnitTypes::Zerg_Lair)*BWAPI::UnitTypes::Zerg_Lair.supplyProvided();
-  plannedSupply+=buildManager->getPlannedCount(BWAPI::UnitTypes::Zerg_Hive)*BWAPI::UnitTypes::Zerg_Hive.supplyProvided();
+  plannedSupply+=buildOrderManager->getPlannedCount(BWAPI::UnitTypes::Terran_Supply_Depot)*BWAPI::UnitTypes::Terran_Supply_Depot.supplyProvided();
+  plannedSupply+=buildOrderManager->getPlannedCount(BWAPI::UnitTypes::Terran_Command_Center)*BWAPI::UnitTypes::Terran_Command_Center.supplyProvided();
+  plannedSupply+=buildOrderManager->getPlannedCount(BWAPI::UnitTypes::Protoss_Pylon)*BWAPI::UnitTypes::Protoss_Pylon.supplyProvided();
+  plannedSupply+=buildOrderManager->getPlannedCount(BWAPI::UnitTypes::Protoss_Nexus)*BWAPI::UnitTypes::Protoss_Nexus.supplyProvided();
+  plannedSupply+=buildOrderManager->getPlannedCount(BWAPI::UnitTypes::Zerg_Overlord)*BWAPI::UnitTypes::Zerg_Overlord.supplyProvided();
+  plannedSupply+=buildOrderManager->getPlannedCount(BWAPI::UnitTypes::Zerg_Hatchery)*BWAPI::UnitTypes::Zerg_Hatchery.supplyProvided();
+  plannedSupply+=buildOrderManager->getPlannedCount(BWAPI::UnitTypes::Zerg_Lair)*BWAPI::UnitTypes::Zerg_Lair.supplyProvided();
+  plannedSupply+=buildOrderManager->getPlannedCount(BWAPI::UnitTypes::Zerg_Hive)*BWAPI::UnitTypes::Zerg_Hive.supplyProvided();
   return plannedSupply;
 }

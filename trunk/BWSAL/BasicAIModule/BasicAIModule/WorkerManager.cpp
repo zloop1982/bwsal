@@ -7,6 +7,8 @@ WorkerManager::WorkerManager(Arbitrator::Arbitrator<BWAPI::Unit*,double>* arbitr
   this->baseManager    = NULL;
   this->lastSCVBalance = 0;
   this->WorkersPerGas  = 3;
+  this->mineralRate    = 0;
+  this->gasRate        = 0;
 }
 void WorkerManager::setBaseManager(BaseManager* baseManager)
 {
@@ -169,10 +171,19 @@ void WorkerManager::update()
   }
   
   //order workers to gather from their assigned resources
+  this->mineralRate=0;
+  this->gasRate=0;
   for(std::map<BWAPI::Unit*,WorkerData>::iterator u = workers.begin(); u != workers.end(); u++)
   {
     BWAPI::Unit* i = u->first;
-
+    if (u->second.resource!=NULL)
+    {
+      if (u->second.resource->getType()==BWAPI::UnitTypes::Resource_Mineral_Field)
+        mineralRate+=8/160.0;
+      else
+        gasRate+=8/160.0;
+    }
+    
     //switch current resource to newResource when appropiate
     if (u->second.resource == NULL || (i->getTarget() != NULL && i->getTarget()->getType().isResourceDepot()))
       u->second.resource = u->second.newResource;
@@ -200,4 +211,12 @@ void WorkerManager::onRemoveUnit(BWAPI::Unit* unit)
 void WorkerManager::setWorkersPerGas(int count)
 {
   this->WorkersPerGas=count;
+}
+double WorkerManager::getMineralRate() const
+{
+  return this->mineralRate;
+}
+double WorkerManager::getGasRate() const
+{
+  return this->gasRate;
 }

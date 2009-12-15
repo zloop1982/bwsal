@@ -14,9 +14,9 @@ void BasicAIModule::onStart()
   this->buildManager      = new BuildManager(&this->arbitrator);
   this->techManager       = new TechManager(&this->arbitrator);
   this->upgradeManager    = new UpgradeManager(&this->arbitrator);
-  this->buildOrderManager = new BuildOrderManager(this->buildManager,this->techManager,this->upgradeManager);
   this->scoutManager      = new ScoutManager(&this->arbitrator);
   this->workerManager     = new WorkerManager(&this->arbitrator);
+  this->buildOrderManager = new BuildOrderManager(this->buildManager,this->techManager,this->upgradeManager,this->workerManager);
   this->baseManager       = new BaseManager();
   this->supplyManager     = new SupplyManager();
 
@@ -29,27 +29,31 @@ void BasicAIModule::onStart()
   
   BWAPI::Race race = Broodwar->self()->getRace();
   BWAPI::UnitType workerType=*(race.getWorker());
-  this->buildOrderManager->build(20,workerType,80);
+  this->buildOrderManager->buildAdditional(20,workerType,80);
   //make the basic production facility
   if (race == BWAPI::Races::Zerg)
   {
     //send an overlord out if Zerg
     this->scoutManager->setScoutCount(1);
-    this->buildManager->build(BWAPI::UnitTypes::Zerg_Spawning_Pool);
-    this->buildManager->build(BWAPI::UnitTypes::Zerg_Zergling);
-    this->buildManager->build(BWAPI::UnitTypes::Zerg_Zergling);
-    this->buildManager->build(BWAPI::UnitTypes::Zerg_Zergling);
+    this->buildOrderManager->buildAdditional(1,UnitTypes::Zerg_Spawning_Pool,60);
+    this->buildOrderManager->buildAdditional(3,UnitTypes::Zerg_Zergling,120);
   }
   else if (race == BWAPI::Races::Terran)
   {
-    this->buildManager->build(BWAPI::UnitTypes::Terran_Barracks);
-    this->buildManager->build(BWAPI::UnitTypes::Terran_Marine);
-    this->buildManager->build(BWAPI::UnitTypes::Terran_Marine);
+    this->buildOrderManager->buildAdditional(20,BWAPI::UnitTypes::Terran_Marine,60);
+    this->buildOrderManager->buildAdditional(1,BWAPI::UnitTypes::Terran_Barracks,40);
+    this->buildOrderManager->buildAdditional(1,BWAPI::UnitTypes::Terran_Refinery,40);
+    this->buildOrderManager->buildAdditional(20,BWAPI::UnitTypes::Terran_Siege_Tank_Tank_Mode,80);
+    this->buildOrderManager->buildAdditional(2,BWAPI::UnitTypes::Terran_Factory,40);
+    this->buildOrderManager->buildAdditional(2,BWAPI::UnitTypes::Terran_Machine_Shop,40);
   }
   else if (race == BWAPI::Races::Protoss)
   {
-    this->buildManager->build(BWAPI::UnitTypes::Protoss_Gateway);
-    this->buildManager->build(BWAPI::UnitTypes::Protoss_Zealot);
+    this->buildOrderManager->buildAdditional(1,UnitTypes::Protoss_Gateway,60);
+    this->buildOrderManager->buildAdditional(10,UnitTypes::Protoss_Zealot,60);
+    this->buildOrderManager->buildAdditional(10,UnitTypes::Protoss_Dragoon,60);
+    this->buildOrderManager->buildAdditional(1,UnitTypes::Protoss_Assimilator,40);
+    this->buildOrderManager->buildAdditional(1,UnitTypes::Protoss_Cybernetics_Core,30);
   }
  
 }
@@ -59,8 +63,8 @@ void BasicAIModule::onFrame()
 {
   if (Broodwar->isReplay()) return;
   if (!this->analyzed) return;
-  this->buildManager->update();
   this->buildOrderManager->update();
+  this->buildManager->update();
   this->baseManager->update();
   this->workerManager->update();
   this->techManager->update();
