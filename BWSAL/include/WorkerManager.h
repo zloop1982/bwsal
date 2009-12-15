@@ -22,6 +22,8 @@ class WorkerManager : public Arbitrator::Controller<BWAPI::Unit*,double>
 
     void onRemoveUnit(BWAPI::Unit* unit);
     void setWorkersPerGas(int count);
+    double getMineralRate() const;
+    double getGasRate() const;
     Arbitrator::Arbitrator<BWAPI::Unit*,double>* arbitrator;
     BaseManager* baseManager;
     std::map<BWAPI::Unit*,WorkerData> workers;
@@ -37,4 +39,6 @@ class WorkerManager : public Arbitrator::Controller<BWAPI::Unit*,double>
   private:
     void rebalanceWorkers();
     void updateWorkerAssignments();
+    double mineralRate;
+    double gasRate;
 };
