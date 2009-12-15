@@ -36,6 +36,7 @@ class ScoutManager : public Arbitrator::Controller<BWAPI::Unit*,double>
     Arbitrator::Arbitrator<BWAPI::Unit*,double>* arbitrator;
     
     std::list<BWAPI::Position> positionsToScout;
+    std::set<BWAPI::Position> positionsExplored;
     BWTA::BaseLocation *myStartLocation;
         
   private:
@@ -43,7 +44,7 @@ class ScoutManager : public Arbitrator::Controller<BWAPI::Unit*,double>
     void requestScout(double bid);
     void addScout(BWAPI::Unit* unit);
     void updateScoutAssignments();
-
+    
     size_t desiredScoutCount;
     int scoutingStartFrame;
 };

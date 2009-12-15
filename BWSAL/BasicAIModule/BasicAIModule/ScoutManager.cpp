@@ -104,7 +104,15 @@ std::string ScoutManager::getName() const
 
 void ScoutManager::onRemoveUnit(BWAPI::Unit* unit)
 {
-  scouts.erase(unit);
+  if (scouts.find(unit) != scouts.end())
+  {
+    BWAPI::Position lostTarget = scouts[unit].target;
+    if (positionsExplored.find(lostTarget) == positionsExplored.end())
+    {
+      positionsToScout.push_back(lostTarget);
+    }
+    scouts.erase(unit);
+  }
 }
 
 void ScoutManager::setScoutCount(int count)
@@ -148,16 +156,11 @@ void ScoutManager::updateScoutAssignments()
   for(u = scouts.begin(); u != scouts.end(); u++)
   {
     if ( (*u).second.mode == ScoutData::Searching
-      && (*u).first->getPosition().getDistance((*u).second.target) < BWAPI::TILE_SIZE*(*u).first->getType().sightRange())
+      && (*u).first->getPosition().getDistance((*u).second.target) < (*u).first->getType().sightRange())
     {
-      for(std::list<BWAPI::Position>::iterator p=positionsToScout.begin();p!=positionsToScout.end();p++)
-      {
-        if (*p==(*u).second.target)
-        {
-          positionsToScout.erase(p);
-          break;
-        }
-      }
+      BWAPI::Position exploredPosition  = (*u).second.target;
+      positionsToScout.remove(exploredPosition);
+      positionsExplored.insert(exploredPosition);
       (*u).second.mode = ScoutData::Idle;
     }
   }
@@ -166,19 +169,21 @@ void ScoutManager::updateScoutAssignments()
   if (positionsToScout.size() > 0) // are there still positions to scout?
   {
     std::list<BWAPI::Position>::iterator p;
-    for( u = scouts.begin(), p = positionsToScout.begin()
-         ;
-         u != scouts.end() && p != positionsToScout.end()
-         ;
-         u++) 
+    for(u = scouts.begin(); u != scouts.end() && !positionsToScout.empty(); u++) 
     { // for
       if ((*u).second.mode == ScoutData::Idle)
       {
-        
+        std::map<double, BWAPI::Position> distanceMap;
+        for (p = positionsToScout.begin(); p != positionsToScout.end(); p++)
+        {
+          double distance = (*u).first->getPosition().getDistance(*p);
+          distanceMap[distance] = *p;
+        }
+        BWAPI::Position target = distanceMap.begin()->second;
         (*u).second.mode = ScoutData::Searching;
-        (*u).first->rightClick(*p);
-        (*u).second.target = *p;
-        p++;
+        (*u).first->rightClick(target);
+        (*u).second.target = target;
+        positionsToScout.remove(target);
       }
     } // for
   }
