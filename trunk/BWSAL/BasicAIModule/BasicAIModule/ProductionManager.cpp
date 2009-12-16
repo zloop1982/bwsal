@@ -17,13 +17,17 @@ void ProductionManager::onOffer(std::set<BWAPI::Unit*> units)
   for(std::set<BWAPI::Unit*>::iterator i=units.begin();i!=units.end();i++)
   {
     //we will loop through the unit types in the production queue for this type of unit
-    std::map<BWAPI::UnitType,std::list<BWAPI::UnitType> >::iterator q=productionQueues.find((*i)->getType());
+    std::map<BWAPI::UnitType,std::list<ProductionUnitType> >::iterator q=productionQueues.find((*i)->getType());
     bool used=false;
     if (q!=productionQueues.end() && !q->second.empty()) //well, only if the queue actually exists
     {
-      for(std::list<BWAPI::UnitType>::iterator t=q->second.begin();t!=q->second.end();t++) //loop through the queue
+      for(std::list<ProductionUnitType>::iterator t=q->second.begin();t!=q->second.end();t++) //loop through the queue
       {
-        if (BWAPI::Broodwar->canMake(*i,*t)) //only accept if the given unit can make the type of unit we want to make
+        BWAPI::UnitType ut=t->type;
+        bool canMake=BWAPI::Broodwar->canMake(*i,ut);
+        if (t->forceNoAddon==true && (*i)->getAddon()!=NULL)
+          canMake=false;
+        if (canMake) //only accept if the given unit can make the type of unit we want to make
         {
           producingUnits[*i].type=*t;
           producingUnits[*i].unit=NULL;
@@ -56,7 +60,7 @@ void ProductionManager::update()
   std::set<BWAPI::Unit*> myPlayerUnits=BWAPI::Broodwar->self()->getUnits();
   for(std::set<BWAPI::Unit*>::iterator u = myPlayerUnits.begin(); u != myPlayerUnits.end(); u++)
   {
-    std::map<BWAPI::UnitType,std::list<BWAPI::UnitType> >::iterator p=productionQueues.find((*u)->getType());
+    std::map<BWAPI::UnitType,std::list<ProductionUnitType> >::iterator p=productionQueues.find((*u)->getType());
     if (p!=productionQueues.end() && !p->second.empty() && (*u)->isCompleted() && producingUnits.find(*u)==producingUnits.end())
       arbitrator->setBid(this, *u, 50);
   }
@@ -81,9 +85,9 @@ void ProductionManager::update()
       if (i->second.unit==NULL) //if the build unit doesnt exist, train it
       {
         if (BWAPI::Broodwar->getFrameCount()>i->second.lastAttemptFrame+BWAPI::Broodwar->getLatency()*2)
-          if (BWAPI::Broodwar->canMake(i->first,i->second.type))
+          if (BWAPI::Broodwar->canMake(i->first,i->second.type.type))
           {
-            i->first->train(i->second.type);
+            i->first->train(i->second.type.type);
             i->second.lastAttemptFrame=BWAPI::Broodwar->getFrameCount();
           }
       }
@@ -92,7 +96,7 @@ void ProductionManager::update()
         //so we have started production
         if (!i->second.started)
         {
-          startedCount[i->second.type]++;
+          startedCount[i->second.type.type]++;
           i->second.started=true;
         }
 
@@ -100,12 +104,12 @@ void ProductionManager::update()
         if (i->second.unit->isCompleted())
         {
           //and if the build unit is the right type
-          if (i->second.unit->getType()==i->second.type)
+          if (i->second.unit->getType()==i->second.type.type)
           {
             //we are done!
             arbitrator->removeBid(this, i->first);
-            startedCount[i->second.type]--;
-            plannedCount[i->second.type]--;
+            startedCount[i->second.type.type]--;
+            plannedCount[i->second.type.type]--;
             producingUnits.erase(i);
           }
           else //if its not the right type, we don't care about the build unit
@@ -114,7 +118,7 @@ void ProductionManager::update()
         else //if the build unit is not complete
         {
           //if the build unit is not the right type, stop training it
-          if (i->second.unit->exists() && i->second.unit->getType()!=i->second.type)
+          if (i->second.unit->exists() && i->second.unit->getType()!=i->second.type.type)
             i->first->cancelTrain();
 
           //if the factory is not training, set the build unit does not exist
@@ -136,13 +140,12 @@ void ProductionManager::onRemoveUnit(BWAPI::Unit* unit)
   //remove this unit from the producingUnits map
   if (producingUnits.find(unit)!=producingUnits.end())
   {
-    if (productionQueues.find(unit->getType())!=productionQueues.end())
-      productionQueues[unit->getType()].push_front(producingUnits[unit].type); //add the type of unit it was making to the front of the queue
+    productionQueues[unit->getType()].push_front(producingUnits[unit].type); //add the type of unit it was making to the front of the queue
     producingUnits.erase(unit);
   }
 }
 
-bool ProductionManager::train(BWAPI::UnitType type)
+bool ProductionManager::train(BWAPI::UnitType type, bool forceNoAddon)
 {
   //production order starts here
   if (!type.whatBuilds().first->canProduce() || type.isBuilding()) //we only accept things that can be produced
@@ -153,7 +156,10 @@ bool ProductionManager::train(BWAPI::UnitType type)
       return false;
 
   //add this unit type to the end of the queue
-  productionQueues[*type.whatBuilds().first].push_back(type);
+  ProductionUnitType newType;
+  newType.type=type;
+  newType.forceNoAddon=forceNoAddon;
+  productionQueues[*type.whatBuilds().first].push_back(newType);
 
   plannedCount[type]++;
   return true;
