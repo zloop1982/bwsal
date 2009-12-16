@@ -179,9 +179,9 @@ void WorkerManager::update()
     if (u->second.resource!=NULL)
     {
       if (u->second.resource->getType()==BWAPI::UnitTypes::Resource_Mineral_Field)
-        mineralRate+=8/160.0;
+        mineralRate+=8/180.0;
       else
-        gasRate+=8/160.0;
+        gasRate+=8/180.0;
     }
     
     //switch current resource to newResource when appropiate

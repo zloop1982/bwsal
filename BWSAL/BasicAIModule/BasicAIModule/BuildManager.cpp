@@ -45,10 +45,19 @@ void BuildManager::onRemoveUnit(BWAPI::Unit* unit)
 
 bool BuildManager::build(BWAPI::UnitType type)
 {
-  return build(type, BWAPI::Broodwar->self()->getStartLocation());
+  return build(type, BWAPI::Broodwar->self()->getStartLocation(),false);
 }
 
+bool BuildManager::build(BWAPI::UnitType type, bool forceNoAddon)
+{
+  return build(type, BWAPI::Broodwar->self()->getStartLocation(),forceNoAddon);
+}
 bool BuildManager::build(BWAPI::UnitType type, BWAPI::TilePosition goalPosition)
+{
+  return build(type, goalPosition,false);
+}
+
+bool BuildManager::build(BWAPI::UnitType type, BWAPI::TilePosition goalPosition, bool forceNoAddon)
 {
   if (type==BWAPI::UnitTypes::None || type==BWAPI::UnitTypes::Unknown) return false;
 
@@ -60,7 +69,7 @@ bool BuildManager::build(BWAPI::UnitType type, BWAPI::TilePosition goalPosition)
     if (type.isBuilding())
       return this->constructionManager->build(type, goalPosition);
     else
-      return this->productionManager->train(type);
+      return this->productionManager->train(type,forceNoAddon);
   }
   return false;
 }

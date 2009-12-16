@@ -42,6 +42,7 @@ bool BuildingPlacer::canBuildHereWithSpace(BWAPI::TilePosition position, BWAPI::
   if (starty<0) starty=0;
   int endx = position.x() + width + buildDistance;
   if (endx>BWAPI::Broodwar->mapWidth()) endx=BWAPI::Broodwar->mapWidth();
+  if (endx<position.x() + width) return false;
   int endy = position.y() + height + buildDistance;
   if (endy>BWAPI::Broodwar->mapHeight()) endy=BWAPI::Broodwar->mapHeight();
 

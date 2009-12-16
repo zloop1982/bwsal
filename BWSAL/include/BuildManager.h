@@ -15,7 +15,9 @@ class BuildManager
     BuildingPlacer* getBuildingPlacer() const;
     void onRemoveUnit(BWAPI::Unit* unit);
     bool build(BWAPI::UnitType type);
+    bool build(BWAPI::UnitType type, bool forceNoAddon);
     bool build(BWAPI::UnitType type, BWAPI::TilePosition goalPosition);
+    bool build(BWAPI::UnitType type, BWAPI::TilePosition goalPosition, bool forceNoAddon);
     int getPlannedCount(BWAPI::UnitType type) const;
     int getStartedCount(BWAPI::UnitType type) const;
     int getCompletedCount(BWAPI::UnitType type) const;

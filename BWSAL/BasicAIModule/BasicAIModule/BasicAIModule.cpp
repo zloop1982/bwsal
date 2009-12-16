@@ -28,28 +28,37 @@ void BasicAIModule::onStart()
   this->baseManager->setBuildOrderManager(this->buildOrderManager);
   
   BWAPI::Race race = Broodwar->self()->getRace();
+  BWAPI::Race enemyRace = Broodwar->enemy()->getRace();
   BWAPI::UnitType workerType=*(race.getWorker());
   this->buildOrderManager->buildAdditional(20,workerType,80);
   //make the basic production facility
-  if (race == BWAPI::Races::Zerg)
+  if (race == Races::Zerg)
   {
     //send an overlord out if Zerg
     this->scoutManager->setScoutCount(1);
     this->buildOrderManager->buildAdditional(1,UnitTypes::Zerg_Spawning_Pool,60);
     this->buildOrderManager->buildAdditional(3,UnitTypes::Zerg_Zergling,120);
   }
-  else if (race == BWAPI::Races::Terran)
+  else if (race == Races::Terran)
   {
-    this->buildOrderManager->buildAdditional(20,BWAPI::UnitTypes::Terran_Marine,60);
-    this->buildOrderManager->buildAdditional(1,BWAPI::UnitTypes::Terran_Barracks,40);
-    this->buildOrderManager->buildAdditional(1,BWAPI::UnitTypes::Terran_Refinery,40);
-    this->buildOrderManager->buildAdditional(20,BWAPI::UnitTypes::Terran_Siege_Tank_Tank_Mode,80);
-    this->buildOrderManager->buildAdditional(2,BWAPI::UnitTypes::Terran_Factory,40);
-    this->buildOrderManager->buildAdditional(2,BWAPI::UnitTypes::Terran_Machine_Shop,40);
+    if (enemyRace == Races::Zerg)
+    {
+      this->buildOrderManager->buildAdditional(2,BWAPI::UnitTypes::Terran_Barracks,40);
+      this->buildOrderManager->buildAdditional(20,BWAPI::UnitTypes::Terran_Marine,40);
+    }
+    else
+    {
+      this->buildOrderManager->buildAdditional(1,BWAPI::UnitTypes::Terran_Barracks,60);
+      this->buildOrderManager->buildAdditional(1,BWAPI::UnitTypes::Terran_Refinery,60);
+      this->buildOrderManager->buildAdditional(3,BWAPI::UnitTypes::Terran_Factory,60);
+      this->buildOrderManager->buildAdditional(2,BWAPI::UnitTypes::Terran_Machine_Shop,70);
+      this->buildOrderManager->buildAdditional(20,BWAPI::UnitTypes::Terran_Vulture,40);
+      this->buildOrderManager->buildAdditional(20,BWAPI::UnitTypes::Terran_Siege_Tank_Tank_Mode,40);
+    }
   }
-  else if (race == BWAPI::Races::Protoss)
+  else if (race == Races::Protoss)
   {
-    this->buildOrderManager->buildAdditional(1,UnitTypes::Protoss_Gateway,60);
+    this->buildOrderManager->buildAdditional(2,UnitTypes::Protoss_Gateway,60);
     this->buildOrderManager->buildAdditional(10,UnitTypes::Protoss_Zealot,60);
     this->buildOrderManager->buildAdditional(10,UnitTypes::Protoss_Dragoon,60);
     this->buildOrderManager->buildAdditional(1,UnitTypes::Protoss_Assimilator,40);

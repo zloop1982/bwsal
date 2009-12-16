@@ -391,7 +391,19 @@
 					>
 				</File>
 				<File
-					RelativePath="..\..\include\BuildOrderManager.h"
+					RelativePath="..\..\include\BuildOrderManager\BuildOrderManager.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\include\BuildOrderManager\TechItem.h"
+					>
+				</File>
+				<File
+					RelativePath=".\UnitItem.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\include\BuildOrderManager\UnitItem.h"
 					>
 				</File>
 			</Filter>

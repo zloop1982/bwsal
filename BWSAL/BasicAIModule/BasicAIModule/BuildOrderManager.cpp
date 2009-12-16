@@ -4,7 +4,12 @@
 #include <UpgradeManager.h>
 #include <WorkerManager.h>
 #include <algorithm>
+using namespace std;
 using namespace BWAPI;
+map<BWAPI::UnitType, map<BWAPI::UnitType, UnitItem* > >* globalUnitSet;
+int y;
+map<const Unit*,int> nextFreeTimeData;
+map<BWAPI::UnitType, set<BWAPI::UnitType> > makes;
 BuildOrderManager::BuildOrderManager(BuildManager* buildManager, TechManager* techManager, UpgradeManager* upgradeManager, WorkerManager* workerManager)
 {
   this->buildManager   = buildManager;
@@ -13,322 +18,337 @@ BuildOrderManager::BuildOrderManager(BuildManager* buildManager, TechManager* te
   this->workerManager  = workerManager;
   this->usedMinerals   = 0;
   this->usedGas        = 0;
-}
-std::map<const Unit*,int> nextAvailableTimeData;
-int nextAvailableTime(const Unit* unit)
-{
-  int time=Broodwar->getFrameCount();
-  int ntime=0;
-  int mtime=time;
-  if (nextAvailableTimeData.find(unit)!=nextAvailableTimeData.end())
-    ntime=nextAvailableTimeData[unit];
-  if (!unit->isCompleted())
+  UnitItem::getBuildManager() = buildManager;
+  for(set<BWAPI::UnitType>::iterator i=UnitTypes::allUnitTypes().begin();i!=UnitTypes::allUnitTypes().end();i++)
   {
-    if (unit->isBeingConstructed())
-      return time+unit->getRemainingBuildTime();
-    else
-      return -1;
+    makes[*(*i).whatBuilds().first].insert(*i);
   }
-  if (unit->isTraining())
-    mtime = time+unit->getRemainingTrainTime();
-  if (unit->isResearching())
-    mtime = time+unit->getRemainingResearchTime();
-  if (unit->isUpgrading())
-    mtime = time+unit->getRemainingUpgradeTime();
-  if (ntime<mtime) return mtime;
-  return ntime;
 }
 
-void BuildOrderManager::reserveResources(Unit* builder, UnitType unitType)
+//returns the next frame that the given unit type will be ready to produce units or research tech or upgrades
+int nextFreeTime(const Unit* unit)
 {
-  int t=Broodwar->getFrameCount();
-  if (builder)
-    t=nextAvailableTime(builder);
-  this->reservedMinerals[t]+=unitType.mineralPrice();
-  this->reservedGas[t]+=unitType.gasPrice();  
+  if (!unit->isCompleted())
+  {
+    if (!unit->isBeingConstructed() && !unit->getType().isAddon())
+      return -1;
+  }
+  int ctime=Broodwar->getFrameCount();
+  int natime=max(ctime,ctime+unit->getRemainingBuildTime());
+  natime=max(natime,ctime+unit->getRemainingTrainTime());
+  natime=max(natime,ctime+unit->getRemainingResearchTime());
+  natime=max(natime,ctime+unit->getRemainingUpgradeTime());
+  natime=max(natime,nextFreeTimeData[unit]);
+  return natime;
 }
-void BuildOrderManager::unreserveResources(Unit* builder, UnitType unitType)
+
+//returns the next available time that at least one unit of the given type (buildings only right now) will be completed 
+int nextFreeTime(UnitType t)
 {
-  int t=Broodwar->getFrameCount();
-  if (builder)
-    t=nextAvailableTime(builder);
-  this->reservedMinerals[t]-=unitType.mineralPrice();
-  this->reservedGas[t]-=unitType.gasPrice();  
+  //if one unit of the given type is already completed, return the given frame count
+  if (Broodwar->self()->completedUnitCount(t)>0)
+    return Broodwar->getFrameCount();
+
+  //if no units of the given type are being constructed, return -1
+  if (Broodwar->self()->incompleteUnitCount(t)==0)
+    return -1;
+
+  set<Unit*> allUnits = Broodwar->self()->getUnits();
+  int time;
+  bool setflag=false;
+  for(set<Unit*>::iterator i=allUnits.begin();i!=allUnits.end();i++)
+  {
+    if ((*i)->getType()==t)
+    {
+      int ntime=nextFreeTime(*i);
+      if (ntime>-1)
+      {
+        //set time to the earliest available time
+        if (!setflag || ntime<time)
+        {
+          time=ntime;
+          setflag=true;
+        }
+      }
+    }
+  }
+  if (setflag)
+    return time;
+
+  //we can get here if construction has been halted by an SCV
+  return -1;
 }
-bool unitCompare(const Unit* a, const Unit* b)
+
+//returns the next available time that the given unit will be able to train the given unit type
+//takes into account required units
+//todo: take into account required tech and supply
+int nextFreeTime(const Unit* unit, UnitType t)
 {
-  return nextAvailableTime(a)<nextAvailableTime(b);
+  int time=nextFreeTime(unit);
+  for(map<const UnitType*,int>::const_iterator i=t.requiredUnits().begin();i!=t.requiredUnits().end();i++)
+  {
+    int ntime=nextFreeTime(*i->first);
+    if (ntime==-1)
+      return -1;
+    if (ntime>time)
+      time=ntime;
+    if (i->first->isAddon() && unit->getAddon()==NULL)
+      return -1;
+  }
+  return time;
+}
+
+set<BWAPI::UnitType> BuildOrderManager::unitsCanMake(BWAPI::Unit* builder, int time)
+{
+  set<BWAPI::UnitType> result;
+  for(set<BWAPI::UnitType>::iterator i=makes[builder->getType()].begin();i!=makes[builder->getType()].end();i++)
+  {
+    int t=nextFreeTime(builder,*i);
+    if (t>-1 && t<=time)
+      result.insert(*i);
+  }
+  return result;
+}
+
+
+//prefer unit types that have larger remaining unit counts
+//if we need a tie-breaker, we prefer cheaper units
+bool unitTypeOrderCompare(const pair<BWAPI::UnitType, int >& a, const pair<BWAPI::UnitType, int >& b)
+{
+  int rA=a.second;
+  int rB=b.second;
+  int pA=a.first.mineralPrice()+a.first.gasPrice();
+  int pB=b.first.mineralPrice()+b.first.gasPrice();
+  return rA>rB || (rA == rB && pA<pB);
+}
+
+UnitType getUnitType(set<UnitType>& validUnitTypes,vector<pair<BWAPI::UnitType, int > >& unitCounts)
+{
+  UnitType answer=UnitTypes::None;
+  sort(unitCounts.begin(),unitCounts.end(),unitTypeOrderCompare);
+  for(vector<pair<BWAPI::UnitType, int > >::iterator i=unitCounts.begin();i!=unitCounts.end();i++)
+  {
+    if (validUnitTypes.find(i->first)!=validUnitTypes.end())
+    {
+      answer=i->first;
+      i->second--;
+      if (i->second<=0)
+      {
+        unitCounts.erase(i);
+      }
+      break;
+    }
+  }
+  return answer;
+}
+bool BuildOrderManager::updateUnits()
+{
+  set<Unit*> allUnits = Broodwar->self()->getUnits();
+  map<BWAPI::UnitType, map<BWAPI::UnitType, UnitItem* > >::iterator i2;
+  for(map<BWAPI::UnitType, map<BWAPI::UnitType, UnitItem* > >::iterator i=globalUnitSet->begin();i!=globalUnitSet->end();i=i2)
+  {
+    i2=i;
+    i2++;
+    map<BWAPI::UnitType, UnitItem* >::iterator j2;
+    for(map<BWAPI::UnitType, UnitItem* >::iterator j=i->second.begin();j!=i->second.end();j=j2)
+    {
+      j2=j;
+      j2++;
+      if (j->second==NULL || j->second->getRemainingCount()==0)
+      {
+        i->second.erase(j);
+      }
+    }
+    if (i->second.empty())
+      globalUnitSet->erase(i);
+  }
+
+  if (globalUnitSet->empty())
+    return false;
+
+  set<Unit*> factories;
+  for(set<Unit*>::iterator i=allUnits.begin();i!=allUnits.end();i++)
+  {
+    Unit* u=*i;
+    UnitType type=u->getType();
+    if (globalUnitSet->find(type)!=globalUnitSet->end() && this->reservedUnits.find(u)==this->reservedUnits.end())
+      factories.insert(u);
+  }
+  set<int> times;
+
+  for(map<BWAPI::UnitType, map<BWAPI::UnitType, UnitItem* > >::iterator i=globalUnitSet->begin();i!=globalUnitSet->end();i++)
+  {
+    set<Unit*> factoriesOfType;
+    UnitType unitType=i->first;
+    for(set<Unit*>::iterator f=factories.begin();f!=factories.end();f++)
+    {
+      Unit* u=*f;
+      UnitType type=u->getType();
+      if (type==i->first)
+        factoriesOfType.insert(u);
+    }
+    for(set<Unit*>::iterator f=factoriesOfType.begin();f!=factoriesOfType.end();f++)
+    {
+      for(map<BWAPI::UnitType, UnitItem* >::iterator j=i->second.begin();j!=i->second.end();j++)
+      {
+        int time=nextFreeTime(*f,j->first);
+        if (time>Broodwar->getFrameCount())
+          times.insert(time);
+      }
+    }
+  }
+  vector<pair<BWAPI::UnitType, int > > remainingUnitCounts;
+  for(map<BWAPI::UnitType, map<BWAPI::UnitType, UnitItem* > >::iterator i=globalUnitSet->begin();i!=globalUnitSet->end();i++)
+  {
+    for(map<BWAPI::UnitType, UnitItem* >::iterator j=i->second.begin();j!=i->second.end();j++)
+    {
+      remainingUnitCounts.push_back(make_pair(j->first,j->second->getRemainingCount()));
+    }
+  }
+  map<Unit*,set<UnitType> > buildableUnitTypesNow;
+  for(set<Unit*>::iterator f=factories.begin();f!=factories.end();f++)
+  {
+    Unit* factory=*f;
+    UnitType t=getUnitType(unitsCanMake(*f,Broodwar->getFrameCount()),remainingUnitCounts);
+    if (t==UnitTypes::None)
+      continue;
+    if (hasResources(t))
+    {
+      this->spendResources(t);
+      this->reservedUnits.insert(factory);
+      if (factory->getAddon()==NULL)
+        this->buildManager->build(t,true);
+      else
+        this->buildManager->build(t);
+      BWAPI::Broodwar->printf("Building %s",t.getName().c_str());
+      (*globalUnitSet)[factory->getType()][t]->decrementAdditional();
+      nextFreeTimeData[factory]=Broodwar->getFrameCount()+60;
+    }
+    else
+    {
+      this->reserveResources(factory,t);
+      this->reservedUnits.insert(factory);
+      BWAPI::Broodwar->drawTextScreen(5,y,"Planning to make a %s as soon as possible",t.getName().c_str());y+=20;
+      BWAPI::Broodwar->drawTextScreen(5,y,"resource-limited");y+=20;
+      return true;
+    }
+  }
+
+  //reserve units
+  for(set<int>::iterator t=times.begin();t!=times.end();t++)
+  {
+    int ctime=*t;
+    map<Unit*,set<UnitType> > buildableUnitTypesNow;
+    set<Unit*>::iterator f2;
+    for(set<Unit*>::iterator f=factories.begin();f!=factories.end();f=f2)
+    {
+      f2=f;
+      f2++;
+      if (this->reservedUnits.find(*f)!=this->reservedUnits.end())
+        factories.erase(f);
+    }
+    for(set<Unit*>::iterator f=factories.begin();f!=factories.end();f++)
+    {
+      Unit* factory=*f;
+      UnitType t=getUnitType(unitsCanMake(*f,ctime),remainingUnitCounts);
+      if (t==UnitTypes::None)
+        continue;
+      if (hasResources(t))
+      {
+        this->reserveResources(factory,t);
+        this->reservedUnits.insert(factory);
+        BWAPI::Broodwar->drawTextScreen(5,y,"Planning to make a %s at time %d",t.getName().c_str(),nextFreeTime(factory,t));y+=20;
+      }
+      else
+      {
+        this->reserveResources(factory,t);
+        this->reservedUnits.insert(factory);
+        BWAPI::Broodwar->drawTextScreen(5,y,"Planning to make a %s as soon as possible",t.getName().c_str());y+=20;
+        BWAPI::Broodwar->drawTextScreen(5,y,"resource-limited");y+=20;
+        return true;
+      }
+    }
+  }
+  return false;
 }
 void BuildOrderManager::update()
 {
   if (items.empty()) return;
-  std::map< int, PriorityLevel >::iterator l=items.end();
+  map< int, PriorityLevel >::iterator l=items.end();
   l--;
-  while (l->second.techs.empty() &&
-         l->second.upgrades.empty() &&
-         l->second.buildings.empty() &&
-         l->second.units.empty())
+  while (l->second.techs.empty() && l->second.units.empty())
   {
     items.erase(l);
     if (items.empty()) return;
     l=items.end();
     l--;
   }
-  this->reservedMinerals.clear();
-  this->reservedGas.clear();
-  int y=5;
-  BWAPI::Broodwar->drawTextScreen(5,y,"Mineral Rate: %f",this->workerManager->getMineralRate());y+=20;
-  BWAPI::Broodwar->drawTextScreen(5,y,"Gas Rate: %f",this->workerManager->getGasRate());y+=20;
+  this->reservedResources.clear();
+  this->reservedUnits.clear();
+  y=5;
 
   //Iterate through priority levels in decreasing order
   for(;l!=items.end();l--)
   {
     BWAPI::Broodwar->drawTextScreen(5,y,"Priority: %d",l->first);y+=20;
-    //First consider all techs for this priority level
-    for(std::list<BuildItem>::iterator i=l->second.techs.begin();i!=l->second.techs.end();i++)
-    {
-    }
-    //Next consider all upgrades for this priority level
-    for(std::list<BuildItem>::iterator i=l->second.upgrades.begin();i!=l->second.upgrades.end();i++)
+    //First consider all techs and upgrades for this priority level
+    for(list<TechItem>::iterator i=l->second.techs.begin();i!=l->second.techs.end();i++)
     {
     }
     //Next consider all buildings for this priority level
-    std::map<UnitType, std::map<UnitType,int> > buildings;
-    for(std::list<BuildItem>::iterator i=l->second.buildings.begin();i!=l->second.buildings.end();i++)
-    {
-      bool ok=true;
-      for(std::map<const UnitType*,int>::const_iterator j=i->unitType.requiredUnits().begin();j!=i->unitType.requiredUnits().end();j++)
-      {
-        if (Broodwar->self()->completedUnitCount(*j->first)==0)
-        {
-          ok=false;
-          break;
-        }
-      }
-      if (ok)
-        buildings[*i->unitType.whatBuilds().first][i->unitType]+=i->count;
-    }
-    for(std::map<UnitType, std::map<UnitType,int> >::iterator i=buildings.begin();i!=buildings.end();i++)
-    {
-      std::map<UnitType,int>::iterator j2;
-      for(std::map<UnitType,int>::iterator j=i->second.begin();j!=i->second.end();j=j2)
-      {
-        BWAPI::Broodwar->drawTextScreen(5,y,"considering %s",j->first.getName().c_str());y+=20;
-        j2=j;
-        j2++;
-        if (hasResources(j->first))
-        {
-          for(std::list<BuildItem>::iterator k=l->second.buildings.begin();k!=l->second.buildings.end();k++)
-          {
-            if (k->unitType==j->first)
-            {
-              if (k->isAdditional)
-              {
-                k->count--;
-                if (k->count==0)
-                {
-                  l->second.buildings.erase(k);
-                }
-              }
-              break;
-            }
-          }
-          this->spendResources(j->first);
-          this->buildManager->build(j->first);
-          j->second--;
-          if (j->second==0)
-          {
-            i->second.erase(j);
-          }
-        }
-        else
-        {
-          BWAPI::Broodwar->drawTextScreen(5,y,"resource-limited");y+=20;
-          return;
-        }
-      }
-    }
 
     //Finally consider all units for this priority level
-    std::map<UnitType, std::map<UnitType,int> > units;
-    for(std::list<BuildItem>::iterator i=l->second.units.begin();i!=l->second.units.end();i++)
+    map<BWAPI::UnitType, map<BWAPI::UnitType, UnitItem* > > buildings;
+    map<BWAPI::UnitType, map<BWAPI::UnitType, UnitItem* > > unitsA;//units that require addons
+    map<BWAPI::UnitType, map<BWAPI::UnitType, UnitItem* > > units;
+    for(map<BWAPI::UnitType, map<BWAPI::UnitType, UnitItem > >::iterator i=l->second.units.begin();i!=l->second.units.end();i++)
     {
-      bool ok=true;
-      for(std::map<const UnitType*,int>::const_iterator j=i->unitType.requiredUnits().begin();j!=i->unitType.requiredUnits().end();j++)
+      for(map<BWAPI::UnitType, UnitItem >::iterator j=i->second.begin();j!=i->second.end();j++)
       {
-        if (Broodwar->self()->completedUnitCount(*j->first)==0)
-        {
-          ok=false;
-          break;
-        }
-      }
-      if (*i->unitType.requiredTech()!=TechTypes::None)
-      {
-        if (!Broodwar->self()->hasResearched(*i->unitType.requiredTech()))
-          ok=false;
-      }
-      if (ok)
-        units[*i->unitType.whatBuilds().first][i->unitType]+=i->count;
-    }
-    for(std::map<UnitType, std::map<UnitType,int> >::iterator i=units.begin();i!=units.end();i++)
-    {
-      std::set<Unit*> allUnits = Broodwar->self()->getUnits();
-      std::vector<Unit*> factories;
-      for(std::set<Unit*>::iterator j=allUnits.begin();j!=allUnits.end();j++)
-      {
-        if ((*j)->getType()==i->first && nextAvailableTime(*j)>-1)
-        {
-          factories.push_back(*j);
-        }
-      }
-      std::sort(factories.begin(),factories.end(),unitCompare);
-      
-      for(int m=0;m<factories.size();m++)
-      {
-        BWAPI::Broodwar->drawTextScreen(5,y,"%s[%x]: %d",factories[m]->getType().getName().c_str(),factories[m],nextAvailableTime(factories[m]));y+=20;
-      }
-      bool done=false;
-      while (!done)
-      {
-        int most=-1;
-        UnitType t=UnitTypes::None;
-        for(std::map<UnitType,int>::iterator j=i->second.begin();j!=i->second.end();j++)
-        {
-          BWAPI::Broodwar->drawTextScreen(5,y,"%s[%d]",j->first.getName().c_str(),j->second);y+=20;
-          if (most<j->second)
-          {
-            most=j->second;
-            t=j->first;
-          }
-        }
-        if (t!=UnitTypes::None)
-        {
-          if (hasResources(t))
-          {
-            if (factories.empty())
-            {
-              BWAPI::Broodwar->drawTextScreen(5,y,"unit-limited for %s",t.getName().c_str());y+=20;
-              done=true;//go to next builder type
-            }
-            else
-            {
-              if (nextAvailableTime(factories.front())==Broodwar->getFrameCount())
-              {
-                for(std::list<BuildItem>::iterator k=l->second.units.begin();k!=l->second.units.end();k++)
-                {
-                  if (k->unitType==t)
-                  {
-                    if (k->isAdditional)
-                    {
-                      k->count--;
-                      if (k->count==0)
-                      {
-                        l->second.units.erase(k);
-                      }
-                    }
-                    break;
-                  }
-                }
-                this->spendResources(t);
-                this->buildManager->build(t);
-                nextAvailableTimeData[factories.front()]=Broodwar->getFrameCount()+20;
-                i->second[t]--;
-                if (i->second[t]==0)
-                {
-                  i->second.erase(t);
-                }
-              }
-              else
-              {
-                this->reserveResources(factories.front(),t);
-              }
-              factories.erase(factories.begin());
-            }
-          }
-          else
-          {
-            BWAPI::Broodwar->drawTextScreen(5,y,"resource-limited");y+=20;
-            return;//out of resources, finish for this frame
-          }
-        }
+        if (j->first.isBuilding())
+          buildings[i->first][j->first]=&(j->second);
         else
         {
-          done=true;
+          //see if the unit type requires an addon
+          if (j->first==UnitTypes::Terran_Siege_Tank_Tank_Mode ||
+              j->first==UnitTypes::Terran_Siege_Tank_Siege_Mode ||
+              j->first==UnitTypes::Terran_Dropship ||
+              j->first==UnitTypes::Terran_Battlecruiser ||
+              j->first==UnitTypes::Terran_Science_Vessel ||
+              j->first==UnitTypes::Terran_Valkyrie)
+            unitsA[i->first][j->first]=&(j->second);
+          else
+            units[i->first][j->first]=&(j->second);
         }
       }
+    }
+    globalUnitSet=&buildings;
+    if (updateUnits()) return;
+    globalUnitSet=&unitsA;
+    if (updateUnits()) return;
+    globalUnitSet=&units;
+    if (updateUnits()) return;
+    map<BWAPI::UnitType, map<BWAPI::UnitType, UnitItem > >::iterator i2;
+    for(map<BWAPI::UnitType, map<BWAPI::UnitType, UnitItem > >::iterator i=l->second.units.begin();i!=l->second.units.end();i=i2)
+    {
+      i2=i;
+      i2++;
+      map<BWAPI::UnitType, UnitItem >::iterator j2;
+      for(map<BWAPI::UnitType, UnitItem >::iterator j=i->second.begin();j!=i->second.end();j=j2)
+      {
+        j2=j;
+        j2++;
+        if (j->second.getRemainingCount()==0)
+          i->second.erase(j);
+      }
+      if (i->second.empty())
+        l->second.units.erase(i);
     }
   }
   BWAPI::Broodwar->drawTextScreen(5,y,"unit-limited");y+=20;
-  /*
-  int o=5;
-  std::list<BuildItem>::iterator i_next;
-  //todo: redesign priority system
-  for(std::list<BuildItem>::iterator i=l->second.begin();i!=l->second.end();i=i_next)
-  {
-    i_next=i;
-    i_next++;
-    if (i->unitType!=BWAPI::UnitTypes::None)
-    {
-      if (i->isAdditional)
-      {
-        BWAPI::Broodwar->drawText(BWAPI::CoordinateType::Screen,5,o,"buildAdditional(%d, \"%s\", %d)",i->count,i->unitType.getName().c_str(),l->first);
-        if (i->count>0)
-        {
-          if (this->hasResources(i->unitType))
-          {
-            this->buildManager->build(i->unitType,i->seedPosition);
-            this->spendResources(i->unitType);
-            i->count--;
-          }
-        }
-        else
-        {
-          l->second.erase(i);
-        }
-      }
-      else
-      {
-        BWAPI::Broodwar->drawText(BWAPI::CoordinateType::Screen,5,o,"build(%d, \"%s\", %d)",i->count,i->unitType.getName().c_str(),l->first);
-        if (this->buildManager->getPlannedCount(i->unitType)>=i->count)
-          l->second.erase(i);
-        else
-          if (this->hasResources(i->unitType))
-          {
-            this->buildManager->build(i->unitType,i->seedPosition);
-            this->spendResources(i->unitType);
-          }
-      }
-    }
-    else if (i->techType!=BWAPI::TechTypes::None)
-    {
-      BWAPI::Broodwar->drawText(BWAPI::CoordinateType::Screen,5,o,"research(\"%s\", %d)",i->techType.getName().c_str(),l->first);
-      if (this->techManager->planned(i->techType))
-        l->second.erase(i);
-      else
-        if (this->hasResources(i->techType))
-        {
-          this->techManager->research(i->techType);
-          this->spendResources(i->techType);
-        }
-    }
-    else
-    {
-      BWAPI::Broodwar->drawText(BWAPI::CoordinateType::Screen,5,o,"upgrade(%d, \"%s\", %d)",i->count,i->upgradeType.getName().c_str(),l->first);
-      if (this->upgradeManager->getPlannedLevel(i->upgradeType)>=i->count)
-        l->second.erase(i);
-      else
-        if (!BWAPI::Broodwar->self()->isUpgrading(i->upgradeType) && this->hasResources(i->upgradeType))
-        {
-          this->upgradeManager->upgrade(i->upgradeType);
-          this->spendResources(i->upgradeType);
-        }
-    }
-    o+=20;
-  }
-  */
 }
 
-std::string BuildOrderManager::getName() const
+string BuildOrderManager::getName() const
 {
   return "Build Order Manager";
 }
@@ -338,17 +358,9 @@ void BuildOrderManager::build(int count, BWAPI::UnitType t, int priority, BWAPI:
   if (seedPosition == BWAPI::TilePositions::None || seedPosition == BWAPI::TilePositions::Unknown)
     seedPosition=BWAPI::Broodwar->self()->getStartLocation();
 
-  BuildItem newItem;
-  newItem.unitType=t;
-  newItem.techType=BWAPI::TechTypes::None;
-  newItem.upgradeType=BWAPI::UpgradeTypes::None;
-  newItem.count=count;
-  newItem.seedPosition=seedPosition;
-  newItem.isAdditional=false;
-  if (t.isBuilding())
-    items[priority].buildings.push_back(newItem);
-  else
-    items[priority].units.push_back(newItem);
+  if (items[priority].units[*t.whatBuilds().first].find(t)==items[priority].units[*t.whatBuilds().first].end())
+    items[priority].units[*t.whatBuilds().first].insert(make_pair(t,UnitItem(t)));
+  items[priority].units[*t.whatBuilds().first][t].setNonAdditional(count,seedPosition);
 }
 
 void BuildOrderManager::buildAdditional(int count, BWAPI::UnitType t, int priority, BWAPI::TilePosition seedPosition)
@@ -357,41 +369,22 @@ void BuildOrderManager::buildAdditional(int count, BWAPI::UnitType t, int priori
   if (seedPosition == BWAPI::TilePositions::None || seedPosition == BWAPI::TilePositions::Unknown)
     seedPosition=BWAPI::Broodwar->self()->getStartLocation();
 
-  BuildItem newItem;
-  newItem.unitType=t;
-  newItem.techType=BWAPI::TechTypes::None;
-  newItem.upgradeType=BWAPI::UpgradeTypes::None;
-  newItem.count=count;
-  newItem.seedPosition=seedPosition;
-  newItem.isAdditional=true;
-  if (t.isBuilding())
-    items[priority].buildings.push_back(newItem);
-  else
-    items[priority].units.push_back(newItem);
+  if (items[priority].units[*t.whatBuilds().first].find(t)==items[priority].units[*t.whatBuilds().first].end())
+    items[priority].units[*t.whatBuilds().first].insert(make_pair(t,UnitItem(t)));
+  items[priority].units[*t.whatBuilds().first][t].addAdditional(count,seedPosition);
 }
 
 void BuildOrderManager::research(BWAPI::TechType t, int priority)
 {
   if (t==BWAPI::TechTypes::None || t==BWAPI::TechTypes::Unknown) return;
-  BuildItem newItem;
-  newItem.unitType=BWAPI::UnitTypes::None;
-  newItem.techType=t;
-  newItem.upgradeType=BWAPI::UpgradeTypes::None;
-  newItem.count=1;
-  newItem.isAdditional=false;
-  items[priority].techs.push_back(newItem);
+
+  items[priority].techs.push_back(TechItem(t));
 }
 
 void BuildOrderManager::upgrade(int level, BWAPI::UpgradeType t, int priority)
 {
   if (t==BWAPI::UpgradeTypes::None || t==BWAPI::UpgradeTypes::Unknown) return;
-  BuildItem newItem;
-  newItem.unitType=BWAPI::UnitTypes::None;
-  newItem.techType=BWAPI::TechTypes::None;
-  newItem.upgradeType=t;
-  newItem.count=level;
-  newItem.isAdditional=false;
-  items[priority].upgrades.push_back(newItem);
+  items[priority].techs.push_back(TechItem(t,level));
 }
 
 bool BuildOrderManager::hasResources(BWAPI::UnitType t)
@@ -401,20 +394,16 @@ bool BuildOrderManager::hasResources(BWAPI::UnitType t)
   if (BWAPI::Broodwar->self()->cumulativeGas()-this->usedGas<t.gasPrice())
     return false;
   double m=BWAPI::Broodwar->self()->cumulativeMinerals()-this->usedMinerals-t.mineralPrice();
-  for(std::map<int, int>::iterator i=this->reservedMinerals.begin();i!=this->reservedMinerals.end();i++)
-  {
-    double t=i->first-Broodwar->getFrameCount();
-    if (m+t*this->workerManager->getMineralRate()<i->second)
-      return false;
-    m-=i->second;
-  }
   double g=BWAPI::Broodwar->self()->cumulativeGas()-this->usedGas-t.gasPrice();
-  for(std::map<int, int>::iterator i=this->reservedGas.begin();i!=this->reservedGas.end();i++)
+  for(map<int, Resources>::iterator i=this->reservedResources.begin();i!=this->reservedResources.end();i++)
   {
     double t=i->first-Broodwar->getFrameCount();
-    if (g+t*this->workerManager->getGasRate()<i->second)
+    if (m+t*this->workerManager->getMineralRate()<i->second.minerals)
       return false;
-    g-=i->second;
+    if (g+t*this->workerManager->getGasRate()<i->second.gas)
+      return false;
+    m-=i->second.minerals;
+    g-=i->second.gas;
   }
   return true;
 }
@@ -425,15 +414,41 @@ bool BuildOrderManager::hasResources(BWAPI::TechType t)
     return false;
   if (BWAPI::Broodwar->self()->cumulativeGas()-this->usedGas<t.gasPrice())
     return false;
+  double m=BWAPI::Broodwar->self()->cumulativeMinerals()-this->usedMinerals-t.mineralPrice();
+  double g=BWAPI::Broodwar->self()->cumulativeGas()-this->usedGas-t.gasPrice();
+  for(map<int, Resources>::iterator i=this->reservedResources.begin();i!=this->reservedResources.end();i++)
+  {
+    double t=i->first-Broodwar->getFrameCount();
+    if (m+t*this->workerManager->getMineralRate()<i->second.minerals)
+      return false;
+    if (g+t*this->workerManager->getGasRate()<i->second.gas)
+      return false;
+    m-=i->second.minerals;
+    g-=i->second.gas;
+  }
   return true;
 }
 
 bool BuildOrderManager::hasResources(BWAPI::UpgradeType t)
 {
-  if (BWAPI::Broodwar->self()->cumulativeMinerals()-this->usedMinerals< t.mineralPriceBase()+t.mineralPriceFactor()*(BWAPI::Broodwar->self()->getUpgradeLevel(t)-1))
+  int mineralPrice=t.mineralPriceBase()+t.mineralPriceFactor()*(BWAPI::Broodwar->self()->getUpgradeLevel(t)-1);
+  int gasPrice=t.gasPriceBase()+t.gasPriceFactor()*(BWAPI::Broodwar->self()->getUpgradeLevel(t)-1);
+  if (BWAPI::Broodwar->self()->cumulativeMinerals()-this->usedMinerals<mineralPrice)
     return false;
-  if (BWAPI::Broodwar->self()->cumulativeGas()-this->usedGas<t.gasPriceBase()+t.gasPriceFactor()*(BWAPI::Broodwar->self()->getUpgradeLevel(t)-1))
+  if (BWAPI::Broodwar->self()->cumulativeGas()-this->usedGas<gasPrice)
     return false;
+  double m=BWAPI::Broodwar->self()->cumulativeMinerals()-this->usedMinerals-mineralPrice;
+  double g=BWAPI::Broodwar->self()->cumulativeGas()-this->usedGas-gasPrice;
+  for(map<int, Resources>::iterator i=this->reservedResources.begin();i!=this->reservedResources.end();i++)
+  {
+    double t=i->first-Broodwar->getFrameCount();
+    if (m+t*this->workerManager->getMineralRate()<i->second.minerals)
+      return false;
+    if (g+t*this->workerManager->getGasRate()<i->second.gas)
+      return false;
+    m-=i->second.minerals;
+    g-=i->second.gas;
+  }
   return true;
 }
 
@@ -455,40 +470,51 @@ void BuildOrderManager::spendResources(BWAPI::UpgradeType t)
   this->usedGas+=t.gasPriceBase()+t.gasPriceFactor()*(BWAPI::Broodwar->self()->getUpgradeLevel(t)-1);
 }
 
+//returns the BuildOrderManager's planned count of units for this type
 int BuildOrderManager::getPlannedCount(BWAPI::UnitType t)
 {
+  //builder unit type
+  UnitType builder=*t.whatBuilds().first;
+
   int c=this->buildManager->getPlannedCount(t);
-  if (t.isBuilding())
+
+  //sum all the remaining units for every priority level
+  for(map<int, PriorityLevel>::iterator p=items.begin();p!=items.end();p++)
   {
-    for(std::map<int, PriorityLevel>::iterator i=items.begin();i!=items.end();i++)
+    map<BWAPI::UnitType, map<BWAPI::UnitType, UnitItem > >* units=&(p->second.units);
+    map<BWAPI::UnitType, map<BWAPI::UnitType, UnitItem > >::iterator i=units->find(builder);
+
+    if (i!=units->end())
     {
-      for(std::list<BuildItem>::iterator j=i->second.buildings.begin();j!=i->second.buildings.end();j++)
+      map<BWAPI::UnitType, UnitItem >* units2=&(i->second);
+      map<BWAPI::UnitType, UnitItem >::iterator j=units2->find(t);
+      if (j!=units2->end())
       {
-        if (j->unitType==t)
-        {
-          if (j->isAdditional)
-            c+=j->count;
-          else
-            c=c<j->count ? j->count : c;
-        }
-      }
-    }
-  }
-  else
-  {
-    for(std::map<int, PriorityLevel>::iterator i=items.begin();i!=items.end();i++)
-    {
-      for(std::list<BuildItem>::iterator j=i->second.units.begin();j!=i->second.units.end();j++)
-      {
-        if (j->unitType==t)
-        {
-          if (j->isAdditional)
-            c+=j->count;
-          else
-            c=c<j->count ? j->count : c;
-        }
+        c+=j->second.getRemainingCount();
       }
     }
   }
   return c;
+}
+
+//reserves resources for this unit type
+pair<int, BuildOrderManager::Resources> BuildOrderManager::reserveResources(Unit* builder, UnitType unitType)
+{
+  int t=Broodwar->getFrameCount();
+  if (builder)
+    t=nextFreeTime(builder,unitType);
+  pair<int, Resources> ret;
+  ret.first=t;
+  ret.second.minerals=unitType.mineralPrice();
+  ret.second.gas=unitType.gasPrice();
+  this->reservedResources[t].minerals+=unitType.mineralPrice();
+  this->reservedResources[t].gas+=unitType.gasPrice();
+  return ret;
+}
+
+//unreserves the given resources
+void BuildOrderManager::unreserveResources(pair<int, BuildOrderManager::Resources> res)
+{
+  this->reservedResources[res.first].minerals-=res.second.minerals;
+  this->reservedResources[res.first].gas-=res.second.gas;
 }
