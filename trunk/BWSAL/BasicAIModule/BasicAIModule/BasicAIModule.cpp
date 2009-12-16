@@ -30,7 +30,7 @@ void BasicAIModule::onStart()
   BWAPI::Race race = Broodwar->self()->getRace();
   BWAPI::Race enemyRace = Broodwar->enemy()->getRace();
   BWAPI::UnitType workerType=*(race.getWorker());
-  this->buildOrderManager->buildAdditional(20,workerType,80);
+  this->buildOrderManager->build(20,workerType,80);
   //make the basic production facility
   if (race == Races::Zerg)
   {
