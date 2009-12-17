@@ -106,6 +106,7 @@ int BuildOrderManager::nextFreeTime(const Unit* unit, UnitType t)
   return time;
 }
 
+//returns the set of unit types the given unit will be able to make at the given time
 set<BWAPI::UnitType> BuildOrderManager::unitsCanMake(BWAPI::Unit* builder, int time)
 {
   set<BWAPI::UnitType> result;
@@ -133,9 +134,11 @@ bool unitTypeOrderCompare(const pair<BWAPI::UnitType, int >& a, const pair<BWAPI
 UnitType getUnitType(set<UnitType>& validUnitTypes,vector<pair<BWAPI::UnitType, int > >& unitCounts)
 {
   UnitType answer=UnitTypes::None;
+  //sort unit counts in descending order of size
   sort(unitCounts.begin(),unitCounts.end(),unitTypeOrderCompare);
   for(vector<pair<BWAPI::UnitType, int > >::iterator i=unitCounts.begin();i!=unitCounts.end();i++)
   {
+    //use the first valid unit type we find
     if (validUnitTypes.find(i->first)!=validUnitTypes.end())
     {
       answer=i->first;
@@ -152,6 +155,8 @@ UnitType getUnitType(set<UnitType>& validUnitTypes,vector<pair<BWAPI::UnitType, 
 bool BuildOrderManager::updateUnits()
 {
   set<Unit*> allUnits = Broodwar->self()->getUnits();
+
+  //sanity check the data (not sure if we need to, but just in case)
   map<BWAPI::UnitType, map<BWAPI::UnitType, UnitItem* > >::iterator i2;
   for(map<BWAPI::UnitType, map<BWAPI::UnitType, UnitItem* > >::iterator i=globalUnitSet->begin();i!=globalUnitSet->end();i=i2)
   {
@@ -172,39 +177,49 @@ bool BuildOrderManager::updateUnits()
   }
 
   if (globalUnitSet->empty())
+  {
+    //false = not resource limited
     return false;
+  }
 
+  //get the set of factory Units
   set<Unit*> factories;
   for(set<Unit*>::iterator i=allUnits.begin();i!=allUnits.end();i++)
   {
     Unit* u=*i;
     UnitType type=u->getType();
+    //only add the factory if it hasn't been reserved and if its a builder type that we need
     if (globalUnitSet->find(type)!=globalUnitSet->end() && this->reservedUnits.find(u)==this->reservedUnits.end())
       factories.insert(u);
   }
-  set<int> times;
 
+  //find the sequence of interesting points in time in the future
+  set<int> times;
+  //iterate through each type of builder
   for(map<BWAPI::UnitType, map<BWAPI::UnitType, UnitItem* > >::iterator i=globalUnitSet->begin();i!=globalUnitSet->end();i++)
   {
-    set<Unit*> factoriesOfType;
-    UnitType unitType=i->first;
+    UnitType unitType=i->first;//builder type
+
+    //iterate through all our factory Units
     for(set<Unit*>::iterator f=factories.begin();f!=factories.end();f++)
     {
       Unit* u=*f;
       UnitType type=u->getType();
-      if (type==i->first)
-        factoriesOfType.insert(u);
-    }
-    for(set<Unit*>::iterator f=factoriesOfType.begin();f!=factoriesOfType.end();f++)
-    {
-      for(map<BWAPI::UnitType, UnitItem* >::iterator j=i->second.begin();j!=i->second.end();j++)
+      if (type==i->first)//only look at units of this builder type
       {
-        int time=nextFreeTime(*f,j->first);
-        if (time>Broodwar->getFrameCount())
-          times.insert(time);
+        //iterate over all the types of units we want to make with this builder type
+        for(map<BWAPI::UnitType, UnitItem* >::iterator j=i->second.begin();j!=i->second.end();j++)
+        {
+          //add the time to the sequence if it is in the future (and not -1)
+          int time=nextFreeTime(*f,j->first);
+          if (time>Broodwar->getFrameCount())
+            times.insert(time);
+        }
       }
     }
   }
+
+  //get the remaining unit counts for each type of unit we want to make
   vector<pair<BWAPI::UnitType, int > > remainingUnitCounts;
   for(map<BWAPI::UnitType, map<BWAPI::UnitType, UnitItem* > >::iterator i=globalUnitSet->begin();i!=globalUnitSet->end();i++)
   {
@@ -213,16 +228,20 @@ bool BuildOrderManager::updateUnits()
       remainingUnitCounts.push_back(make_pair(j->first,j->second->getRemainingCount()));
     }
   }
+
+  //build what we can now
   map<Unit*,set<UnitType> > buildableUnitTypesNow;
   for(set<Unit*>::iterator f=factories.begin();f!=factories.end();f++)
   {
     Unit* factory=*f;
+    //get a unit type, taking into account the remaining unit counts and the set of units this factory can make right now
     UnitType t=getUnitType(unitsCanMake(*f,Broodwar->getFrameCount()),remainingUnitCounts);
     if (t==UnitTypes::None)
       continue;
     if (hasResources(t))
     {
-      this->spendResources(t);
+      //tell factory to build t now
+      this->spendResources(t);//don't need to reserveResources() since we are spending resources instead
       this->reservedUnits.insert(factory);
       TilePosition tp=(*globalUnitSet)[factory->getType()][t]->decrementAdditional();
       if (factory->getAddon()==NULL)
@@ -238,15 +257,19 @@ bool BuildOrderManager::updateUnits()
       this->reservedUnits.insert(factory);
       BWAPI::Broodwar->drawTextScreen(5,y,"Planning to make a %s as soon as possible",t.getName().c_str());y+=20;
       BWAPI::Broodwar->drawTextScreen(5,y,"resource-limited");y+=20;
+      //true = resource limited
       return true;
     }
   }
 
-  //reserve units
+  //reserve units and resources for later
+
+  //iterate through time (this gives earlier events higher priority)
   for(set<int>::iterator t=times.begin();t!=times.end();t++)
   {
     int ctime=*t;
-    map<Unit*,set<UnitType> > buildableUnitTypesNow;
+
+    //remove all factories that have been reserved
     set<Unit*>::iterator f2;
     for(set<Unit*>::iterator f=factories.begin();f!=factories.end();f=f2)
     {
@@ -255,9 +278,11 @@ bool BuildOrderManager::updateUnits()
       if (this->reservedUnits.find(*f)!=this->reservedUnits.end())
         factories.erase(f);
     }
+    //iterate through all factories that haven't been reserved yet
     for(set<Unit*>::iterator f=factories.begin();f!=factories.end();f++)
     {
       Unit* factory=*f;
+      //get a unit type, taking into account the remaining unit counts and the set of units this factory can make at time ctime
       UnitType t=getUnitType(unitsCanMake(*f,ctime),remainingUnitCounts);
       if (t==UnitTypes::None)
         continue;
@@ -273,10 +298,12 @@ bool BuildOrderManager::updateUnits()
         this->reservedUnits.insert(factory);
         BWAPI::Broodwar->drawTextScreen(5,y,"Planning to make a %s as soon as possible",t.getName().c_str());y+=20;
         BWAPI::Broodwar->drawTextScreen(5,y,"resource-limited");y+=20;
+        //true = resource limited
         return true;
       }
     }
   }
+  //false = not resource limited
   return false;
 }
 void BuildOrderManager::update()
