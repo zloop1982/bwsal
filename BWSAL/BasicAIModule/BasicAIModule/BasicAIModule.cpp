@@ -57,8 +57,9 @@ void BasicAIModule::onStart()
   }
   else if (race == Races::Protoss)
   {
-    this->buildOrderManager->buildAdditional(10,UnitTypes::Protoss_Dragoon,60);
-    this->buildOrderManager->buildAdditional(10,UnitTypes::Protoss_Zealot,60);
+    this->buildOrderManager->buildAdditional(10,UnitTypes::Protoss_Dragoon,70);
+    this->buildOrderManager->buildAdditional(10,UnitTypes::Protoss_Zealot,70);
+    this->buildOrderManager->buildAdditional(20,UnitTypes::Protoss_Carrier,60);
   }
  
 }
