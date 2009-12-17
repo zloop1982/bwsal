@@ -52,34 +52,49 @@ ScoutManager::ScoutManager(Arbitrator::Arbitrator<BWAPI::Unit*,double> *arbitrat
 void ScoutManager::onOffer(std::set<BWAPI::Unit*> units)
 {
   //First find an overlord
-  std::set<BWAPI::Unit*> allUnits=units;
-  for(std::set<BWAPI::Unit*>::iterator u = allUnits.begin(); u != allUnits.end(); u++)
+  std::set<BWAPI::Unit*>::iterator u2;
+  for(std::set<BWAPI::Unit*>::iterator u = units.begin(); u != units.end(); u=u2)
   {
-    //ignore if its already a scout
+    u2=u;
+    u2++;
+     //ignore if its already a scout
     if (scouts.find(*u) != scouts.end())
+    {
+      arbitrator->accept(this, *u);
+      units.erase(u);
       continue;
+    }
     if ((*u)->getType() == BWAPI::UnitTypes::Zerg_Overlord && needMoreScouts())
     {
       arbitrator->accept(this, *u);
       addScout(*u);
       units.erase(u);
     }
-    else
-      arbitrator->decline(this, *u, 0);
   }
 
-  for(std::set<BWAPI::Unit*>::iterator u = units.begin(); u != units.end(); u++)
+  for(std::set<BWAPI::Unit*>::iterator u = units.begin(); u != units.end(); u=u2)
   {
+    u2=u;
+    u2++;
     //ignore if its already a scout
     if (scouts.find(*u) != scouts.end())
+    {
+      arbitrator->accept(this, *u);
+      units.erase(u);
       continue;
+    }
     if ((*u)->getType().isWorker() && needMoreScouts())
     {
       arbitrator->accept(this, *u);
       addScout(*u);
+      units.erase(u);
     }
-    else
-      arbitrator->decline(this, *u, 0);
+  }
+
+  //decline remaining units
+  for(std::set<BWAPI::Unit*>::iterator u = units.begin(); u != units.end(); u++)
+  {
+    arbitrator->decline(this, *u, 0);
   }
 }
 
