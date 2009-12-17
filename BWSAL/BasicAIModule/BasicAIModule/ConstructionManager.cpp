@@ -384,6 +384,16 @@ void ConstructionManager::onRemoveUnit(BWAPI::Unit* unit)
     building->builderUnit = NULL;
     builders.erase(unit);
   }
+  else
+  {
+    for(std::list<Building>::iterator i=incompleteBuildings.begin();i!=incompleteBuildings.end();i++)
+    {
+      if (unit==i->buildingUnit)
+      {
+        i->buildingUnit=NULL;
+      }
+    }
+  }
 }
 
 bool ConstructionManager::build(BWAPI::UnitType type, BWAPI::TilePosition goalPosition)
