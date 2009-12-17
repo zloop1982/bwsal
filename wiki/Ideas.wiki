@@ -61,13 +61,13 @@ Also keeps track of last seen positions and the time the unit was last seen. May
 
   * UnitGroup class to make it easier to manipulate groups of units. Examples:
 
-SelectAll(UnitTypes::Terran_Marines).withInRadius(300,startPosition).attackUnit(enemy)
+SelectAll(UnitTypes::Terran_Marine).withInRadius(300,startPosition).attackUnit(enemy)
 
 SelectAll(UnitTypes::Protoss_Probe).isIdle().getCenter()
 
 perhaps a different sort of interface:
 
-AllUnits.filter(Broodwar->self()).filter(UnitTypes::Terran_Marines).getNearest(AllUnits.filter(Broodwar->enemy()).filter(UnitTypes::Zerg_Mutalisk).getCenter()).rightClick(Broodwar->getStartLocation())
+AllUnits.filter(Broodwar->self()).filter(UnitTypes::Terran_Marine).getNearest(AllUnits.filter(Broodwar->enemy()).filter(UnitTypes::Zerg_Mutalisk).getCenter()).rightClick(Broodwar->getStartLocation())
 
 (rightclicks our marine that is closest to the center of the group of enemy mutalisks back to home base)
 
