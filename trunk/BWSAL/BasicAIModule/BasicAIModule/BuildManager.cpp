@@ -109,3 +109,7 @@ void BuildManager::setBuildDistance(int distance)
 {
   this->buildingPlacer->setBuildDistance(distance);
 }
+BWAPI::UnitType BuildManager::getBuildType(BWAPI::Unit* unit) const
+{
+  return this->productionManager->getBuildType(unit);
+}

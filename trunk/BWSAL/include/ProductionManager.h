@@ -15,6 +15,7 @@ class ProductionManager : public Arbitrator::Controller<BWAPI::Unit*,double>
     bool train(BWAPI::UnitType type, bool forceNoAddon=false);
     int getPlannedCount(BWAPI::UnitType type) const;
     int getStartedCount(BWAPI::UnitType type) const;
+    BWAPI::UnitType getBuildType(BWAPI::Unit* unit) const;
 
   private:
     class ProductionUnitType
