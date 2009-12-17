@@ -42,13 +42,19 @@ class BuildOrderManager
     void enableDependencyResolver();
 
   private:
+    bool hasResources(BWAPI::UnitType t, int time);
+    bool hasResources(BWAPI::TechType t, int time);
+    bool hasResources(BWAPI::UpgradeType t, int time);
+    bool hasResources(std::pair<int, BuildOrderManager::Resources> res);
     std::pair<int, Resources> reserveResources(BWAPI::Unit* builder, BWAPI::UnitType unitType);
+    void reserveResources(std::pair<int, BuildOrderManager::Resources> res);
     void unreserveResources(std::pair<int, BuildOrderManager::Resources> res);
     bool updateUnits();
     std::set<BWAPI::UnitType> unitsCanMake(BWAPI::Unit* builder, int time);
     int nextFreeTime(const BWAPI::Unit* unit);
     int nextFreeTime(BWAPI::UnitType t);
     int nextFreeTime(const BWAPI::Unit* unit, BWAPI::UnitType t);
+    bool isResourceLimited();
     BuildManager* buildManager;
     TechManager* techManager;
     UpgradeManager* upgradeManager;
@@ -59,4 +65,6 @@ class BuildOrderManager
     std::map<int, Resources> reservedResources;
     std::set<BWAPI::Unit*> reservedUnits;
     bool dependencyResolver;
+    bool isMineralLimited;
+    bool isGasLimited;
 };

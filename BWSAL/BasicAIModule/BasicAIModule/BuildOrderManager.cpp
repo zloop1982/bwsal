@@ -45,7 +45,7 @@ int BuildOrderManager::nextFreeTime(const Unit* unit)
   natime=max(natime,ctime+unit->getRemainingResearchTime());
   natime=max(natime,ctime+unit->getRemainingUpgradeTime());
   natime=max(natime,nextFreeTimeData[unit]);
-  if (natime==ctime && this->buildManager->getBuildType((Unit*)unit)!=UnitTypes::None)
+  if (natime==ctime && this->buildManager->getBuildType((Unit*)unit)!=UnitTypes::None && unit->getBuildUnit()==NULL)
     natime=ctime+this->buildManager->getBuildType((Unit*)unit).buildTime();
   return natime;
 }
@@ -106,6 +106,10 @@ int BuildOrderManager::nextFreeTime(const Unit* unit, UnitType t)
   return time;
 }
 
+bool BuildOrderManager::isResourceLimited()
+{
+  return this->isMineralLimited && this->isGasLimited;
+}
 //returns the set of unit types the given unit will be able to make at the given time
 set<BWAPI::UnitType> BuildOrderManager::unitsCanMake(BWAPI::Unit* builder, int time)
 {
@@ -238,6 +242,8 @@ bool BuildOrderManager::updateUnits()
     UnitType t=getUnitType(unitsCanMake(*f,Broodwar->getFrameCount()),remainingUnitCounts);
     if (t==UnitTypes::None)
       continue;
+    bool gasLimited=this->isGasLimited;
+    bool mineralLimited=this->isMineralLimited;
     if (hasResources(t))
     {
       //tell factory to build t now
@@ -256,9 +262,21 @@ bool BuildOrderManager::updateUnits()
       this->reserveResources(factory,t);
       this->reservedUnits.insert(factory);
       BWAPI::Broodwar->drawTextScreen(5,y,"Planning to make a %s as soon as possible",t.getName().c_str());y+=20;
-      BWAPI::Broodwar->drawTextScreen(5,y,"resource-limited");y+=20;
-      //true = resource limited
-      return true;
+      if (this->isResourceLimited())
+      {
+        BWAPI::Broodwar->drawTextScreen(5,y,"resource-limited");y+=20;
+        //true = resource limited
+        return true;
+      }
+      if (this->isMineralLimited && !mineralLimited)
+      {
+        BWAPI::Broodwar->drawTextScreen(5,y,"mineral-limited");y+=20;
+      }
+      if (this->isGasLimited && !gasLimited)
+      {
+        BWAPI::Broodwar->drawTextScreen(5,y,"gas-limited");y+=20;
+      }
+
     }
   }
 
@@ -286,7 +304,9 @@ bool BuildOrderManager::updateUnits()
       UnitType t=getUnitType(unitsCanMake(*f,ctime),remainingUnitCounts);
       if (t==UnitTypes::None)
         continue;
-      if (hasResources(t))
+      bool gasLimited=this->isGasLimited;
+      bool mineralLimited=this->isMineralLimited;
+      if (hasResources(t,ctime))
       {
         this->reserveResources(factory,t);
         this->reservedUnits.insert(factory);
@@ -297,9 +317,20 @@ bool BuildOrderManager::updateUnits()
         this->reserveResources(factory,t);
         this->reservedUnits.insert(factory);
         BWAPI::Broodwar->drawTextScreen(5,y,"Planning to make a %s as soon as possible",t.getName().c_str());y+=20;
-        BWAPI::Broodwar->drawTextScreen(5,y,"resource-limited");y+=20;
-        //true = resource limited
-        return true;
+        if (this->isResourceLimited())
+        {
+          BWAPI::Broodwar->drawTextScreen(5,y,"resource-limited");y+=20;
+          //true = resource limited
+          return true;
+        }
+        if (this->isMineralLimited && !mineralLimited)
+        {
+          BWAPI::Broodwar->drawTextScreen(5,y,"mineral-limited");y+=20;
+        }
+        if (this->isGasLimited && !gasLimited)
+        {
+          BWAPI::Broodwar->drawTextScreen(5,y,"gas-limited");y+=20;
+        }
       }
     }
   }
@@ -320,6 +351,8 @@ void BuildOrderManager::update()
   }
   this->reservedResources.clear();
   this->reservedUnits.clear();
+  this->isGasLimited=false;
+  this->isMineralLimited=false;
   y=5;
 
   //Iterate through priority levels in decreasing order
@@ -442,69 +475,67 @@ void BuildOrderManager::upgrade(int level, BWAPI::UpgradeType t, int priority)
   items[priority].techs.push_back(TechItem(t,level));
 }
 
+bool BuildOrderManager::hasResources(std::pair<int, BuildOrderManager::Resources> res)
+{
+  bool mineralLimited=false;
+  bool gasLimited=false;
+  this->reserveResources(res);
+  double m=BWAPI::Broodwar->self()->cumulativeMinerals()-this->usedMinerals;
+  double g=BWAPI::Broodwar->self()->cumulativeGas()-this->usedGas;
+  for(map<int, Resources>::iterator i=this->reservedResources.begin();i!=this->reservedResources.end();i++)
+  {
+    double t=i->first-Broodwar->getFrameCount();
+    m-=i->second.minerals;
+    g-=i->second.gas;
+    if (m+t*this->workerManager->getMineralRate()<0)
+      mineralLimited=true;
+    if (g+t*this->workerManager->getGasRate()<0)
+      gasLimited=true;
+  }
+  this->unreserveResources(res);
+  this->isMineralLimited = this->isMineralLimited || mineralLimited;
+  this->isGasLimited = this->isGasLimited || gasLimited;
+  return (!mineralLimited || res.second.minerals==0) && (!gasLimited || res.second.gas==0);
+}
 bool BuildOrderManager::hasResources(BWAPI::UnitType t)
 {
-  if (BWAPI::Broodwar->self()->cumulativeMinerals()-this->usedMinerals<t.mineralPrice())
-    return false;
-  if (BWAPI::Broodwar->self()->cumulativeGas()-this->usedGas<t.gasPrice())
-    return false;
-  double m=BWAPI::Broodwar->self()->cumulativeMinerals()-this->usedMinerals-t.mineralPrice();
-  double g=BWAPI::Broodwar->self()->cumulativeGas()-this->usedGas-t.gasPrice();
-  for(map<int, Resources>::iterator i=this->reservedResources.begin();i!=this->reservedResources.end();i++)
-  {
-    double t=i->first-Broodwar->getFrameCount();
-    if (m+t*this->workerManager->getMineralRate()<i->second.minerals)
-      return false;
-    if (g+t*this->workerManager->getGasRate()<i->second.gas)
-      return false;
-    m-=i->second.minerals;
-    g-=i->second.gas;
-  }
-  return true;
+  bool ret=hasResources(t,Broodwar->getFrameCount());
+  return ret;
 }
-
 bool BuildOrderManager::hasResources(BWAPI::TechType t)
 {
-  if (BWAPI::Broodwar->self()->cumulativeMinerals()-this->usedMinerals<t.mineralPrice())
-    return false;
-  if (BWAPI::Broodwar->self()->cumulativeGas()-this->usedGas<t.gasPrice())
-    return false;
-  double m=BWAPI::Broodwar->self()->cumulativeMinerals()-this->usedMinerals-t.mineralPrice();
-  double g=BWAPI::Broodwar->self()->cumulativeGas()-this->usedGas-t.gasPrice();
-  for(map<int, Resources>::iterator i=this->reservedResources.begin();i!=this->reservedResources.end();i++)
-  {
-    double t=i->first-Broodwar->getFrameCount();
-    if (m+t*this->workerManager->getMineralRate()<i->second.minerals)
-      return false;
-    if (g+t*this->workerManager->getGasRate()<i->second.gas)
-      return false;
-    m-=i->second.minerals;
-    g-=i->second.gas;
-  }
-  return true;
+  return hasResources(t,Broodwar->getFrameCount());
 }
-
 bool BuildOrderManager::hasResources(BWAPI::UpgradeType t)
 {
-  int mineralPrice=t.mineralPriceBase()+t.mineralPriceFactor()*(BWAPI::Broodwar->self()->getUpgradeLevel(t)-1);
-  int gasPrice=t.gasPriceBase()+t.gasPriceFactor()*(BWAPI::Broodwar->self()->getUpgradeLevel(t)-1);
-  if (BWAPI::Broodwar->self()->cumulativeMinerals()-this->usedMinerals<mineralPrice)
-    return false;
-  if (BWAPI::Broodwar->self()->cumulativeGas()-this->usedGas<gasPrice)
-    return false;
-  double m=BWAPI::Broodwar->self()->cumulativeMinerals()-this->usedMinerals-mineralPrice;
-  double g=BWAPI::Broodwar->self()->cumulativeGas()-this->usedGas-gasPrice;
-  for(map<int, Resources>::iterator i=this->reservedResources.begin();i!=this->reservedResources.end();i++)
-  {
-    double t=i->first-Broodwar->getFrameCount();
-    if (m+t*this->workerManager->getMineralRate()<i->second.minerals)
-      return false;
-    if (g+t*this->workerManager->getGasRate()<i->second.gas)
-      return false;
-    m-=i->second.minerals;
-    g-=i->second.gas;
-  }
-  return true;
+  return hasResources(t,Broodwar->getFrameCount());
+}
+bool BuildOrderManager::hasResources(BWAPI::UnitType t, int time)
+{
+  pair<int, Resources> res;
+  res.first=time;
+  res.second.minerals=t.mineralPrice();
+  res.second.gas=t.gasPrice();
+  bool ret=hasResources(res);
+  return ret;
+}
+
+bool BuildOrderManager::hasResources(BWAPI::TechType t, int time)
+{
+  pair<int, Resources> res;
+  res.first=time;
+  res.second.minerals=t.mineralPrice();
+  res.second.gas=t.gasPrice();
+  return hasResources(res);
+}
+
+bool BuildOrderManager::hasResources(BWAPI::UpgradeType t, int time)
+{
+  pair<int, Resources> res;
+  res.first=time;
+  res.second.minerals=t.mineralPriceBase()+t.mineralPriceFactor()*(BWAPI::Broodwar->self()->getUpgradeLevel(t)-1);
+  res.second.gas=t.gasPriceBase()+t.gasPriceFactor()*(BWAPI::Broodwar->self()->getUpgradeLevel(t)-1);
+  return hasResources(res);
 }
 
 void BuildOrderManager::spendResources(BWAPI::UnitType t)
@@ -562,16 +593,22 @@ pair<int, BuildOrderManager::Resources> BuildOrderManager::reserveResources(Unit
   ret.first=t;
   ret.second.minerals=unitType.mineralPrice();
   ret.second.gas=unitType.gasPrice();
-  this->reservedResources[t].minerals+=unitType.mineralPrice();
-  this->reservedResources[t].gas+=unitType.gasPrice();
+  reserveResources(ret);
   return ret;
 }
+void BuildOrderManager::reserveResources(pair<int, BuildOrderManager::Resources> res)
+{
 
+  this->reservedResources[res.first].minerals+=res.second.minerals;
+  this->reservedResources[res.first].gas+=res.second.gas;
+}
 //unreserves the given resources
 void BuildOrderManager::unreserveResources(pair<int, BuildOrderManager::Resources> res)
 {
   this->reservedResources[res.first].minerals-=res.second.minerals;
   this->reservedResources[res.first].gas-=res.second.gas;
+  if (this->reservedResources[res.first].minerals==0 && this->reservedResources[res.first].gas == 0)
+    this->reservedResources.erase(res.first);
 }
 void BuildOrderManager::enableDependencyResolver()
 {
