@@ -216,12 +216,12 @@ bool BuildOrderManager::updateUnits()
     {
       this->spendResources(t);
       this->reservedUnits.insert(factory);
+      TilePosition tp=(*globalUnitSet)[factory->getType()][t]->decrementAdditional();
       if (factory->getAddon()==NULL)
-        this->buildManager->build(t,true);
+        this->buildManager->build(t,tp,true);
       else
-        this->buildManager->build(t);
+        this->buildManager->build(t,tp);
       BWAPI::Broodwar->printf("Building %s",t.getName().c_str());
-      (*globalUnitSet)[factory->getType()][t]->decrementAdditional();
       nextFreeTimeData[factory]=Broodwar->getFrameCount()+60;
     }
     else
