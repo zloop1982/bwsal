@@ -180,3 +180,10 @@ int ProductionManager::getStartedCount(BWAPI::UnitType type) const
     return i->second;
   return 0;
 }
+
+BWAPI::UnitType ProductionManager::getBuildType(BWAPI::Unit* unit) const
+{
+  if (producingUnits.find(unit)==producingUnits.end())
+    return BWAPI::UnitTypes::None;
+  return producingUnits.find(unit)->second.type.type;
+}

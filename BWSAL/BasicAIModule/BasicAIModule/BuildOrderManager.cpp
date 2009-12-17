@@ -26,24 +26,31 @@ BuildOrderManager::BuildOrderManager(BuildManager* buildManager, TechManager* te
 }
 
 //returns the next frame that the given unit type will be ready to produce units or research tech or upgrades
-int nextFreeTime(const Unit* unit)
+int BuildOrderManager::nextFreeTime(const Unit* unit)
 {
+  int ctime=Broodwar->getFrameCount();
   if (!unit->isCompleted())
   {
+    if (unit->getType().getRace()==Races::Protoss && unit->getType().isBuilding() && unit->getRemainingBuildTime()>0 && nextFreeTimeData[unit]<ctime+24*3)
+      nextFreeTimeData[unit]=ctime+24*3;
     if (!unit->isBeingConstructed() && !unit->getType().isAddon())
       return -1;
   }
-  int ctime=Broodwar->getFrameCount();
-  int natime=max(ctime,ctime+unit->getRemainingBuildTime());
+  int natime=ctime;
+  natime=max(ctime,ctime+unit->getRemainingBuildTime());
+  if (unit->getType().getRace()==Races::Protoss && unit->getType().isBuilding() && unit->getRemainingBuildTime()>0)
+    natime=max(ctime,ctime+unit->getRemainingBuildTime()+24*3);
   natime=max(natime,ctime+unit->getRemainingTrainTime());
   natime=max(natime,ctime+unit->getRemainingResearchTime());
   natime=max(natime,ctime+unit->getRemainingUpgradeTime());
   natime=max(natime,nextFreeTimeData[unit]);
+  if (natime==ctime && this->buildManager->getBuildType((Unit*)unit)!=UnitTypes::None)
+    natime=ctime+this->buildManager->getBuildType((Unit*)unit).buildTime();
   return natime;
 }
 
 //returns the next available time that at least one unit of the given type (buildings only right now) will be completed 
-int nextFreeTime(UnitType t)
+int BuildOrderManager::nextFreeTime(UnitType t)
 {
   //if one unit of the given type is already completed, return the given frame count
   if (Broodwar->self()->completedUnitCount(t)>0)
@@ -82,7 +89,7 @@ int nextFreeTime(UnitType t)
 //returns the next available time that the given unit will be able to train the given unit type
 //takes into account required units
 //todo: take into account required tech and supply
-int nextFreeTime(const Unit* unit, UnitType t)
+int BuildOrderManager::nextFreeTime(const Unit* unit, UnitType t)
 {
   int time=nextFreeTime(unit);
   for(map<const UnitType*,int>::const_iterator i=t.requiredUnits().begin();i!=t.requiredUnits().end();i++)

@@ -45,6 +45,9 @@ class BuildOrderManager
     void unreserveResources(std::pair<int, BuildOrderManager::Resources> res);
     bool updateUnits();
     std::set<BWAPI::UnitType> unitsCanMake(BWAPI::Unit* builder, int time);
+    int nextFreeTime(const BWAPI::Unit* unit);
+    int nextFreeTime(BWAPI::UnitType t);
+    int nextFreeTime(const BWAPI::Unit* unit, BWAPI::UnitType t);
     BuildManager* buildManager;
     TechManager* techManager;
     UpgradeManager* upgradeManager;
