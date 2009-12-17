@@ -39,6 +39,7 @@ class BuildOrderManager
     void spendResources(BWAPI::UpgradeType t);
 
     int getPlannedCount(BWAPI::UnitType t);
+    void enableDependencyResolver();
 
   private:
     std::pair<int, Resources> reserveResources(BWAPI::Unit* builder, BWAPI::UnitType unitType);
@@ -57,4 +58,5 @@ class BuildOrderManager
     int usedGas;
     std::map<int, Resources> reservedResources;
     std::set<BWAPI::Unit*> reservedUnits;
+    bool dependencyResolver;
 };

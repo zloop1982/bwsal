@@ -30,6 +30,7 @@ void BasicAIModule::onStart()
   BWAPI::Race race = Broodwar->self()->getRace();
   BWAPI::Race enemyRace = Broodwar->enemy()->getRace();
   BWAPI::UnitType workerType=*(race.getWorker());
+  this->buildOrderManager->enableDependencyResolver();
   this->buildOrderManager->build(20,workerType,80);
   //make the basic production facility
   if (race == Races::Zerg)
@@ -48,8 +49,6 @@ void BasicAIModule::onStart()
     }
     else
     {
-      this->buildOrderManager->buildAdditional(1,BWAPI::UnitTypes::Terran_Barracks,60);
-      this->buildOrderManager->buildAdditional(1,BWAPI::UnitTypes::Terran_Refinery,60);
       this->buildOrderManager->buildAdditional(3,BWAPI::UnitTypes::Terran_Factory,60);
       this->buildOrderManager->buildAdditional(2,BWAPI::UnitTypes::Terran_Machine_Shop,70);
       this->buildOrderManager->buildAdditional(20,BWAPI::UnitTypes::Terran_Vulture,40);
@@ -58,11 +57,8 @@ void BasicAIModule::onStart()
   }
   else if (race == Races::Protoss)
   {
-    this->buildOrderManager->buildAdditional(1,UnitTypes::Protoss_Gateway,60);
-    this->buildOrderManager->buildAdditional(10,UnitTypes::Protoss_Zealot,60);
     this->buildOrderManager->buildAdditional(10,UnitTypes::Protoss_Dragoon,60);
-    this->buildOrderManager->buildAdditional(1,UnitTypes::Protoss_Assimilator,40);
-    this->buildOrderManager->buildAdditional(1,UnitTypes::Protoss_Cybernetics_Core,30);
+    this->buildOrderManager->buildAdditional(10,UnitTypes::Protoss_Zealot,60);
   }
  
 }

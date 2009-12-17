@@ -12,12 +12,13 @@ map<const Unit*,int> nextFreeTimeData;
 map<BWAPI::UnitType, set<BWAPI::UnitType> > makes;
 BuildOrderManager::BuildOrderManager(BuildManager* buildManager, TechManager* techManager, UpgradeManager* upgradeManager, WorkerManager* workerManager)
 {
-  this->buildManager   = buildManager;
-  this->techManager    = techManager;
-  this->upgradeManager = upgradeManager;
-  this->workerManager  = workerManager;
-  this->usedMinerals   = 0;
-  this->usedGas        = 0;
+  this->buildManager       = buildManager;
+  this->techManager        = techManager;
+  this->upgradeManager     = upgradeManager;
+  this->workerManager      = workerManager;
+  this->usedMinerals       = 0;
+  this->usedGas            = 0;
+  this->dependencyResolver = false;
   UnitItem::getBuildManager() = buildManager;
   for(set<BWAPI::UnitType>::iterator i=UnitTypes::allUnitTypes().begin();i!=UnitTypes::allUnitTypes().end();i++)
   {
@@ -327,6 +328,26 @@ void BuildOrderManager::update()
           else
             units[i->first][j->first]=&(j->second);
         }
+        if (this->dependencyResolver)
+        {
+          //check dependencies (required units)
+          for(map<const BWAPI::UnitType*, int>::const_iterator k=j->first.requiredUnits().begin();k!=j->first.requiredUnits().end();k++)
+          {
+            if (this->getPlannedCount(*k->first)==0)
+            {
+              this->build(1,*k->first,l->first);
+            }
+          }
+          //also check to see if we have enough gas, or a refinery planned
+          if (j->first.gasPrice()>BWAPI::Broodwar->self()->cumulativeGas()-this->usedGas)
+          {
+            UnitType refinery=*j->first.getRace().getRefinery();
+            if (this->getPlannedCount(refinery)==0)
+            {
+              this->build(1,refinery,l->first);
+            }
+          }
+        }
       }
     }
     globalUnitSet=&buildings;
@@ -524,4 +545,8 @@ void BuildOrderManager::unreserveResources(pair<int, BuildOrderManager::Resource
 {
   this->reservedResources[res.first].minerals-=res.second.minerals;
   this->reservedResources[res.first].gas-=res.second.gas;
+}
+void BuildOrderManager::enableDependencyResolver()
+{
+  this->dependencyResolver=true;
 }
