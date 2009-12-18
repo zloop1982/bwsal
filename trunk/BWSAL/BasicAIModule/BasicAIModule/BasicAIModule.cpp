@@ -45,8 +45,20 @@ void BasicAIModule::onStart()
   {
     if (enemyRace == Races::Zerg)
     {
-      this->buildOrderManager->buildAdditional(2,BWAPI::UnitTypes::Terran_Barracks,40);
-      this->buildOrderManager->buildAdditional(20,BWAPI::UnitTypes::Terran_Marine,40);
+      this->buildOrderManager->buildAdditional(1,UnitTypes::Terran_Barracks,60);
+      this->buildOrderManager->buildAdditional(1,UnitTypes::Terran_Academy,50);
+      this->buildOrderManager->buildAdditional(1,UnitTypes::Terran_Barracks,40);
+      this->buildOrderManager->buildAdditional(9,UnitTypes::Terran_Marine,45);
+      this->buildOrderManager->buildAdditional(9,UnitTypes::Terran_Medic,40);
+      this->buildOrderManager->research(TechTypes::Stim_Packs,35);
+      this->buildOrderManager->research(TechTypes::Tank_Siege_Mode,35);
+      this->buildOrderManager->buildAdditional(2,UnitTypes::Terran_Siege_Tank_Tank_Mode,34);
+      this->buildOrderManager->buildAdditional(2,UnitTypes::Terran_Science_Vessel,30);
+      this->buildOrderManager->research(TechTypes::Irradiate,30);
+      this->buildOrderManager->upgrade(1,UpgradeTypes::Terran_Infantry_Weapons,20);
+      this->buildOrderManager->build(3,UnitTypes::Terran_Missile_Turret,12);
+      this->buildOrderManager->build(6,UnitTypes::Terran_Barracks,10);
+      this->buildOrderManager->buildAdditional(40,UnitTypes::Terran_Marine,10);
     }
     else
     {
