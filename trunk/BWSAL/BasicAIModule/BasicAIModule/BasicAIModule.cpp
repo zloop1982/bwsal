@@ -35,6 +35,7 @@ void BasicAIModule::onStart()
   //make the basic production facility
   if (race == Races::Zerg)
   {
+    this->buildOrderManager->upgrade(3,UpgradeTypes::Zerg_Missile_Attacks,79);
     //send an overlord out if Zerg
     this->scoutManager->setScoutCount(1);
     this->buildOrderManager->buildAdditional(1,UnitTypes::Zerg_Spawning_Pool,60);
@@ -49,12 +50,13 @@ void BasicAIModule::onStart()
     }
     else
     {
+      this->buildOrderManager->buildAdditional(2,BWAPI::UnitTypes::Terran_Machine_Shop,70);
       this->buildOrderManager->buildAdditional(3,BWAPI::UnitTypes::Terran_Factory,60);
       this->buildOrderManager->research(TechTypes::Spider_Mines,55);
       this->buildOrderManager->research(TechTypes::Tank_Siege_Mode,55);
-      this->buildOrderManager->buildAdditional(2,BWAPI::UnitTypes::Terran_Machine_Shop,70);
       this->buildOrderManager->buildAdditional(20,BWAPI::UnitTypes::Terran_Vulture,40);
       this->buildOrderManager->buildAdditional(20,BWAPI::UnitTypes::Terran_Siege_Tank_Tank_Mode,40);
+      this->buildOrderManager->upgrade(3,UpgradeTypes::Terran_Vehicle_Weapons,20);
     }
   }
   else if (race == Races::Protoss)

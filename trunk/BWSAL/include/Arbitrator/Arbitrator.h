@@ -60,7 +60,10 @@ namespace Arbitrator
       return false;
     if (bids[obj].top().first != c) //only the top bidder/controller can decline an object
       return false;
-    bids[obj].set(c, bid);
+    if (bid == 0)
+      bids[obj].erase(c);
+    else
+      bids[obj].set(c, bid);
     updatedObjects.insert(obj);
     return true;
   }
