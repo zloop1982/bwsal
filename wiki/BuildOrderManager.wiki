@@ -4,15 +4,15 @@ Class header file: http://code.google.com/p/bwsal/source/browse/trunk/BWSAL/incl
 
   * [#update update]
   * [#getName getName]
-  * [BuildOrderManager#build build]
-  * [BuildOrderManager#buildAdditional buildAdditional]
-  * [BuildOrderManager#research research]
-  * [BuildOrderManager#upgrade upgrade]
+  * [#build build]
+  * [#buildAdditional buildAdditional]
+  * [#research research]
+  * [#upgrade upgrade]
   * [#hasResources hasResources]
   * [#spendResources spendResources]
-  * [#getPlannedCount]
-  * [#enableDependencyResolver]
-  * [#enableDebugMode]
+  * [#getPlannedCount getPlannedCount]
+  * [#enableDependencyResolver enableDependencyResolver]
+  * [#enableDebugMode enableDebugMode]
 
 == update ==
 void update();
