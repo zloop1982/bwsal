@@ -19,6 +19,7 @@ void BasicAIModule::onStart()
   this->buildOrderManager = new BuildOrderManager(this->buildManager,this->techManager,this->upgradeManager,this->workerManager);
   this->baseManager       = new BaseManager();
   this->supplyManager     = new SupplyManager();
+  this->defenseManager    = new DefenseManager(&this->arbitrator);
 
   this->supplyManager->setBuildManager(this->buildManager);
   this->supplyManager->setBuildOrderManager(this->buildOrderManager);
@@ -94,6 +95,7 @@ void BasicAIModule::onFrame()
   this->upgradeManager->update();
   this->supplyManager->update();
   this->scoutManager->update();
+  this->defenseManager->update();
   this->arbitrator.update();
   if (Broodwar->getFrameCount()>24*50)
     scoutManager->setScoutCount(1);
@@ -189,7 +191,9 @@ void BasicAIModule::onUnitDestroy(BWAPI::Unit* unit)
   this->upgradeManager->onRemoveUnit(unit);
   this->workerManager->onRemoveUnit(unit);
   this->scoutManager->onRemoveUnit(unit);
+  this->defenseManager->onRemoveUnit(unit);
 }
+
 bool BasicAIModule::onSendText(std::string text)
 {
   UnitType type=UnitTypes::getUnitType(text);
