@@ -57,8 +57,10 @@ void UpgradeManager::update()
   for(std::set<BWAPI::Unit*>::iterator u = myPlayerUnits.begin(); u != myPlayerUnits.end(); u++)
   {
     std::map<BWAPI::UnitType,std::list<Upgrade> >::iterator r=upgradeQueues.find((*u)->getType());
-    if (r!=upgradeQueues.end() && !r->second.empty())
+    if ((*u)->isCompleted() && r!=upgradeQueues.end() && !r->second.empty())
+    {
       arbitrator->setBid(this, *u, 50);
+    }
   }
   std::map<BWAPI::Unit*,Upgrade>::iterator i_next;
   //iterate through all the upgrading units

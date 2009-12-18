@@ -52,7 +52,7 @@ void TechManager::update()
   for(std::set<BWAPI::Unit*>::iterator u = myPlayerUnits.begin(); u != myPlayerUnits.end(); u++)
   {
     std::map<BWAPI::UnitType,std::list<BWAPI::TechType> >::iterator r=researchQueues.find((*u)->getType());
-    if (r!=researchQueues.end() && !r->second.empty())
+    if ((*u)->isCompleted() && r!=researchQueues.end() && !r->second.empty())
       arbitrator->setBid(this, *u, 50);
   }
   std::map<BWAPI::Unit*,BWAPI::TechType>::iterator i_next;

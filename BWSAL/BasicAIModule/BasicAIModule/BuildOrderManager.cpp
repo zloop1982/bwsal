@@ -458,6 +458,72 @@ void BuildOrderManager::update()
     //get the remaining tech
     list<TechItem > remainingTech=l->second.techs;
 
+    if (this->dependencyResolver)
+    {
+      //check dependencies
+      for(list<TechItem>::iterator i=remainingTech.begin();i!=remainingTech.end();i++)
+      {
+        TechType t=i->techType;
+        UpgradeType u=i->upgradeType;
+        if (t!=TechTypes::None)
+        {
+          if (this->getPlannedCount(*t.whatResearches())==0)
+          {
+            this->build(1,*t.whatResearches(),l->first);
+          }
+          //also check to see if we have enough gas, or a refinery planned
+          if (t.gasPrice()>BWAPI::Broodwar->self()->cumulativeGas()-this->usedGas)
+          {
+            UnitType refinery=*Broodwar->self()->getRace().getRefinery();
+            if (this->getPlannedCount(refinery)==0)
+            {
+              this->build(1,refinery,l->first);
+            }
+          }
+        }
+        else if (u!=UpgradeTypes::None)
+        {
+          if (this->getPlannedCount(*u.whatUpgrades())==0)
+          {
+            this->build(1,*u.whatUpgrades(),l->first);
+          }
+          //also check to see if we have enough gas, or a refinery planned
+          if (u.gasPriceBase()+u.gasPriceFactor()*(BWAPI::Broodwar->self()->getUpgradeLevel(u)-1)>BWAPI::Broodwar->self()->cumulativeGas()-this->usedGas)
+          {
+            UnitType refinery=*Broodwar->self()->getRace().getRefinery();
+            if (this->getPlannedCount(refinery)==0)
+            {
+              this->build(1,refinery,l->first);
+            }
+          }
+          if (i->level>1)
+          {
+            if (u.getRace()==Races::Terran)
+            {
+              if (this->getPlannedCount(UnitTypes::Terran_Science_Facility)==0)
+              {
+                this->build(1,UnitTypes::Terran_Science_Facility,l->first);
+              }
+            }
+            else if (u.getRace()==Races::Protoss)
+            {
+              if (this->getPlannedCount(UnitTypes::Protoss_Templar_Archives)==0)
+              {
+                this->build(1,UnitTypes::Protoss_Templar_Archives,l->first);
+              }
+            }
+            else if (u.getRace()==Races::Zerg)
+            {
+              if (this->getPlannedCount(UnitTypes::Zerg_Lair)==0)
+              {
+                this->build(1,UnitTypes::Zerg_Lair,l->first);
+              }
+            }
+          }
+        }
+      }
+    }
+
     //research and upgrade what we can now
     map<Unit*,set<UnitType> > buildableUnitTypesNow;
     for(set<Unit*>::iterator i=techUnits.begin();i!=techUnits.end();i++)
@@ -654,7 +720,7 @@ void BuildOrderManager::update()
           //also check to see if we have enough gas, or a refinery planned
           if (j->first.gasPrice()>BWAPI::Broodwar->self()->cumulativeGas()-this->usedGas)
           {
-            UnitType refinery=*j->first.getRace().getRefinery();
+            UnitType refinery=*Broodwar->self()->getRace().getRefinery();
             if (this->getPlannedCount(refinery)==0)
             {
               this->build(1,refinery,l->first);
@@ -818,6 +884,10 @@ int BuildOrderManager::getPlannedCount(BWAPI::UnitType t)
       }
     }
   }
+  if (t==UnitTypes::Zerg_Hatchery)
+    c+=this->getPlannedCount(UnitTypes::Zerg_Lair);
+  if (t==UnitTypes::Zerg_Lair)
+    c+=this->getPlannedCount(UnitTypes::Zerg_Hive);
   return c;
 }
 
