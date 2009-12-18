@@ -10,6 +10,8 @@ map<BWAPI::UnitType, map<BWAPI::UnitType, UnitItem* > >* globalUnitSet;
 int y;
 map<const Unit*,int> nextFreeTimeData;
 map<BWAPI::UnitType, set<BWAPI::UnitType> > makes;
+map<BWAPI::UnitType, set<BWAPI::TechType> > researches;
+map<BWAPI::UnitType, set<BWAPI::UpgradeType> > upgrades;
 BuildOrderManager::BuildOrderManager(BuildManager* buildManager, TechManager* techManager, UpgradeManager* upgradeManager, WorkerManager* workerManager)
 {
   this->buildManager       = buildManager;
@@ -23,6 +25,14 @@ BuildOrderManager::BuildOrderManager(BuildManager* buildManager, TechManager* te
   for(set<BWAPI::UnitType>::iterator i=UnitTypes::allUnitTypes().begin();i!=UnitTypes::allUnitTypes().end();i++)
   {
     makes[*(*i).whatBuilds().first].insert(*i);
+  }
+  for(set<BWAPI::TechType>::iterator i=TechTypes::allTechTypes().begin();i!=TechTypes::allTechTypes().end();i++)
+  {
+    researches[*i->whatResearches()].insert(*i);
+  }
+  for(set<BWAPI::UpgradeType>::iterator i=UpgradeTypes::allUpgradeTypes().begin();i!=UpgradeTypes::allUpgradeTypes().end();i++)
+  {
+    upgrades[*i->whatUpgrades()].insert(*i);
   }
 }
 
@@ -123,6 +133,29 @@ set<BWAPI::UnitType> BuildOrderManager::unitsCanMake(BWAPI::Unit* builder, int t
   return result;
 }
 
+set<BWAPI::TechType> BuildOrderManager::techsCanResearch(BWAPI::Unit* techUnit, int time)
+{
+  set<BWAPI::TechType> result;
+  for(set<BWAPI::TechType>::iterator i=researches[techUnit->getType()].begin();i!=researches[techUnit->getType()].end();i++)
+  {
+    int t=nextFreeTime(techUnit);
+    if (t>-1 && t<=time)
+      result.insert(*i);
+  }
+  return result;
+}
+
+set<BWAPI::UpgradeType> BuildOrderManager::upgradesCanResearch(BWAPI::Unit* techUnit, int time)
+{
+  set<BWAPI::UpgradeType> result;
+  for(set<BWAPI::UpgradeType>::iterator i=upgrades[techUnit->getType()].begin();i!=upgrades[techUnit->getType()].end();i++)
+  {
+    int t=nextFreeTime(techUnit);
+    if (t>-1 && t<=time)
+      result.insert(*i);
+  }
+  return result;
+}
 
 //prefer unit types that have larger remaining unit counts
 //if we need a tie-breaker, we prefer cheaper units
@@ -156,6 +189,37 @@ UnitType getUnitType(set<UnitType>& validUnitTypes,vector<pair<BWAPI::UnitType, 
   }
   return answer;
 }
+
+pair<TechType,UpgradeType> getTechOrUpgradeType(set<TechType>& validTechTypes, set<UpgradeType>& validUpgradeTypes, list<TechItem> &remainingTech)
+{
+  pair<TechType,UpgradeType> answer(TechTypes::None,UpgradeTypes::None);
+  for(list<TechItem>::iterator i=remainingTech.begin();i!=remainingTech.end();i++)
+  {
+    //use the first valid unit type we find
+    TechType t=(*i).techType;
+    UpgradeType u=(*i).upgradeType;
+    if (t!=TechTypes::None)
+    {
+      if (validTechTypes.find(t)!=validTechTypes.end())
+      {
+        answer.first=t;
+        remainingTech.erase(i);
+        break;
+      }
+    }
+    else if (u!=UpgradeTypes::None)
+    {
+      if (validUpgradeTypes.find(u)!=validUpgradeTypes.end())
+      {
+        answer.second=u;
+        remainingTech.erase(i);
+        break;
+      }
+    }
+  }
+  return answer;
+}
+
 bool BuildOrderManager::updateUnits()
 {
   set<Unit*> allUnits = Broodwar->self()->getUnits();
@@ -234,7 +298,6 @@ bool BuildOrderManager::updateUnits()
   }
 
   //build what we can now
-  map<Unit*,set<UnitType> > buildableUnitTypesNow;
   for(set<Unit*>::iterator f=factories.begin();f!=factories.end();f++)
   {
     Unit* factory=*f;
@@ -356,16 +419,206 @@ void BuildOrderManager::update()
   y=5;
 
   //Iterate through priority levels in decreasing order
+  //---------------------------------------------------------------------------------------------------------
   for(;l!=items.end();l--)
   {
     BWAPI::Broodwar->drawTextScreen(5,y,"Priority: %d",l->first);y+=20;
+
     //First consider all techs and upgrades for this priority level
+    set<UnitType> techUnitTypes;
     for(list<TechItem>::iterator i=l->second.techs.begin();i!=l->second.techs.end();i++)
     {
+      if (i->techType!=TechTypes::None)
+        techUnitTypes.insert(*i->techType.whatResearches());
+      if (i->upgradeType!=UpgradeTypes::None)
+        techUnitTypes.insert(*i->upgradeType.whatUpgrades());
     }
-    //Next consider all buildings for this priority level
+    set<Unit*> allUnits=BWAPI::Broodwar->self()->getUnits();
+    //get the set of tech Units
+    set<Unit*> techUnits;
+    for(set<Unit*>::iterator i=allUnits.begin();i!=allUnits.end();i++)
+    {
+      Unit* u=*i;
+      UnitType type=u->getType();
+      //only add the factory if it hasn't been reserved and if its a builder type that we need
+      if (techUnitTypes.find(type)!=techUnitTypes.end() && this->reservedUnits.find(u)==this->reservedUnits.end())
+        techUnits.insert(u);
+    }
 
-    //Finally consider all units for this priority level
+    //find the sequence of interesting points in time in the future
+    set<int> times;
+    for(set<Unit*>::iterator i=techUnits.begin();i!=techUnits.end();i++)
+    {
+      //add the time to the sequence if it is in the future (and not -1)
+      int time=nextFreeTime(*i);
+      if (time>Broodwar->getFrameCount())
+        times.insert(time);
+    }
+
+    //get the remaining tech
+    list<TechItem > remainingTech=l->second.techs;
+
+    //research and upgrade what we can now
+    map<Unit*,set<UnitType> > buildableUnitTypesNow;
+    for(set<Unit*>::iterator i=techUnits.begin();i!=techUnits.end();i++)
+    {
+      Unit* techUnit=*i;
+      //get a unit type, taking into account the remaining unit counts and the set of units this factory can make right now
+      pair< TechType,UpgradeType > p=getTechOrUpgradeType(techsCanResearch(*i,Broodwar->getFrameCount()),upgradesCanResearch(*i,Broodwar->getFrameCount()),remainingTech);
+      TechType t=p.first;
+      UpgradeType u=p.second;
+      bool gasLimited=this->isGasLimited;
+      bool mineralLimited=this->isMineralLimited;
+      if (t!=TechTypes::None)
+      {
+        if (hasResources(t))
+        {
+          //tell tech unit to research t now
+          this->spendResources(t);//don't need to reserveResources() since we are spending resources instead
+          this->reservedUnits.insert(techUnit);
+          this->techManager->research(t);
+          BWAPI::Broodwar->printf("Researching %s",t.getName().c_str());
+          nextFreeTimeData[techUnit]=Broodwar->getFrameCount()+60;
+        }
+        else
+        {
+          this->reserveResources(techUnit,t);
+          this->reservedUnits.insert(techUnit);
+          BWAPI::Broodwar->drawTextScreen(5,y,"Planning to make a %s as soon as possible",t.getName().c_str());y+=20;
+          if (this->isResourceLimited())
+          {
+            BWAPI::Broodwar->drawTextScreen(5,y,"resource-limited");y+=20;
+            return;
+          }
+          if (this->isMineralLimited && !mineralLimited)
+          {
+            BWAPI::Broodwar->drawTextScreen(5,y,"mineral-limited");y+=20;
+          }
+          if (this->isGasLimited && !gasLimited)
+          {
+            BWAPI::Broodwar->drawTextScreen(5,y,"gas-limited");y+=20;
+          }
+        }
+      }
+      else if (u!=UpgradeTypes::None)
+      {
+        if (hasResources(u))
+        {
+          //tell tech unit to upgrade u now
+          this->spendResources(u);//don't need to reserveResources() since we are spending resources instead
+          this->reservedUnits.insert(techUnit);
+          this->upgradeManager->upgrade(u);
+          BWAPI::Broodwar->printf("Upgrading %s",u.getName().c_str());
+          nextFreeTimeData[techUnit]=Broodwar->getFrameCount()+60;
+        }
+        else
+        {
+          this->reserveResources(techUnit,u);
+          this->reservedUnits.insert(techUnit);
+          BWAPI::Broodwar->drawTextScreen(5,y,"Planning to make a %s as soon as possible",u.getName().c_str());y+=20;
+          if (this->isResourceLimited())
+          {
+            BWAPI::Broodwar->drawTextScreen(5,y,"resource-limited");y+=20;
+            return;
+          }
+          if (this->isMineralLimited && !mineralLimited)
+          {
+            BWAPI::Broodwar->drawTextScreen(5,y,"mineral-limited");y+=20;
+          }
+          if (this->isGasLimited && !gasLimited)
+          {
+            BWAPI::Broodwar->drawTextScreen(5,y,"gas-limited");y+=20;
+          }
+        }
+      }
+    }
+
+    //reserve units and resources for later
+
+    //iterate through time (this gives earlier events higher priority)
+    for(set<int>::iterator t=times.begin();t!=times.end();t++)
+    {
+      int ctime=*t;
+
+      //remove all tech units that have been reserved
+      set<Unit*>::iterator i2;
+      for(set<Unit*>::iterator i=techUnits.begin();i!=techUnits.end();i=i2)
+      {
+        i2=i;
+        i2++;
+        if (this->reservedUnits.find(*i)!=this->reservedUnits.end())
+          techUnits.erase(i);
+      }
+      //iterate through all tech units that haven't been reserved yet
+      for(set<Unit*>::iterator i=techUnits.begin();i!=techUnits.end();i++)
+      {
+        Unit* techUnit=*i;
+        //get a unit type, taking into account the remaining unit counts and the set of units this factory can make right now
+        pair< TechType,UpgradeType > p=getTechOrUpgradeType(techsCanResearch(*i,ctime),upgradesCanResearch(*i,ctime),remainingTech);
+        TechType t=p.first;
+        UpgradeType u=p.second;
+        bool gasLimited=this->isGasLimited;
+        bool mineralLimited=this->isMineralLimited;
+        if (t!=TechTypes::None)
+        {
+          if (hasResources(t,ctime))
+          {
+            this->reserveResources(techUnit,t);
+            this->reservedUnits.insert(techUnit);
+            BWAPI::Broodwar->drawTextScreen(5,y,"Planning to make a %s at time %d",t.getName().c_str(),nextFreeTime(techUnit));y+=20;
+          }
+          else
+          {
+            this->reserveResources(techUnit,t);
+            this->reservedUnits.insert(techUnit);
+            BWAPI::Broodwar->drawTextScreen(5,y,"Planning to make a %s as soon as possible",t.getName().c_str());y+=20;
+            if (this->isResourceLimited())
+            {
+              BWAPI::Broodwar->drawTextScreen(5,y,"resource-limited");y+=20;
+              return;
+            }
+            if (this->isMineralLimited && !mineralLimited)
+            {
+              BWAPI::Broodwar->drawTextScreen(5,y,"mineral-limited");y+=20;
+            }
+            if (this->isGasLimited && !gasLimited)
+            {
+              BWAPI::Broodwar->drawTextScreen(5,y,"gas-limited");y+=20;
+            }
+          }
+        }
+        else if (u!=UpgradeTypes::None)
+        {
+          if (hasResources(u,ctime))
+          {
+            this->reserveResources(techUnit,u);
+            this->reservedUnits.insert(techUnit);
+            BWAPI::Broodwar->drawTextScreen(5,y,"Planning to make a %s at time %d",u.getName().c_str(),nextFreeTime(techUnit));y+=20;
+          }
+          else
+          {
+            this->reserveResources(techUnit,t);
+            this->reservedUnits.insert(techUnit);
+            BWAPI::Broodwar->drawTextScreen(5,y,"Planning to make a %s as soon as possible",u.getName().c_str());y+=20;
+            if (this->isResourceLimited())
+            {
+              BWAPI::Broodwar->drawTextScreen(5,y,"resource-limited");y+=20;
+              return;
+            }
+            if (this->isMineralLimited && !mineralLimited)
+            {
+              BWAPI::Broodwar->drawTextScreen(5,y,"mineral-limited");y+=20;
+            }
+            if (this->isGasLimited && !gasLimited)
+            {
+              BWAPI::Broodwar->drawTextScreen(5,y,"gas-limited");y+=20;
+            }
+          }
+        }
+      }
+    }
+    //-------------------------------------------------------------------------------------------------------
+    //Next consider all buildings and units for this priority level
     map<BWAPI::UnitType, map<BWAPI::UnitType, UnitItem* > > buildings;
     map<BWAPI::UnitType, map<BWAPI::UnitType, UnitItem* > > unitsA;//units that require addons
     map<BWAPI::UnitType, map<BWAPI::UnitType, UnitItem* > > units;
@@ -416,22 +669,7 @@ void BuildOrderManager::update()
     if (updateUnits()) return;
     globalUnitSet=&units;
     if (updateUnits()) return;
-    map<BWAPI::UnitType, map<BWAPI::UnitType, UnitItem > >::iterator i2;
-    for(map<BWAPI::UnitType, map<BWAPI::UnitType, UnitItem > >::iterator i=l->second.units.begin();i!=l->second.units.end();i=i2)
-    {
-      i2=i;
-      i2++;
-      map<BWAPI::UnitType, UnitItem >::iterator j2;
-      for(map<BWAPI::UnitType, UnitItem >::iterator j=i->second.begin();j!=i->second.end();j=j2)
-      {
-        j2=j;
-        j2++;
-        if (j->second.getRemainingCount()==0)
-          i->second.erase(j);
-      }
-      if (i->second.empty())
-        l->second.units.erase(i);
-    }
+    this->removeCompletedItems(&(l->second));
   }
   BWAPI::Broodwar->drawTextScreen(5,y,"unit-limited");y+=20;
 }
@@ -596,6 +834,32 @@ pair<int, BuildOrderManager::Resources> BuildOrderManager::reserveResources(Unit
   reserveResources(ret);
   return ret;
 }
+//reserves resources for this tech type
+pair<int, BuildOrderManager::Resources> BuildOrderManager::reserveResources(Unit* techUnit, TechType techType)
+{
+  int t=Broodwar->getFrameCount();
+  if (techUnit)
+    t=nextFreeTime(techUnit);
+  pair<int, Resources> ret;
+  ret.first=t;
+  ret.second.minerals=techType.mineralPrice();
+  ret.second.gas=techType.gasPrice();
+  reserveResources(ret);
+  return ret;
+}
+//reserves resources for this upgrade type
+pair<int, BuildOrderManager::Resources> BuildOrderManager::reserveResources(Unit* techUnit, UpgradeType upgradeType)
+{
+  int t=Broodwar->getFrameCount();
+  if (techUnit)
+    t=nextFreeTime(techUnit);
+  pair<int, Resources> ret;
+  ret.first=t;
+  ret.second.minerals=upgradeType.mineralPriceBase()+upgradeType.mineralPriceFactor()*(BWAPI::Broodwar->self()->getUpgradeLevel(upgradeType)-1);
+  ret.second.gas=upgradeType.gasPriceBase()+upgradeType.gasPriceFactor()*(BWAPI::Broodwar->self()->getUpgradeLevel(upgradeType)-1);
+  reserveResources(ret);
+  return ret;
+}
 void BuildOrderManager::reserveResources(pair<int, BuildOrderManager::Resources> res)
 {
 
@@ -613,4 +877,45 @@ void BuildOrderManager::unreserveResources(pair<int, BuildOrderManager::Resource
 void BuildOrderManager::enableDependencyResolver()
 {
   this->dependencyResolver=true;
+}
+
+
+void BuildOrderManager::removeCompletedItems(PriorityLevel* p)
+{
+  list<TechItem>::iterator i2;
+  for(list<TechItem>::iterator i=p->techs.begin();i!=p->techs.end();i=i2)
+  {
+    i2=i;
+    i2++;
+    if (i->techType!=TechTypes::None)
+    {
+      if (this->techManager->planned(i->techType))
+      {
+        p->techs.erase(i);
+      }
+    }
+    else if (i->upgradeType!=UpgradeTypes::None)
+    {
+      if (this->upgradeManager->getPlannedLevel(i->upgradeType)==i->level)
+      {
+        p->techs.erase(i);
+      }
+    }
+  }
+  map<BWAPI::UnitType, map<BWAPI::UnitType, UnitItem > >::iterator i3;
+  for(map<BWAPI::UnitType, map<BWAPI::UnitType, UnitItem > >::iterator i=p->units.begin();i!=p->units.end();i=i3)
+  {
+    i3=i;
+    i3++;
+    map<BWAPI::UnitType, UnitItem >::iterator j2;
+    for(map<BWAPI::UnitType, UnitItem >::iterator j=i->second.begin();j!=i->second.end();j=j2)
+    {
+      j2=j;
+      j2++;
+      if (j->second.getRemainingCount()==0)
+        i->second.erase(j);
+    }
+    if (i->second.empty())
+      p->units.erase(i);
+  }
 }

@@ -50,6 +50,8 @@ void BasicAIModule::onStart()
     else
     {
       this->buildOrderManager->buildAdditional(3,BWAPI::UnitTypes::Terran_Factory,60);
+      this->buildOrderManager->research(TechTypes::Spider_Mines,55);
+      this->buildOrderManager->research(TechTypes::Tank_Siege_Mode,55);
       this->buildOrderManager->buildAdditional(2,BWAPI::UnitTypes::Terran_Machine_Shop,70);
       this->buildOrderManager->buildAdditional(20,BWAPI::UnitTypes::Terran_Vulture,40);
       this->buildOrderManager->buildAdditional(20,BWAPI::UnitTypes::Terran_Siege_Tank_Tank_Mode,40);
@@ -59,6 +61,7 @@ void BasicAIModule::onStart()
   {
     this->buildOrderManager->buildAdditional(10,UnitTypes::Protoss_Dragoon,70);
     this->buildOrderManager->buildAdditional(10,UnitTypes::Protoss_Zealot,70);
+    this->buildOrderManager->upgrade(1,UpgradeTypes::Singularity_Charge,61);
     this->buildOrderManager->buildAdditional(20,UnitTypes::Protoss_Carrier,60);
   }
  
