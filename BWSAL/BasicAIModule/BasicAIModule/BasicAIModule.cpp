@@ -184,6 +184,7 @@ bool BasicAIModule::onSendText(std::string text)
   if (text=="debug")
   {
     this->showManagerAssignments=true;
+    this->buildOrderManager->enableDebugMode();
     return true;
   }
   if (text=="expand")

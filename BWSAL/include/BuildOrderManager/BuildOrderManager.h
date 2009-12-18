@@ -40,6 +40,7 @@ class BuildOrderManager
 
     int getPlannedCount(BWAPI::UnitType t);
     void enableDependencyResolver();
+    void enableDebugMode();
 
   private:
     bool hasResources(BWAPI::UnitType t, int time);
@@ -60,6 +61,7 @@ class BuildOrderManager
     int nextFreeTime(const BWAPI::Unit* unit, BWAPI::UnitType t);
     bool isResourceLimited();
     void removeCompletedItems(PriorityLevel* p);
+    void debug(const char* text, ...);
     BuildManager* buildManager;
     TechManager* techManager;
     UpgradeManager* upgradeManager;
@@ -72,4 +74,5 @@ class BuildOrderManager
     bool dependencyResolver;
     bool isMineralLimited;
     bool isGasLimited;
+    bool showDebugInfo;
 };

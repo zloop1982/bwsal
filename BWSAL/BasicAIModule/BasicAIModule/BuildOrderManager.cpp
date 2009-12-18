@@ -4,6 +4,7 @@
 #include <UpgradeManager.h>
 #include <WorkerManager.h>
 #include <algorithm>
+#include <stdarg.h>
 using namespace std;
 using namespace BWAPI;
 map<BWAPI::UnitType, map<BWAPI::UnitType, UnitItem* > >* globalUnitSet;
@@ -21,6 +22,7 @@ BuildOrderManager::BuildOrderManager(BuildManager* buildManager, TechManager* te
   this->usedMinerals       = 0;
   this->usedGas            = 0;
   this->dependencyResolver = false;
+  this->showDebugInfo      = false;
   UnitItem::getBuildManager() = buildManager;
   for(set<BWAPI::UnitType>::iterator i=UnitTypes::allUnitTypes().begin();i!=UnitTypes::allUnitTypes().end();i++)
   {
@@ -317,27 +319,27 @@ bool BuildOrderManager::updateUnits()
         this->buildManager->build(t,tp,true);
       else
         this->buildManager->build(t,tp);
-      BWAPI::Broodwar->printf("Building %s",t.getName().c_str());
+      if (showDebugInfo) Broodwar->printf("Building %s",t.getName().c_str());
       nextFreeTimeData[factory]=Broodwar->getFrameCount()+60;
     }
     else
     {
       this->reserveResources(factory,t);
       this->reservedUnits.insert(factory);
-      BWAPI::Broodwar->drawTextScreen(5,y,"Planning to make a %s as soon as possible",t.getName().c_str());y+=20;
+      debug("Planning to make a %s as soon as possible",t.getName().c_str());
       if (this->isResourceLimited())
       {
-        BWAPI::Broodwar->drawTextScreen(5,y,"resource-limited");y+=20;
+        debug("resource-limited");
         //true = resource limited
         return true;
       }
       if (this->isMineralLimited && !mineralLimited)
       {
-        BWAPI::Broodwar->drawTextScreen(5,y,"mineral-limited");y+=20;
+        debug("mineral-limited");
       }
       if (this->isGasLimited && !gasLimited)
       {
-        BWAPI::Broodwar->drawTextScreen(5,y,"gas-limited");y+=20;
+        debug("gas-limited");
       }
 
     }
@@ -373,26 +375,26 @@ bool BuildOrderManager::updateUnits()
       {
         this->reserveResources(factory,t);
         this->reservedUnits.insert(factory);
-        BWAPI::Broodwar->drawTextScreen(5,y,"Planning to make a %s at time %d",t.getName().c_str(),nextFreeTime(factory,t));y+=20;
+        debug("Planning to make a %s at time %d",t.getName().c_str(),nextFreeTime(factory,t));
       }
       else
       {
         this->reserveResources(factory,t);
         this->reservedUnits.insert(factory);
-        BWAPI::Broodwar->drawTextScreen(5,y,"Planning to make a %s as soon as possible",t.getName().c_str());y+=20;
+        debug("Planning to make a %s as soon as possible",t.getName().c_str());
         if (this->isResourceLimited())
         {
-          BWAPI::Broodwar->drawTextScreen(5,y,"resource-limited");y+=20;
+          debug("resource-limited");
           //true = resource limited
           return true;
         }
         if (this->isMineralLimited && !mineralLimited)
         {
-          BWAPI::Broodwar->drawTextScreen(5,y,"mineral-limited");y+=20;
+          debug("mineral-limited");
         }
         if (this->isGasLimited && !gasLimited)
         {
-          BWAPI::Broodwar->drawTextScreen(5,y,"gas-limited");y+=20;
+          debug("gas-limited");
         }
       }
     }
@@ -422,7 +424,7 @@ void BuildOrderManager::update()
   //---------------------------------------------------------------------------------------------------------
   for(;l!=items.end();l--)
   {
-    BWAPI::Broodwar->drawTextScreen(5,y,"Priority: %d",l->first);y+=20;
+    debug("Priority: %d",l->first);
 
     //First consider all techs and upgrades for this priority level
     set<UnitType> techUnitTypes;
@@ -543,26 +545,26 @@ void BuildOrderManager::update()
           this->spendResources(t);//don't need to reserveResources() since we are spending resources instead
           this->reservedUnits.insert(techUnit);
           this->techManager->research(t);
-          BWAPI::Broodwar->printf("Researching %s",t.getName().c_str());
+          if (showDebugInfo) BWAPI::Broodwar->printf("Researching %s",t.getName().c_str());
           nextFreeTimeData[techUnit]=Broodwar->getFrameCount()+60;
         }
         else
         {
           this->reserveResources(techUnit,t);
           this->reservedUnits.insert(techUnit);
-          BWAPI::Broodwar->drawTextScreen(5,y,"Planning to make a %s as soon as possible",t.getName().c_str());y+=20;
+          debug("Planning to make a %s as soon as possible",t.getName().c_str());
           if (this->isResourceLimited())
           {
-            BWAPI::Broodwar->drawTextScreen(5,y,"resource-limited");y+=20;
+            debug("resource-limited");
             return;
           }
           if (this->isMineralLimited && !mineralLimited)
           {
-            BWAPI::Broodwar->drawTextScreen(5,y,"mineral-limited");y+=20;
+            debug("mineral-limited");
           }
           if (this->isGasLimited && !gasLimited)
           {
-            BWAPI::Broodwar->drawTextScreen(5,y,"gas-limited");y+=20;
+            debug("gas-limited");
           }
         }
       }
@@ -574,26 +576,26 @@ void BuildOrderManager::update()
           this->spendResources(u);//don't need to reserveResources() since we are spending resources instead
           this->reservedUnits.insert(techUnit);
           this->upgradeManager->upgrade(u);
-          BWAPI::Broodwar->printf("Upgrading %s",u.getName().c_str());
+          if (showDebugInfo) BWAPI::Broodwar->printf("Upgrading %s",u.getName().c_str());
           nextFreeTimeData[techUnit]=Broodwar->getFrameCount()+60;
         }
         else
         {
           this->reserveResources(techUnit,u);
           this->reservedUnits.insert(techUnit);
-          BWAPI::Broodwar->drawTextScreen(5,y,"Planning to make a %s as soon as possible",u.getName().c_str());y+=20;
+          debug("Planning to make a %s as soon as possible",u.getName().c_str());
           if (this->isResourceLimited())
           {
-            BWAPI::Broodwar->drawTextScreen(5,y,"resource-limited");y+=20;
+            debug("resource-limited");
             return;
           }
           if (this->isMineralLimited && !mineralLimited)
           {
-            BWAPI::Broodwar->drawTextScreen(5,y,"mineral-limited");y+=20;
+            debug("mineral-limited");
           }
           if (this->isGasLimited && !gasLimited)
           {
-            BWAPI::Broodwar->drawTextScreen(5,y,"gas-limited");y+=20;
+            debug("gas-limited");
           }
         }
       }
@@ -631,25 +633,25 @@ void BuildOrderManager::update()
           {
             this->reserveResources(techUnit,t);
             this->reservedUnits.insert(techUnit);
-            BWAPI::Broodwar->drawTextScreen(5,y,"Planning to make a %s at time %d",t.getName().c_str(),nextFreeTime(techUnit));y+=20;
+            debug("Planning to make a %s at time %d",t.getName().c_str(),nextFreeTime(techUnit));
           }
           else
           {
             this->reserveResources(techUnit,t);
             this->reservedUnits.insert(techUnit);
-            BWAPI::Broodwar->drawTextScreen(5,y,"Planning to make a %s as soon as possible",t.getName().c_str());y+=20;
+            debug("Planning to make a %s as soon as possible",t.getName().c_str());
             if (this->isResourceLimited())
             {
-              BWAPI::Broodwar->drawTextScreen(5,y,"resource-limited");y+=20;
+              debug("resource-limited");
               return;
             }
             if (this->isMineralLimited && !mineralLimited)
             {
-              BWAPI::Broodwar->drawTextScreen(5,y,"mineral-limited");y+=20;
+              debug("mineral-limited");
             }
             if (this->isGasLimited && !gasLimited)
             {
-              BWAPI::Broodwar->drawTextScreen(5,y,"gas-limited");y+=20;
+              debug("gas-limited");
             }
           }
         }
@@ -659,25 +661,25 @@ void BuildOrderManager::update()
           {
             this->reserveResources(techUnit,u);
             this->reservedUnits.insert(techUnit);
-            BWAPI::Broodwar->drawTextScreen(5,y,"Planning to make a %s at time %d",u.getName().c_str(),nextFreeTime(techUnit));y+=20;
+            debug("Planning to make a %s at time %d",u.getName().c_str(),nextFreeTime(techUnit));
           }
           else
           {
             this->reserveResources(techUnit,t);
             this->reservedUnits.insert(techUnit);
-            BWAPI::Broodwar->drawTextScreen(5,y,"Planning to make a %s as soon as possible",u.getName().c_str());y+=20;
+            debug("Planning to make a %s as soon as possible",u.getName().c_str());
             if (this->isResourceLimited())
             {
-              BWAPI::Broodwar->drawTextScreen(5,y,"resource-limited");y+=20;
+              debug("resource-limited");
               return;
             }
             if (this->isMineralLimited && !mineralLimited)
             {
-              BWAPI::Broodwar->drawTextScreen(5,y,"mineral-limited");y+=20;
+              debug("mineral-limited");
             }
             if (this->isGasLimited && !gasLimited)
             {
-              BWAPI::Broodwar->drawTextScreen(5,y,"gas-limited");y+=20;
+              debug("gas-limited");
             }
           }
         }
@@ -737,7 +739,7 @@ void BuildOrderManager::update()
     if (updateUnits()) return;
     this->removeCompletedItems(&(l->second));
   }
-  BWAPI::Broodwar->drawTextScreen(5,y,"unit-limited");y+=20;
+  debug("unit-limited");
 }
 
 string BuildOrderManager::getName() const
@@ -948,6 +950,10 @@ void BuildOrderManager::enableDependencyResolver()
 {
   this->dependencyResolver=true;
 }
+void BuildOrderManager::enableDebugMode()
+{
+  this->showDebugInfo=true;
+}
 
 
 void BuildOrderManager::removeCompletedItems(PriorityLevel* p)
@@ -987,5 +993,22 @@ void BuildOrderManager::removeCompletedItems(PriorityLevel* p)
     }
     if (i->second.empty())
       p->units.erase(i);
+  }
+}
+
+void BuildOrderManager::debug(const char* text, ...)
+{
+  const int BUFFER_SIZE = 1024;
+  char buffer[BUFFER_SIZE];
+
+  va_list ap;
+  va_start(ap, text);
+  vsnprintf_s(buffer, BUFFER_SIZE, BUFFER_SIZE, text, ap);
+  va_end(ap);
+
+  if (this->showDebugInfo)
+  {
+    Broodwar->drawTextScreen(5,y,buffer);
+    y+=20;
   }
 }
