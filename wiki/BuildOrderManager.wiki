@@ -10,6 +10,9 @@ Class header file: http://code.google.com/p/bwsal/source/browse/trunk/BWSAL/incl
   * [BuildOrderManager#upgrade upgrade]
   * [#hasResources hasResources]
   * [#spendResources spendResources]
+  * [#getPlannedCount]
+  * [#enableDependencyResolver]
+  * [#enableDebugMode]
 
 == update ==
 void update();
@@ -54,3 +57,18 @@ Returns true if the player has enough resources for the given type (taking into 
   * void spendResources(BWAPI::UpgradeType t);
 
 Returns true if the player has enough resources for the given type (taking into account the Build Order Manager's resource reserve system).
+
+== getPlannedCount ==
+int getPlannedCount(BWAPI::UnitType t);
+
+Returns the currently planned number of units of the given type (includes started and completed units).
+
+== enableDependencyResolver ==
+void enableDependencyResolver();
+
+Enables the dependency resolver, which will automatically queue up required units when needed.
+
+== enableDebugMode ==
+void enableDebugMode();
+
+Enables debug mode, which will show a lot of debug information on the screen. Useful if you want to see what the Build Order Manager is currently planning to do.
