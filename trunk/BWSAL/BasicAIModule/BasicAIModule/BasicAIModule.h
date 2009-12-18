@@ -10,6 +10,7 @@
 #include <UpgradeManager.h>
 #include <BaseManager.h>
 #include <ScoutManager.h>
+#include <DefenseManager.h>
 
 class BasicAIModule : public BWAPI::AIModule
 {
@@ -34,5 +35,6 @@ public:
   BaseManager* baseManager;
   ScoutManager* scoutManager;
   BuildOrderManager* buildOrderManager;
+  DefenseManager* defenseManager;
   bool showManagerAssignments;
 };
