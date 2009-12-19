@@ -11,15 +11,16 @@ void BasicAIModule::onStart()
   BWTA::readMap();
   BWTA::analyze();
   this->analyzed=true;
-  this->buildManager      = new BuildManager(&this->arbitrator);
-  this->techManager       = new TechManager(&this->arbitrator);
-  this->upgradeManager    = new UpgradeManager(&this->arbitrator);
-  this->scoutManager      = new ScoutManager(&this->arbitrator);
-  this->workerManager     = new WorkerManager(&this->arbitrator);
-  this->buildOrderManager = new BuildOrderManager(this->buildManager,this->techManager,this->upgradeManager,this->workerManager);
-  this->baseManager       = new BaseManager();
-  this->supplyManager     = new SupplyManager();
-  this->defenseManager    = new DefenseManager(&this->arbitrator);
+  this->buildManager       = new BuildManager(&this->arbitrator);
+  this->techManager        = new TechManager(&this->arbitrator);
+  this->upgradeManager     = new UpgradeManager(&this->arbitrator);
+  this->scoutManager       = new ScoutManager(&this->arbitrator);
+  this->workerManager      = new WorkerManager(&this->arbitrator);
+  this->buildOrderManager  = new BuildOrderManager(this->buildManager,this->techManager,this->upgradeManager,this->workerManager);
+  this->baseManager        = new BaseManager();
+  this->supplyManager      = new SupplyManager();
+  this->defenseManager     = new DefenseManager(&this->arbitrator);
+  this->informationManager = new InformationManager();
 
   this->supplyManager->setBuildManager(this->buildManager);
   this->supplyManager->setBuildOrderManager(this->buildOrderManager);
@@ -192,6 +193,11 @@ void BasicAIModule::onUnitDestroy(BWAPI::Unit* unit)
   this->workerManager->onRemoveUnit(unit);
   this->scoutManager->onRemoveUnit(unit);
   this->defenseManager->onRemoveUnit(unit);
+}
+
+void BasicAIModule::onUnitHide(BWAPI::Unit* unit)
+{
+  this->informationManager->onUnitHide(unit);
 }
 
 bool BasicAIModule::onSendText(std::string text)
