@@ -11,12 +11,14 @@
 #include <BaseManager.h>
 #include <ScoutManager.h>
 #include <DefenseManager.h>
+#include <InformationManager.h>
 
 class BasicAIModule : public BWAPI::AIModule
 {
 public:
   virtual void onStart();
   virtual void onFrame();
+  virtual void onUnitHide(BWAPI::Unit* unit);
   virtual void onUnitDestroy(BWAPI::Unit* unit);
   virtual bool onSendText(std::string text);
   void showStats(); //not part of BWAPI::AIModule
@@ -36,5 +38,6 @@ public:
   ScoutManager* scoutManager;
   BuildOrderManager* buildOrderManager;
   DefenseManager* defenseManager;
+  InformationManager* informationManager;
   bool showManagerAssignments;
 };

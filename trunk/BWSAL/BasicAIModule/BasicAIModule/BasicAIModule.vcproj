@@ -419,6 +419,18 @@
 					>
 				</File>
 			</Filter>
+			<Filter
+				Name="InformationManager"
+				>
+				<File
+					RelativePath=".\InformationManager.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\include\InformationManager.h"
+					>
+				</File>
+			</Filter>
 		</Filter>
 	</Files>
 	<Globals>
