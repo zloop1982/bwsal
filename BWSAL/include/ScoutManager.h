@@ -31,6 +31,7 @@ class ScoutManager : public Arbitrator::Controller<BWAPI::Unit*,double>
     // Non-Controller methods.
     bool isScouting() const;
     void setScoutCount(int count);
+    void enableDebugMode();
 
     std::map<BWAPI::Unit*, ScoutData> scouts;
     Arbitrator::Arbitrator<BWAPI::Unit*,double>* arbitrator;
@@ -44,7 +45,9 @@ class ScoutManager : public Arbitrator::Controller<BWAPI::Unit*,double>
     void requestScout(double bid);
     void addScout(BWAPI::Unit* unit);
     void updateScoutAssignments();
+    void drawAssignments();
     
     size_t desiredScoutCount;
     int scoutingStartFrame;
+    bool debugMode;
 };
