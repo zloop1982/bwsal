@@ -44,7 +44,11 @@ void DefenseManager::update()
   std::set<BWAPI::Unit*> myPlayerUnits=BWAPI::Broodwar->self()->getUnits();
   for (std::set<BWAPI::Unit*>::iterator u = myPlayerUnits.begin(); u != myPlayerUnits.end(); u++)
   {
-    if ((*u)->isCompleted() && !(*u)->getType().isWorker() && !(*u)->getType().isBuilding())
+    if ((*u)->isCompleted() && 
+        !(*u)->getType().isWorker() && 
+        !(*u)->getType().isBuilding() &&
+        (*u)->getType() != BWAPI::UnitTypes::Zerg_Egg &&
+        (*u)->getType() != BWAPI::UnitTypes::Zerg_Larva)
     {
       arbitrator->setBid(this, *u, 20);
     }
