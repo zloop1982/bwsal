@@ -56,7 +56,7 @@ Returns true if the player has enough resources for the given type (taking into 
   * void spendResources(BWAPI::TechType t);
   * void spendResources(BWAPI::UpgradeType t);
 
-Returns true if the player has enough resources for the given type (taking into account the Build Order Manager's resource reserve system).
+Spends resources in the Build Order Manager's resource reserve system. Should be used if you plan to spend resources on units/buildings/tech/upgrades without using the BuildOrderManager (i.e. by calling the BuildManager directly or ordering a unit directly).
 
 == getPlannedCount ==
 int getPlannedCount(BWAPI::UnitType t);
