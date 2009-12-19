@@ -100,12 +100,7 @@ void ScoutManager::onOffer(std::set<BWAPI::Unit*> units)
 
 void ScoutManager::onRevoke(BWAPI::Unit *unit, double bid)
 {
-  BWAPI::Position lostTarget = scouts[unit].target;
-  if (positionsExplored.find(lostTarget) == positionsExplored.end())
-  {
-    positionsToScout.push_back(lostTarget);
-  }
- scouts.erase(unit);
+  onRemoveUnit(unit);
 }
 
 void ScoutManager::update()
@@ -123,6 +118,10 @@ void ScoutManager::update()
     }
   }
   updateScoutAssignments();
+  if (debugMode)
+  {
+    drawAssignments();
+  }
 }
 
 std::string ScoutManager::getName() const
@@ -138,6 +137,10 @@ void ScoutManager::onRemoveUnit(BWAPI::Unit* unit)
     if (positionsExplored.find(lostTarget) == positionsExplored.end())
     {
       positionsToScout.push_back(lostTarget);
+      if (debugMode)
+      {
+        BWAPI::Broodwar->printf("Reassigning (%d,%d)", lostTarget.x(), lostTarget.y());
+      }
     }
     scouts.erase(unit);
   }
@@ -146,6 +149,27 @@ void ScoutManager::onRemoveUnit(BWAPI::Unit* unit)
 void ScoutManager::setScoutCount(int count)
 {
   this->desiredScoutCount=count;
+}
+
+void ScoutManager::enableDebugMode()
+{
+  debugMode = true;
+}
+
+void ScoutManager::drawAssignments()
+{
+  //draw target vector for each scout
+  for (std::map<BWAPI::Unit*,ScoutData>::iterator s = scouts.begin(); s != scouts.end(); s++)
+  {
+    if ((*s).second.mode != ScoutData::Idle)
+    {
+      BWAPI::Position scoutPos = (*s).first->getPosition();
+      BWAPI::Position targetPos = (*s).second.target;
+      BWAPI::Broodwar->drawLineMap(scoutPos.x(), scoutPos.y(), targetPos.x(), targetPos.y(), BWAPI::Colors::Yellow);
+      BWAPI::Broodwar->drawCircleMap(scoutPos.x(), scoutPos.y(), 6, BWAPI::Colors::Yellow);
+      BWAPI::Broodwar->drawCircleMap(targetPos.x(), targetPos.y(), (*s).first->getType().sightRange(), BWAPI::Colors::Yellow);
+    }
+  }
 }
 
 bool ScoutManager::isScouting() const
@@ -190,6 +214,10 @@ void ScoutManager::updateScoutAssignments()
       positionsToScout.remove(exploredPosition);
       positionsExplored.insert(exploredPosition);
       (*u).second.mode = ScoutData::Idle;
+      if (debugMode)
+      {
+        BWAPI::Broodwar->printf("Sucessfully scouted (%d,%d)", exploredPosition.x(), exploredPosition.y());
+      }
     }
   }
 
@@ -212,6 +240,10 @@ void ScoutManager::updateScoutAssignments()
         (*u).first->rightClick(target);
         (*u).second.target = target;
         positionsToScout.remove(target);
+        if (debugMode)
+        {
+          BWAPI::Broodwar->printf("Scouting (%d,%d)", target.x(), target.y());
+        }
       }
     } // for
   }
