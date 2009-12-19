@@ -431,6 +431,18 @@
 					>
 				</File>
 			</Filter>
+			<Filter
+				Name="UnitGroup"
+				>
+				<File
+					RelativePath=".\UnitGroup.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\include\UnitGroup.h"
+					>
+				</File>
+			</Filter>
 		</Filter>
 	</Files>
 	<Globals>

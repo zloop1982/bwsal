@@ -48,10 +48,10 @@ void BasicAIModule::onStart()
     if (enemyRace == Races::Zerg)
     {
       this->buildOrderManager->buildAdditional(1,UnitTypes::Terran_Barracks,60);
-      this->buildOrderManager->buildAdditional(1,UnitTypes::Terran_Academy,50);
-      this->buildOrderManager->buildAdditional(1,UnitTypes::Terran_Barracks,40);
       this->buildOrderManager->buildAdditional(9,UnitTypes::Terran_Marine,45);
-      this->buildOrderManager->buildAdditional(9,UnitTypes::Terran_Medic,40);
+      this->buildOrderManager->buildAdditional(1,UnitTypes::Terran_Barracks,40);
+      this->buildOrderManager->buildAdditional(1,UnitTypes::Terran_Academy,39);
+      this->buildOrderManager->buildAdditional(9,UnitTypes::Terran_Medic,38);
       this->buildOrderManager->research(TechTypes::Stim_Packs,35);
       this->buildOrderManager->research(TechTypes::Tank_Siege_Mode,35);
       this->buildOrderManager->buildAdditional(2,UnitTypes::Terran_Siege_Tank_Tank_Mode,34);
