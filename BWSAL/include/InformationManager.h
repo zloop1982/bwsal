@@ -9,6 +9,7 @@ class InformationManager
     BWAPI::Player* getPlayer(BWAPI::Unit* unit);
     BWAPI::UnitType getType(BWAPI::Unit* unit);
     BWAPI::Position getLastPosition(BWAPI::Unit* unit);
+    int getLastSeenTime(BWAPI::Unit* unit);
   private:
     class UnitData
     {
@@ -17,6 +18,7 @@ class InformationManager
         BWAPI::Position position;
         BWAPI::UnitType type;
         BWAPI::Player* player;
+        int lastSeenTime;
     };
     std::map<BWAPI::Unit*, UnitData> savedData;
 };
