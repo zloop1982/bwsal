@@ -407,6 +407,18 @@
 					>
 				</File>
 			</Filter>
+			<Filter
+				Name="DefenseManager"
+				>
+				<File
+					RelativePath=".\DefenseManager.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\include\DefenseManager.h"
+					>
+				</File>
+			</Filter>
 		</Filter>
 	</Files>
 	<Globals>
