@@ -12,7 +12,7 @@
 #include <ScoutManager.h>
 #include <DefenseManager.h>
 #include <InformationManager.h>
-
+#include <UnitGroup.h>
 class BasicAIModule : public BWAPI::AIModule
 {
 public:
