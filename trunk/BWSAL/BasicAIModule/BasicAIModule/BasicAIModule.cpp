@@ -125,14 +125,14 @@ void BasicAIModule::onFrame()
       }
     }
   }
-  /*
+  
   UnitGroup g=SelectAll(UnitTypes::Terran_Marine)+SelectAll(UnitTypes::Terran_Medic);
   for(std::set<Unit*>::iterator i=g.begin();i!=g.end();i++)
   {
     Unit* u=*i;
     Broodwar->drawCircleMap(u->getPosition().x(),u->getPosition().y(),20,Colors::White,false);
   }
-  */
+  
 
   /*
   for(std::set<Unit*>::iterator i=units.begin();i!=units.end();i++)
