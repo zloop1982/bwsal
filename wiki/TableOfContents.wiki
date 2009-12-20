@@ -13,3 +13,4 @@
   * [TechManager Tech Manager]
   * [UpgradeManager Upgrade Manager]
   * [ScoutManager Scout Manager]
+  * [DefenseManager Defense Manager]
