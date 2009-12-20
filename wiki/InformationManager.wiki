@@ -1,0 +1,36 @@
+#sidebar TableOfContents
+
+Class header file: http://code.google.com/p/bwsal/source/browse/trunk/BWSAL/include/InformationManager.h
+
+Currently just keeps track of units and their last seen player, type, and position, and the time the unit was last seen.
+
+  * [#onUnitHide onUnitHide]
+  * [#getPlayer getPlayer]
+  * [#getType getType]
+  * [#getLastPosition getLastPosition]
+  * [#getLastSeenTime getLastSeenTime]
+
+== onUnitHide ==
+void onUnitHide(BWAPI::Unit{{{*}}} unit);
+
+Should be called from AIModule::onUnitHide.
+
+== getPlayer ==
+BWAPI::Player* getPlayer(BWAPI::Unit{{{*}}} unit);
+
+Returns unit's last seen player.
+
+== getType ==
+BWAPI::UnitType getType(BWAPI::Unit{{{*}}} unit);
+
+Returns the unit's last seen type.
+
+== getLastPosition ==
+BWAPI::Position getLastPosition(BWAPI::Unit{{{*}}} unit);
+
+Returns the unit's last seen position.
+
+== getLastSeenTime ==
+int getLastSeenTime(BWAPI::Unit{{{*}}} unit);
+
+Returns the last time the unit was seen.
