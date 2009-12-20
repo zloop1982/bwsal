@@ -432,7 +432,7 @@
 				</File>
 			</Filter>
 			<Filter
-				Name="UnitGroup"
+				Name="UnitGroupManager"
 				>
 				<File
 					RelativePath=".\UnitGroup.cpp"
@@ -440,6 +440,14 @@
 				</File>
 				<File
 					RelativePath="..\..\include\UnitGroup.h"
+					>
+				</File>
+				<File
+					RelativePath=".\UnitGroupManager.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\include\UnitGroupManager.h"
 					>
 				</File>
 			</Filter>
