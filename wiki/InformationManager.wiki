@@ -16,7 +16,7 @@ void onUnitHide(BWAPI::Unit{{{*}}} unit);
 Should be called from AIModule::onUnitHide.
 
 == getPlayer ==
-BWAPI::Player* getPlayer(BWAPI::Unit{{{*}}} unit);
+BWAPI::Player{{{*}}} getPlayer(BWAPI::Unit{{{*}}} unit);
 
 Returns unit's last seen player.
 
