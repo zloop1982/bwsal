@@ -103,6 +103,17 @@ void BasicAIModule::onFrame()
   this->scoutManager->update();
   this->defenseManager->update();
   this->arbitrator.update();
+  /*
+  int y=5;
+  for(std::set<UnitType>::iterator i=UnitTypes::allUnitTypes().begin();i!=UnitTypes::allUnitTypes().end();i++)
+  {
+    if (this->informationManager->enemyHasBuilt(*i))
+    {
+      Broodwar->drawTextScreen(5,y,"%s: %d",i->getName().c_str(),this->informationManager->getBuildTime(*i));
+      y+=20;
+    }
+  }
+  */
   if (Broodwar->getFrameCount()>24*50)
     scoutManager->setScoutCount(1);
 
@@ -207,10 +218,12 @@ void BasicAIModule::onUnitDestroy(BWAPI::Unit* unit)
   this->workerManager->onRemoveUnit(unit);
   this->scoutManager->onRemoveUnit(unit);
   this->defenseManager->onRemoveUnit(unit);
+  this->informationManager->onUnitDestroy(unit);
 }
 
 void BasicAIModule::onUnitShow(BWAPI::Unit* unit)
 {
+  this->informationManager->onUnitShow(unit);
   this->unitGroupManager->onUnitShow(unit);
 }
 void BasicAIModule::onUnitHide(BWAPI::Unit* unit)
