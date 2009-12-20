@@ -47,6 +47,7 @@ ScoutManager::ScoutManager(Arbitrator::Arbitrator<BWAPI::Unit*,double> *arbitrat
   std::list<BWTA::BaseLocation*> path=getBestPath(startLocations).first;
   for(std::list<BWTA::BaseLocation*>::iterator p=path.begin();p!=path.end();p++)
     positionsToScout.push_back((*p)->getPosition());
+  this->debugMode=false;
 }
 
 void ScoutManager::onOffer(std::set<BWAPI::Unit*> units)

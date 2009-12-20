@@ -21,6 +21,7 @@ void BasicAIModule::onStart()
   this->supplyManager      = new SupplyManager();
   this->defenseManager     = new DefenseManager(&this->arbitrator);
   this->informationManager = new InformationManager();
+  this->unitGroupManager   = new UnitGroupManager();
 
   this->supplyManager->setBuildManager(this->buildManager);
   this->supplyManager->setBuildOrderManager(this->buildOrderManager);
@@ -54,13 +55,17 @@ void BasicAIModule::onStart()
       this->buildOrderManager->buildAdditional(9,UnitTypes::Terran_Medic,38);
       this->buildOrderManager->research(TechTypes::Stim_Packs,35);
       this->buildOrderManager->research(TechTypes::Tank_Siege_Mode,35);
-      this->buildOrderManager->buildAdditional(2,UnitTypes::Terran_Siege_Tank_Tank_Mode,34);
+      this->buildOrderManager->buildAdditional(3,UnitTypes::Terran_Siege_Tank_Tank_Mode,34);
       this->buildOrderManager->buildAdditional(2,UnitTypes::Terran_Science_Vessel,30);
       this->buildOrderManager->research(TechTypes::Irradiate,30);
       this->buildOrderManager->upgrade(1,UpgradeTypes::Terran_Infantry_Weapons,20);
-      this->buildOrderManager->build(3,UnitTypes::Terran_Missile_Turret,12);
-      this->buildOrderManager->build(6,UnitTypes::Terran_Barracks,10);
+      this->buildOrderManager->build(3,UnitTypes::Terran_Missile_Turret,13);
+      this->buildOrderManager->upgrade(3,UpgradeTypes::Terran_Infantry_Weapons,12);
+      this->buildOrderManager->upgrade(3,UpgradeTypes::Terran_Infantry_Armor,12);
+      this->buildOrderManager->build(2,UnitTypes::Terran_Engineering_Bay,11);
       this->buildOrderManager->buildAdditional(40,UnitTypes::Terran_Marine,10);
+      this->buildOrderManager->build(6,UnitTypes::Terran_Barracks,8);
+      this->buildOrderManager->buildAdditional(10,UnitTypes::Terran_Siege_Tank_Tank_Mode,5);
     }
     else
     {
@@ -75,9 +80,9 @@ void BasicAIModule::onStart()
   }
   else if (race == Races::Protoss)
   {
-    this->buildOrderManager->buildAdditional(10,UnitTypes::Protoss_Dragoon,70);
-    this->buildOrderManager->buildAdditional(10,UnitTypes::Protoss_Zealot,70);
-    this->buildOrderManager->upgrade(1,UpgradeTypes::Singularity_Charge,61);
+    //this->buildOrderManager->buildAdditional(10,UnitTypes::Protoss_Dragoon,70);
+  //  this->buildOrderManager->buildAdditional(10,UnitTypes::Protoss_Zealot,70);
+//    this->buildOrderManager->upgrade(1,UpgradeTypes::Singularity_Charge,61);
     this->buildOrderManager->buildAdditional(20,UnitTypes::Protoss_Carrier,60);
   }
  
@@ -120,6 +125,15 @@ void BasicAIModule::onFrame()
       }
     }
   }
+  /*
+  UnitGroup g=SelectAll(UnitTypes::Terran_Marine)+SelectAll(UnitTypes::Terran_Medic);
+  for(std::set<Unit*>::iterator i=g.begin();i!=g.end();i++)
+  {
+    Unit* u=*i;
+    Broodwar->drawCircleMap(u->getPosition().x(),u->getPosition().y(),20,Colors::White,false);
+  }
+  */
+
   /*
   for(std::set<Unit*>::iterator i=units.begin();i!=units.end();i++)
   {
@@ -195,9 +209,23 @@ void BasicAIModule::onUnitDestroy(BWAPI::Unit* unit)
   this->defenseManager->onRemoveUnit(unit);
 }
 
+void BasicAIModule::onUnitShow(BWAPI::Unit* unit)
+{
+  this->unitGroupManager->onUnitShow(unit);
+}
 void BasicAIModule::onUnitHide(BWAPI::Unit* unit)
 {
   this->informationManager->onUnitHide(unit);
+  this->unitGroupManager->onUnitHide(unit);
+}
+
+void BasicAIModule::onUnitMorph(BWAPI::Unit* unit)
+{
+  this->unitGroupManager->onUnitMorph(unit);
+}
+void BasicAIModule::onUnitRenegade(BWAPI::Unit* unit)
+{
+  this->unitGroupManager->onUnitRenegade(unit);
 }
 
 bool BasicAIModule::onSendText(std::string text)
