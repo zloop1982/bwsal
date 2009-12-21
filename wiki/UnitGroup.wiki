@@ -9,8 +9,8 @@ The UnitGroup class is defined as a std::set<BWAPI::Unit{{{*}}}> object with a n
   * [#operator() operator()]
   * [#not not]
   * [#operator+ operator+]
-  * [#operator{{{*}}} operator{{{*}}}]
-  * [#operator{{{^}}} operator{{{^}}}]
+  * [#operator operator{{{*}}}]
+  * [#operator operator{{{^}}}]
   * [#operator- operator-]
 
 === getCenter ===
