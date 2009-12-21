@@ -14,20 +14,20 @@ UnitGroup AllUnits();
 Returns a UnitGroup containing all accessible units.
 
 === SelectAll ===
-  * UnitGroup SelectAll();
+UnitGroup SelectAll();
 Returns a UnitGroup containing all units owned by the player.
 
-  * UnitGroup SelectAll(BWAPI::UnitType type);
+UnitGroup SelectAll(BWAPI::UnitType type);
 Returns a UnitGroup containing all units of the given type owned by the player (or owned by neutral, if the unit type is a neutral unit type).
 
-  * UnitGroup SelectAll(BWAPI::Player* player, BWAPI::UnitType type);
+UnitGroup SelectAll(BWAPI::Player{{{*}}} player, BWAPI::UnitType type);
 Returns a UnitGroup containing all units of the given type owned by the given player.
 
 === SelectAllEnemy ===
-  * UnitGroup SelectAllEnemy();
+UnitGroup SelectAllEnemy();
 Returns a UnitGroup containing all units owned by the enemy player.
 
-  * UnitGroup SelectAllEnemy(BWAPI::UnitType type);
+UnitGroup SelectAllEnemy(BWAPI::UnitType type);
 Returns a UnitGroup containing all units of the given type owned by the enemy player.
 
 Member functions:
