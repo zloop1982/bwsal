@@ -127,6 +127,14 @@ void BasicAIModule::onFrame()
     }
   }
 
+
+  UnitGroup idleWorkers=SelectAll()(isWorker)(isIdle);
+  for(std::set<Unit*>::iterator i=idleWorkers.begin();i!=idleWorkers.end();i++)
+  {
+    int x=(*i)->getPosition().x();
+    int y=(*i)->getPosition().y();
+    Broodwar->drawCircleMap(x,y,20,Colors::Blue,false);
+  }
   /*
   for(std::set<Unit*>::iterator i=units.begin();i!=units.end();i++)
   {

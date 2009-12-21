@@ -1,6 +1,218 @@
 #include <UnitGroup.h>
+
 using namespace BWAPI;
 using namespace std;
+
+bool passesint(Unit* u, int f)
+{
+  if (f<0)
+    return !passesint(u,-f);
+  switch(f)
+  {
+    case exists:
+      if (u->exists()) return true;
+    break;
+    case isAccelerating:
+      if (u->isAccelerating()) return true;
+    break;
+    case isBeingConstructed:
+      if (u->isBeingConstructed()) return true;
+    break;
+    case isBeingGathered:
+      if (u->isBeingGathered()) return true;
+    break;
+    case isBeingHealed:
+      if (u->isBeingHealed()) return true;
+    break;
+    case isBlind:
+      if (u->isBlind()) return true;
+    break;
+    case isBraking:
+      if (u->isBraking()) return true;
+    break;
+    case isBurrowed:
+      if (u->isBurrowed()) return true;
+    break;
+    case isCarryingGas:
+      if (u->isCarryingGas()) return true;
+    break;
+    case isCarryingMinerals:
+      if (u->isCarryingMinerals()) return true;
+    break;
+    case isCloaked:
+      if (u->isCloaked()) return true;
+    break;
+    case isCompleted:
+      if (u->isCompleted()) return true;
+    break;
+    case isConstructing:
+      if (u->isConstructing()) return true;
+    break;
+    case isDefenseMatrixed:
+      if (u->isDefenseMatrixed()) return true;
+    break;
+    case isEnsnared:
+      if (u->isEnsnared()) return true;
+    break;
+    case isFollowing:
+      if (u->isFollowing()) return true;
+    break;
+    case isGatheringGas:
+      if (u->isGatheringGas()) return true;
+    break;
+    case isGatheringMinerals:
+      if (u->isGatheringMinerals()) return true;
+    break;
+    case isHallucination:
+      if (u->isHallucination()) return true;
+    break;
+    case isIdle:
+      if (u->isIdle()) return true;
+    break;
+    case isIrradiated:
+      if (u->isIrradiated()) return true;
+    break;
+    case isLifted:
+      if (u->isLifted()) return true;
+    break;
+    case isLoaded:
+      if (u->isLoaded()) return true;
+    break;
+    case isLockedDown:
+      if (u->isLockedDown()) return true;
+    break;
+    case isMaelstrommed:
+      if (u->isMaelstrommed()) return true;
+    break;
+    case isMorphing:
+      if (u->isMorphing()) return true;
+    break;
+    case isMoving:
+      if (u->isMoving()) return true;
+    break;
+    case isParasited:
+      if (u->isParasited()) return true;
+    break;
+    case isPatrolling:
+      if (u->isPatrolling()) return true;
+    break;
+    case isPlagued:
+      if (u->isPlagued()) return true;
+    break;
+    case isRepairing:
+      if (u->isRepairing()) return true;
+    break;
+    case isResearching:
+      if (u->isResearching()) return true;
+    break;
+    case isSelected:
+      if (u->isSelected()) return true;
+    break;
+    case isSieged:
+      if (u->isSieged()) return true;
+    break;
+    case isStartingAttack:
+      if (u->isStartingAttack()) return true;
+    break;
+    case isStasised:
+      if (u->isStasised()) return true;
+    break;
+    case isStimmed:
+      if (u->isStimmed()) return true;
+    break;
+    case isTraining:
+      if (u->isTraining()) return true;
+    break;
+    case isUnderStorm:
+      if (u->isUnderStorm()) return true;
+    break;
+    case isUnpowered:
+      if (u->isUnpowered()) return true;
+    break;
+    case isUpgrading:
+      if (u->isUpgrading()) return true;
+    break;
+    case isVisible:
+      if (u->isVisible()) return true;
+    break;
+    case canProduce:
+      if (u->getType().canProduce()) return true;
+    break;
+    case canAttack:
+      if (u->getType().canAttack()) return true;
+    break;
+    case canMove:
+      if (u->getType().canMove()) return true;
+    break;
+    case isFlyer:
+      if (u->getType().isFlyer()) return true;
+    break;
+    case regeneratesHP:
+      if (u->getType().regeneratesHP()) return true;
+    break;
+    case isSpellcaster:
+      if (u->getType().isSpellcaster()) return true;
+    break;
+    case hasPermanentCloak:
+      if (u->getType().hasPermanentCloak()) return true;
+    break;
+    case isInvincible:
+      if (u->getType().isInvincible()) return true;
+    break;
+    case isOrganic:
+      if (u->getType().isOrganic()) return true;
+    break;
+    case isMechanical:
+      if (u->getType().isMechanical()) return true;
+    break;
+    case isRobotic:
+      if (u->getType().isRobotic()) return true;
+    break;
+    case isDetector:
+      if (u->getType().isDetector()) return true;
+    break;
+    case isResourceContainer:
+      if (u->getType().isResourceContainer()) return true;
+    break;
+    case isResourceDepot:
+      if (u->getType().isResourceDepot()) return true;
+    break;
+    case isRefinery:
+      if (u->getType().isRefinery()) return true;
+    break;
+    case isWorker:
+      if (u->getType().isWorker()) return true;
+    break;
+    case requiresPsi:
+      if (u->getType().requiresPsi()) return true;
+    break;
+    case requiresCreep:
+      if (u->getType().requiresCreep()) return true;
+    break;
+    case isTwoUnitsInOneEgg:
+      if (u->getType().isTwoUnitsInOneEgg()) return true;
+    break;
+    case isBurrowable:
+      if (u->getType().isBurrowable()) return true;
+    break;
+    case isCloakable:
+      if (u->getType().isCloakable()) return true;
+    break;
+    case isBuilding:
+      if (u->getType().isBuilding()) return true;
+    break;
+    case isAddon:
+      if (u->getType().isAddon()) return true;
+    break;
+    case isFlyingBuilding:
+      if (u->getType().isFlyingBuilding()) return true;
+    break;
+    case isNeutral:
+      if (u->getType().isNeutral()) return true;
+    break;
+  }
+  return false;
+}
 
 UnitGroup UnitGroup::operator+(const UnitGroup& other) const
 {
@@ -45,6 +257,116 @@ UnitGroup UnitGroup::operator-(const UnitGroup& other) const
   for(set<Unit*>::const_iterator i=other.begin();i!=other.end();i++)
   {
     result.erase(*i);
+  }
+  return result;
+}
+
+UnitGroup UnitGroup::operator()(int f1) const
+{
+  UnitGroup result;
+  for(set<Unit*>::const_iterator i=this->begin();i!=this->end();i++)
+  {
+    if (passesint(*i,f1))
+      result.insert(*i);
+  }
+  return result;
+}
+
+UnitGroup UnitGroup::operator()(int f1, int f2) const
+{
+  UnitGroup result;
+  for(set<Unit*>::const_iterator i=this->begin();i!=this->end();i++)
+  {
+    if (passesint(*i,f1) || passesint(*i,f2))
+      result.insert(*i);
+  }
+  return result;
+}
+
+UnitGroup UnitGroup::operator()(int f1, int f2, int f3) const
+{
+  UnitGroup result;
+  for(set<Unit*>::const_iterator i=this->begin();i!=this->end();i++)
+  {
+    if (passesint(*i,f1) || passesint(*i,f2) || passesint(*i,f3))
+      result.insert(*i);
+  }
+  return result;
+}
+
+UnitGroup UnitGroup::operator()(int f1, int f2, int f3, int f4) const
+{
+  UnitGroup result;
+  for(set<Unit*>::const_iterator i=this->begin();i!=this->end();i++)
+  {
+    if (passesint(*i,f1) || passesint(*i,f2) || passesint(*i,f3) || passesint(*i,f4))
+      result.insert(*i);
+  }
+  return result;
+}
+
+UnitGroup UnitGroup::operator()(int f1, int f2, int f3, int f4, int f5) const
+{
+  UnitGroup result;
+  for(set<Unit*>::const_iterator i=this->begin();i!=this->end();i++)
+  {
+    if (passesint(*i,f1) || passesint(*i,f2) || passesint(*i,f3) || passesint(*i,f4) || passesint(*i,f5))
+      result.insert(*i);
+  }
+  return result;
+}
+
+UnitGroup UnitGroup::not(int f1) const
+{
+  UnitGroup result;
+  for(set<Unit*>::const_iterator i=this->begin();i!=this->end();i++)
+  {
+    if (!(passesint(*i,f1)))
+      result.insert(*i);
+  }
+  return result;
+}
+
+UnitGroup UnitGroup::not(int f1, int f2) const
+{
+  UnitGroup result;
+  for(set<Unit*>::const_iterator i=this->begin();i!=this->end();i++)
+  {
+    if (!(passesint(*i,f1) || passesint(*i,f2)))
+      result.insert(*i);
+  }
+  return result;
+}
+
+UnitGroup UnitGroup::not(int f1, int f2, int f3) const
+{
+  UnitGroup result;
+  for(set<Unit*>::const_iterator i=this->begin();i!=this->end();i++)
+  {
+    if (!(passesint(*i,f1) || passesint(*i,f2) || passesint(*i,f3)))
+      result.insert(*i);
+  }
+  return result;
+}
+
+UnitGroup UnitGroup::not(int f1, int f2, int f3, int f4) const
+{
+  UnitGroup result;
+  for(set<Unit*>::const_iterator i=this->begin();i!=this->end();i++)
+  {
+    if (!(passesint(*i,f1) || passesint(*i,f2) || passesint(*i,f3) || passesint(*i,f4)))
+      result.insert(*i);
+  }
+  return result;
+}
+
+UnitGroup UnitGroup::not(int f1, int f2, int f3, int f4, int f5) const
+{
+  UnitGroup result;
+  for(set<Unit*>::const_iterator i=this->begin();i!=this->end();i++)
+  {
+    if (!(passesint(*i,f1) || passesint(*i,f2) || passesint(*i,f3) || passesint(*i,f4) || passesint(*i,f5)))
+      result.insert(*i);
   }
   return result;
 }
