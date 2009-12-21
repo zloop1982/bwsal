@@ -14,10 +14,17 @@ The UnitGroup class is defined as a std::set<BWAPI::Unit{{{*}}}> object with a n
   * [#operator- operator-]
 
 === getCenter ===
+BWAPI::Position getCenter() const;
+
+Returns the average position of all the units in the UnitGroup.
 
 === withinRadius ===
+UnitGroup withinRadius(double radius,BWAPI::Position position) const;
+
+Returns a UnitGroup containing all the units of this UnitGroup which have a distance of less than {{{radius}}} to the given position.
 
 === operator() ===
+
 operator() can be used to create a UnitGroup that is a subset of the original group. For example, the following 2 lines creates a UnitGroup called myWorkers which holds all the worker units owned by the player:
 
 UnitGroup myUnits=SelectAll()
