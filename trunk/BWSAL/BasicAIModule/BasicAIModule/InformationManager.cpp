@@ -1,8 +1,14 @@
 #include <InformationManager.h>
+#include "Util.h"
 InformationManager::InformationManager()
 {
   buildTime[*BWAPI::Broodwar->enemy()->getRace().getCenter()]=0;
   buildTime[*BWAPI::Broodwar->enemy()->getRace().getWorker()]=0;
+  if (BWAPI::Broodwar->enemy()->getRace()==BWAPI::Races::Zerg)
+  {
+    buildTime[BWAPI::UnitTypes::Zerg_Larva]=0;
+    buildTime[BWAPI::UnitTypes::Zerg_Overlord]=0;
+  }
 }
 void InformationManager::onUnitShow(BWAPI::Unit* unit)
 {
@@ -78,7 +84,7 @@ int InformationManager::getBuildTime(BWAPI::UnitType type)
 void InformationManager::updateBuildTime(BWAPI::UnitType type, int time)
 {
   std::map<BWAPI::UnitType, int>::iterator i=buildTime.find(type);
-  if (i!=buildTime.end() && i->second<=time) return;
+  if (i!=buildTime.end() && (i->second<=time || i->second==0)) return;
   buildTime[type]=time;
   for(std::map<const BWAPI::UnitType*,int>::const_iterator i=type.requiredUnits().begin();i!=type.requiredUnits().end();i++)
   {

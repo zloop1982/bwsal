@@ -5,6 +5,7 @@
 #include <WorkerManager.h>
 #include <algorithm>
 #include <stdarg.h>
+#include <UnitGroupManager.h>
 using namespace std;
 using namespace BWAPI;
 map<BWAPI::UnitType, map<BWAPI::UnitType, UnitItem* > >* globalUnitSet;
@@ -118,6 +119,31 @@ int BuildOrderManager::nextFreeTime(const Unit* unit, UnitType t)
   return time;
 }
 
+int BuildOrderManager::nextFreeTime(const Unit* unit, TechType t)
+{
+  int time=nextFreeTime(unit);
+  //if something else is already researching it, this unit will never be able to research it
+  if (Broodwar->self()->isResearching(t))
+    return -1;
+  return time;
+}
+
+int BuildOrderManager::nextFreeTime(const Unit* unit, UpgradeType t)
+{
+  int time=nextFreeTime(unit);
+  if (!Broodwar->self()->isUpgrading(t))
+    return time;
+  UnitGroup upgraders=SelectAll(*t.whatUpgrades());
+  for(std::set<Unit*>::iterator i=upgraders.begin();i!=upgraders.end();i++)
+  {
+    if ((*i)->isUpgrading() && (*i)->getUpgrade()==t)
+    {
+      time=max(time,nextFreeTime(*i));
+    }
+  }
+  return time;
+}
+
 bool BuildOrderManager::isResourceLimited()
 {
   return this->isMineralLimited && this->isGasLimited;
@@ -140,7 +166,7 @@ set<BWAPI::TechType> BuildOrderManager::techsCanResearch(BWAPI::Unit* techUnit, 
   set<BWAPI::TechType> result;
   for(set<BWAPI::TechType>::iterator i=researches[techUnit->getType()].begin();i!=researches[techUnit->getType()].end();i++)
   {
-    int t=nextFreeTime(techUnit);
+    int t=nextFreeTime(techUnit,*i);
     if (t>-1 && t<=time)
       result.insert(*i);
   }
@@ -152,7 +178,7 @@ set<BWAPI::UpgradeType> BuildOrderManager::upgradesCanResearch(BWAPI::Unit* tech
   set<BWAPI::UpgradeType> result;
   for(set<BWAPI::UpgradeType>::iterator i=upgrades[techUnit->getType()].begin();i!=upgrades[techUnit->getType()].end();i++)
   {
-    int t=nextFreeTime(techUnit);
+    int t=nextFreeTime(techUnit,*i);
     if (t>-1 && t<=time)
       result.insert(*i);
   }

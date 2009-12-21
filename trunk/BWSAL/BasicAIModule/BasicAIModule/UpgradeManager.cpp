@@ -24,7 +24,7 @@ void UpgradeManager::onOffer(std::set<BWAPI::Unit*> units)
     {
       for(std::list<Upgrade>::iterator t=q->second.begin();t!=q->second.end();t++)
       {
-        if (BWAPI::Broodwar->canUpgrade(*i,t->type) && (*i)->isIdle())
+        if (BWAPI::Broodwar->canUpgrade(*i,t->type))
         {
           upgradingUnits.insert(std::make_pair(*i,*t));
           q->second.erase(t);
@@ -96,8 +96,15 @@ void UpgradeManager::update()
         }
         else
         {
-          if (BWAPI::Broodwar->canUpgrade(i->first,i->second.type))
-            i->first->upgrade(i->second.type);
+          if (i->first->isResearching())
+          {
+            i->first->cancelResearch();
+          }
+          else
+          {
+            if (BWAPI::Broodwar->canUpgrade(i->first,i->second.type))
+              i->first->upgrade(i->second.type);
+          }
         }
       }
     }
