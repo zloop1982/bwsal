@@ -1,0 +1,45 @@
+#sidebar TableOfContents
+
+Class header file: http://code.google.com/p/bwsal/source/browse/trunk/BWSAL/include/UnitGroup.h
+
+The UnitGroup class is defined as a std::set<BWAPI::Unit{{{*}}}> object with a number of additional methods:
+
+  * [#getCenter getCenter]
+  * [#withinRadius withinRadius]
+  * [#operator() operator()]
+  * [#not not]
+  * [#operator+ operator+]
+  * [#operator{{{*}}} operator{{{*}}}]
+  * [#operator{{{^}}} operator{{{^}}}]
+  * [#operator- operator-]
+
+=== getCenter ===
+
+=== withinRadius ===
+
+=== operator() ===
+operator() can be used to create a UnitGroup that is a subset of the original group. For example, the following 2 lines creates a UnitGroup called myWorkers which holds all the worker units owned by the player:
+
+UnitGroup myUnits=SelectAll()
+
+UnitGroup myWorkers = myUnits(isWorker)
+
+This can be further narrowed down to only idle workers by another call to operator():
+
+UnitGroup myIdleWorkers = myWorkers(isIdle)
+
+Finally, we can compress this to just 1 line:
+
+UnitGroup myIdleWorkers = SelectAll(isWorker)(isIdle)
+
+Also all of the Unit command methods also exist in the UnitGroup class, making it easy to issue the same command to every unit in the UnitGroup.
+
+=== not ===
+
+=== operator+ ===
+
+=== operator{{{*}}} ===
+
+=== operator{{{^}}} ===
+
+=== operator- ===
