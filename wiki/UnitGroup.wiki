@@ -50,6 +50,10 @@ As another example, the following gets all units that are gathering minerals or 
 
 UnitGroup gatheringUnits = SelectAll()(isGatheringMinerals,isGatheringGas);
 
+While the following returns an empty set (since no unit can gather minerals and gas at the same time):
+
+UnitGroup nothing = SelectAll()(isGatheringMinerals)(isGatheringGas);
+
 === not ===
   * UnitGroup not(int f1) const;
   * UnitGroup not(int f1, int f2) const;
