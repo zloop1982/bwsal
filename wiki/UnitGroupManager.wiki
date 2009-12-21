@@ -16,11 +16,11 @@ Returns a UnitGroup containing all accessible units.
 === SelectAll ===
 UnitGroup SelectAll();
 
-Returns a UnitGroup containing all units owned by the player.
+Returns a UnitGroup containing all units owned by our player.
 
 UnitGroup SelectAll(BWAPI::UnitType type);
 
-Returns a UnitGroup containing all units of the given type owned by the player (or owned by neutral, if the unit type is a neutral unit type).
+Returns a UnitGroup containing all units of the given type owned by our player (or owned by neutral, if the unit type is a neutral unit type).
 
 UnitGroup SelectAll(BWAPI::Player{{{*}}} player, BWAPI::UnitType type);
 
