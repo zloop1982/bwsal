@@ -59,6 +59,8 @@ class BuildOrderManager
     int nextFreeTime(const BWAPI::Unit* unit);
     int nextFreeTime(BWAPI::UnitType t);
     int nextFreeTime(const BWAPI::Unit* unit, BWAPI::UnitType t);
+    int nextFreeTime(const BWAPI::Unit* unit, BWAPI::TechType t);
+    int nextFreeTime(const BWAPI::Unit* unit, BWAPI::UpgradeType t);
     bool isResourceLimited();
     void removeCompletedItems(PriorityLevel* p);
     void debug(const char* text, ...);

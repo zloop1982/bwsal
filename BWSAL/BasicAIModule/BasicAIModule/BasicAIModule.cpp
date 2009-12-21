@@ -80,9 +80,9 @@ void BasicAIModule::onStart()
   }
   else if (race == Races::Protoss)
   {
-    //this->buildOrderManager->buildAdditional(10,UnitTypes::Protoss_Dragoon,70);
-  //  this->buildOrderManager->buildAdditional(10,UnitTypes::Protoss_Zealot,70);
-//    this->buildOrderManager->upgrade(1,UpgradeTypes::Singularity_Charge,61);
+    this->buildOrderManager->buildAdditional(10,UnitTypes::Protoss_Dragoon,70);
+    this->buildOrderManager->buildAdditional(10,UnitTypes::Protoss_Zealot,70);
+    this->buildOrderManager->upgrade(1,UpgradeTypes::Singularity_Charge,61);
     this->buildOrderManager->buildAdditional(20,UnitTypes::Protoss_Carrier,60);
   }
  
@@ -103,17 +103,7 @@ void BasicAIModule::onFrame()
   this->scoutManager->update();
   this->defenseManager->update();
   this->arbitrator.update();
-  /*
-  int y=5;
-  for(std::set<UnitType>::iterator i=UnitTypes::allUnitTypes().begin();i!=UnitTypes::allUnitTypes().end();i++)
-  {
-    if (this->informationManager->enemyHasBuilt(*i))
-    {
-      Broodwar->drawTextScreen(5,y,"%s: %d",i->getName().c_str(),this->informationManager->getBuildTime(*i));
-      y+=20;
-    }
-  }
-  */
+
   if (Broodwar->getFrameCount()>24*50)
     scoutManager->setScoutCount(1);
 
@@ -136,14 +126,6 @@ void BasicAIModule::onFrame()
       }
     }
   }
-  
-  UnitGroup g=SelectAll(UnitTypes::Terran_Marine)+SelectAll(UnitTypes::Terran_Medic);
-  for(std::set<Unit*>::iterator i=g.begin();i!=g.end();i++)
-  {
-    Unit* u=*i;
-    Broodwar->drawCircleMap(u->getPosition().x(),u->getPosition().y(),20,Colors::White,false);
-  }
-  
 
   /*
   for(std::set<Unit*>::iterator i=units.begin();i!=units.end();i++)
