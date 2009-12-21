@@ -15,3 +15,5 @@
   * [ScoutManager Scout Manager]
   * [DefenseManager Defense Manager]
   * [InformationManager Information Manager]
+  * [UnitGroupManager Unit Group Manager]
+   * [UnitGroup Unit Group]
