@@ -1,0 +1,28 @@
+#sidebar TableOfContents
+
+Class header file: http://code.google.com/p/bwsal/source/browse/trunk/BWSAL/include/UnitGroupManager.h
+
+  * [#onUnitShow onUnitShow]
+  * [#onUnitHide onUnitHide]
+  * [#onUnitMorph onUnitMorph]
+  * [#onUnitRenegade onUnitRenegade]
+
+=== onUnitShow ===
+void onUnitShow(BWAPI::Unit* unit);
+
+Should be called from AIModule::onUnitShow.
+
+=== onUnitHide ===
+void onUnitHide(BWAPI::Unit* unit);
+
+Should be called from AIModule::onUnitHide.
+
+=== onUnitMorph ===
+void onUnitMorph(BWAPI::Unit* unit);
+
+Should be called from AIModule::onUnitMorph .
+
+=== onUnitRenegade ===
+void onUnitRenegade(BWAPI::Unit* unit);
+
+Should be called from AIModule::onUnitRenegade.
