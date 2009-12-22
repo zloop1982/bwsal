@@ -3,10 +3,10 @@
 using namespace BWAPI;
 using namespace std;
 
-bool passesint(Unit* u, int f)
+bool passesFlag(Unit* u, int f)
 {
   if (f<0)
-    return !passesint(u,-f);
+    return !passesFlag(u,-f);
   switch(f)
   {
     case exists:
@@ -266,7 +266,7 @@ UnitGroup UnitGroup::operator()(int f1) const
   UnitGroup result;
   for(set<Unit*>::const_iterator i=this->begin();i!=this->end();i++)
   {
-    if (passesint(*i,f1))
+    if (passesFlag(*i,f1))
       result.insert(*i);
   }
   return result;
@@ -277,7 +277,7 @@ UnitGroup UnitGroup::operator()(int f1, int f2) const
   UnitGroup result;
   for(set<Unit*>::const_iterator i=this->begin();i!=this->end();i++)
   {
-    if (passesint(*i,f1) || passesint(*i,f2))
+    if (passesFlag(*i,f1) || passesFlag(*i,f2))
       result.insert(*i);
   }
   return result;
@@ -288,7 +288,7 @@ UnitGroup UnitGroup::operator()(int f1, int f2, int f3) const
   UnitGroup result;
   for(set<Unit*>::const_iterator i=this->begin();i!=this->end();i++)
   {
-    if (passesint(*i,f1) || passesint(*i,f2) || passesint(*i,f3))
+    if (passesFlag(*i,f1) || passesFlag(*i,f2) || passesFlag(*i,f3))
       result.insert(*i);
   }
   return result;
@@ -299,7 +299,7 @@ UnitGroup UnitGroup::operator()(int f1, int f2, int f3, int f4) const
   UnitGroup result;
   for(set<Unit*>::const_iterator i=this->begin();i!=this->end();i++)
   {
-    if (passesint(*i,f1) || passesint(*i,f2) || passesint(*i,f3) || passesint(*i,f4))
+    if (passesFlag(*i,f1) || passesFlag(*i,f2) || passesFlag(*i,f3) || passesFlag(*i,f4))
       result.insert(*i);
   }
   return result;
@@ -310,7 +310,7 @@ UnitGroup UnitGroup::operator()(int f1, int f2, int f3, int f4, int f5) const
   UnitGroup result;
   for(set<Unit*>::const_iterator i=this->begin();i!=this->end();i++)
   {
-    if (passesint(*i,f1) || passesint(*i,f2) || passesint(*i,f3) || passesint(*i,f4) || passesint(*i,f5))
+    if (passesFlag(*i,f1) || passesFlag(*i,f2) || passesFlag(*i,f3) || passesFlag(*i,f4) || passesFlag(*i,f5))
       result.insert(*i);
   }
   return result;
@@ -321,7 +321,7 @@ UnitGroup UnitGroup::not(int f1) const
   UnitGroup result;
   for(set<Unit*>::const_iterator i=this->begin();i!=this->end();i++)
   {
-    if (!(passesint(*i,f1)))
+    if (!(passesFlag(*i,f1)))
       result.insert(*i);
   }
   return result;
@@ -332,7 +332,7 @@ UnitGroup UnitGroup::not(int f1, int f2) const
   UnitGroup result;
   for(set<Unit*>::const_iterator i=this->begin();i!=this->end();i++)
   {
-    if (!(passesint(*i,f1) || passesint(*i,f2)))
+    if (!(passesFlag(*i,f1) || passesFlag(*i,f2)))
       result.insert(*i);
   }
   return result;
@@ -343,7 +343,7 @@ UnitGroup UnitGroup::not(int f1, int f2, int f3) const
   UnitGroup result;
   for(set<Unit*>::const_iterator i=this->begin();i!=this->end();i++)
   {
-    if (!(passesint(*i,f1) || passesint(*i,f2) || passesint(*i,f3)))
+    if (!(passesFlag(*i,f1) || passesFlag(*i,f2) || passesFlag(*i,f3)))
       result.insert(*i);
   }
   return result;
@@ -354,7 +354,7 @@ UnitGroup UnitGroup::not(int f1, int f2, int f3, int f4) const
   UnitGroup result;
   for(set<Unit*>::const_iterator i=this->begin();i!=this->end();i++)
   {
-    if (!(passesint(*i,f1) || passesint(*i,f2) || passesint(*i,f3) || passesint(*i,f4)))
+    if (!(passesFlag(*i,f1) || passesFlag(*i,f2) || passesFlag(*i,f3) || passesFlag(*i,f4)))
       result.insert(*i);
   }
   return result;
@@ -365,7 +365,7 @@ UnitGroup UnitGroup::not(int f1, int f2, int f3, int f4, int f5) const
   UnitGroup result;
   for(set<Unit*>::const_iterator i=this->begin();i!=this->end();i++)
   {
-    if (!(passesint(*i,f1) || passesint(*i,f2) || passesint(*i,f3) || passesint(*i,f4) || passesint(*i,f5)))
+    if (!(passesFlag(*i,f1) || passesFlag(*i,f2) || passesFlag(*i,f3) || passesFlag(*i,f4) || passesFlag(*i,f5)))
       result.insert(*i);
   }
   return result;

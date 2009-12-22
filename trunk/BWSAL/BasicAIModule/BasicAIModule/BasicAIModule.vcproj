@@ -190,6 +190,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\include\RectangleArray.h"
+				>
+			</File>
+			<File
 				RelativePath=".\Util.h"
 				>
 			</File>
@@ -223,11 +227,7 @@
 					>
 				</File>
 				<File
-					RelativePath="..\..\include\BuildingPlacer\BuildingPlacer.h"
-					>
-				</File>
-				<File
-					RelativePath="..\..\include\BuildingPlacer\RectangleArray.h"
+					RelativePath="..\..\include\BuildingPlacer.h"
 					>
 				</File>
 			</Filter>
