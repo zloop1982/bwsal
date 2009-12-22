@@ -14,7 +14,9 @@ void log(const char* text, ...)
   va_end(ap);
 
   FILE *outfile;
-  fopen_s(&outfile, "bwapi-data\\logs\\BWSAL.log", "a+");
-  fprintf_s(outfile, buffer);
-  fclose(outfile);
+  if (fopen_s(&outfile, "bwapi-data\\logs\\BWSAL.log", "a+")==0)
+  {
+    fprintf_s(outfile, buffer);
+    fclose(outfile);
+  }
 }
