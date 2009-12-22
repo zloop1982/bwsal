@@ -127,6 +127,12 @@ void BasicAIModule::onFrame()
     }
   }
 
+  UnitGroup myPylonsAndGateways = SelectAll()(Pylon,Gateway);
+  for each(Unit* u in myPylonsAndGateways)
+  {
+    Broodwar->drawCircleMap(u->getPosition().x(),u->getPosition().y(),20,Colors::Red);
+  }
+
   //we will iterate through all the base locations, and draw their outlines.
   for(std::set<BWTA::BaseLocation*>::const_iterator i=BWTA::getBaseLocations().begin();i!=BWTA::getBaseLocations().end();i++)
   {
