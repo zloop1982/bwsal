@@ -86,6 +86,7 @@ void InformationManager::updateBuildTime(BWAPI::UnitType type, int time)
   std::map<BWAPI::UnitType, int>::iterator i=buildTime.find(type);
   if (i!=buildTime.end() && (i->second<=time || i->second==0)) return;
   buildTime[type]=time;
+  if (time<0) return;
   for(std::map<const BWAPI::UnitType*,int>::const_iterator i=type.requiredUnits().begin();i!=type.requiredUnits().end();i++)
   {
     updateBuildTime(*i->first,time-i->first->buildTime());

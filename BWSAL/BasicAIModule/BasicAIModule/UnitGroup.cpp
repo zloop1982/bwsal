@@ -210,6 +210,393 @@ bool passesFlag(Unit* u, int f)
     case isNeutral:
       if (u->getType().isNeutral()) return true;
     break;
+    case Terran_Marine:
+      if(u->getType()==UnitTypes::Terran_Marine) return true;
+    break;
+    case Terran_Ghost:
+      if(u->getType()==UnitTypes::Terran_Ghost) return true;
+    break;
+    case Terran_Vulture:
+      if(u->getType()==UnitTypes::Terran_Vulture) return true;
+    break;
+    case Terran_Goliath:
+      if(u->getType()==UnitTypes::Terran_Goliath) return true;
+    break;
+    case Terran_Siege_Tank_Tank_Mode:
+      if(u->getType()==UnitTypes::Terran_Siege_Tank_Tank_Mode) return true;
+    break;
+    case Terran_SCV:
+      if(u->getType()==UnitTypes::Terran_SCV) return true;
+    break;
+    case Terran_Wraith:
+      if(u->getType()==UnitTypes::Terran_Wraith) return true;
+    break;
+    case Terran_Science_Vessel:
+      if(u->getType()==UnitTypes::Terran_Science_Vessel) return true;
+    break;
+    case Terran_Dropship:
+      if(u->getType()==UnitTypes::Terran_Dropship) return true;
+    break;
+    case Terran_Battlecruiser:
+      if(u->getType()==UnitTypes::Terran_Battlecruiser) return true;
+    break;
+    case Terran_Vulture_Spider_Mine:
+      if(u->getType()==UnitTypes::Terran_Vulture_Spider_Mine) return true;
+    break;
+    case Terran_Nuclear_Missile:
+      if(u->getType()==UnitTypes::Terran_Nuclear_Missile) return true;
+    break;
+    case Terran_Siege_Tank_Siege_Mode:
+      if(u->getType()==UnitTypes::Terran_Siege_Tank_Siege_Mode) return true;
+    break;
+    case Terran_Firebat:
+      if(u->getType()==UnitTypes::Terran_Firebat) return true;
+    break;
+    case Spell_Scanner_Sweep:
+      if(u->getType()==UnitTypes::Spell_Scanner_Sweep) return true;
+    break;
+    case Terran_Medic:
+      if(u->getType()==UnitTypes::Terran_Medic) return true;
+    break;
+    case Zerg_Larva:
+      if(u->getType()==UnitTypes::Zerg_Larva) return true;
+    break;
+    case Zerg_Egg:
+      if(u->getType()==UnitTypes::Zerg_Egg) return true;
+    break;
+    case Zerg_Zergling:
+      if(u->getType()==UnitTypes::Zerg_Zergling) return true;
+    break;
+    case Zerg_Hydralisk:
+      if(u->getType()==UnitTypes::Zerg_Hydralisk) return true;
+    break;
+    case Zerg_Ultralisk:
+      if(u->getType()==UnitTypes::Zerg_Ultralisk) return true;
+    break;
+    case Zerg_Broodling:
+      if(u->getType()==UnitTypes::Zerg_Broodling) return true;
+    break;
+    case Zerg_Drone:
+      if(u->getType()==UnitTypes::Zerg_Drone) return true;
+    break;
+    case Zerg_Overlord:
+      if(u->getType()==UnitTypes::Zerg_Overlord) return true;
+    break;
+    case Zerg_Mutalisk:
+      if(u->getType()==UnitTypes::Zerg_Mutalisk) return true;
+    break;
+    case Zerg_Guardian:
+      if(u->getType()==UnitTypes::Zerg_Guardian) return true;
+    break;
+    case Zerg_Queen:
+      if(u->getType()==UnitTypes::Zerg_Queen) return true;
+    break;
+    case Zerg_Defiler:
+      if(u->getType()==UnitTypes::Zerg_Defiler) return true;
+    break;
+    case Zerg_Scourge:
+      if(u->getType()==UnitTypes::Zerg_Scourge) return true;
+    break;
+    case Zerg_Infested_Terran:
+      if(u->getType()==UnitTypes::Zerg_Infested_Terran) return true;
+    break;
+    case Terran_Valkyrie:
+      if(u->getType()==UnitTypes::Terran_Valkyrie) return true;
+    break;
+    case Zerg_Cocoon:
+      if(u->getType()==UnitTypes::Zerg_Cocoon) return true;
+    break;
+    case Protoss_Corsair:
+      if(u->getType()==UnitTypes::Protoss_Corsair) return true;
+    break;
+    case Protoss_Dark_Templar:
+      if(u->getType()==UnitTypes::Protoss_Dark_Templar) return true;
+    break;
+    case Zerg_Devourer:
+      if(u->getType()==UnitTypes::Zerg_Devourer) return true;
+    break;
+    case Protoss_Dark_Archon:
+      if(u->getType()==UnitTypes::Protoss_Dark_Archon) return true;
+    break;
+    case Protoss_Probe:
+      if(u->getType()==UnitTypes::Protoss_Probe) return true;
+    break;
+    case Protoss_Zealot:
+      if(u->getType()==UnitTypes::Protoss_Zealot) return true;
+    break;
+    case Protoss_Dragoon:
+      if(u->getType()==UnitTypes::Protoss_Dragoon) return true;
+    break;
+    case Protoss_High_Templar:
+      if(u->getType()==UnitTypes::Protoss_High_Templar) return true;
+    break;
+    case Protoss_Archon:
+      if(u->getType()==UnitTypes::Protoss_Archon) return true;
+    break;
+    case Protoss_Shuttle:
+      if(u->getType()==UnitTypes::Protoss_Shuttle) return true;
+    break;
+    case Protoss_Scout:
+      if(u->getType()==UnitTypes::Protoss_Scout) return true;
+    break;
+    case Protoss_Arbiter:
+      if(u->getType()==UnitTypes::Protoss_Arbiter) return true;
+    break;
+    case Protoss_Carrier:
+      if(u->getType()==UnitTypes::Protoss_Carrier) return true;
+    break;
+    case Protoss_Interceptor:
+      if(u->getType()==UnitTypes::Protoss_Interceptor) return true;
+    break;
+    case Protoss_Reaver:
+      if(u->getType()==UnitTypes::Protoss_Reaver) return true;
+    break;
+    case Protoss_Observer:
+      if(u->getType()==UnitTypes::Protoss_Observer) return true;
+    break;
+    case Protoss_Scarab:
+      if(u->getType()==UnitTypes::Protoss_Scarab) return true;
+    break;
+    case Critter_Rhynadon:
+      if(u->getType()==UnitTypes::Critter_Rhynadon) return true;
+    break;
+    case Critter_Bengalaas:
+      if(u->getType()==UnitTypes::Critter_Bengalaas) return true;
+    break;
+    case Critter_Scantid:
+      if(u->getType()==UnitTypes::Critter_Scantid) return true;
+    break;
+    case Critter_Kakaru:
+      if(u->getType()==UnitTypes::Critter_Kakaru) return true;
+    break;
+    case Critter_Ragnasaur:
+      if(u->getType()==UnitTypes::Critter_Ragnasaur) return true;
+    break;
+    case Critter_Ursadon:
+      if(u->getType()==UnitTypes::Critter_Ursadon) return true;
+    break;
+    case Zerg_Lurker_Egg:
+      if(u->getType()==UnitTypes::Zerg_Lurker_Egg) return true;
+    break;
+    case Zerg_Lurker:
+      if(u->getType()==UnitTypes::Zerg_Lurker) return true;
+    break;
+    case Spell_Disruption_Web:
+      if(u->getType()==UnitTypes::Spell_Disruption_Web) return true;
+    break;
+    case Terran_Command_Center:
+      if(u->getType()==UnitTypes::Terran_Command_Center) return true;
+    break;
+    case Terran_Comsat_Station:
+      if(u->getType()==UnitTypes::Terran_Comsat_Station) return true;
+    break;
+    case Terran_Nuclear_Silo:
+      if(u->getType()==UnitTypes::Terran_Nuclear_Silo) return true;
+    break;
+    case Terran_Supply_Depot:
+      if(u->getType()==UnitTypes::Terran_Supply_Depot) return true;
+    break;
+    case Terran_Refinery:
+      if(u->getType()==UnitTypes::Terran_Refinery) return true;
+    break;
+    case Terran_Barracks:
+      if(u->getType()==UnitTypes::Terran_Barracks) return true;
+    break;
+    case Terran_Academy:
+      if(u->getType()==UnitTypes::Terran_Academy) return true;
+    break;
+    case Terran_Factory:
+      if(u->getType()==UnitTypes::Terran_Factory) return true;
+    break;
+    case Terran_Starport:
+      if(u->getType()==UnitTypes::Terran_Starport) return true;
+    break;
+    case Terran_Control_Tower:
+      if(u->getType()==UnitTypes::Terran_Control_Tower) return true;
+    break;
+    case Terran_Science_Facility:
+      if(u->getType()==UnitTypes::Terran_Science_Facility) return true;
+    break;
+    case Terran_Covert_Ops:
+      if(u->getType()==UnitTypes::Terran_Covert_Ops) return true;
+    break;
+    case Terran_Physics_Lab:
+      if(u->getType()==UnitTypes::Terran_Physics_Lab) return true;
+    break;
+    case Terran_Machine_Shop:
+      if(u->getType()==UnitTypes::Terran_Machine_Shop) return true;
+    break;
+    case Terran_Engineering_Bay:
+      if(u->getType()==UnitTypes::Terran_Engineering_Bay) return true;
+    break;
+    case Terran_Armory:
+      if(u->getType()==UnitTypes::Terran_Armory) return true;
+    break;
+    case Terran_Missile_Turret:
+      if(u->getType()==UnitTypes::Terran_Missile_Turret) return true;
+    break;
+    case Terran_Bunker:
+      if(u->getType()==UnitTypes::Terran_Bunker) return true;
+    break;
+    case Special_Crashed_Norad_II:
+      if(u->getType()==UnitTypes::Special_Crashed_Norad_II) return true;
+    break;
+    case Special_Ion_Cannon:
+      if(u->getType()==UnitTypes::Special_Ion_Cannon) return true;
+    break;
+    case Zerg_Infested_Command_Center:
+      if(u->getType()==UnitTypes::Zerg_Infested_Command_Center) return true;
+    break;
+    case Zerg_Hatchery:
+      if(u->getType()==UnitTypes::Zerg_Hatchery) return true;
+    break;
+    case Zerg_Lair:
+      if(u->getType()==UnitTypes::Zerg_Lair) return true;
+    break;
+    case Zerg_Hive:
+      if(u->getType()==UnitTypes::Zerg_Hive) return true;
+    break;
+    case Zerg_Nydus_Canal:
+      if(u->getType()==UnitTypes::Zerg_Nydus_Canal) return true;
+    break;
+    case Zerg_Hydralisk_Den:
+      if(u->getType()==UnitTypes::Zerg_Hydralisk_Den) return true;
+    break;
+    case Zerg_Defiler_Mound:
+      if(u->getType()==UnitTypes::Zerg_Defiler_Mound) return true;
+    break;
+    case Zerg_Greater_Spire:
+      if(u->getType()==UnitTypes::Zerg_Greater_Spire) return true;
+    break;
+    case Zerg_Queens_Nest:
+      if(u->getType()==UnitTypes::Zerg_Queens_Nest) return true;
+    break;
+    case Zerg_Evolution_Chamber:
+      if(u->getType()==UnitTypes::Zerg_Evolution_Chamber) return true;
+    break;
+    case Zerg_Ultralisk_Cavern:
+      if(u->getType()==UnitTypes::Zerg_Ultralisk_Cavern) return true;
+    break;
+    case Zerg_Spire:
+      if(u->getType()==UnitTypes::Zerg_Spire) return true;
+    break;
+    case Zerg_Spawning_Pool:
+      if(u->getType()==UnitTypes::Zerg_Spawning_Pool) return true;
+    break;
+    case Zerg_Creep_Colony:
+      if(u->getType()==UnitTypes::Zerg_Creep_Colony) return true;
+    break;
+    case Zerg_Spore_Colony:
+      if(u->getType()==UnitTypes::Zerg_Spore_Colony) return true;
+    break;
+    case Zerg_Sunken_Colony:
+      if(u->getType()==UnitTypes::Zerg_Sunken_Colony) return true;
+    break;
+    case Special_Overmind_With_Shell:
+      if(u->getType()==UnitTypes::Special_Overmind_With_Shell) return true;
+    break;
+    case Special_Overmind:
+      if(u->getType()==UnitTypes::Special_Overmind) return true;
+    break;
+    case Zerg_Extractor:
+      if(u->getType()==UnitTypes::Zerg_Extractor) return true;
+    break;
+    case Special_Mature_Chrysalis:
+      if(u->getType()==UnitTypes::Special_Mature_Chrysalis) return true;
+    break;
+    case Special_Cerebrate:
+      if(u->getType()==UnitTypes::Special_Cerebrate) return true;
+    break;
+    case Special_Cerebrate_Daggoth:
+      if(u->getType()==UnitTypes::Special_Cerebrate_Daggoth) return true;
+    break;
+    case Protoss_Nexus:
+      if(u->getType()==UnitTypes::Protoss_Nexus) return true;
+    break;
+    case Protoss_Robotics_Facility:
+      if(u->getType()==UnitTypes::Protoss_Robotics_Facility) return true;
+    break;
+    case Protoss_Pylon:
+      if(u->getType()==UnitTypes::Protoss_Pylon) return true;
+    break;
+    case Protoss_Assimilator:
+      if(u->getType()==UnitTypes::Protoss_Assimilator) return true;
+    break;
+    case Protoss_Observatory:
+      if(u->getType()==UnitTypes::Protoss_Observatory) return true;
+    break;
+    case Protoss_Gateway:
+      if(u->getType()==UnitTypes::Protoss_Gateway) return true;
+    break;
+    case Protoss_Photon_Cannon:
+      if(u->getType()==UnitTypes::Protoss_Photon_Cannon) return true;
+    break;
+    case Protoss_Citadel_of_Adun:
+      if(u->getType()==UnitTypes::Protoss_Citadel_of_Adun) return true;
+    break;
+    case Protoss_Cybernetics_Core:
+      if(u->getType()==UnitTypes::Protoss_Cybernetics_Core) return true;
+    break;
+    case Protoss_Templar_Archives:
+      if(u->getType()==UnitTypes::Protoss_Templar_Archives) return true;
+    break;
+    case Protoss_Forge:
+      if(u->getType()==UnitTypes::Protoss_Forge) return true;
+    break;
+    case Protoss_Stargate:
+      if(u->getType()==UnitTypes::Protoss_Stargate) return true;
+    break;
+    case Special_Stasis_Cell_Prison:
+      if(u->getType()==UnitTypes::Special_Stasis_Cell_Prison) return true;
+    break;
+    case Protoss_Fleet_Beacon:
+      if(u->getType()==UnitTypes::Protoss_Fleet_Beacon) return true;
+    break;
+    case Protoss_Arbiter_Tribunal:
+      if(u->getType()==UnitTypes::Protoss_Arbiter_Tribunal) return true;
+    break;
+    case Protoss_Robotics_Support_Bay:
+      if(u->getType()==UnitTypes::Protoss_Robotics_Support_Bay) return true;
+    break;
+    case Protoss_Shield_Battery:
+      if(u->getType()==UnitTypes::Protoss_Shield_Battery) return true;
+    break;
+    case Special_Khaydarin_Crystal_Form:
+      if(u->getType()==UnitTypes::Special_Khaydarin_Crystal_Form) return true;
+    break;
+    case Special_Protoss_Temple:
+      if(u->getType()==UnitTypes::Special_Protoss_Temple) return true;
+    break;
+    case Special_XelNaga_Temple:
+      if(u->getType()==UnitTypes::Special_XelNaga_Temple) return true;
+    break;
+    case Resource_Mineral_Field:
+      if(u->getType()==UnitTypes::Resource_Mineral_Field) return true;
+    break;
+    case Resource_Vespene_Geyser:
+      if(u->getType()==UnitTypes::Resource_Vespene_Geyser) return true;
+    break;
+    case Special_Warp_Gate:
+      if(u->getType()==UnitTypes::Special_Warp_Gate) return true;
+    break;
+    case Special_Psi_Disrupter:
+      if(u->getType()==UnitTypes::Special_Psi_Disrupter) return true;
+    break;
+    case Special_Power_Generator:
+      if(u->getType()==UnitTypes::Special_Power_Generator) return true;
+    break;
+    case Special_Overmind_Cocoon:
+      if(u->getType()==UnitTypes::Special_Overmind_Cocoon) return true;
+    break;
+    case Spell_Dark_Swarm:
+      if(u->getType()==UnitTypes::Spell_Dark_Swarm) return true;
+    break;
+    case None:
+      if(u->getType()==UnitTypes::None) return true;
+    break;
+    case Unknown:
+      if(u->getType()==UnitTypes::Unknown) return true;
+    break;
   }
   return false;
 }
@@ -403,6 +790,17 @@ UnitGroup UnitGroup::withinRadius(double radius,BWAPI::Position position) const
   for(set<Unit*>::const_iterator i=this->begin();i!=this->end();i++)
   {
     if ((*i)->getDistance(position)<=radius)
+      result.insert(*i);
+  }
+  return result;
+}
+
+UnitGroup UnitGroup::withinRegion(BWTA::Region* region) const
+{
+  UnitGroup result;
+  for(set<Unit*>::const_iterator i=this->begin();i!=this->end();i++)
+  {
+    if (region->getPolygon().isInside((*i)->getPosition()))
       result.insert(*i);
   }
   return result;
