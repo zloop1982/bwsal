@@ -33,19 +33,39 @@ void BasicAIModule::onStart()
   BWAPI::Race race = Broodwar->self()->getRace();
   BWAPI::Race enemyRace = Broodwar->enemy()->getRace();
   BWAPI::UnitType workerType=*(race.getWorker());
+    double minDist;
+  BWTA::BaseLocation* natural=NULL;
+  BWTA::BaseLocation* home=BWTA::getStartLocation(Broodwar->self());
+  for(std::set<BWTA::BaseLocation*>::const_iterator b=BWTA::getBaseLocations().begin();b!=BWTA::getBaseLocations().end();b++)
+  {
+    if (*b==home) continue;
+    double dist=home->getGroundDistance(*b);
+    if (dist>0)
+    {
+      if (natural==NULL || dist<minDist)
+      {
+        minDist=dist;
+        natural=*b;
+      }
+    }
+  }
   this->buildOrderManager->enableDependencyResolver();
-  this->buildOrderManager->build(20,workerType,80);
   //make the basic production facility
   if (race == Races::Zerg)
   {
-    this->buildOrderManager->upgrade(3,UpgradeTypes::Zerg_Missile_Attacks,79);
     //send an overlord out if Zerg
     this->scoutManager->setScoutCount(1);
+
+    //12 hatch
+    this->buildOrderManager->build(12,workerType,80);
+    this->baseManager->expand(natural,79);
+    this->buildOrderManager->build(20,workerType,78);
     this->buildOrderManager->buildAdditional(1,UnitTypes::Zerg_Spawning_Pool,60);
-    this->buildOrderManager->buildAdditional(3,UnitTypes::Zerg_Zergling,120);
+    this->buildOrderManager->buildAdditional(3,UnitTypes::Zerg_Zergling,82);
   }
   else if (race == Races::Terran)
   {
+    this->buildOrderManager->build(20,workerType,80);
     if (enemyRace == Races::Zerg)
     {
       this->buildOrderManager->buildAdditional(1,UnitTypes::Terran_Barracks,60);
@@ -69,6 +89,7 @@ void BasicAIModule::onStart()
     }
     else
     {
+      this->buildOrderManager->build(20,workerType,80);
       this->buildOrderManager->buildAdditional(2,BWAPI::UnitTypes::Terran_Machine_Shop,70);
       this->buildOrderManager->buildAdditional(3,BWAPI::UnitTypes::Terran_Factory,60);
       this->buildOrderManager->research(TechTypes::Spider_Mines,55);
