@@ -691,7 +691,7 @@ void BuildOrderManager::update()
           }
           else
           {
-            this->reserveResources(techUnit,t);
+            this->reserveResources(techUnit,u);
             this->reservedUnits.insert(techUnit);
             debug("Planning to make a %s as soon as possible",u.getName().c_str());
             if (this->isResourceLimited())
@@ -750,7 +750,6 @@ void BuildOrderManager::update()
           {
             if (j->first!=UnitTypes::Zerg_Larva && j->first!=UnitTypes::Zerg_Egg && j->first!=UnitTypes::Zerg_Lurker_Egg && j->first!=UnitTypes::Zerg_Cocoon)
             {
-              Broodwar->printf("%s",j->first.getName().c_str());
               UnitType refinery=*Broodwar->self()->getRace().getRefinery();
               if (this->getPlannedCount(refinery)==0)
               {
@@ -869,8 +868,8 @@ bool BuildOrderManager::hasResources(BWAPI::UpgradeType t, int time)
 {
   pair<int, Resources> res;
   res.first=time;
-  res.second.minerals=t.mineralPriceBase()+t.mineralPriceFactor()*(BWAPI::Broodwar->self()->getUpgradeLevel(t)-1);
-  res.second.gas=t.gasPriceBase()+t.gasPriceFactor()*(BWAPI::Broodwar->self()->getUpgradeLevel(t)-1);
+  res.second.minerals=t.mineralPriceBase()+t.mineralPriceFactor()*(BWAPI::Broodwar->self()->getUpgradeLevel(t));
+  res.second.gas=t.gasPriceBase()+t.gasPriceFactor()*(BWAPI::Broodwar->self()->getUpgradeLevel(t));
   return hasResources(res);
 }
 
@@ -888,8 +887,8 @@ void BuildOrderManager::spendResources(BWAPI::TechType t)
 
 void BuildOrderManager::spendResources(BWAPI::UpgradeType t)
 {
-  this->usedMinerals+=t.mineralPriceBase()+t.mineralPriceFactor()*(BWAPI::Broodwar->self()->getUpgradeLevel(t)-1);
-  this->usedGas+=t.gasPriceBase()+t.gasPriceFactor()*(BWAPI::Broodwar->self()->getUpgradeLevel(t)-1);
+  this->usedMinerals+=t.mineralPriceBase()+t.mineralPriceFactor()*(BWAPI::Broodwar->self()->getUpgradeLevel(t));
+  this->usedGas+=t.gasPriceBase()+t.gasPriceFactor()*(BWAPI::Broodwar->self()->getUpgradeLevel(t));
 }
 
 //returns the BuildOrderManager's planned count of units for this type
@@ -957,8 +956,8 @@ pair<int, BuildOrderManager::Resources> BuildOrderManager::reserveResources(Unit
     t=nextFreeTime(techUnit);
   pair<int, Resources> ret;
   ret.first=t;
-  ret.second.minerals=upgradeType.mineralPriceBase()+upgradeType.mineralPriceFactor()*(BWAPI::Broodwar->self()->getUpgradeLevel(upgradeType)-1);
-  ret.second.gas=upgradeType.gasPriceBase()+upgradeType.gasPriceFactor()*(BWAPI::Broodwar->self()->getUpgradeLevel(upgradeType)-1);
+  ret.second.minerals=upgradeType.mineralPriceBase()+upgradeType.mineralPriceFactor()*(BWAPI::Broodwar->self()->getUpgradeLevel(upgradeType));
+  ret.second.gas=upgradeType.gasPriceBase()+upgradeType.gasPriceFactor()*(BWAPI::Broodwar->self()->getUpgradeLevel(upgradeType));
   reserveResources(ret);
   return ret;
 }

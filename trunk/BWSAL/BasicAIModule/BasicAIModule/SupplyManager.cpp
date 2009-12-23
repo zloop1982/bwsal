@@ -22,10 +22,23 @@ void SupplyManager::update()
     int productionCapacity       = 0;
     lastFrameCheck               = BWAPI::Broodwar->getFrameCount();
     std::set<BWAPI::Unit*> units = BWAPI::Broodwar->self()->getUnits();
+    int supplyBuildTime = BWAPI::Broodwar->self()->getRace().getSupplyProvider()->buildTime();
+    int time = BWAPI::Broodwar->getFrameCount() + supplyBuildTime;
 
     for(std::set<BWAPI::Unit*>::iterator i = units.begin(); i != units.end(); i++)
-      if ((*i)->getType().canProduce())
-        productionCapacity += 4; //heuristic, should replace with exact calculation at some point
+    {
+      std::set<BWAPI::UnitType> m=this->buildOrderManager->unitsCanMake(*i,time);
+      int max=0;
+      for(std::set<BWAPI::UnitType>::iterator j=m.begin();j!=m.end();j++)
+      {
+        int s=j->supplyRequired();
+        if (j->buildTime()<supplyBuildTime && (*i)->getType().getRace()!=BWAPI::Races::Zerg)
+          s*=2;
+        if (s > max)
+          max=s;
+      }
+      productionCapacity += max;
+    }
 
     if (getPlannedSupply() <= BWAPI::Broodwar->self()->supplyUsed() + productionCapacity)
     {
