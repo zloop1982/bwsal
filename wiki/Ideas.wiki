@@ -18,7 +18,7 @@ Improve the scout manager so that it tries to stay alive as long as possible ins
 
 Might be possible to split the scout manager into 3 overall tasks or goals:
 
-1) Scout empty base locations to check for new bases
+1) Scout empty base locations to check for new enemy bases
 
 2) Scout enemy bases for tech buildings and production capabilities
 
