@@ -868,8 +868,8 @@ bool BuildOrderManager::hasResources(BWAPI::UpgradeType t, int time)
 {
   pair<int, Resources> res;
   res.first=time;
-  res.second.minerals=t.mineralPriceBase()+t.mineralPriceFactor()*(BWAPI::Broodwar->self()->getUpgradeLevel(t));
-  res.second.gas=t.gasPriceBase()+t.gasPriceFactor()*(BWAPI::Broodwar->self()->getUpgradeLevel(t));
+  res.second.minerals=t.mineralPriceBase()+t.mineralPriceFactor()*this->upgradeManager->getPlannedLevel(t);
+  res.second.gas=t.gasPriceBase()+t.gasPriceFactor()*this->upgradeManager->getPlannedLevel(t);
   return hasResources(res);
 }
 
@@ -887,8 +887,8 @@ void BuildOrderManager::spendResources(BWAPI::TechType t)
 
 void BuildOrderManager::spendResources(BWAPI::UpgradeType t)
 {
-  this->usedMinerals+=t.mineralPriceBase()+t.mineralPriceFactor()*(BWAPI::Broodwar->self()->getUpgradeLevel(t));
-  this->usedGas+=t.gasPriceBase()+t.gasPriceFactor()*(BWAPI::Broodwar->self()->getUpgradeLevel(t));
+  this->usedMinerals+=t.mineralPriceBase()+t.mineralPriceFactor()*this->upgradeManager->getPlannedLevel(t);
+  this->usedGas+=t.gasPriceBase()+t.gasPriceFactor()*this->upgradeManager->getPlannedLevel(t);
 }
 
 //returns the BuildOrderManager's planned count of units for this type
@@ -956,8 +956,8 @@ pair<int, BuildOrderManager::Resources> BuildOrderManager::reserveResources(Unit
     t=nextFreeTime(techUnit);
   pair<int, Resources> ret;
   ret.first=t;
-  ret.second.minerals=upgradeType.mineralPriceBase()+upgradeType.mineralPriceFactor()*(BWAPI::Broodwar->self()->getUpgradeLevel(upgradeType));
-  ret.second.gas=upgradeType.gasPriceBase()+upgradeType.gasPriceFactor()*(BWAPI::Broodwar->self()->getUpgradeLevel(upgradeType));
+  ret.second.minerals=upgradeType.mineralPriceBase()+upgradeType.mineralPriceFactor()*this->upgradeManager->getPlannedLevel(upgradeType);
+  ret.second.gas=upgradeType.gasPriceBase()+upgradeType.gasPriceFactor()*this->upgradeManager->getPlannedLevel(upgradeType);
   reserveResources(ret);
   return ret;
 }

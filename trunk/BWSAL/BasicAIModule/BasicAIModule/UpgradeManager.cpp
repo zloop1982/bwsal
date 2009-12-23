@@ -128,9 +128,10 @@ void UpgradeManager::onRemoveUnit(BWAPI::Unit* unit)
   }
 }
 
-bool UpgradeManager::upgrade(BWAPI::UpgradeType type)
+bool UpgradeManager::upgrade(BWAPI::UpgradeType type, int level)
 {
-  int level=BWAPI::Broodwar->self()->getUpgradeLevel(type)+1;
+  if (level<=0)
+    level=this->getPlannedLevel(type)+1;
   if (level>type.maxRepeats()) return false;
   Upgrade newUpgrade;
   newUpgrade.type=type;
