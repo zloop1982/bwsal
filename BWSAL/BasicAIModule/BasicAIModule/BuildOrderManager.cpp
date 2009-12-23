@@ -430,16 +430,17 @@ bool BuildOrderManager::updateUnits()
 }
 void BuildOrderManager::update()
 {
+  map< int, PriorityLevel >::iterator l2;
+  for(map< int, PriorityLevel >::iterator l=items.begin();l!=items.end();l=l2)
+  {
+    l2=l;
+    l2++;
+    if (l->second.techs.empty() && l->second.units.empty())
+      items.erase(l);
+  }
   if (items.empty()) return;
   map< int, PriorityLevel >::iterator l=items.end();
   l--;
-  while (l->second.techs.empty() && l->second.units.empty())
-  {
-    items.erase(l);
-    if (items.empty()) return;
-    l=items.end();
-    l--;
-  }
   this->reservedResources.clear();
   this->reservedUnits.clear();
   this->isGasLimited=false;
@@ -740,6 +741,7 @@ void BuildOrderManager::update()
           //check dependencies (required units)
           for(map<const BWAPI::UnitType*, int>::const_iterator k=j->first.requiredUnits().begin();k!=j->first.requiredUnits().end();k++)
           {
+            if (*k->first == UnitTypes::Zerg_Larva) continue;
             if (this->getPlannedCount(*k->first)==0)
             {
               this->build(1,*k->first,l->first);
