@@ -18,7 +18,7 @@ class UpgradeManager : public Arbitrator::Controller<BWAPI::Unit*,double>
     virtual void update();
     virtual std::string getName() const;
     void onRemoveUnit(BWAPI::Unit* unit);
-    bool upgrade(BWAPI::UpgradeType type);
+    bool upgrade(BWAPI::UpgradeType type, int level = -1);
     int getPlannedLevel(BWAPI::UpgradeType type) const;
     int getStartedLevel(BWAPI::UpgradeType type) const;
     int getCompletedLevel(BWAPI::UpgradeType type) const;
