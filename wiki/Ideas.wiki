@@ -24,7 +24,7 @@ Might be possible to split the scout manager into 3 overall tasks or goals:
 
 3) Scout enemy army for size, unit composition, and position
 
-The first two tasks usually occur at specific points in time and might be possible to plan in advance, while the third task is more of a continuous process that starts as soon as the first military unit is created.
+The first two tasks usually occur at specific points in time (i.e. scout on frame X to see if a Spire or Hydralisk Den was constructed) and might be possible to plan in advance, while the third task is more of a continuous process that starts as soon as the first military unit is created.
 
 = Other Ideas =
 
