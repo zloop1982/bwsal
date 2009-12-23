@@ -127,7 +127,7 @@ void BasicAIModule::onFrame()
     }
   }
 
-  UnitGroup myPylonsAndGateways = SelectAll()(Pylon,Gateway);
+  UnitGroup myPylonsAndGateways = SelectAll()(Pylon,Gateway)(HitPoints,"<=",200);
   for each(Unit* u in myPylonsAndGateways)
   {
     Broodwar->drawCircleMap(u->getPosition().x(),u->getPosition().y(),20,Colors::Red);
