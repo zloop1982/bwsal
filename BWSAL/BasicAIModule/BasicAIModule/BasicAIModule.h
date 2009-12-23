@@ -27,8 +27,6 @@ public:
   void showStats(); //not part of BWAPI::AIModule
   void showPlayers();
   void showForces();
-  BWTA::Region* home;
-  BWTA::Region* enemy_base;
   bool analyzed;
   std::map<BWAPI::Unit*,BWAPI::UnitType> buildings;
   Arbitrator::Arbitrator<BWAPI::Unit*,double> arbitrator;

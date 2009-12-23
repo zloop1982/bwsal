@@ -748,10 +748,14 @@ void BuildOrderManager::update()
           //also check to see if we have enough gas, or a refinery planned
           if (j->first.gasPrice()>BWAPI::Broodwar->self()->cumulativeGas()-this->usedGas)
           {
-            UnitType refinery=*Broodwar->self()->getRace().getRefinery();
-            if (this->getPlannedCount(refinery)==0)
+            if (j->first!=UnitTypes::Zerg_Larva && j->first!=UnitTypes::Zerg_Egg && j->first!=UnitTypes::Zerg_Lurker_Egg && j->first!=UnitTypes::Zerg_Cocoon)
             {
-              this->build(1,refinery,l->first);
+              Broodwar->printf("%s",j->first.getName().c_str());
+              UnitType refinery=*Broodwar->self()->getRace().getRefinery();
+              if (this->getPlannedCount(refinery)==0)
+              {
+                this->build(1,refinery,l->first);
+              }
             }
           }
         }
