@@ -11,10 +11,15 @@ namespace Arbitrator
   {
   public:
     bool setBid(Controller<_Tp,_Val>* c, _Tp obj, _Val bid);
+    bool setBid(Controller<_Tp,_Val>* c, std::set<_Tp> objs, _Val bid);
     bool removeBid(Controller<_Tp,_Val>* c, _Tp obj);
+    bool removeBid(Controller<_Tp,_Val>* c, std::set<_Tp> objs, _Val bid);
     bool accept(Controller<_Tp,_Val>* c, _Tp obj, _Val bid);
+    bool accept(Controller<_Tp,_Val>* c, std::set<_Tp> objs, _Val bid);
     bool accept(Controller<_Tp,_Val>* c, _Tp obj);
+    bool accept(Controller<_Tp,_Val>* c, std::set<_Tp> objs);
     bool decline(Controller<_Tp,_Val>* c, _Tp obj, _Val bid);
+    bool decline(Controller<_Tp,_Val>* c, std::set<_Tp> objs, _Val bid);
     bool hasBid(_Tp obj) const;
     const std::pair<Controller<_Tp,_Val>*, _Val>& getHighestBidder(_Tp obj) const;
     const std::list< std::pair<Controller<_Tp,_Val>*, _Val> > getAllBidders(_Tp obj) const;
@@ -41,6 +46,17 @@ namespace Arbitrator
   }
 
   template <class _Tp,class _Val>
+  bool Arbitrator<_Tp,_Val>::setBid(Controller<_Tp,_Val>* c, std::set<_Tp> objs, _Val bid)
+  {
+    bool result;
+    for (std::set<_Tp>::const_iterator o = objs.begin(); o != objs.end(); o++)
+    {
+      result |= setBid(c, *o, bid);
+    }
+    return result;
+  }
+
+  template <class _Tp,class _Val>
   bool Arbitrator<_Tp,_Val>::removeBid(Controller<_Tp,_Val>* c, _Tp obj)
   {
     if (c == NULL || obj == NULL)
@@ -51,6 +67,17 @@ namespace Arbitrator
       updatedObjects.insert(obj); //insert the object into the updated set
     }
     return true;
+  }
+
+  template <class _Tp,class _Val>
+  bool Arbitrator<_Tp,_Val>::removeBid(Controller<_Tp,_Val>* c, std::set<_Tp> objs, _Val bid)
+  {
+    bool result;
+    for (std::set<_Tp>::const_iterator o = objs.begin(); o != objs.end(); o++)
+    {
+      result |= removeBid(c, *o, bid);
+    }
+    return result;
   }
 
   template <class _Tp,class _Val>
@@ -66,6 +93,17 @@ namespace Arbitrator
       bids[obj].set(c, bid);
     updatedObjects.insert(obj);
     return true;
+  }
+
+  template <class _Tp,class _Val>
+  bool Arbitrator<_Tp,_Val>::decline(Controller<_Tp,_Val>* c, std::set<_Tp> objs, _Val bid)
+  {
+    bool result;
+    for (std::set<_Tp>::const_iterator o = objs.begin(); o != objs.end(); o++)
+    {
+      result |= decline(c, *o, bid);
+    }
+    return result;
   }
 
   template <class _Tp,class _Val>
@@ -86,6 +124,17 @@ namespace Arbitrator
   }
 
   template <class _Tp,class _Val>
+  bool Arbitrator<_Tp,_Val>::accept(Controller<_Tp,_Val>* c, std::set<_Tp> objs)
+  {
+    bool result;
+    for (std::set<_Tp>::const_iterator o = objs.begin(); o != objs.end(); o++)
+    {
+      result |= accept(c, *o);
+    }
+    return result;
+  }
+
+  template <class _Tp,class _Val>
   bool Arbitrator<_Tp,_Val>::accept(Controller<_Tp,_Val>* c, _Tp obj, _Val bid)
   {
     //same idea as accept(Controller<_Tp,_Val>* c, _Tp obj), but the controller also specifies a new bid value
@@ -102,6 +151,17 @@ namespace Arbitrator
     owner[obj] = c; //set the new owner
     objects[c].insert(obj); //insert this object into the set of objects owned by this controller
     updatedObjects.insert(obj); //since the object was updated, insert it into the updated objects set
+  }
+
+  template <class _Tp,class _Val>
+  bool Arbitrator<_Tp,_Val>::accept(Controller<_Tp,_Val>* c, std::set<_Tp> objs, _Val bid)
+  {
+    bool result;
+    for (std::set<_Tp>::const_iterator o = objs.begin(); o != objs.end(); o++)
+    {
+      result |= accept(c, *o, bid);
+    }
+    return result;
   }
 
   template <class _Tp,class _Val>
