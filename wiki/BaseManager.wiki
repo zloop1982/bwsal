@@ -21,7 +21,7 @@ Should be called in AIModule::onFrame.
 void addBase(BWTA::BaseLocation{{{*}}} location);
 
 == expand ==
-void expand(BWTA::BaseLocatio{{{*}}} location);
+void expand(BWTA::BaseLocatio{{{*}}} location, int priority = 100);
 
 Call this to expand to the given base location. Note that nothing yet is done to clear the given base location of mines, burrowed units, blocking mineral patches, or other buildings.
 
