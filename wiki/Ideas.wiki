@@ -26,6 +26,8 @@ Might be possible to split the scout manager into 3 overall tasks or goals:
 
 The first two tasks usually occur at specific points in time (i.e. scout on frame X to see if a Spire or Hydralisk Den was constructed) and might be possible to plan in advance, while the third task is more of a continuous process that starts as soon as the first military unit is created.
 
+The Scout Manager does not determine how important each of these tasks are, or how much units to use. Rather the AI tells the scout manager this information. The role of the scout manager is to scout based on the importance levels (i.e. find the best way to enter and scout the enemy base, given the units it has).
+
 = Other Ideas =
 
   * UnitGroup class to make it easier to manipulate groups of units. Examples:
