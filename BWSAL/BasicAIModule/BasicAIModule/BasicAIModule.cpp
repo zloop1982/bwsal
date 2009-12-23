@@ -89,7 +89,6 @@ void BasicAIModule::onStart()
     }
     else
     {
-      this->buildOrderManager->build(20,workerType,80);
       this->buildOrderManager->buildAdditional(2,BWAPI::UnitTypes::Terran_Machine_Shop,70);
       this->buildOrderManager->buildAdditional(3,BWAPI::UnitTypes::Terran_Factory,60);
       this->buildOrderManager->research(TechTypes::Spider_Mines,55);
@@ -101,6 +100,7 @@ void BasicAIModule::onStart()
   }
   else if (race == Races::Protoss)
   {
+    this->buildOrderManager->build(20,workerType,80);
     this->buildOrderManager->buildAdditional(10,UnitTypes::Protoss_Dragoon,70);
     this->buildOrderManager->buildAdditional(10,UnitTypes::Protoss_Zealot,70);
     this->buildOrderManager->upgrade(1,UpgradeTypes::Singularity_Charge,61);
