@@ -50,10 +50,10 @@ void BaseManager::addBase(BWTA::BaseLocation* location)
   this->location2base[location] = newBase;
 }
 
-void BaseManager::expand(BWTA::BaseLocation* location)
+void BaseManager::expand(BWTA::BaseLocation* location, int priority)
 {
   addBase(location);
-  this->builder->buildAdditional(1,*BWAPI::Broodwar->self()->getRace().getCenter(),100,location->getTilePosition());
+  this->builder->buildAdditional(1,*BWAPI::Broodwar->self()->getRace().getCenter(),priority,location->getTilePosition());
 }
 std::set<Base*> BaseManager::getActiveBases() const
 {

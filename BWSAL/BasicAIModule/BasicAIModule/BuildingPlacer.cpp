@@ -49,7 +49,7 @@ bool BuildingPlacer::canBuildHereWithSpace(BWAPI::TilePosition position, BWAPI::
   for(int x = startx; x < endx; x++)
     for(int y = starty; y < endy; y++)
       if (!type.isRefinery())
-        if (!buildable(x, y))
+        if (!buildable(x, y) || reserveMap[x][y])
           return false;
 
   if (position.x()>3)
