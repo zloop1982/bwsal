@@ -12,6 +12,20 @@ Also we can provide a reasonable guess as to the existence of units - for exampl
 
 Also keeps track of last seen positions and the time the unit was last seen. Maybe do some stuff to calculate probability unit is at tile X,Y, assuming the unit began a random walk when it went out of sight. Though this might be too calculation intensive to do in real time for every movable unit.
 
+= Scout Manager =
+
+Improve the scout manager so that it tries to stay alive as long as possible inside the enemy base once it finds the enemy base
+
+Might be possible to split the scout manager into 3 overall tasks or goals:
+
+1) Scout empty base locations to check for new bases
+
+2) Scout enemy bases for tech buildings and production capabilities
+
+3) Scout enemy army for size, unit composition, and position
+
+The first two tasks usually occur at specific points in time and might be possible to plan in advance, while the third task is more of a continuous process that starts as soon as the first military unit is created.
+
 = Other Ideas =
 
   * UnitGroup class to make it easier to manipulate groups of units. Examples:
@@ -33,7 +47,5 @@ AllUnits.filter(Broodwar->self()).filter(UnitTypes::Terran_Marine).getNearest(Al
   * Threat Assessment Manager - influence maps. Determine which tiles are dangerous and how much. Also assign a priority to units that are attacking our base.
   * Risk Adverse Path Manager - moves units to their destination using the safest path (recalculate paths when new threats are discovered i.e. Missile Turrets)
   * Transport Manager - transports units to a given position, perhaps with a priority, using the risk adverse path planner to find safest paths
-
-  * Improve the scout manager so that it tries to stay alive as long as possible inside the enemy base once it finds the enemy base
 
   * Add a function to the building placer which takes a choke point and list of building unit types (possibly with repetitions) and returns a list of unit type - build position pairs that can be used to block off the choke point.
