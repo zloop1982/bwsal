@@ -135,6 +135,11 @@ std::string ProductionManager::getName() const
   return "Production Manager";
 }
 
+std::string ProductionManager::getShortName() const
+{
+  return "Prod";
+}
+
 void ProductionManager::onRemoveUnit(BWAPI::Unit* unit)
 {
   //remove this unit from the producingUnits map

@@ -375,6 +375,11 @@ std::string ConstructionManager::getName() const
   return "Construction Manager";
 }
 
+std::string ConstructionManager::getShortName() const
+{
+  return "Con";
+}
+
 void ConstructionManager::onRemoveUnit(BWAPI::Unit* unit)
 {
   //remove the builder if needed - incomplete buildings will ask for a new builder during update()

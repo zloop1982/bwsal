@@ -19,6 +19,7 @@ class WorkerManager : public Arbitrator::Controller<BWAPI::Unit*,double>
     virtual void onRevoke(BWAPI::Unit* unit, double bid);
     virtual void update();
     virtual std::string getName() const;
+    virtual std::string getShortName() const;
 
     void onRemoveUnit(BWAPI::Unit* unit);
     void setWorkersPerGas(int count);

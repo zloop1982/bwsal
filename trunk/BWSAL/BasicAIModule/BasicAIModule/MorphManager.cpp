@@ -104,6 +104,11 @@ std::string MorphManager::getName() const
   return "Morph Manager";
 }
 
+std::string MorphManager::getShortName() const
+{
+  return "Morph";
+}
+
 void MorphManager::onRemoveUnit(BWAPI::Unit* unit)
 {
   std::map<BWAPI::Unit*,Unit>::iterator m=morphingUnits.find(unit);
