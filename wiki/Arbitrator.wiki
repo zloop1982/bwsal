@@ -21,7 +21,7 @@ bool setBid(Controller<{{{_}}}Tp,{{{_}}}Val>{{{*}}} c, {{{_}}}Tp obj, {{{_}}}Val
 
 bool setBid(Controller<{{{_}}}Tp,{{{_}}}Val>{{{*}}} c, std::set<{{{_}}}Tp> objs, {{{_}}}Val bid);
 
-Sets the bid of the given object or set of objects to the given value.
+Sets the bid of the given object or set of objects to the given value. Bids cannot be increased from onRevoke(), and in onOffer only the offered units can have their bids increased.
 
 == removeBid ==
 bool removeBid(Controller<{{{_}}}Tp,{{{_}}}Val>{{{*}}} c, {{{_}}}Tp obj);
