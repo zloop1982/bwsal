@@ -242,6 +242,11 @@ string WorkerManager::getName() const
   return "Worker Manager";
 }
 
+string WorkerManager::getShortName() const
+{
+  return "Work";
+}
+
 void WorkerManager::onRemoveUnit(Unit* unit)
 {
   if (unit->getType().isWorker())

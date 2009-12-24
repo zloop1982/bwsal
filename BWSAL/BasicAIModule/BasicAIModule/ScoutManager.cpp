@@ -159,6 +159,11 @@ std::string ScoutManager::getName() const
   return "Scout Manager";
 }
 
+std::string ScoutManager::getShortName() const
+{
+  return "Scout";
+}
+
 void ScoutManager::onRemoveUnit(BWAPI::Unit* unit)
 {
   if (scouts.find(unit) != scouts.end())

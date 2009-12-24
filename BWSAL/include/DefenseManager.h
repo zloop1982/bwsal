@@ -23,6 +23,7 @@ public:
   void onRemoveUnit(BWAPI::Unit* unit);
   virtual void update();
   virtual std::string getName() const;
+  virtual std::string getShortName() const;
 
   Arbitrator::Arbitrator<BWAPI::Unit*,double>* arbitrator;
   BWAPI::Position chokePosition;

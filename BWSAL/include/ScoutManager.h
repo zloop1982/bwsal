@@ -26,6 +26,7 @@ class ScoutManager : public Arbitrator::Controller<BWAPI::Unit*,double>
     virtual void update();
 
     virtual std::string getName() const;
+    virtual std::string getShortName() const;
     void onRemoveUnit(BWAPI::Unit* unit);
 
     // Non-Controller methods.

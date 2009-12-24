@@ -68,3 +68,8 @@ std::string DefenseManager::getName() const
 {
   return "Defense Manager";
 }
+
+std::string DefenseManager::getShortName() const
+{
+  return "Def";
+}

@@ -144,7 +144,7 @@ void BasicAIModule::onFrame()
         char color = activeColor;
         for(std::list< std::pair< Arbitrator::Controller<BWAPI::Unit*,double>*, double> >::iterator j=bids.begin();j!=bids.end();j++)
         {
-          Broodwar->drawText(CoordinateType::Map,x,y+y_off,"%c%s: %d",color,j->first->getName().c_str(),(int)j->second);
+          Broodwar->drawText(CoordinateType::Map,x,y+y_off,"%c%s: %d",color,j->first->getShortName().c_str(),(int)j->second);
           y_off+=20;
           color = inactiveColor;
         }
