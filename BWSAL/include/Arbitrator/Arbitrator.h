@@ -10,10 +10,11 @@ namespace Arbitrator
   class Arbitrator
   {
   public:
+    Arbitrator();
     bool setBid(Controller<_Tp,_Val>* c, _Tp obj, _Val bid);
     bool setBid(Controller<_Tp,_Val>* c, std::set<_Tp> objs, _Val bid);
     bool removeBid(Controller<_Tp,_Val>* c, _Tp obj);
-    bool removeBid(Controller<_Tp,_Val>* c, std::set<_Tp> objs, _Val bid);
+    bool removeBid(Controller<_Tp,_Val>* c, std::set<_Tp> objs);
     bool accept(Controller<_Tp,_Val>* c, _Tp obj, _Val bid);
     bool accept(Controller<_Tp,_Val>* c, std::set<_Tp> objs, _Val bid);
     bool accept(Controller<_Tp,_Val>* c, _Tp obj);
@@ -32,13 +33,26 @@ namespace Arbitrator
     std::map<_Tp,Controller<_Tp,_Val>* > owner;
     std::map<Controller<_Tp,_Val>*, std::set<_Tp> > objects;
     std::set<_Tp> updatedObjects;
+    std::set<_Tp> objectsCanIncreaseBid;
+    bool inUpdate;
   };
+
+  template <class _Tp,class _Val>
+  Arbitrator<_Tp,_Val>::Arbitrator()
+  {
+    this->inUpdate=false;
+  }
 
   template <class _Tp,class _Val>
   bool Arbitrator<_Tp,_Val>::setBid(Controller<_Tp,_Val>* c, _Tp obj, _Val bid)
   {
     if (c == NULL || obj == NULL)
       return false;
+
+    //can only increase bids of certain objects during update()
+    if (inUpdate && objectsCanIncreaseBid.find(obj)==objectsCanIncreaseBid.end() && bids[obj].contains(c) && bid>bids[obj].get(c))
+      return false;
+
     //set the bid for this object and insert the object into the updated set
     bids[obj].set(c,bid);
     updatedObjects.insert(obj);
@@ -70,12 +84,12 @@ namespace Arbitrator
   }
 
   template <class _Tp,class _Val>
-  bool Arbitrator<_Tp,_Val>::removeBid(Controller<_Tp,_Val>* c, std::set<_Tp> objs, _Val bid)
+  bool Arbitrator<_Tp,_Val>::removeBid(Controller<_Tp,_Val>* c, std::set<_Tp> objs)
   {
     bool result;
     for (std::set<_Tp>::const_iterator o = objs.begin(); o != objs.end(); o++)
     {
-      result |= removeBid(c, *o, bid);
+      result |= removeBid(c, *o);
     }
     return result;
   }
@@ -87,11 +101,20 @@ namespace Arbitrator
       return false;
     if (bids[obj].top().first != c) //only the top bidder/controller can decline an object
       return false;
-    if (bid == 0)
-      bids[obj].erase(c);
-    else
-      bids[obj].set(c, bid);
     updatedObjects.insert(obj);
+
+    //must decrease bid via decline()
+    if (bids[obj].contains(c) && bid>=bids[obj].get(c))
+      bid=0;
+
+    objectsCanIncreaseBid.erase(obj);
+
+    if (bid == 0)
+    {
+      bids[obj].erase(c);
+      return true;
+    }
+    bids[obj].set(c, bid);
     return true;
   }
 
@@ -147,10 +170,17 @@ namespace Arbitrator
       owner[obj]->onRevoke(obj, bids[obj].top().second);
       objects[owner[obj]].erase(obj); //remove this object from the set of objects owned by the former owner
     }
-    bids[obj].set(c,bid); //update the bid for this object
     owner[obj] = c; //set the new owner
     objects[c].insert(obj); //insert this object into the set of objects owned by this controller
     updatedObjects.insert(obj); //since the object was updated, insert it into the updated objects set
+
+    //cannot decrease bid via accept()
+    if (bids[obj].contains(c) && bid<bids[obj].get(c))
+      return true;
+
+    //update the bid for this object
+    bids[obj].set(c,bid);
+    return true;
   }
 
   template <class _Tp,class _Val>
@@ -228,33 +258,47 @@ namespace Arbitrator
   template <class _Tp,class _Val>
   void Arbitrator<_Tp,_Val>::update()
   {
+    this->inUpdate=true;
+    bool first=true;
     //first we construct a map for the objects to offer
     std::map<Controller<_Tp,_Val>*, std::set<_Tp> > objectsToOffer;
 
-    //go through all the updated objects
-    for(std::set<_Tp>::iterator i = updatedObjects.begin(); i != updatedObjects.end(); i++)
+    while(first || !objectsToOffer.empty())
     {
-      if (!bids[*i].empty()) //if there is a bid on this object
+      first=false;
+      objectsToOffer.clear();
+
+      this->objectsCanIncreaseBid.clear();
+
+      //go through all the updated objects
+      for(std::set<_Tp>::iterator i = updatedObjects.begin(); i != updatedObjects.end(); i++)
       {
-        if (owner.find(*i) == owner.end() || bids[*i].top().first != owner[*i]) //if the top bidder is not the owner
-          objectsToOffer[bids[*i].top().first].insert(*i); //make a note to offer it to the top bidder.
-      }
-      else
-      {
-        //no bids on this object, remove it from the owner if there is one
-        if (owner.find(*i) != owner.end())
+        if (!bids[*i].empty()) //if there is a bid on this object
         {
-          _Val temp=0;
-          owner.find(*i)->second->onRevoke(*i,temp);
-          owner.erase(*i);
+          if (owner.find(*i) == owner.end() || bids[*i].top().first != owner[*i]) //if the top bidder is not the owner
+            objectsToOffer[bids[*i].top().first].insert(*i); //make a note to offer it to the top bidder.
+        }
+        else
+        {
+          //no bids on this object, remove it from the owner if there is one
+          if (owner.find(*i) != owner.end())
+          {
+            _Val temp=0;
+            owner.find(*i)->second->onRevoke(*i,temp);
+            owner.erase(*i);
+          }
         }
       }
-    }
-    //reset updated objects
-    updatedObjects.clear();
+      //reset updated objects
+      updatedObjects.clear();
 
-    //offer the objects to the top bidders
-    for(std::map< Controller<_Tp,_Val>*, std::set<_Tp> >::iterator i = objectsToOffer.begin(); i != objectsToOffer.end(); i++)
-      (*i).first->onOffer((*i).second);
+      //offer the objects to the top bidders
+      for(std::map< Controller<_Tp,_Val>*, std::set<_Tp> >::iterator i = objectsToOffer.begin(); i != objectsToOffer.end(); i++)
+      {
+        this->objectsCanIncreaseBid=i->second;
+        (*i).first->onOffer((*i).second);
+      }
+    }
+    this->inUpdate=false;
   }
 }
