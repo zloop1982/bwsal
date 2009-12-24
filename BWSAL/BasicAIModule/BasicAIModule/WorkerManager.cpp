@@ -142,13 +142,22 @@ void WorkerManager::rebalanceWorkers()
   for(set<Base*>::iterator b = this->basesCache.begin(); b != this->basesCache.end(); b++)
   {
     set<Unit*> baseMinerals = (*b)->getMinerals();
+    vector< std::pair<Unit*,int> > baseMineralOrder;
     for(set<Unit*>::iterator m = baseMinerals.begin(); m != baseMinerals.end(); m++)
     {
       resourceBase[*m] = *b;
       desiredWorkerCount[*m] = 0;
-      mineralOrder.push_back(make_pair(*m, currentWorkers[*m].size()*400+(*m)->getResources() - 2*(int)(*m)->getPosition().getDistance((*b)->getBaseLocation()->getPosition())));
       currentWorkers[*m].clear();
+      baseMineralOrder.push_back(std::make_pair(*m,(*m)->getResources() - 2*(int)(*m)->getPosition().getDistance((*b)->getBaseLocation()->getPosition())));
     }
+    sort(baseMineralOrder.begin(), baseMineralOrder.end(), mineralCompare);
+    for(int i=0;i<(int)baseMineralOrder.size();i++)
+    {
+      Unit* mineral=baseMineralOrder[i].first;
+      mineralOrder.push_back(make_pair(mineral, mineral->getResources() - 2*(int)mineral->getPosition().getDistance((*b)->getBaseLocation()->getPosition())-3000*i));
+    }
+
+
     set<Unit*> baseGeysers = (*b)->getGeysers();
     for(set<Unit*>::iterator g = baseGeysers.begin(); g != baseGeysers.end(); g++)
     {
