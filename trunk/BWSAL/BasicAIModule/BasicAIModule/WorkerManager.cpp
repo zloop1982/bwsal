@@ -134,10 +134,6 @@ void WorkerManager::rebalanceWorkers()
   resourceBase.clear();
   int remainingWorkers = this->workers.size();
   
-  for(map<Unit*,WorkerData >::iterator w = this->workers.begin(); w != this->workers.end(); w++)
-  {
-    currentWorkers[w->second.newResource].insert(w->first);
-  }
   // iterate over all the resources of each active base
   for(set<Base*>::iterator b = this->basesCache.begin(); b != this->basesCache.end(); b++)
   {
@@ -147,7 +143,6 @@ void WorkerManager::rebalanceWorkers()
     {
       resourceBase[*m] = *b;
       desiredWorkerCount[*m] = 0;
-      currentWorkers[*m].clear();
       baseMineralOrder.push_back(std::make_pair(*m,(*m)->getResources() - 2*(int)(*m)->getPosition().getDistance((*b)->getBaseLocation()->getPosition())));
     }
     sort(baseMineralOrder.begin(), baseMineralOrder.end(), mineralCompare);
@@ -156,8 +151,6 @@ void WorkerManager::rebalanceWorkers()
       Unit* mineral=baseMineralOrder[i].first;
       mineralOrder.push_back(make_pair(mineral, mineral->getResources() - 2*(int)mineral->getPosition().getDistance((*b)->getBaseLocation()->getPosition())-3000*i));
     }
-
-
     set<Unit*> baseGeysers = (*b)->getGeysers();
     for(set<Unit*>::iterator g = baseGeysers.begin(); g != baseGeysers.end(); g++)
     {
@@ -171,7 +164,6 @@ void WorkerManager::rebalanceWorkers()
           remainingWorkers--;
         }
       }
-      currentWorkers[*g].clear();
     }
   }
 
@@ -252,7 +244,25 @@ string WorkerManager::getName() const
 
 void WorkerManager::onRemoveUnit(Unit* unit)
 {
-  workers.erase(unit);
+  if (unit->getType().isWorker())
+    workers.erase(unit);
+  if (unit->getType().isResourceContainer())
+  {
+    map<Unit*,set<Unit*> >::iterator c=currentWorkers.find(unit);
+    if (c==currentWorkers.end())
+      return;
+    for(set<Unit*>::iterator i=c->second.begin();i!=c->second.end();i++)
+    {
+      std::map<Unit*,WorkerData>::iterator j=workers.find(*i);
+      if (j!=workers.end())
+      {
+        if (j->second.resource==unit)
+          j->second.resource=NULL;
+        if (j->second.newResource==unit)
+          j->second.newResource=NULL;
+      }
+    }
+  }
 }
 
 void WorkerManager::setWorkersPerGas(int count)

@@ -34,13 +34,18 @@ namespace Arbitrator
     std::map<Controller<_Tp,_Val>*, std::set<_Tp> > objects;
     std::set<_Tp> updatedObjects;
     std::set<_Tp> objectsCanIncreaseBid;
+    std::set<_Tp> unansweredObjected;
     bool inUpdate;
+    bool inOnOffer;
+    bool inOnRevoke;
   };
 
   template <class _Tp,class _Val>
   Arbitrator<_Tp,_Val>::Arbitrator()
   {
-    this->inUpdate=false;
+    inUpdate=false;
+    inOnOffer=false;
+    inOnRevoke=false;
   }
 
   template <class _Tp,class _Val>
@@ -50,8 +55,11 @@ namespace Arbitrator
       return false;
 
     //can only increase bids of certain objects during update()
-    if (inUpdate && objectsCanIncreaseBid.find(obj)==objectsCanIncreaseBid.end() && bids[obj].contains(c) && bid>bids[obj].get(c))
-      return false;
+    if (bids[obj].contains(c) && bid>bids[obj].get(c))
+    {
+      if (inOnRevoke || (inOnOffer && objectsCanIncreaseBid.find(obj)==objectsCanIncreaseBid.end()))
+        return false;
+    }
 
     //set the bid for this object and insert the object into the updated set
     bids[obj].set(c,bid);
@@ -99,9 +107,12 @@ namespace Arbitrator
   {
     if (c == NULL || obj == NULL)
       return false;
+    if (!inOnOffer) //can only call decline from the onOffer() callback
+      return false;
     if (bids[obj].top().first != c) //only the top bidder/controller can decline an object
       return false;
     updatedObjects.insert(obj);
+    unansweredObjected.erase(obj);
 
     //must decrease bid via decline()
     if (bids[obj].contains(c) && bid>=bids[obj].get(c))
@@ -134,11 +145,18 @@ namespace Arbitrator
   {
     if (c == NULL || obj == NULL)
       return false;
+    if (!inOnOffer) //can only call accept from the onOffer() callback
+      return false;
     if (bids[obj].top().first != c) //only the top bidder/controller can accept an object
       return false;
+    unansweredObjected.erase(obj);
     if (owner[obj]) //if someone else already own this object, take it away from them
     {
+      inOnOffer=false;
+      inOnRevoke=true;
       owner[obj]->onRevoke(obj,bids[obj].top().second);
+      inOnRevoke=false;
+      inOnOffer=true;
       objects[owner[obj]].erase(obj); //remove this object from the set of objects owned by the former owner
     }
     owner[obj] = c; //set the new owner
@@ -163,11 +181,18 @@ namespace Arbitrator
     //same idea as accept(Controller<_Tp,_Val>* c, _Tp obj), but the controller also specifies a new bid value
     if (c == NULL || obj == NULL)
       return false;
+    if (!inOnOffer) //can only call accept from the onOffer() callback
+      return false;
     if (bids[obj].top().first != c) //only the top bidder/controller can accept an object
       return false;
+    unansweredObjected.erase(obj);
     if (owner[obj]) //if someone else already own this object, take it away from them
     {
+      inOnOffer=false;
+      inOnRevoke=true;
       owner[obj]->onRevoke(obj, bids[obj].top().second);
+      inOnRevoke=false;
+      inOnOffer=true;
       objects[owner[obj]].erase(obj); //remove this object from the set of objects owned by the former owner
     }
     owner[obj] = c; //set the new owner
@@ -295,8 +320,16 @@ namespace Arbitrator
       //offer the objects to the top bidders
       for(std::map< Controller<_Tp,_Val>*, std::set<_Tp> >::iterator i = objectsToOffer.begin(); i != objectsToOffer.end(); i++)
       {
-        this->objectsCanIncreaseBid=i->second;
-        (*i).first->onOffer((*i).second);
+        objectsCanIncreaseBid=i->second;
+        unansweredObjected=i->second;
+
+        inOnOffer=true;
+        i->first->onOffer(i->second);
+        inOnOffer=false;
+
+        //decline all unanswered objects
+        for(std::set<_Tp>::iterator j=unansweredObjected.begin();j!=unansweredObjected.end();j++)
+          decline(i->first,*j,0);
       }
     }
     this->inUpdate=false;
