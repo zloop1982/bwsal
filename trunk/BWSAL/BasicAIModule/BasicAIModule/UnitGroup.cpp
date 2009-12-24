@@ -971,6 +971,23 @@ UnitGroup UnitGroup::operator()(FilterAttributeType a, BWAPI::TechType type) con
   }
   return result;
 }
+UnitGroup UnitGroup::operator()(FilterAttributeOrder a, BWAPI::Order type) const
+{
+  UnitGroup result;
+  for(set<Unit*>::const_iterator i=this->begin();i!=this->end();i++)
+  {
+    bool passes=false;
+    if (a==GetOrder)
+      if ((*i)->getOrder()==type)
+        passes=true;
+    if (a==GetSecondaryOrder)
+      if ((*i)->getSecondaryOrder()==type)
+        passes=true;
+    if (passes)
+      result.insert(*i);
+  }
+  return result;
+}
 UnitGroup UnitGroup::operator()(FilterAttributeType a, BWAPI::UpgradeType type) const
 {
   UnitGroup result;

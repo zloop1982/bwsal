@@ -134,6 +134,10 @@ void WorkerManager::rebalanceWorkers()
   resourceBase.clear();
   int remainingWorkers = this->workers.size();
   
+  for(map<Unit*,WorkerData >::iterator w = this->workers.begin(); w != this->workers.end(); w++)
+  {
+    currentWorkers[w->second.newResource].insert(w->first);
+  }
   // iterate over all the resources of each active base
   for(set<Base*>::iterator b = this->basesCache.begin(); b != this->basesCache.end(); b++)
   {
@@ -142,8 +146,8 @@ void WorkerManager::rebalanceWorkers()
     {
       resourceBase[*m] = *b;
       desiredWorkerCount[*m] = 0;
+      mineralOrder.push_back(make_pair(*m, currentWorkers[*m].size()*400+(*m)->getResources() - 2*(int)(*m)->getPosition().getDistance((*b)->getBaseLocation()->getPosition())));
       currentWorkers[*m].clear();
-      mineralOrder.push_back(make_pair(*m, (*m)->getResources() - 2*(int)(*m)->getPosition().getDistance((*b)->getBaseLocation()->getPosition())));
     }
     set<Unit*> baseGeysers = (*b)->getGeysers();
     for(set<Unit*>::iterator g = baseGeysers.begin(); g != baseGeysers.end(); g++)
