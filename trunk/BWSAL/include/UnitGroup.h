@@ -290,6 +290,13 @@ enum FilterAttributeOrder
 class UnitGroup : public std::set<BWAPI::Unit*>
 {
   public:
+    static UnitGroup getUnitGroup(const std::set<BWAPI::Unit*> units)
+    {
+      UnitGroup u;
+      u.insert(units.begin(), units.end());
+      return u;
+    }
+
     UnitGroup operator+(const UnitGroup& other) const;//union
     UnitGroup operator*(const UnitGroup& other) const;//intersection
     UnitGroup operator^(const UnitGroup& other) const;//symmetric difference
