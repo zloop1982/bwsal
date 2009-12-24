@@ -1,7 +1,7 @@
 #include <BWTA.h>
 #include <ScoutManager.h>
 
-std::pair<std::list<BWTA::BaseLocation*>, double> getBestPath(std::set<BWTA::BaseLocation* > baseLocations)
+std::pair<std::list<BWTA::BaseLocation*>, double> getBestPathHelper(std::set<BWTA::BaseLocation* > baseLocations)
 {
   std::pair<std::list<BWTA::BaseLocation*>, double> shortest_path;
   shortest_path.second=0;
@@ -16,8 +16,36 @@ std::pair<std::list<BWTA::BaseLocation*>, double> getBestPath(std::set<BWTA::Bas
     BWTA::BaseLocation* node=*i;
     std::set<BWTA::BaseLocation* > baseLocations2=baseLocations;
     baseLocations2.erase(*i);
-    std::pair<std::list<BWTA::BaseLocation*>, double> path_result=getBestPath(baseLocations2);
+    std::pair<std::list<BWTA::BaseLocation*>, double> path_result=getBestPathHelper(baseLocations2);
     double dist=path_result.second+node->getGroundDistance(path_result.first.front());
+    if (dist<shortest_path.second || shortest_path.first.empty())
+    {
+      path_result.first.push_front(node);
+      shortest_path=std::make_pair(path_result.first,dist);
+    }
+  }
+  return shortest_path;
+}
+
+std::pair<std::list<BWTA::BaseLocation*>, double> getBestPath(std::set<BWTA::BaseLocation* > baseLocations)
+{
+  std::pair<std::list<BWTA::BaseLocation*>, double> shortest_path;
+  shortest_path.second=0;
+  if (baseLocations.empty()) return shortest_path;
+  BWTA::BaseLocation* start=BWTA::getStartLocation(BWAPI::Broodwar->self());
+  baseLocations.erase(start);
+  if (baseLocations.size()==1)
+  {
+    shortest_path.first.push_back(*baseLocations.begin());
+    return shortest_path;
+  }
+  for(std::set<BWTA::BaseLocation*>::iterator i=baseLocations.begin();i!=baseLocations.end();i++)
+  {
+    BWTA::BaseLocation* node=*i;
+    std::set<BWTA::BaseLocation* > baseLocations2=baseLocations;
+    baseLocations2.erase(*i);
+    std::pair<std::list<BWTA::BaseLocation*>, double> path_result=getBestPathHelper(baseLocations2);
+    double dist=start->getGroundDistance(node)+node->getGroundDistance(path_result.first.front())+path_result.second;
     if (dist<shortest_path.second || shortest_path.first.empty())
     {
       path_result.first.push_front(node);
@@ -44,6 +72,7 @@ ScoutManager::ScoutManager(Arbitrator::Arbitrator<BWAPI::Unit*,double> *arbitrat
       startLocations.erase(*l);
     }
   }
+
   std::list<BWTA::BaseLocation*> path=getBestPath(startLocations).first;
   for(std::list<BWTA::BaseLocation*>::iterator p=path.begin();p!=path.end();p++)
     positionsToScout.push_back((*p)->getPosition());
