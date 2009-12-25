@@ -71,6 +71,7 @@ void BasicAIModule::onStart()
     {
       this->buildOrderManager->buildAdditional(1,UnitTypes::Terran_Barracks,60);
       this->buildOrderManager->buildAdditional(9,UnitTypes::Terran_Marine,45);
+      this->buildOrderManager->buildAdditional(1,UnitTypes::Terran_Refinery,42);
       this->buildOrderManager->buildAdditional(1,UnitTypes::Terran_Barracks,40);
       this->buildOrderManager->buildAdditional(1,UnitTypes::Terran_Academy,39);
       this->buildOrderManager->buildAdditional(9,UnitTypes::Terran_Medic,38);
@@ -83,9 +84,10 @@ void BasicAIModule::onStart()
       this->buildOrderManager->build(3,UnitTypes::Terran_Missile_Turret,13);
       this->buildOrderManager->upgrade(3,UpgradeTypes::Terran_Infantry_Weapons,12);
       this->buildOrderManager->upgrade(3,UpgradeTypes::Terran_Infantry_Armor,12);
-      this->buildOrderManager->build(2,UnitTypes::Terran_Engineering_Bay,11);
+      this->buildOrderManager->build(1,UnitTypes::Terran_Engineering_Bay,11);
       this->buildOrderManager->buildAdditional(40,UnitTypes::Terran_Marine,10);
       this->buildOrderManager->build(6,UnitTypes::Terran_Barracks,8);
+      this->buildOrderManager->build(2,UnitTypes::Terran_Engineering_Bay,7);
       this->buildOrderManager->buildAdditional(10,UnitTypes::Terran_Siege_Tank_Tank_Mode,5);
     }
     else
@@ -148,7 +150,7 @@ void BasicAIModule::onFrame()
         for(std::list< std::pair< Arbitrator::Controller<BWAPI::Unit*,double>*, double> >::iterator j=bids.begin();j!=bids.end();j++)
         {
           Broodwar->drawText(CoordinateType::Map,x,y+y_off,"%c%s: %d",color,j->first->getShortName().c_str(),(int)j->second);
-          y_off+=20;
+          y_off+=15;
           color = inactiveColor;
         }
       }
