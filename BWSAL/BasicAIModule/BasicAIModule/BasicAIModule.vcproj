@@ -180,6 +180,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\EnhancedUI.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\Util.cpp"
 				>
 			</File>
@@ -191,6 +195,10 @@
 			>
 			<File
 				RelativePath=".\BasicAIModule.h"
+				>
+			</File>
+			<File
+				RelativePath=".\EnhancedUI.h"
 				>
 			</File>
 			<File
