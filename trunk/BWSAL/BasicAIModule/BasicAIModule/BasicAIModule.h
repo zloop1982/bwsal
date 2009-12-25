@@ -13,6 +13,7 @@
 #include <DefenseManager.h>
 #include <InformationManager.h>
 #include <UnitGroupManager.h>
+#include <EnhancedUI.h>
 class BasicAIModule : public BWAPI::AIModule
 {
 public:
@@ -41,5 +42,6 @@ public:
   DefenseManager* defenseManager;
   InformationManager* informationManager;
   UnitGroupManager* unitGroupManager;
+  EnhancedUI* enhancedUI;
   bool showManagerAssignments;
 };
