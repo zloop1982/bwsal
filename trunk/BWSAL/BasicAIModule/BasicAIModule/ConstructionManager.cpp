@@ -104,7 +104,7 @@ void ConstructionManager::onRevoke(BWAPI::Unit* unit, double bid)
 
 void ConstructionManager::update()
 {
-  std::set<BWAPI::Unit*> myPlayerUnits = SelectAll()(isCompleted)(GetAddon,(BWAPI::Unit*)NULL).not(isCarryingMinerals,isCarryingGas);
+  std::set<BWAPI::Unit*> myPlayerUnits = SelectAll()(isCompleted)(GetAddon,(BWAPI::Unit*)NULL).not(isCarryingMinerals,isCarryingGas,isGatheringGas);
 
   //iterate through all the builder types
   for(std::map<BWAPI::UnitType,std::set<Building*> >::iterator i=this->buildingsNeedingBuilders.begin();i!=this->buildingsNeedingBuilders.end();i++)

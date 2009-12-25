@@ -220,7 +220,7 @@ bool ScoutManager::needMoreScouts() const
 void ScoutManager::requestScout(double bid)
 {
   // Bid on all completed workers.
-  std::set<BWAPI::Unit*> usefulUnits=SelectAll()(isWorker,Overlord)(isCompleted).not(isCarryingMinerals,isCarryingGas);
+  std::set<BWAPI::Unit*> usefulUnits=SelectAll()(isWorker,Overlord)(isCompleted).not(isCarryingMinerals,isCarryingGas,isGatheringGas);
   arbitrator->setBid(this,usefulUnits,bid);
 }
 
