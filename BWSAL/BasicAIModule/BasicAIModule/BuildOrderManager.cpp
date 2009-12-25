@@ -10,6 +10,7 @@ using namespace std;
 using namespace BWAPI;
 map<BWAPI::UnitType, map<BWAPI::UnitType, UnitItem* > >* globalUnitSet;
 int y;
+int currentPriority;
 map<const Unit*,int> nextFreeTimeData;
 map<BWAPI::UnitType, set<BWAPI::UnitType> > makes;
 map<BWAPI::UnitType, set<BWAPI::TechType> > researches;
@@ -352,7 +353,7 @@ bool BuildOrderManager::updateUnits()
     {
       this->reserveResources(factory,t);
       this->reservedUnits.insert(factory);
-      debug("Planning to make a %s as soon as possible",t.getName().c_str());
+      debug("Plan to make %s",t.getName().c_str());
       if (this->isResourceLimited())
       {
         debug("resource-limited");
@@ -401,13 +402,13 @@ bool BuildOrderManager::updateUnits()
       {
         this->reserveResources(factory,t);
         this->reservedUnits.insert(factory);
-        debug("Planning to make a %s at time %d",t.getName().c_str(),nextFreeTime(factory,t));
+        debug("Plan to make %s at %d",t.getName().c_str(),nextFreeTime(factory,t));
       }
       else
       {
         this->reserveResources(factory,t);
         this->reservedUnits.insert(factory);
-        debug("Planning to make a %s as soon as possible",t.getName().c_str());
+        debug("Plan to make %s",t.getName().c_str());
         if (this->isResourceLimited())
         {
           debug("resource-limited");
@@ -451,7 +452,7 @@ void BuildOrderManager::update()
   //---------------------------------------------------------------------------------------------------------
   for(;l!=items.end();l--)
   {
-    debug("Priority: %d",l->first);
+    currentPriority=l->first;
 
     //First consider all techs and upgrades for this priority level
     set<UnitType> techUnitTypes;
@@ -579,7 +580,7 @@ void BuildOrderManager::update()
         {
           this->reserveResources(techUnit,t);
           this->reservedUnits.insert(techUnit);
-          debug("Planning to make a %s as soon as possible",t.getName().c_str());
+          debug("Plan to research %s",t.getName().c_str());
           if (this->isResourceLimited())
           {
             debug("resource-limited");
@@ -610,7 +611,7 @@ void BuildOrderManager::update()
         {
           this->reserveResources(techUnit,u);
           this->reservedUnits.insert(techUnit);
-          debug("Planning to make a %s as soon as possible",u.getName().c_str());
+          debug("Plan to upgrade %s",u.getName().c_str());
           if (this->isResourceLimited())
           {
             debug("resource-limited");
@@ -660,13 +661,13 @@ void BuildOrderManager::update()
           {
             this->reserveResources(techUnit,t);
             this->reservedUnits.insert(techUnit);
-            debug("Planning to make a %s at time %d",t.getName().c_str(),nextFreeTime(techUnit));
+            debug("Plan research %s at %d",t.getName().c_str(),nextFreeTime(techUnit));
           }
           else
           {
             this->reserveResources(techUnit,t);
             this->reservedUnits.insert(techUnit);
-            debug("Planning to make a %s as soon as possible",t.getName().c_str());
+            debug("Plan to research %s",t.getName().c_str());
             if (this->isResourceLimited())
             {
               debug("resource-limited");
@@ -688,13 +689,13 @@ void BuildOrderManager::update()
           {
             this->reserveResources(techUnit,u);
             this->reservedUnits.insert(techUnit);
-            debug("Planning to make a %s at time %d",u.getName().c_str(),nextFreeTime(techUnit));
+            debug("Plan to upgrade %s at %d",u.getName().c_str(),nextFreeTime(techUnit));
           }
           else
           {
             this->reserveResources(techUnit,u);
             this->reservedUnits.insert(techUnit);
-            debug("Planning to make a %s as soon as possible",u.getName().c_str());
+            debug("Plan to upgrade %s",u.getName().c_str());
             if (this->isResourceLimited())
             {
               debug("resource-limited");
@@ -1039,7 +1040,7 @@ void BuildOrderManager::debug(const char* text, ...)
 
   if (this->showDebugInfo)
   {
-    Broodwar->drawTextScreen(5,y,buffer);
-    y+=20;
+    Broodwar->drawTextScreen(5,y,"%d: %s",currentPriority,buffer);
+    y+=15;
   }
 }

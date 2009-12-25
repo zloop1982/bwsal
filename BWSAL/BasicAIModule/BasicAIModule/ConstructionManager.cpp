@@ -1,5 +1,5 @@
 #include <ConstructionManager.h>
-
+#include <UnitGroupManager.h>
 ConstructionManager::ConstructionManager(Arbitrator::Arbitrator<BWAPI::Unit*,double>* arbitrator, BuildingPlacer* placer)
 {
   this->arbitrator   = arbitrator;
@@ -104,7 +104,7 @@ void ConstructionManager::onRevoke(BWAPI::Unit* unit, double bid)
 
 void ConstructionManager::update()
 {
-  std::set<BWAPI::Unit*> myPlayerUnits = BWAPI::Broodwar->self()->getUnits();
+  std::set<BWAPI::Unit*> myPlayerUnits = SelectAll()(isCompleted)(GetAddon,(BWAPI::Unit*)NULL).not(isCarryingMinerals,isCarryingGas);
 
   //iterate through all the builder types
   for(std::map<BWAPI::UnitType,std::set<Building*> >::iterator i=this->buildingsNeedingBuilders.begin();i!=this->buildingsNeedingBuilders.end();i++)
@@ -114,7 +114,7 @@ void ConstructionManager::update()
       for(std::set<BWAPI::Unit*>::iterator u = myPlayerUnits.begin(); u != myPlayerUnits.end(); u++)
       {
         //if this unit is completed and the right type, and doesn't have an addon, and we aren't already using it
-        if ((*u)->isCompleted() && (*u)->getType()==i->first && (*u)->getAddon()==NULL && this->builders.find(*u)==this->builders.end())
+        if ((*u)->getType()==i->first && this->builders.find(*u)==this->builders.end())
         {
           //bid value depends on distance - we like closer builders better
           double min_dist=1000000;

@@ -1,6 +1,6 @@
 #include <BWTA.h>
 #include <ScoutManager.h>
-
+#include <UnitGroupManager.h>
 std::pair<std::list<BWTA::BaseLocation*>, double> getBestPathHelper(std::set<BWTA::BaseLocation* > baseLocations)
 {
   std::pair<std::list<BWTA::BaseLocation*>, double> shortest_path;
@@ -220,14 +220,8 @@ bool ScoutManager::needMoreScouts() const
 void ScoutManager::requestScout(double bid)
 {
   // Bid on all completed workers.
-  std::set<BWAPI::Unit*> myPlayerUnits=BWAPI::Broodwar->self()->getUnits();
-  for(std::set<BWAPI::Unit*>::iterator u = myPlayerUnits.begin(); u != myPlayerUnits.end(); u++)
-  {
-    if ((*u)->isCompleted() && ((*u)->getType().isWorker() || (*u)->getType() == BWAPI::UnitTypes::Zerg_Overlord))
-    {
-      arbitrator->setBid(this, *u, bid);
-    }
-  }
+  std::set<BWAPI::Unit*> usefulUnits=SelectAll()(isWorker,Overlord)(isCompleted).not(isCarryingMinerals,isCarryingGas);
+  arbitrator->setBid(this,usefulUnits,bid);
 }
 
 void ScoutManager::addScout(BWAPI::Unit* u)
