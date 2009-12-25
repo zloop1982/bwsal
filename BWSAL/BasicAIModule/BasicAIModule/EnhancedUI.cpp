@@ -1,13 +1,14 @@
 #include <EnhancedUI.h>
 using namespace BWAPI;
 
-void EnhancedUI::update()
+void EnhancedUI::update() const
 {
-  drawBases();
   drawTerrain();
+  drawBases();
+  drawProgress();
 }
 
-void EnhancedUI::drawBases()
+void EnhancedUI::drawBases() const
 {
   //we will iterate through all the base locations, and draw their outlines.
   for(std::set<BWTA::BaseLocation*>::const_iterator i=BWTA::getBaseLocations().begin();i!=BWTA::getBaseLocations().end();i++)
@@ -40,7 +41,7 @@ void EnhancedUI::drawBases()
   }
 }
 
-void EnhancedUI::drawTerrain()
+void EnhancedUI::drawTerrain() const
 {
   //we will iterate through all the regions and draw the polygon outline of it in green.
   for(std::set<BWTA::Region*>::const_iterator r=BWTA::getRegions().begin();r!=BWTA::getRegions().end();r++)
@@ -64,4 +65,46 @@ void EnhancedUI::drawTerrain()
       Broodwar->drawLine(CoordinateType::Map,point1.x(),point1.y(),point2.x(),point2.y(),Colors::Red);
     }
   }
+}
+
+void EnhancedUI::drawProgress() const
+{
+  UnitGroup constructing = SelectAll()(isBuilding).not(isCompleted);
+  for each (Unit* c in constructing)
+  {
+    double progress = 1.0 - (static_cast<double>(c->getRemainingBuildTime()) / c->getType().buildTime());
+    drawProgressBar(c->getPosition(), progress, BWAPI::Colors::Red);
+  }
+
+  UnitGroup producing = SelectAll()(isTraining);
+  for each (Unit* c in producing)
+  {
+    if (c->getRemainingTrainTime() > .0)
+    {
+      double progress = 1.0 - (static_cast<double>(c->getRemainingTrainTime()) / c->getTrainingQueue().front().buildTime());
+      drawProgressBar(c->getPosition(), progress, BWAPI::Colors::Green);
+    }
+  }
+
+}
+
+void EnhancedUI::drawProgressBar(BWAPI::Position pos, double progressFraction, BWAPI::Color innerBar) const
+{
+  const int width = 20, height = 4;
+  const BWAPI::Color outline = BWAPI::Colors::Blue;
+  const BWAPI::Color barBG = BWAPI::Color(0, 0, 170);
+  int xLeft = pos.x() - width / 2, xRight = pos.x() + width / 2;
+  int yTop = pos.y() - height / 2, yBottom = pos.y() + height / 2;
+  
+  //Draw outline
+  Broodwar->drawLineMap(xLeft + 1, yTop, xRight - 1, yTop, outline);        //top
+  Broodwar->drawLineMap(xLeft + 1, yBottom, xRight - 1, yBottom, outline);  //bottom
+  Broodwar->drawLineMap(xLeft, yTop + 1, xLeft, yBottom, outline);          //left
+  Broodwar->drawLineMap(xRight - 1, yTop + 1, xRight - 1, yBottom, outline);//right
+  //Draw bar
+  Broodwar->drawBoxMap(xLeft + 1, yTop + 1, xRight - 1, yBottom, barBG, true);
+  //Draw progress bar
+  const int innerWidth = (xRight - 1) - (xLeft + 1);
+  int progressWidth = static_cast<int>(progressFraction * innerWidth);
+  Broodwar->drawBoxMap(xLeft + 1, yTop + 1, (xLeft + 1) + progressWidth, yBottom, innerBar, true);
 }
