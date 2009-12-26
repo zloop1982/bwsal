@@ -31,7 +31,7 @@ void ConstructionManager::onOffer(std::set<BWAPI::Unit*> units)
       for(std::set<BWAPI::Unit*>::iterator u = units.begin(); u != units.end(); u++)
       {
         //only consider this builder if it can build this type of building
-        if (BWAPI::Broodwar->canMake(*u,(*b)->type))
+        if (*((*b)->type.whatBuilds().first)==(*u)->getType() && (!(*b)->type.isAddon() || (*u)->getAddon()==NULL))
         {
           double dist = (*u)->getPosition().getDistance((*b)->position);
           if (dist < min_dist)
@@ -244,7 +244,7 @@ void ConstructionManager::update()
     {
       if (b->tilePosition==BWAPI::TilePositions::None) //if we don't have a build location yet
       {
-        if ((BWAPI::Broodwar->getFrameCount()+index)%25==0 && BWAPI::Broodwar->canMake(NULL,b->type))
+        if ((BWAPI::Broodwar->getFrameCount()+index)%25==0)
         {
           //get a build location near the goal position
           b->tilePosition = this->placer->getBuildLocationNear(b->goalPosition, b->type);
@@ -305,30 +305,27 @@ void ConstructionManager::update()
       {
         if (s == NULL) //if the building doesn't even exist
         {
-          if (BWAPI::Broodwar->canMake(NULL,b->type)) //if we can make it
+          if (u == NULL) //ask for a builder if we don't have one yet
+            buildingsNeedingBuilders[*b->type.whatBuilds().first].insert(b);
+          else //if we have a worker
           {
-            if (u == NULL) //ask for a builder if we don't have one yet
-              buildingsNeedingBuilders[*b->type.whatBuilds().first].insert(b);
-            else //if we have a worker
+            if (!u->isConstructing()) //if the worker isn't constructing
             {
-              if (!u->isConstructing()) //if the worker isn't constructing
-              {
-                double distance = u->getPosition().getDistance(b->position);
-                if (distance > 100) //if its too far away, tell it to go to the build site
-                  u->rightClick(b->position);
-                else //if its close enough, tell it to build
-                  if (BWAPI::Broodwar->canBuildHere(u, b->tilePosition, b->type)) //if we can build here, tell the worker to build
-                  {
-                    if (BWAPI::Broodwar->canMake(u, b->type))
-                      u->build(b->tilePosition, b->type);
-                  }
-                  else //if we cannot build here, we need to find another build site (reset the tilePosition)
-                  {
-                    this->placer->freeTiles(b->tilePosition, b->type.tileWidth(), b->type.tileHeight());
-                    b->tilePosition = BWAPI::TilePositions::None;
-                    b->position = BWAPI::Positions::None;
-                  }
-              }
+              double distance = u->getPosition().getDistance(b->position);
+              if (distance > 100) //if its too far away, tell it to go to the build site
+                u->rightClick(b->position);
+              else //if its close enough, tell it to build
+                if (BWAPI::Broodwar->canBuildHere(u, b->tilePosition, b->type)) //if we can build here, tell the worker to build
+                {
+                  if (BWAPI::Broodwar->canMake(u, b->type))
+                    u->build(b->tilePosition, b->type);
+                }
+                else //if we cannot build here, we need to find another build site (reset the tilePosition)
+                {
+                  this->placer->freeTiles(b->tilePosition, b->type.tileWidth(), b->type.tileHeight());
+                  b->tilePosition = BWAPI::TilePositions::None;
+                  b->position = BWAPI::Positions::None;
+                }              
             }
           }
         }
