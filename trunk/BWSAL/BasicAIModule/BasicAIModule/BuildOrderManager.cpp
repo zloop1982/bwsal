@@ -331,12 +331,15 @@ bool BuildOrderManager::updateUnits()
   {
     Unit* factory=*f;
     //get a unit type, taking into account the remaining unit counts and the set of units this factory can make right now
-    UnitType t=getUnitType(unitsCanMake(*f,Broodwar->getFrameCount()),remainingUnitCounts);
+    int time=Broodwar->getFrameCount();
+    if ((*f)->getType().isWorker())
+      time+=24*4;
+    UnitType t=getUnitType(unitsCanMake(*f,time),remainingUnitCounts);
     if (t==UnitTypes::None)
       continue;
     bool gasLimited=this->isGasLimited;
     bool mineralLimited=this->isMineralLimited;
-    if (hasResources(t))
+    if (hasResources(t,time))
     {
       //tell factory to build t now
       this->spendResources(t);//don't need to reserveResources() since we are spending resources instead
