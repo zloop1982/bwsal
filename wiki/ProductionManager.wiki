@@ -6,6 +6,7 @@ Given a unit type, the production manager will attempt to get a suitable factory
 
   * [#update update]
   * [#getName getName]
+  * [#getShortName getShortName]
   * [#onRemoveUnit onRemoveUnit]
   * [#train train]
   * [#getPlannedCount getPlannedCount]
@@ -21,6 +22,11 @@ Should be called in AIModule::onFrame.
 virtual std::string getName() const;
 
 Returns std::string("Production Manager");
+
+== getShortName ==
+virtual std::string getShortName() const;
+
+Returns std::string("Prod");
 
 == onRemoveUnit ==
 void onRemoveUnit(BWAPI::Unit{{{*}}} unit);
