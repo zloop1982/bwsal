@@ -51,7 +51,7 @@ int getLastSeenTime(BWAPI::Unit{{{*}}} unit);
 Returns the last time the unit was seen.
 
 == exists ==
-bool exists(BWAPI::Unit* unit);
+bool exists(BWAPI::Unit{{{*}}} unit);
 
 Returns true if the information manager believes the unit exists, or false if the information manager saw the unit get destroyed via onUnitDestroy.
 
