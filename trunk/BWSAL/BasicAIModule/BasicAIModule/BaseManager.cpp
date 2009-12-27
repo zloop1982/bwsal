@@ -26,8 +26,15 @@ void BaseManager::update()
           }
       }
       if ((*b)->getResourceDepot()!=NULL)
-        if ((*b)->getResourceDepot()->isCompleted() || (*b)->getResourceDepot()->getRemainingBuildTime() < 250)
-          (*b)->setActive(true);
+      {
+        if ((*b)->getResourceDepot()->exists()==false)
+          (*b)->setResourceDepot(NULL);
+        else
+        {
+          if ((*b)->getResourceDepot()->isCompleted() || (*b)->getResourceDepot()->getRemainingBuildTime() < 250)
+            (*b)->setActive(true);
+        }
+      }
     }
   }
 
@@ -109,7 +116,12 @@ void BaseManager::onRemoveUnit(BWAPI::Unit* unit)
 {
   for(std::set<Base*>::const_iterator b = this->allBases.begin(); b != this->allBases.end(); b++)
   {
-    if((*b)->getResourceDepot() == unit && unit->isCompleted())
-      allBases.erase(b);
+    if((*b)->getResourceDepot() == unit)
+    {
+      if (unit->isCompleted())
+        allBases.erase(b);
+      else
+        (*b)->setResourceDepot(NULL);
+    }
   }
 }
