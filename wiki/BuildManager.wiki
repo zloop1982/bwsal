@@ -13,6 +13,7 @@ Methods:
 
   * [#update update]
   * [#getName getName]
+  * [#getShortName getShortName]
   * [#onRemoveUnit onRemoveUnit]
   * [BuildManager#build build]
   * [BuildManager#getPlannedCount getPlannedCount]
@@ -29,6 +30,11 @@ Should be called during AIModule::onFrame.
 std::string getName() const;
 
 Returns std::string("Build Manager");
+
+== getShortName ==
+std::string getShortName() const;
+
+Returns std::string("Build");
 
 == onRemoveUnit ==
 void onRemoveUnit(BWAPI::Unit{{{*}}} unit);
