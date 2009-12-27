@@ -10,6 +10,7 @@ Given a unit type, the production manager will attempt to get a suitable factory
   * [#train train]
   * [#getPlannedCount getPlannedCount]
   * [#getStartedCount getStartedCount]
+  * [#getBuildType getBuildType]
 
 == update ==
 virtual void update();
@@ -40,3 +41,8 @@ Returns the planned count for the given unit type.
 int getStartedCount(BWAPI::UnitType type) const;
 
 Returns the started count for the given unit type.
+
+== getBuildType ==
+BWAPI::UnitType getBuildType(BWAPI::Unit{{{*}}} unit) const;
+
+Returns the unit type that the given unit is about to train, or UnitTypes::None if the unit is not about to train anything.
