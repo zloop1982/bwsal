@@ -12,7 +12,6 @@ class BaseManager
   BaseManager();
   void setBuildOrderManager(BuildOrderManager* builder);
   void update();
-  void addBase(BWTA::BaseLocation* location);
   Base* getBase(BWTA::BaseLocation* location);
   void expand(BWTA::BaseLocation* location, int priority = 100);
   std::set<Base*> getActiveBases() const;
@@ -21,6 +20,8 @@ class BaseManager
   std::string getName();
   void onRemoveUnit(BWAPI::Unit* unit);
 
+  private:
+  void addBase(BWTA::BaseLocation* location);
   BuildOrderManager* builder;
   std::map<BWTA::BaseLocation*,Base*> location2base;
   std::set<Base*> allBases;
