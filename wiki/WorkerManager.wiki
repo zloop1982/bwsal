@@ -53,8 +53,14 @@ Returns the rate at which the worker manager is gathering gas, in gas per frame.
 == enableAutoBuild ==
 void enableAutoBuild();
 
+Enables auto-build, which automatically builds workers when needed to keep all mining bases gathering at maximum capacity.
+
 == disableAutoBuild ==
 void disableAutoBuild();
 
+Disables auto-build.
+
 == setAutoBuildPriority ==
 void setAutoBuildPriority(int priority);
+
+Sets the auto-build priority. Default priority level is 80.
