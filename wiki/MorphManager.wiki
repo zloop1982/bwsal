@@ -6,6 +6,7 @@ The morph manager is used to morph Zerg units and buildings.
 
   * [#update update]
   * [#getName getName]
+  * [#getShortName getShortName]
   * [#onRemoveUnit onRemoveUnit]
   * [#morph morph]
   * [#getPlannedCount getPlannedCount]
@@ -20,6 +21,11 @@ Should be called in AIModule::onFrame.
 virtual std::string getName() const;
 
 Returns std::string("Morph Manager");
+
+== getShortName ==
+virtual std::string getShortName() const;
+
+Returns std::string("Morph");
 
 == onRemoveUnit ==
 void onRemoveUnit(BWAPI::Unit{{{*}}} unit);
