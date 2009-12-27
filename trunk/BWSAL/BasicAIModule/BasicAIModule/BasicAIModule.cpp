@@ -209,24 +209,7 @@ bool BasicAIModule::onSendText(std::string text)
   }
   if (text=="expand")
   {
-    double minDist;
-    BWTA::BaseLocation* natural=NULL;
-    BWTA::BaseLocation* home=BWTA::getStartLocation(Broodwar->self());
-    for(std::set<BWTA::BaseLocation*>::const_iterator b=BWTA::getBaseLocations().begin();b!=BWTA::getBaseLocations().end();b++)
-    {
-      if (*b==home) continue;
-      double dist=home->getGroundDistance(*b);
-      if (dist>0)
-      {
-        if (natural==NULL || dist<minDist)
-        {
-          minDist=dist;
-          natural=*b;
-        }
-      }
-    }
-    Broodwar->printf("expanding to (%d,%d)",natural->getTilePosition().x(),natural->getTilePosition().y());
-    this->baseManager->expand(natural);
+    this->baseManager->expand();
   }
   if (type!=UnitTypes::Unknown)
   {

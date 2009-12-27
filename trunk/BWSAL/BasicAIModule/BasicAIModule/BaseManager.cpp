@@ -57,11 +57,35 @@ Base* BaseManager::getBase(BWTA::BaseLocation* location)
   return i->second;
 }
 
+
+void BaseManager::expand(int priority)
+{
+  BWTA::BaseLocation* location=NULL;
+  double minDist=-1;
+  BWTA::BaseLocation* home=BWTA::getStartLocation(BWAPI::Broodwar->self());
+  for(std::set<BWTA::BaseLocation*>::const_iterator i=BWTA::getBaseLocations().begin();i!=BWTA::getBaseLocations().end();i++)
+  {
+    double dist=home->getGroundDistance(*i);
+    if (dist>0 && getBase(*i)==NULL)
+    {
+      if (minDist == -1 || dist<minDist)
+      {
+        minDist=dist;
+        location=*i;
+      }
+    }
+  }
+  expand(location,priority);
+}
 void BaseManager::expand(BWTA::BaseLocation* location, int priority)
 {
+  if (location==NULL)
+    return;
   addBase(location);
   this->builder->buildAdditional(1,*BWAPI::Broodwar->self()->getRace().getCenter(),priority,location->getTilePosition());
 }
+
+
 std::set<Base*> BaseManager::getActiveBases() const
 {
   std::set<Base*> activeBases;

@@ -13,6 +13,7 @@ class BaseManager
   void setBuildOrderManager(BuildOrderManager* builder);
   void update();
   Base* getBase(BWTA::BaseLocation* location);
+  void expand(int priority = 100);
   void expand(BWTA::BaseLocation* location, int priority = 100);
   std::set<Base*> getActiveBases() const;
   std::set<Base*> getAllBases() const;
