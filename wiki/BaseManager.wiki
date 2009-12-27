@@ -18,12 +18,13 @@ void update();
 Should be called in AIModule::onFrame.
 
 == getBase ==
-Base* getBase(BWTA::BaseLocation* location);
+Base* getBase(BWTA::BaseLocation{{{*}}} location);
 
 Returns the Base that is at the specified BaseLocation, or NULL if no base is there.
 
 == expand ==
 void expand(int priority = 100);
+
 void expand(BWTA::BaseLocation{{{*}}} location, int priority = 100);
 
 Call this to expand to the given base location. Note that nothing yet is done to clear the given base location of mines, burrowed units, blocking mineral patches, or other buildings. If no base location is specified, then the manager picks the closest base location to the player's starting location that hasn't been expanded to yet, and expands there.
