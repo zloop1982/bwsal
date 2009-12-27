@@ -287,6 +287,10 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\include\BWTA\RectangleArray.h"
+					>
+				</File>
+				<File
 					RelativePath="..\..\include\BWTA\Region.h"
 					>
 				</File>
