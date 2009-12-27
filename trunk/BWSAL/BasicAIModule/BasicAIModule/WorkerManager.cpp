@@ -235,6 +235,16 @@ void WorkerManager::update()
         i->getOrder() == Orders::PlayerGuard)
       if ((i->getTarget()==NULL || !i->getTarget()->exists() || !i->getTarget()->getType().isResourceDepot()) && i->getTarget() != resource)
         i->rightClick(resource);
+    if (i->getOrder() == Orders::ReturnGas || i->getOrder() == Orders::ReturnMinerals ||  i->getOrder() == Orders::PlayerGuard)
+    {
+      Base* b=this->baseManager->getBase(BWTA::getNearestBaseLocation(i->getTilePosition()));
+      if (b!=NULL)
+      {
+        Unit* center = b->getResourceDepot();
+        if (i->getTarget()==NULL || !i->getTarget()->exists() || i->getTarget()!=center || (center->isCompleted() &&  i->getOrder() == Orders::PlayerGuard))
+          i->rightClick(center);
+      }
+    }
   }
 }
 string WorkerManager::getName() const

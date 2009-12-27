@@ -49,6 +49,13 @@ void BaseManager::addBase(BWTA::BaseLocation* location)
   allBases.insert(newBase);
   this->location2base[location] = newBase;
 }
+Base* BaseManager::getBase(BWTA::BaseLocation* location)
+{
+  std::map<BWTA::BaseLocation*,Base*>::iterator i=location2base.find(location);
+  if (i==location2base.end())
+    return NULL;
+  return i->second;
+}
 
 void BaseManager::expand(BWTA::BaseLocation* location, int priority)
 {
