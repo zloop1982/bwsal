@@ -29,6 +29,16 @@ Returns a UnitGroup containing all the units of this UnitGroup which have a dist
   * UnitGroup operator()(int f1, int f2, int f3) const;
   * UnitGroup operator()(int f1, int f2, int f3, int f4) const;
   * UnitGroup operator()(int f1, int f2, int f3, int f4, int f5) const;
+  * UnitGroup operator()(FliterAttributeScalar a, const char{{{*}}} compare, double value) const;
+  * UnitGroup operator()(FliterAttributeScalar a, const char{{{*}}} compare, int value) const;
+  * UnitGroup operator()(BWAPI::Player{{{*}}} player) const;
+  * UnitGroup operator()(FilterAttributeUnit a, BWAPI::Unit{{{*}}} unit) const;
+  * UnitGroup operator()(FilterAttributeType a, BWAPI::UnitType type) const;
+  * UnitGroup operator()(FilterAttributeType a, BWAPI::TechType type) const;
+  * UnitGroup operator()(FilterAttributeType a, BWAPI::UpgradeType type) const;
+  * UnitGroup operator()(FilterAttributeOrder a, BWAPI::Order type) const;
+  * UnitGroup operator()(FilterAttributePosition a, BWAPI::Position position) const;
+  * UnitGroup operator()(FilterAttributeTilePosition a, BWAPI::TilePosition position) const;
 
 operator() can be used to create a UnitGroup containing only the units that satisfy one of the specified properties. For example, the following 2 lines creates a UnitGroup called myWorkers which holds all the worker units owned by the player:
 
@@ -60,8 +70,18 @@ UnitGroup nothing = SelectAll()(isGatheringMinerals)(isGatheringGas);
   * UnitGroup not(int f1, int f2, int f3) const;
   * UnitGroup not(int f1, int f2, int f3, int f4) const;
   * UnitGroup not(int f1, int f2, int f3, int f4, int f5) const;
+  * UnitGroup not(FliterAttributeScalar a, const char{{{*}}} compare, double value) const;
+  * UnitGroup not(FliterAttributeScalar a, const char{{{*}}} compare, int value) const;
+  * UnitGroup not(BWAPI::Player{{{*}}} player) const;
+  * UnitGroup not(FilterAttributeUnit a, BWAPI::Unit{{{*}}} unit) const;
+  * UnitGroup not(FilterAttributeType a, BWAPI::UnitType type) const;
+  * UnitGroup not(FilterAttributeType a, BWAPI::TechType type) const;
+  * UnitGroup not(FilterAttributeType a, BWAPI::UpgradeType type) const;
+  * UnitGroup not(FilterAttributeOrder a, BWAPI::Order type) const;
+  * UnitGroup not(FilterAttributePosition a, BWAPI::Position position) const;
+  * UnitGroup not(FilterAttributeTilePosition a, BWAPI::TilePosition position) const;
 
-not() can be used to create a UnitGroup containing all the units that do not satisfy the given property.
+not() can be used to create a UnitGroup containing all the units that do not satisfy the given property. Returns the complement of the corresponding operator() method call.
 
 === operator+ ===
 UnitGroup operator+(const UnitGroup& other) const;
