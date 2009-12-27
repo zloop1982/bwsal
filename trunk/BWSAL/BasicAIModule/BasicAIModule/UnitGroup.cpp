@@ -1296,7 +1296,7 @@ Position UnitGroup::getCenter() const
   return Position((int)(x/count),(int)(y/count));
 }
 
-UnitGroup UnitGroup::withinRadius(double radius,BWAPI::Position position) const
+UnitGroup UnitGroup::inRadius(double radius,BWAPI::Position position) const
 {
   UnitGroup result;
   for(set<Unit*>::const_iterator i=this->begin();i!=this->end();i++)
@@ -1307,17 +1307,47 @@ UnitGroup UnitGroup::withinRadius(double radius,BWAPI::Position position) const
   return result;
 }
 
-UnitGroup UnitGroup::withinRegion(BWTA::Region* region) const
+UnitGroup UnitGroup::inRegion(BWTA::Region* region) const
 {
   UnitGroup result;
   for(set<Unit*>::const_iterator i=this->begin();i!=this->end();i++)
   {
-    if (region->getPolygon().isInside((*i)->getPosition()))
+    if (BWTA::getRegion((*i)->getTilePosition())==region)
+      result.insert(*i);
+  }
+  return result;
+}
+UnitGroup UnitGroup::onlyNearestChokepoint(BWTA::Chokepoint* choke) const
+{
+  UnitGroup result;
+  for(set<Unit*>::const_iterator i=this->begin();i!=this->end();i++)
+  {
+    if (BWTA::getNearestChokepoint((*i)->getTilePosition())==choke)
       result.insert(*i);
   }
   return result;
 }
 
+UnitGroup UnitGroup::onlyNearestBaseLocation(BWTA::BaseLocation* location) const
+{
+  UnitGroup result;
+  for(set<Unit*>::const_iterator i=this->begin();i!=this->end();i++)
+  {
+    if (BWTA::getNearestBaseLocation((*i)->getTilePosition())==location)
+      result.insert(*i);
+  }
+  return result;
+}
+UnitGroup UnitGroup::onlyNearestUnwalkablePolygon(BWTA::Polygon* polygon) const
+{
+  UnitGroup result;
+  for(set<Unit*>::const_iterator i=this->begin();i!=this->end();i++)
+  {
+    if (BWTA::getNearestUnwalkablePolygon((*i)->getTilePosition())==polygon)
+      result.insert(*i);
+  }
+  return result;
+}
 bool UnitGroup::attackMove(Position position) const
 {
   bool retval=true;

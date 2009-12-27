@@ -302,8 +302,11 @@ class UnitGroup : public std::set<BWAPI::Unit*>
     UnitGroup operator^(const UnitGroup& other) const;//symmetric difference
     UnitGroup operator-(const UnitGroup& other) const;//difference
     BWAPI::Position getCenter() const;
-    UnitGroup withinRadius(double radius,BWAPI::Position position) const;
-    UnitGroup withinRegion(BWTA::Region* region) const;
+    UnitGroup inRadius(double radius,BWAPI::Position position) const;
+    UnitGroup inRegion(BWTA::Region* region) const;
+    UnitGroup onlyNearestChokepoint(BWTA::Chokepoint* choke) const;
+    UnitGroup onlyNearestBaseLocation(BWTA::BaseLocation* location) const;
+    UnitGroup onlyNearestUnwalkablePolygon(BWTA::Polygon* polygon) const;
     UnitGroup operator()(int f1) const;
     UnitGroup operator()(int f1, int f2) const;
     UnitGroup operator()(int f1, int f2, int f3) const;
