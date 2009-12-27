@@ -18,7 +18,7 @@ void update();
 Should be called in AIModule::onFrame.
 
 == getBase ==
-Base* getBase(BWTA::BaseLocation{{{*}}} location);
+Base{{{*}}} getBase(BWTA::BaseLocation{{{*}}} location);
 
 Returns the Base that is at the specified BaseLocation, or NULL if no base is there.
 
