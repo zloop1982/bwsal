@@ -29,6 +29,7 @@ void BasicAIModule::onStart()
   this->techManager->setBuildingPlacer(this->buildManager->getBuildingPlacer());
   this->upgradeManager->setBuildingPlacer(this->buildManager->getBuildingPlacer());
   this->workerManager->setBaseManager(this->baseManager);
+  this->workerManager->setBuildOrderManager(this->buildOrderManager);
   this->baseManager->setBuildOrderManager(this->buildOrderManager);
   
   BWAPI::Race race = Broodwar->self()->getRace();
@@ -109,6 +110,8 @@ void BasicAIModule::onStart()
     this->buildOrderManager->upgrade(1,UpgradeTypes::Singularity_Charge,61);
     this->buildOrderManager->buildAdditional(20,UnitTypes::Protoss_Carrier,60);
   }
+  this->workerManager->enableAutoBuild();
+  this->workerManager->setAutoBuildPriority(40);
  
 }
 

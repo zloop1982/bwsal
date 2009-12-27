@@ -2,6 +2,7 @@
 #include <Arbitrator.h>
 #include <BWAPI.h>
 #include <BaseManager.h>
+class BuildOrderManager;
 class WorkerManager : public Arbitrator::Controller<BWAPI::Unit*,double>
 {
   public:
@@ -15,6 +16,7 @@ class WorkerManager : public Arbitrator::Controller<BWAPI::Unit*,double>
     };
     WorkerManager(Arbitrator::Arbitrator<BWAPI::Unit*,double>* arbitrator);
     void setBaseManager(BaseManager* baseManager);
+    void setBuildOrderManager(BuildOrderManager* buildOrderManager);
     virtual void onOffer(std::set<BWAPI::Unit*> units);
     virtual void onRevoke(BWAPI::Unit* unit, double bid);
     virtual void update();
@@ -25,8 +27,14 @@ class WorkerManager : public Arbitrator::Controller<BWAPI::Unit*,double>
     void setWorkersPerGas(int count);
     double getMineralRate() const;
     double getGasRate() const;
+    void enableAutoBuild();
+    void disableAutoBuild();
+    void setAutoBuildPriority(int priority);
+  private:
+
     Arbitrator::Arbitrator<BWAPI::Unit*,double>* arbitrator;
     BaseManager* baseManager;
+    BuildOrderManager* buildOrderManager;
     std::map<BWAPI::Unit*,WorkerData> workers;
     std::map<BWAPI::Unit*, std::set<BWAPI::Unit*> > currentWorkers;
     std::map<BWAPI::Unit*, Base*> resourceBase;
@@ -37,9 +45,10 @@ class WorkerManager : public Arbitrator::Controller<BWAPI::Unit*,double>
     std::set<Base*> basesCache;
     int WorkersPerGas;
     
-  private:
     void rebalanceWorkers();
     void updateWorkerAssignments();
     double mineralRate;
     double gasRate;
+    bool autoBuild;
+    int autoBuildPriority;
 };
