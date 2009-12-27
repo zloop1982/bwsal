@@ -1098,6 +1098,178 @@ UnitGroup UnitGroup::not(int f1, int f2, int f3, int f4, int f5) const
   return result;
 }
 
+
+UnitGroup UnitGroup::not(FliterAttributeScalar a, const char* compare, double value) const
+{
+  UnitGroup result;
+  string cmp(compare);
+  for(set<Unit*>::const_iterator i=this->begin();i!=this->end();i++)
+  {
+    double val=getAttribute(*i,a);
+    bool passes=false;
+    if (cmp=="=" || cmp=="==" || cmp=="<=" || cmp==">=")
+      if (val==value)
+        passes=true;
+    if (cmp=="<" || cmp=="<=" || cmp=="!=" || cmp=="<>")
+      if (val<value)
+        passes=true;
+    if (cmp==">" || cmp==">=" || cmp=="!=" || cmp=="<>")
+      if (val>value)
+        passes=true;
+    if (passes)
+      result.insert(*i);
+  }
+  return result;
+}
+UnitGroup UnitGroup::not(FliterAttributeScalar a, const char* compare, int value) const
+{
+  UnitGroup result;
+  string cmp(compare);
+  for(set<Unit*>::const_iterator i=this->begin();i!=this->end();i++)
+  {
+    int val=(int)getAttribute(*i,a);
+    bool passes=false;
+    if (cmp=="=" || cmp=="==" || cmp=="<=" || cmp==">=")
+      if (val==value)
+        passes=true;
+    if (cmp=="<" || cmp=="<=" || cmp=="!=" || cmp=="<>")
+      if (val<value)
+        passes=true;
+    if (cmp==">" || cmp==">=" || cmp=="!=" || cmp=="<>")
+      if (val>value)
+        passes=true;
+    if (passes)
+      result.insert(*i);
+  }
+  return result;
+}
+UnitGroup UnitGroup::not(BWAPI::Player* player) const
+{
+  UnitGroup result;
+  for(set<Unit*>::const_iterator i=this->begin();i!=this->end();i++)
+  {
+    if ((*i)->getPlayer()!=player)
+      result.insert(*i);
+  }
+  return result;
+}
+UnitGroup UnitGroup::not(FilterAttributeUnit a, BWAPI::Unit* unit) const
+{
+  UnitGroup result;
+  for(set<Unit*>::const_iterator i=this->begin();i!=this->end();i++)
+  {
+    Unit* target=getUnit(*i,a);
+    if (target!=unit)
+      result.insert(*i);
+  }
+  return result;
+}
+UnitGroup UnitGroup::not(FilterAttributeType a, BWAPI::UnitType type) const
+{
+  UnitGroup result;
+  for(set<Unit*>::const_iterator i=this->begin();i!=this->end();i++)
+  {
+    bool passes=false;
+    if (a==GetType)
+      if ((*i)->getType()==type)
+        passes=true;
+    if (a==GetInitialType)
+      if ((*i)->getInitialType()==type)
+        passes=true;
+    if (a==GetBuildType)
+      if ((*i)->getBuildType()==type)
+        passes=true;
+    if (!passes)
+      result.insert(*i);
+  }
+  return result;
+}
+UnitGroup UnitGroup::not(FilterAttributeType a, BWAPI::TechType type) const
+{
+  UnitGroup result;
+  for(set<Unit*>::const_iterator i=this->begin();i!=this->end();i++)
+  {
+    bool passes=false;
+    if (a==GetTech)
+      if ((*i)->getTech()==type)
+        passes=true;
+    if (!passes)
+      result.insert(*i);
+  }
+  return result;
+}
+UnitGroup UnitGroup::not(FilterAttributeOrder a, BWAPI::Order type) const
+{
+  UnitGroup result;
+  for(set<Unit*>::const_iterator i=this->begin();i!=this->end();i++)
+  {
+    bool passes=false;
+    if (a==GetOrder)
+      if ((*i)->getOrder()==type)
+        passes=true;
+    if (a==GetSecondaryOrder)
+      if ((*i)->getSecondaryOrder()==type)
+        passes=true;
+    if (!passes)
+      result.insert(*i);
+  }
+  return result;
+}
+UnitGroup UnitGroup::not(FilterAttributeType a, BWAPI::UpgradeType type) const
+{
+  UnitGroup result;
+  for(set<Unit*>::const_iterator i=this->begin();i!=this->end();i++)
+  {
+    bool passes=false;
+    if (a==GetUpgrade)
+      if ((*i)->getUpgrade()==type)
+        passes=true;
+    if (!passes)
+      result.insert(*i);
+  }
+  return result;
+}
+UnitGroup UnitGroup::not(FilterAttributePosition a, BWAPI::Position position) const
+{
+  UnitGroup result;
+  for(set<Unit*>::const_iterator i=this->begin();i!=this->end();i++)
+  {
+    bool passes=false;
+    if (a==GetPosition)
+      if ((*i)->getPosition()==position)
+        passes=true;
+    if (a==GetInitialPosition)
+      if ((*i)->getInitialPosition()==position)
+        passes=true;
+    if (a==GetTargetPosition)
+      if ((*i)->getTargetPosition()==position)
+        passes=true;
+    if (a==GetRallyPosition)
+      if ((*i)->getRallyPosition()==position)
+        passes=true;
+    if (!passes)
+      result.insert(*i);
+  }
+  return result;
+}
+UnitGroup UnitGroup::not(FilterAttributeTilePosition a, BWAPI::TilePosition position) const
+{
+  UnitGroup result;
+  for(set<Unit*>::const_iterator i=this->begin();i!=this->end();i++)
+  {
+    bool passes=false;
+    if (a==GetPosition)
+      if ((*i)->getTilePosition()==position)
+        passes=true;
+    if (a==GetInitialPosition)
+      if ((*i)->getInitialTilePosition()==position)
+        passes=true;
+    if (!passes)
+      result.insert(*i);
+  }
+  return result;
+}
+
 Position UnitGroup::getCenter() const
 {
   if (this->empty())

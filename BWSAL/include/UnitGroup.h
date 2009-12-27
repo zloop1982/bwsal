@@ -311,7 +311,6 @@ class UnitGroup : public std::set<BWAPI::Unit*>
     UnitGroup operator()(int f1, int f2, int f3, int f4, int f5) const;
     UnitGroup operator()(FliterAttributeScalar a, const char* compare, double value) const;
     UnitGroup operator()(FliterAttributeScalar a, const char* compare, int value) const;
-    
     UnitGroup operator()(BWAPI::Player* player) const;
     UnitGroup operator()(FilterAttributeUnit a, BWAPI::Unit* unit) const;
     UnitGroup operator()(FilterAttributeType a, BWAPI::UnitType type) const;
@@ -326,6 +325,18 @@ class UnitGroup : public std::set<BWAPI::Unit*>
     UnitGroup not(int f1, int f2, int f3) const;
     UnitGroup not(int f1, int f2, int f3, int f4) const;
     UnitGroup not(int f1, int f2, int f3, int f4, int f5) const;
+
+    UnitGroup not(FliterAttributeScalar a, const char* compare, double value) const;
+    UnitGroup not(FliterAttributeScalar a, const char* compare, int value) const;
+    UnitGroup not(BWAPI::Player* player) const;
+    UnitGroup not(FilterAttributeUnit a, BWAPI::Unit* unit) const;
+    UnitGroup not(FilterAttributeType a, BWAPI::UnitType type) const;
+    UnitGroup not(FilterAttributeType a, BWAPI::TechType type) const;
+    UnitGroup not(FilterAttributeType a, BWAPI::UpgradeType type) const;
+    UnitGroup not(FilterAttributeOrder a, BWAPI::Order type) const;
+    UnitGroup not(FilterAttributePosition a, BWAPI::Position position) const;
+    UnitGroup not(FilterAttributeTilePosition a, BWAPI::TilePosition position) const;
+
     bool attackMove(BWAPI::Position position) const;
     bool attackUnit(BWAPI::Unit* target) const;
     bool rightClick(BWAPI::Position position) const;
