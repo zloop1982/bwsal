@@ -105,7 +105,7 @@ UnitGroup nothing = SelectAll()(isGatheringMinerals)(isGatheringGas);
   * UnitGroup not(FilterAttributePosition a, BWAPI::Position position) const;
   * UnitGroup not(FilterAttributeTilePosition a, BWAPI::TilePosition position) const;
 
-not() can be used to create a UnitGroup containing all the units that do not satisfy the given property. Returns the complement of the corresponding operator() method call.
+Returns the complement of the corresponding operator() method call.
 
 === operator+ ===
 UnitGroup operator+(const UnitGroup& other) const;
