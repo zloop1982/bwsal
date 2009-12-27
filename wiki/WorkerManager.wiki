@@ -11,6 +11,9 @@ The worker manager ensures that workers are mining minerals and gas at maximum c
   * [#setWorkersPerGas setWorkersPerGas]
   * [#getMineralRate getMineralRate]
   * [#getGasRate getGasRate]
+  * [#enableAutoBuild enableAutoBuild]
+  * [#disableAutoBuild disableAutoBuild]
+  * [#setAutoBuildPriority setAutoBuildPriority]
 
 == update ==
 virtual void update();
@@ -46,3 +49,12 @@ Returns the rate at which the worker manager is gathering minerals, in minerals 
 double getGasRate() const;
 
 Returns the rate at which the worker manager is gathering gas, in gas per frame.
+
+== enableAutoBuild ==
+void enableAutoBuild();
+
+== disableAutoBuild ==
+void disableAutoBuild();
+
+== setAutoBuildPriority ==
+void setAutoBuildPriority(int priority);
