@@ -74,6 +74,6 @@ void setBuildDistance(int distance);
 Sets the build distance for the building placer.
 
 == getBuildType ==
-BWAPI::UnitType getBuildType(BWAPI::Unit* unit) const;
+BWAPI::UnitType getBuildType(BWAPI::Unit{{{*}}} unit) const;
 
 Returns the unit type that the given unit is about to train, or UnitTypes::None if the unit is not about to train anything.
