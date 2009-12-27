@@ -5,7 +5,11 @@ Class header file: http://code.google.com/p/bwsal/source/browse/trunk/BWSAL/incl
 The UnitGroup class is defined as a std::set<BWAPI::Unit{{{*}}}> object with a number of additional methods:
 
   * [#getCenter getCenter]
-  * [#withinRadius withinRadius]
+  * [#inRadius inRadius]
+  * [#inRegion inRegion]
+  * [#onlyNearestChokepoint onlyNearestChokepoint]
+  * [#onlyNearestBaseLocation onlyNearestBaseLocation]
+  * [#onlyNearestUnwalkablePolygon onlyNearestUnwalkablePolygon]
   * [#operator() operator()]
   * [#not not]
   * [#operator+ operator+]
@@ -18,10 +22,30 @@ BWAPI::Position getCenter() const;
 
 Returns the average position of all the units in the UnitGroup.
 
-=== withinRadius ===
-UnitGroup withinRadius(double radius,BWAPI::Position position) const;
+=== inRadius ===
+UnitGroup inRadius(double radius,BWAPI::Position position) const;
 
-Returns a UnitGroup containing all the units of this UnitGroup which have a distance of less than {{{radius}}} to the given position.
+Returns a UnitGroup containing all the units of this UnitGroup which have a distance of less than the given radius to the given position.
+
+=== inRegion===
+UnitGroup inRegion(BWTA::Region* region) const;
+
+Returns a UnitGroup containing all the units of this UnitGroup which are in the given region.
+
+=== onlyNearestChokepoint ===
+UnitGroup onlyNearestChokepoint(BWTA::Chokepoint* choke) const;
+
+Returns a UnitGroup containing all the units of this UnitGroup which are closer to the given chokepoint than to any other chokepoint on the map.
+
+=== onlyNearestBaseLocation ===
+UnitGroup onlyNearestBaseLocation(BWTA::BaseLocation* location) const;
+
+Returns a UnitGroup containing all the units of this UnitGroup which are closer to the given base location than to any other base location on the map.
+
+=== onlyNearestUnwalkablePolygon ===
+UnitGroup onlyNearestUnwalkablePolygon(BWTA::Polygon* polygon) const;
+
+Returns a UnitGroup containing all the units of this UnitGroup which are closer to the given unwalkable polygon than to any other unwalkable polygon on the map.
 
 === operator() ===
   * UnitGroup operator()(int f1) const;
