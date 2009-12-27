@@ -38,7 +38,11 @@ Should be called during AIModule::onUnitDestroy.
 == build ==
 bool build(BWAPI::UnitType type);
 
+bool build(BWAPI::UnitType type, bool forceNoAddon);
+
 bool build(BWAPI::UnitType type, BWAPI::TilePosition goalPosition);
+
+bool build(BWAPI::UnitType type, BWAPI::TilePosition goalPosition, bool forceNoAddon);
 
 Call this to build a new unit of the given type. If the unit is a building, an optional goalPosition can be used to specified where the building should be placed near. If no goal position is specified, the goal position will be the player's starting position so new buildings are placed near the main base.
 
