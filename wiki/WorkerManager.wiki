@@ -8,6 +8,8 @@ The worker manager ensures that workers are mining minerals and gas at maximum c
   * [#getName getName]
   * [#onRemoveUnit onRemoveUnit]
   * [#setWorkersPerGas setWorkersPerGas]
+  * [#getMineralRate getMineralRate]
+  * [#getGasRate getGasRate]
 
 == update ==
 virtual void update();
@@ -28,3 +30,13 @@ Should be called during AIModule::onUnitDestroy.
 void setWorkersPerGas(int count);
 
 Used to set how many workers should be used per refinery. The default value is 3 and generally this is the optimal number, but some times in the early game you may want to have only 1 worker on gas.
+
+== getMineralRate ==
+double getMineralRate() const;
+
+Returns the rate at which the worker manager is gathering minerals, in minerals per frame.
+
+== getGasRate ==
+double getGasRate() const;
+
+Returns the rate at which the worker manager is gathering gas, in gas per frame.
