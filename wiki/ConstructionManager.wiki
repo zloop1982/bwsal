@@ -6,6 +6,7 @@ Given a unit type, the construction manager will attempt to get a suitable worke
 
   * [#update update]
   * [#getName getName]
+  * [#getShortName getShortName]
   * [#onRemoveUnit onRemoveUnit]
   * [#build build]
   * [#getPlannedCount getPlannedCount]
@@ -20,6 +21,11 @@ Should be called in AIModule::onFrame.
 virtual std::string getName() const;
 
 Returns std::string("Construction Manager");
+
+== getShortName ==
+virtual std::string getShortName() const;
+
+Returns std::string("Con");
 
 == onRemoveUnit ==
 void onRemoveUnit(BWAPI::Unit{{{*}}} unit);
