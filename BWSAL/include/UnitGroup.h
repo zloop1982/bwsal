@@ -325,7 +325,6 @@ class UnitGroup : public std::set<BWAPI::Unit*>
     UnitGroup not(int f1, int f2, int f3) const;
     UnitGroup not(int f1, int f2, int f3, int f4) const;
     UnitGroup not(int f1, int f2, int f3, int f4, int f5) const;
-
     UnitGroup not(FliterAttributeScalar a, const char* compare, double value) const;
     UnitGroup not(FliterAttributeScalar a, const char* compare, int value) const;
     UnitGroup not(BWAPI::Player* player) const;
