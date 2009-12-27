@@ -6,6 +6,7 @@ The worker manager ensures that workers are mining minerals and gas at maximum c
 
   * [#update update]
   * [#getName getName]
+  * [#getShortName getShortName]
   * [#onRemoveUnit onRemoveUnit]
   * [#setWorkersPerGas setWorkersPerGas]
   * [#getMineralRate getMineralRate]
@@ -20,6 +21,11 @@ Should be called during AIModule::onFrame.
 virtual std::string getName() const;
 
 Returns std::string("Worker Manager");
+
+== getShortName ==
+virtual std::string getShortName() const;
+
+Returns std::string("Work");
 
 == onRemoveUnit ==
 void onRemoveUnit(BWAPI::Unit{{{*}}} unit);
