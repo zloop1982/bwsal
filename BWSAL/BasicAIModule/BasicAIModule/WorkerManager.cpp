@@ -1,6 +1,7 @@
 #include <WorkerManager.h>
 #include <BaseManager.h>
 #include <RectangleArray.h>
+#include <BuildOrderManager.h>
 #include "Util.h"
 #include <algorithm>
 using namespace BWAPI;
@@ -8,16 +9,23 @@ using namespace std;
 using namespace Util;
 WorkerManager::WorkerManager(Arbitrator::Arbitrator<Unit*,double>* arbitrator)
 {
-  this->arbitrator     = arbitrator;
-  this->baseManager    = NULL;
-  this->lastSCVBalance = 0;
-  this->WorkersPerGas  = 3;
-  this->mineralRate    = 0;
-  this->gasRate        = 0;
+  this->arbitrator        = arbitrator;
+  this->baseManager       = NULL;
+  this->buildOrderManager = NULL;
+  this->lastSCVBalance    = 0;
+  this->WorkersPerGas     = 3;
+  this->mineralRate       = 0;
+  this->gasRate           = 0;
+  this->autoBuild         = false;
+  this->autoBuildPriority = 80;
 }
 void WorkerManager::setBaseManager(BaseManager* baseManager)
 {
   this->baseManager = baseManager;
+}
+void WorkerManager::setBuildOrderManager(BuildOrderManager* buildOrderManager)
+{
+  this->buildOrderManager = buildOrderManager;
 }
 void WorkerManager::onOffer(set<Unit*> units)
 {
@@ -133,6 +141,7 @@ void WorkerManager::rebalanceWorkers()
   currentWorkers.clear();
   resourceBase.clear();
   int remainingWorkers = this->workers.size();
+  int optimalWorkerCount = 0;
   
   // iterate over all the resources of each active base
   for(set<Base*>::iterator b = this->basesCache.begin(); b != this->basesCache.end(); b++)
@@ -144,6 +153,7 @@ void WorkerManager::rebalanceWorkers()
       resourceBase[*m] = *b;
       desiredWorkerCount[*m] = 0;
       baseMineralOrder.push_back(std::make_pair(*m,(*m)->getResources() - 2*(int)(*m)->getPosition().getDistance((*b)->getBaseLocation()->getPosition())));
+      optimalWorkerCount+=2;
     }
     sort(baseMineralOrder.begin(), baseMineralOrder.end(), mineralCompare);
     for(int i=0;i<(int)baseMineralOrder.size();i++)
@@ -154,6 +164,7 @@ void WorkerManager::rebalanceWorkers()
     set<Unit*> baseGeysers = (*b)->getGeysers();
     for(set<Unit*>::iterator g = baseGeysers.begin(); g != baseGeysers.end(); g++)
     {
+      optimalWorkerCount+=3;
       resourceBase[*g] = *b;
       desiredWorkerCount[*g]=0;
       if ((*g)->getType().isRefinery() && (*g)->getPlayer()==Broodwar->self() && (*g)->isCompleted())
@@ -186,6 +197,14 @@ void WorkerManager::rebalanceWorkers()
 
   //update the worker assignments so the actual workers per resource is the same as the desired workers per resource
   updateWorkerAssignments();
+  if (this->autoBuild)
+  {
+    BWAPI::UnitType workerType=*BWAPI::Broodwar->self()->getRace().getWorker();
+    if (this->buildOrderManager->getPlannedCount(workerType)<optimalWorkerCount)
+    {
+      this->buildOrderManager->build(optimalWorkerCount,workerType,this->autoBuildPriority);
+    }
+  }
 }
 
 void WorkerManager::update()
@@ -235,14 +254,18 @@ void WorkerManager::update()
         i->getOrder() == Orders::PlayerGuard)
       if ((i->getTarget()==NULL || !i->getTarget()->exists() || !i->getTarget()->getType().isResourceDepot()) && i->getTarget() != resource)
         i->rightClick(resource);
-    if (i->getOrder() == Orders::ReturnGas || i->getOrder() == Orders::ReturnMinerals ||  i->getOrder() == Orders::PlayerGuard)
+    if (i->isCarryingGas() || i->isCarryingMinerals())
     {
-      Base* b=this->baseManager->getBase(BWTA::getNearestBaseLocation(i->getTilePosition()));
-      if (b!=NULL)
+      if (i->getOrder() == Orders::ReturnGas || i->getOrder() == Orders::ReturnMinerals ||  (i->getOrder() == Orders::PlayerGuard && BWAPI::Broodwar->getFrameCount()>u->second.lastFrameSpam+BWAPI::Broodwar->getLatency()*2))
       {
-        Unit* center = b->getResourceDepot();
-        if (i->getTarget()==NULL || !i->getTarget()->exists() || i->getTarget()!=center || (center->isCompleted() &&  i->getOrder() == Orders::PlayerGuard))
-          i->rightClick(center);
+        u->second.lastFrameSpam=BWAPI::Broodwar->getFrameCount();
+        Base* b=this->baseManager->getBase(BWTA::getNearestBaseLocation(i->getTilePosition()));
+        if (b!=NULL)
+        {
+          Unit* center = b->getResourceDepot();
+          if (i->getTarget()==NULL || !i->getTarget()->exists() || i->getTarget()!=center || (center->isCompleted() &&  i->getOrder() == Orders::PlayerGuard))
+            i->rightClick(center);
+        }
       }
     }
   }
@@ -291,4 +314,16 @@ double WorkerManager::getMineralRate() const
 double WorkerManager::getGasRate() const
 {
   return this->gasRate;
+}
+void WorkerManager::enableAutoBuild()
+{
+  this->autoBuild=true;
+}
+void WorkerManager::disableAutoBuild()
+{
+  this->autoBuild=false;
+}
+void WorkerManager::setAutoBuildPriority(int priority)
+{
+  this->autoBuildPriority = priority;
 }
