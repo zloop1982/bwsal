@@ -28,22 +28,22 @@ UnitGroup inRadius(double radius,BWAPI::Position position) const;
 Returns a UnitGroup containing all the units of this UnitGroup which have a distance of less than the given radius to the given position.
 
 === inRegion===
-UnitGroup inRegion(BWTA::Region* region) const;
+UnitGroup inRegion(BWTA::Region{{{*}}} region) const;
 
 Returns a UnitGroup containing all the units of this UnitGroup which are in the given region.
 
 === onlyNearestChokepoint ===
-UnitGroup onlyNearestChokepoint(BWTA::Chokepoint* choke) const;
+UnitGroup onlyNearestChokepoint(BWTA::Chokepoint{{{*}}} choke) const;
 
 Returns a UnitGroup containing all the units of this UnitGroup which are closer to the given chokepoint than to any other chokepoint on the map.
 
 === onlyNearestBaseLocation ===
-UnitGroup onlyNearestBaseLocation(BWTA::BaseLocation* location) const;
+UnitGroup onlyNearestBaseLocation(BWTA::BaseLocation{{{*}}} location) const;
 
 Returns a UnitGroup containing all the units of this UnitGroup which are closer to the given base location than to any other base location on the map.
 
 === onlyNearestUnwalkablePolygon ===
-UnitGroup onlyNearestUnwalkablePolygon(BWTA::Polygon* polygon) const;
+UnitGroup onlyNearestUnwalkablePolygon(BWTA::Polygon{{{*}}} polygon) const;
 
 Returns a UnitGroup containing all the units of this UnitGroup which are closer to the given unwalkable polygon than to any other unwalkable polygon on the map.
 
