@@ -5,7 +5,7 @@ Class header file: http://code.google.com/p/bwsal/source/browse/trunk/BWSAL/incl
 Keeps track of each base and handles requests to activate and deactivate individual bases (useful to react to storm drops).
 
   * [#update update]
-  * [#addBase addBase]
+  * [#getBase getBase]
   * [#expand expand]
   * [#getActiveBases getActiveBases]
   * [#getAllBases getAllBases]
@@ -17,8 +17,10 @@ void update();
 
 Should be called in AIModule::onFrame.
 
-== addBase ==
-void addBase(BWTA::BaseLocation{{{*}}} location);
+== getBase ==
+Base* getBase(BWTA::BaseLocation* location);
+
+Returns the Base that is at the specified BaseLocation, or NULL if no base is there.
 
 == expand ==
 void expand(BWTA::BaseLocatio{{{*}}} location, int priority = 100);
