@@ -15,11 +15,12 @@ Methods:
   * [#getName getName]
   * [#getShortName getShortName]
   * [#onRemoveUnit onRemoveUnit]
-  * [BuildManager#build build]
-  * [BuildManager#getPlannedCount getPlannedCount]
-  * [BuildManager#getStartedCount getStartedCount]
-  * [BuildManager#getCompletedCount getCompletedCount]
-  * [BuildManager#setBuildDistance setBuildDistance]
+  * [#build build]
+  * [#getPlannedCount getPlannedCount]
+  * [#getStartedCount getStartedCount]
+  * [#getCompletedCount getCompletedCount]
+  * [#setBuildDistance setBuildDistance]
+  * [#getBuildType getBuildType]
 
 == update ==
 void update();
@@ -71,3 +72,8 @@ Simply calls BWAPI::Broodwar->self()->completedUnitCount(type).
 void setBuildDistance(int distance);
 
 Sets the build distance for the building placer.
+
+== getBuildType ==
+BWAPI::UnitType getBuildType(BWAPI::Unit* unit) const;
+
+Returns the unit type that the given unit is about to train, or UnitTypes::None if the unit is not about to train anything.
