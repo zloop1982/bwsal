@@ -13,6 +13,9 @@ Class header file: http://code.google.com/p/bwsal/source/browse/trunk/BWSAL/incl
   * [#getPlannedCount getPlannedCount]
   * [#enableDependencyResolver enableDependencyResolver]
   * [#enableDebugMode enableDebugMode]
+  * [#unitsCanMake unitsCanMake]
+  * [#techsCanResearch techsCanResearch]
+  * [#upgradesCanResearch upgradesCanResearch]
 
 == update ==
 void update();
@@ -72,3 +75,18 @@ Enables the dependency resolver, which will automatically queue up required unit
 void enableDebugMode();
 
 Enables debug mode, which will show a lot of debug information on the screen. Useful if you want to see what the Build Order Manager is currently planning to do.
+
+== unitsCanMake ==
+std::set<BWAPI::UnitType> unitsCanMake(BWAPI::Unit{{{*}}} builder, int time);
+
+Returns the set of unit types the given unit will be able to make at the given time.
+
+== techsCanResearch ==
+std::set<BWAPI::TechType> techsCanResearch(BWAPI::Unit{{{*}}} techUnit, int time);
+
+Returns the set of tech types the given unit will be able to research at the given time.
+
+== upgradesCanResearch ==
+std::set<BWAPI::UpgradeType> upgradesCanResearch(BWAPI::Unit{{{*}}} techUnit, int time);
+
+Returns the set of upgrade types the given unit will be able to upgrade at the given time.
