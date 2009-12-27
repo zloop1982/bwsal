@@ -109,7 +109,7 @@ void BaseManager::onRemoveUnit(BWAPI::Unit* unit)
 {
   for(std::set<Base*>::const_iterator b = this->allBases.begin(); b != this->allBases.end(); b++)
   {
-    if((*b)->getResourceDepot() == unit)
+    if((*b)->getResourceDepot() == unit && unit->isCompleted())
       allBases.erase(b);
   }
 }
