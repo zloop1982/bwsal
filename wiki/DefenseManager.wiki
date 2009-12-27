@@ -6,6 +6,7 @@ The Defense Manager sends all non-worker units to the initial bases's chokepoint
 
   * [#update update]
   * [#getName getName]
+  * [#getShortName getShortName]
   * [#onRemoveUnit onRemoveUnit]
 
 == update ==
@@ -17,6 +18,11 @@ Should be called from AIModule::onFrame.
 virtual std::string getName() const;
 
 Returns std::string("Defense Manager");
+
+== getShortName ==
+virtual std::string getShortName() const;
+
+Returns std::string("Def");
 
 == onRemoveUnit ==
 void onRemoveUnit(BWAPI::Unit{{{*}}} unit);
