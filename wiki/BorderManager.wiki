@@ -2,7 +2,7 @@
 
 Class header file: http://code.google.com/p/bwsal/source/browse/trunk/BWSAL/include/BorderManager.h
 
-The Border Manager can be used both to get the border around our base (i.e. for defense), and also for getting the border around the enemy's base (i.e. for containment).
+A border is a set of chokepoints that divides the map into two or more parts. The Border Manager can be used both to get the border around our base (i.e. for defense), and also for getting the border around the enemy's base (i.e. for containment).
 
   * [#addMyBase addMyBase]
   * [#removeMyBase removeMyBase]
