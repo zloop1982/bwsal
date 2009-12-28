@@ -4,13 +4,15 @@
 #include <BWAPI.h>
 #include <Arbitrator.h>
 #include <BWTA.h>
-#include <BuildOrderManager.h>
 #include "Base.h"
+class BuildOrderManager;
+class BorderManager;
 class BaseManager
 {
   public:
   BaseManager();
   void setBuildOrderManager(BuildOrderManager* builder);
+  void setBorderManager(BorderManager* borderManager);
   void update();
   Base* getBase(BWTA::BaseLocation* location);
   void expand(int priority = 100);
@@ -24,6 +26,7 @@ class BaseManager
   private:
   void addBase(BWTA::BaseLocation* location);
   BuildOrderManager* builder;
+  BorderManager* borderManager;
   std::map<BWTA::BaseLocation*,Base*> location2base;
   std::set<Base*> allBases;
 };

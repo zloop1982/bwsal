@@ -1,20 +1,13 @@
-#include <BWTA.h>
 #include <DefenseManager.h>
-
+#include <BorderManager.h>
 DefenseManager::DefenseManager(Arbitrator::Arbitrator<BWAPI::Unit*,double>* arbitrator)
 {
   this->arbitrator = arbitrator;
-  std::set<BWTA::Chokepoint*> chokepoints = BWTA::getStartLocation(BWAPI::Broodwar->self())->getRegion()->getChokepoints();
-  if (chokepoints.size() == 1)
-  {
-    chokePosition = (*chokepoints.begin())->getCenter();
-  }
-  else
-  {
-    chokePosition = BWAPI::Positions::None;
-  }
 }
-
+void DefenseManager::setBorderManager(BorderManager* borderManager)
+{
+  this->borderManager=borderManager;
+}
 void DefenseManager::onOffer(std::set<BWAPI::Unit*> units)
 {
   for(std::set<BWAPI::Unit*>::iterator u = units.begin(); u != units.end(); u++)
@@ -53,11 +46,25 @@ void DefenseManager::update()
       arbitrator->setBid(this, *u, 20);
     }
   }
+  bool borderUpdated=false;
+  if (myBorder!=borderManager->getMyBorder())
+  {
+    myBorder=borderManager->getMyBorder();
+    myBorderVector.clear();
+    for(std::set<BWTA::Chokepoint*>::iterator i=myBorder.begin();i!=myBorder.end();i++)
+      myBorderVector.push_back(*i);
+    borderUpdated=true;
+  }
   //Order all units to choke
+  int i=0;
   for (std::map<BWAPI::Unit*,DefenseData>::iterator u = defenders.begin(); u != defenders.end(); u++)
   {
-    if ((*u).second.mode == DefenseData::Idle)
+    if ((*u).second.mode == DefenseData::Idle || borderUpdated)
     {
+      BWAPI::Position chokePosition=myBorderVector[i]->getCenter();
+      i++;
+      if (i>=myBorderVector.size())
+        i=0;
       (*u).first->attackMove(chokePosition);
       (*u).second.mode = DefenseData::Moving;
     }

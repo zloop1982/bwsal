@@ -21,6 +21,7 @@ void BasicAIModule::onStart()
   this->supplyManager      = new SupplyManager();
   this->defenseManager     = new DefenseManager(&this->arbitrator);
   this->informationManager = new InformationManager();
+  this->borderManager      = new BorderManager();
   this->unitGroupManager   = new UnitGroupManager();
   this->enhancedUI         = new EnhancedUI();
 
@@ -31,6 +32,9 @@ void BasicAIModule::onStart()
   this->workerManager->setBaseManager(this->baseManager);
   this->workerManager->setBuildOrderManager(this->buildOrderManager);
   this->baseManager->setBuildOrderManager(this->buildOrderManager);
+  this->borderManager->setInformationManager(this->informationManager);
+  this->baseManager->setBorderManager(this->borderManager);
+  this->defenseManager->setBorderManager(this->borderManager);
   
   BWAPI::Race race = Broodwar->self()->getRace();
   BWAPI::Race enemyRace = Broodwar->enemy()->getRace();
@@ -128,10 +132,10 @@ void BasicAIModule::onFrame()
   this->upgradeManager->update();
   this->supplyManager->update();
   this->scoutManager->update();
+  this->enhancedUI->update();
+  this->borderManager->update();
   this->defenseManager->update();
   this->arbitrator.update();
-
-  this->enhancedUI->update();
 
   if (Broodwar->getFrameCount()>24*50)
     scoutManager->setScoutCount(1);
