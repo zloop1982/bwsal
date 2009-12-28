@@ -1,0 +1,46 @@
+#sidebar TableOfContents
+
+Class header file: http://code.google.com/p/bwsal/source/browse/trunk/BWSAL/include/BorderManager.h
+
+  * [#addMyBase addMyBase]
+  * [#removeMyBase removeMyBase]
+  * [#getMyBorder getMyBorder]
+  * [#getEnemyBorder getEnemyBorder]
+  * [#getMyRegions getMyRegions]
+  * [#getEnemyRegions getEnemyRegions]
+  * [#update update]
+
+== addMyBase ==
+void addMyBase(BWTA::BaseLocation{{{*}}} location);
+
+Call when you are about to expand to the given base location.
+
+== removeMyBase ==
+void removeMyBase(BWTA::BaseLocation{{{*}}} location);
+
+Call when you are abandoning a base at the given base location.
+
+== getMyBorder ==
+const std::set<BWTA::Chokepoint{{{*}}}>& getMyBorder() const;
+
+Returns the border around our base. Useful for defending against ground attacks.
+
+== getEnemyBorder ==
+const std::set<BWTA::Chokepoint{{{*}}}>& getEnemyBorder() const;
+
+Returns the border around the enemy base. Useful for containing the enemy in his base.
+
+== getMyRegions ==
+const std::set<BWTA::Chokepoint{{{*}}}>& getMyRegions() const;
+
+Returns the set of regions controlled by our player.
+
+== getEnemyRegions ==
+const std::set<BWTA::Chokepoint{{{*}}}>& getEnemyRegions() const;
+
+Returns the set of regions controlled by the enemy.
+
+== update ==
+void update();
+
+Should be called from AIModule::onFrame.
