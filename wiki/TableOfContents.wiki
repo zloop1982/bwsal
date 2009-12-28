@@ -1,6 +1,7 @@
   * [BWSALManual API]
   * [Arbitrator Arbitrator]
    * [Controller Controller]
+  * [EnhancedUI EnhancedUI]
   * [WorkerManager Worker Manager]
   * [BuildingPlacer Building Placer]
   * [BuildManager Build Manager]
