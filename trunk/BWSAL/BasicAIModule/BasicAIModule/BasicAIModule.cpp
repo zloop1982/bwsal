@@ -39,7 +39,7 @@ void BasicAIModule::onStart()
   BWAPI::Race race = Broodwar->self()->getRace();
   BWAPI::Race enemyRace = Broodwar->enemy()->getRace();
   BWAPI::UnitType workerType=*(race.getWorker());
-    double minDist;
+  double minDist;
   BWTA::BaseLocation* natural=NULL;
   BWTA::BaseLocation* home=BWTA::getStartLocation(Broodwar->self());
   for(std::set<BWTA::BaseLocation*>::const_iterator b=BWTA::getBaseLocations().begin();b!=BWTA::getBaseLocations().end();b++)
@@ -116,7 +116,7 @@ void BasicAIModule::onStart()
   }
   this->workerManager->enableAutoBuild();
   this->workerManager->setAutoBuildPriority(40);
- 
+
 }
 
 
@@ -182,6 +182,7 @@ void BasicAIModule::onUnitDestroy(BWAPI::Unit* unit)
   this->scoutManager->onRemoveUnit(unit);
   this->defenseManager->onRemoveUnit(unit);
   this->informationManager->onUnitDestroy(unit);
+  this->baseManager->onRemoveUnit(unit);
 }
 
 void BasicAIModule::onUnitShow(BWAPI::Unit* unit)
