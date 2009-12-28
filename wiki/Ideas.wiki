@@ -50,7 +50,6 @@ AllUnits.filter(Broodwar->self()).filter(UnitTypes::Terran_Marine).getNearest(Al
   * Improve the Supply Manager so it uses a more precise algorithm (currently just uses a simple heuristic)
   * Attack Manager - attack stuff, maybe break down into smaller managers
   * Contain Manager - contains the enemy with siege tanks, lurkers, etc.
-  * Front Manager - Not a controller, tries to calculate where our front ends and where the enemy's front begins.
   * Repair Manager - repair units that are damaged
   * Threat Assessment Manager - influence maps. Determine which tiles are dangerous and how much. Also assign a priority to units that are attacking our base.
   * Risk Adverse Path Manager - moves units to their destination using the safest path (recalculate paths when new threats are discovered i.e. Missile Turrets)
