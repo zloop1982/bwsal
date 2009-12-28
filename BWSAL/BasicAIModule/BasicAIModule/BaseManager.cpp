@@ -1,4 +1,6 @@
 #include <BaseManager.h>
+#include <BuildOrderManager.h>
+#include <BorderManager.h>
 BaseManager::BaseManager()
 {
   this->builder = NULL;
@@ -6,6 +8,10 @@ BaseManager::BaseManager()
 void BaseManager::setBuildOrderManager(BuildOrderManager* builder)
 {
   this->builder = builder;
+}
+void BaseManager::setBorderManager(BorderManager* borderManager)
+{
+  this->borderManager = borderManager;
 }
 
 void BaseManager::update()
@@ -55,6 +61,7 @@ void BaseManager::addBase(BWTA::BaseLocation* location)
   Base* newBase = new Base(location);
   allBases.insert(newBase);
   this->location2base[location] = newBase;
+  this->borderManager->addMyBase(location);
 }
 Base* BaseManager::getBase(BWTA::BaseLocation* location)
 {
@@ -119,9 +126,13 @@ void BaseManager::onRemoveUnit(BWAPI::Unit* unit)
     if((*b)->getResourceDepot() == unit)
     {
       if (unit->isCompleted())
+      {
+        this->borderManager->removeMyBase((*b)->getBaseLocation());
         allBases.erase(b);
+      }
       else
         (*b)->setResourceDepot(NULL);
+      break;
     }
   }
 }

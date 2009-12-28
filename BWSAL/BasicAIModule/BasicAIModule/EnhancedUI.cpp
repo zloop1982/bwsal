@@ -55,14 +55,14 @@ void EnhancedUI::drawTerrain() const
     }
   }
 
-  //we will visualize the chokepoints with red lines
+  //we will visualize the chokepoints with yellow lines
   for(std::set<BWTA::Region*>::const_iterator r=BWTA::getRegions().begin();r!=BWTA::getRegions().end();r++)
   {
     for(std::set<BWTA::Chokepoint*>::const_iterator c=(*r)->getChokepoints().begin();c!=(*r)->getChokepoints().end();c++)
     {
       Position point1=(*c)->getSides().first;
       Position point2=(*c)->getSides().second;
-      Broodwar->drawLine(CoordinateType::Map,point1.x(),point1.y(),point2.x(),point2.y(),Colors::Red);
+      Broodwar->drawLine(CoordinateType::Map,point1.x(),point1.y(),point2.x(),point2.y(),Colors::Yellow);
     }
   }
 }

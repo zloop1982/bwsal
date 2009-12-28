@@ -2,7 +2,6 @@
 #include <BWAPI.h>
 #include <BWTA.h>
 #include <UnitGroupManager.h>
-
 class EnhancedUI
 {
   public:

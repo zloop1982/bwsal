@@ -12,6 +12,7 @@
 #include <ScoutManager.h>
 #include <DefenseManager.h>
 #include <InformationManager.h>
+#include <BorderManager.h>
 #include <UnitGroupManager.h>
 #include <EnhancedUI.h>
 class BasicAIModule : public BWAPI::AIModule
@@ -41,6 +42,7 @@ public:
   BuildOrderManager* buildOrderManager;
   DefenseManager* defenseManager;
   InformationManager* informationManager;
+  BorderManager* borderManager;
   UnitGroupManager* unitGroupManager;
   EnhancedUI* enhancedUI;
   bool showManagerAssignments;

@@ -26,6 +26,7 @@ std::set<BWAPI::Unit*> Base::getGeysers() const
 {
   return this->baseLocation->getGeysers();
 }
+
 bool Base::isActive() const
 {
   return this->active;

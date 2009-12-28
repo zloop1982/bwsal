@@ -198,7 +198,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\EnhancedUI.h"
+				RelativePath="..\..\include\EnhancedUI.h"
 				>
 			</File>
 			<File
@@ -464,6 +464,18 @@
 				</File>
 				<File
 					RelativePath="..\..\include\UnitGroupManager.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="BorderManager"
+				>
+				<File
+					RelativePath=".\BorderManager.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\include\BorderManager.h"
 					>
 				</File>
 			</Filter>
