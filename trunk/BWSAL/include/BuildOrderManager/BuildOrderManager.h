@@ -88,6 +88,7 @@ class BuildOrderManager
     int usedGas;
     std::map<int, Resources> reservedResources;
     std::set<BWAPI::Unit*> reservedUnits;
+    std::map<BWAPI::UnitType,int> currentlyPlannedCount;
     std::list<Type> savedPlan;
     bool dependencyResolver;
     bool isMineralLimited;

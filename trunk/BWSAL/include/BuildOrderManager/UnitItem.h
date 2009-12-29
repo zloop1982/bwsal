@@ -6,7 +6,7 @@ class UnitItem
   public:
     UnitItem();
     UnitItem(BWAPI::UnitType type);
-    int getRemainingCount();
+    int getRemainingCount(int currentPlannedCount=-1);
     void addAdditional(int count, BWAPI::TilePosition position);
     void setNonAdditional(int count, BWAPI::TilePosition position);
     BWAPI::TilePosition decrementAdditional(BWAPI::TilePosition position=BWAPI::TilePositions::None);

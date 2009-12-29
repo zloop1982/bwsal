@@ -18,7 +18,7 @@ UnitItem::UnitItem(BWAPI::UnitType type)
   nonadditionalPosition=BWAPI::TilePositions::None;
 }
 
-int UnitItem::getRemainingCount()
+int UnitItem::getRemainingCount(int currentPlannedCount)
 {
   //initialize counter
   int count=0;
@@ -26,7 +26,10 @@ int UnitItem::getRemainingCount()
   //if non-additional is not zero
   if (this->nonadditional!=0)
   {
-    count = this->nonadditional-UnitItem::getBuildManager()->getPlannedCount(this->type);
+    if (currentPlannedCount==-1)
+      currentPlannedCount=UnitItem::getBuildManager()->getPlannedCount(this->type);
+
+    count = this->nonadditional-currentPlannedCount;
 
     //make sure count is no less than 0
     if (count<0) count=0;

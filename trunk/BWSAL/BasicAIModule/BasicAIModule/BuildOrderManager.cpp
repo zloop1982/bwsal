@@ -322,7 +322,7 @@ bool BuildOrderManager::updateUnits()
   {
     for(map<BWAPI::UnitType, UnitItem* >::iterator j=i->second.begin();j!=i->second.end();j++)
     {
-      remainingUnitCounts.push_back(make_pair(j->first,j->second->getRemainingCount()));
+      remainingUnitCounts.push_back(make_pair(j->first,j->second->getRemainingCount(currentlyPlannedCount[j->first])));
     }
   }
 
@@ -355,6 +355,7 @@ bool BuildOrderManager::updateUnits()
       int btime=ctime;
       if (factory->getType().isWorker())
         btime=ctime+24*4;
+      currentlyPlannedCount[t]++;
       if (hasResources(t,btime))
       {
         this->reserveResources(factory,t);
@@ -461,6 +462,10 @@ void BuildOrderManager::update()
 void BuildOrderManager::updatePlan()
 {
   this->savedPlan.clear();
+  for(set<UnitType>::iterator i=UnitTypes::allUnitTypes().begin();i!=UnitTypes::allUnitTypes().end();i++)
+  {
+    currentlyPlannedCount[*i]=this->buildManager->getPlannedCount(*i);
+  }
   map< int, PriorityLevel >::iterator l2;
   for(map< int, PriorityLevel >::iterator l=items.begin();l!=items.end();l=l2)
   {
@@ -838,7 +843,7 @@ int BuildOrderManager::getPlannedCount(BWAPI::UnitType t)
       map<BWAPI::UnitType, UnitItem >::iterator j=units2->find(t);
       if (j!=units2->end())
       {
-        c+=j->second.getRemainingCount();
+        c+=j->second.getRemainingCount(c);
       }
     }
   }
