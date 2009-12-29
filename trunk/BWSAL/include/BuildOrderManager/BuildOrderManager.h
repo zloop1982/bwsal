@@ -7,6 +7,7 @@ class BuildManager;
 class TechManager;
 class UpgradeManager;
 class WorkerManager;
+class SupplyManager;
 class BuildOrderManager
 {
   public:
@@ -38,7 +39,7 @@ class BuildOrderManager
       int time;
     };
 
-    BuildOrderManager(BuildManager* buildManager, TechManager* techManager, UpgradeManager* upgradeManager, WorkerManager* workerManager);
+    BuildOrderManager(BuildManager* buildManager, TechManager* techManager, UpgradeManager* upgradeManager, WorkerManager* workerManager, SupplyManager* supplyManager);
     void update();
     std::string getName() const;
     void build(int count, BWAPI::UnitType t, int priority, BWAPI::TilePosition seedPosition=BWAPI::TilePositions::None);
@@ -83,6 +84,7 @@ class BuildOrderManager
     TechManager* techManager;
     UpgradeManager* upgradeManager;
     WorkerManager* workerManager;
+    SupplyManager* supplyManager;
     std::map<int, PriorityLevel > items;
     int usedMinerals;
     int usedGas;

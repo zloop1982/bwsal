@@ -3,6 +3,7 @@
 #include <TechManager.h>
 #include <UpgradeManager.h>
 #include <WorkerManager.h>
+#include <SupplyManager.h>
 #include <algorithm>
 #include <stdarg.h>
 #include <UnitGroupManager.h>
@@ -15,12 +16,13 @@ map<const Unit*,int> nextFreeTimeData;
 map<BWAPI::UnitType, set<BWAPI::UnitType> > makes;
 map<BWAPI::UnitType, set<BWAPI::TechType> > researches;
 map<BWAPI::UnitType, set<BWAPI::UpgradeType> > upgrades;
-BuildOrderManager::BuildOrderManager(BuildManager* buildManager, TechManager* techManager, UpgradeManager* upgradeManager, WorkerManager* workerManager)
+BuildOrderManager::BuildOrderManager(BuildManager* buildManager, TechManager* techManager, UpgradeManager* upgradeManager, WorkerManager* workerManager, SupplyManager* supplyManager)
 {
   this->buildManager       = buildManager;
   this->techManager        = techManager;
   this->upgradeManager     = upgradeManager;
   this->workerManager      = workerManager;
+  this->supplyManager      = supplyManager;
   this->usedMinerals       = 0;
   this->usedGas            = 0;
   this->dependencyResolver = false;
@@ -75,23 +77,27 @@ int BuildOrderManager::nextFreeTime(UnitType t)
   if (Broodwar->self()->incompleteUnitCount(t)==0)
     return -1;
 
-  set<Unit*> allUnits = Broodwar->self()->getUnits();
+  set<Unit*> allUnits = SelectAll(t);
   int time;
   bool setflag=false;
   for(set<Unit*>::iterator i=allUnits.begin();i!=allUnits.end();i++)
   {
-    if ((*i)->getType()==t)
+    int ntime=nextFreeTime(*i);
+    if (ntime>-1)
     {
-      int ntime=nextFreeTime(*i);
-      if (ntime>-1)
+      //set time to the earliest available time
+      if (!setflag || ntime<time)
       {
-        //set time to the earliest available time
-        if (!setflag || ntime<time)
-        {
-          time=ntime;
-          setflag=true;
-        }
+        time=ntime;
+        setflag=true;
       }
+    }
+  }
+  if (t.supplyRequired()>0)
+  {
+    if (Broodwar->self()->supplyUsed()+t.supplyRequired()>Broodwar->self()->supplyTotal())
+    {
+      time=this->supplyManager->getSupplyTime(Broodwar->self()->supplyUsed()+t.supplyRequired());
     }
   }
   if (setflag)

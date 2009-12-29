@@ -35,6 +35,13 @@ void MorphManager::onOffer(std::set<BWAPI::Unit*> units)
           used=true;
           break;
         }
+        else
+        {
+          if (BWAPI::Broodwar->self()->minerals()<(*t).mineralPrice() || BWAPI::Broodwar->self()->gas()<(*t).gasPrice())
+          {
+            break;
+          }
+        }
       }
     }
     //if we didnt use this unit, tell the arbitrator we decline it
