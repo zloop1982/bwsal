@@ -24,6 +24,20 @@ class BuildOrderManager
         int minerals;
         int gas;
     };
+    class Type
+    {
+      public:
+        Type(BWAPI::UnitType t, BWAPI::Unit* unit, int priority, int time=0) : unitType(t), unit(unit), priority(priority), time(time) {}
+      Type(BWAPI::TechType t, BWAPI::Unit* unit, int priority, int time=0) : techType(t), unit(unit), priority(priority), time(time) {}
+      Type(BWAPI::UpgradeType t, BWAPI::Unit* unit, int priority, int time=0) : upgradeType(t), unit(unit), priority(priority), time(time) {}
+      BWAPI::UnitType unitType;
+      BWAPI::TechType techType;
+      BWAPI::UpgradeType upgradeType;
+      BWAPI::Unit* unit;
+      int priority;
+      int time;
+    };
+
     BuildOrderManager(BuildManager* buildManager, TechManager* techManager, UpgradeManager* upgradeManager, WorkerManager* workerManager);
     void update();
     std::string getName() const;
@@ -56,6 +70,7 @@ class BuildOrderManager
     void reserveResources(std::pair<int, BuildOrderManager::Resources> res);
     void unreserveResources(std::pair<int, BuildOrderManager::Resources> res);
     bool updateUnits();
+    void updatePlan();
     int nextFreeTime(const BWAPI::Unit* unit);
     int nextFreeTime(BWAPI::UnitType t);
     int nextFreeTime(const BWAPI::Unit* unit, BWAPI::UnitType t);
@@ -73,8 +88,10 @@ class BuildOrderManager
     int usedGas;
     std::map<int, Resources> reservedResources;
     std::set<BWAPI::Unit*> reservedUnits;
+    std::list<Type> savedPlan;
     bool dependencyResolver;
     bool isMineralLimited;
     bool isGasLimited;
     bool showDebugInfo;
+    int nextUpdateFrame;
 };

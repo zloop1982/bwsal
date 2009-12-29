@@ -309,7 +309,7 @@ bool BuildOrderManager::updateUnits()
         {
           //add the time to the sequence if it is in the future (and not -1)
           int time=nextFreeTime(*f,j->first);
-          if (time>Broodwar->getFrameCount())
+          if (time>-1)
             times.insert(time);
         }
       }
@@ -323,55 +323,6 @@ bool BuildOrderManager::updateUnits()
     for(map<BWAPI::UnitType, UnitItem* >::iterator j=i->second.begin();j!=i->second.end();j++)
     {
       remainingUnitCounts.push_back(make_pair(j->first,j->second->getRemainingCount()));
-    }
-  }
-
-  //build what we can now
-  for(set<Unit*>::iterator f=factories.begin();f!=factories.end();f++)
-  {
-    Unit* factory=*f;
-    //get a unit type, taking into account the remaining unit counts and the set of units this factory can make right now
-    int time=Broodwar->getFrameCount();
-    if ((*f)->getType().isWorker())
-      time+=24*4;
-    UnitType t=getUnitType(unitsCanMake(*f,time),remainingUnitCounts);
-    if (t==UnitTypes::None)
-      continue;
-    bool gasLimited=this->isGasLimited;
-    bool mineralLimited=this->isMineralLimited;
-    if (hasResources(t,time))
-    {
-      //tell factory to build t now
-      this->spendResources(t);//don't need to reserveResources() since we are spending resources instead
-      this->reservedUnits.insert(factory);
-      TilePosition tp=(*globalUnitSet)[factory->getType()][t]->decrementAdditional();
-      if (factory->getAddon()==NULL)
-        this->buildManager->build(t,tp,true);
-      else
-        this->buildManager->build(t,tp);
-      if (showDebugInfo) Broodwar->printf("Building %s",t.getName().c_str());
-      nextFreeTimeData[factory]=Broodwar->getFrameCount()+60;
-    }
-    else
-    {
-      this->reserveResources(factory,t);
-      this->reservedUnits.insert(factory);
-      debug("Plan to make %s",t.getName().c_str());
-      if (this->isResourceLimited())
-      {
-        debug("resource-limited");
-        //true = resource limited
-        return true;
-      }
-      if (this->isMineralLimited && !mineralLimited)
-      {
-        debug("mineral-limited");
-      }
-      if (this->isGasLimited && !gasLimited)
-      {
-        debug("gas-limited");
-      }
-
     }
   }
 
@@ -401,31 +352,22 @@ bool BuildOrderManager::updateUnits()
         continue;
       bool gasLimited=this->isGasLimited;
       bool mineralLimited=this->isMineralLimited;
-      if (hasResources(t,ctime))
+      int btime=ctime;
+      if (factory->getType().isWorker())
+        btime=ctime+24*4;
+      if (hasResources(t,btime))
       {
         this->reserveResources(factory,t);
         this->reservedUnits.insert(factory);
-        debug("Plan to make %s at %d",t.getName().c_str(),nextFreeTime(factory,t));
+        this->savedPlan.push_back(Type(t,factory,currentPriority,ctime));
       }
       else
       {
         this->reserveResources(factory,t);
         this->reservedUnits.insert(factory);
-        debug("Plan to make %s",t.getName().c_str());
+        this->savedPlan.push_back(Type(t,factory,currentPriority));
         if (this->isResourceLimited())
-        {
-          debug("resource-limited");
-          //true = resource limited
           return true;
-        }
-        if (this->isMineralLimited && !mineralLimited)
-        {
-          debug("mineral-limited");
-        }
-        if (this->isGasLimited && !gasLimited)
-        {
-          debug("gas-limited");
-        }
       }
     }
   }
@@ -434,6 +376,91 @@ bool BuildOrderManager::updateUnits()
 }
 void BuildOrderManager::update()
 {
+  int time=Broodwar->getFrameCount();
+  if (time>=this->nextUpdateFrame)
+  {
+    updatePlan();
+    this->nextUpdateFrame=time+24*3;
+  }
+  y=0;
+  this->reservedResources.clear();
+  this->reservedUnits.clear();
+  this->isGasLimited=false;
+  this->isMineralLimited=false;
+  debug("time=%d",time);
+  for(list<Type>::iterator i=this->savedPlan.begin();i!=this->savedPlan.end();i++)
+  {
+    UnitType unit=(*i).unitType;
+    TechType tech=(*i).techType;
+    UpgradeType upgrade=(*i).upgradeType;
+    if (unit!=UnitTypes::None)
+        debug("%s at %d",unit.getName().c_str(),(*i).time);
+    if (tech!=TechTypes::None)
+        debug("%s at %d",tech.getName().c_str(),(*i).time);
+    if (upgrade!=UpgradeTypes::None)
+        debug("%s at %d",upgrade.getName().c_str(),(*i).time);
+  }
+  list<Type>::iterator i2;
+  for(list<Type>::iterator i=this->savedPlan.begin();i!=this->savedPlan.end();i=i2)
+  {
+    i2=i;
+    i2++;
+    UnitType unit=(*i).unitType;
+    TechType tech=(*i).techType;
+    UpgradeType upgrade=(*i).upgradeType;
+    Unit* factory=(*i).unit;
+    int priority=(*i).priority;
+    int ctime=(*i).time;
+    if (ctime<Broodwar->getFrameCount())
+      ctime=Broodwar->getFrameCount();
+    int btime=ctime;
+    if (factory->getType().isWorker())
+      btime=ctime+24*4;
+    if (unit!=UnitTypes::None)
+    {
+      if (ctime<=time && hasResources(unit,btime))
+      {
+        TilePosition tp=this->items[priority].units[factory->getType()][unit].decrementAdditional();
+        if (factory->getAddon()==NULL)
+          this->buildManager->build(unit,tp,true);
+        else
+          this->buildManager->build(unit,tp);
+        if (this->showDebugInfo) Broodwar->printf("Build %s",unit.getName().c_str());
+        this->spendResources(unit);
+        savedPlan.erase(i);
+      }
+      else
+        this->reserveResources(factory,unit);
+    }
+    else if (tech!=TechTypes::None)
+    {
+      if (ctime<=time && hasResources(tech,btime))
+      {
+        if (this->showDebugInfo) Broodwar->printf("Research %s",tech.getName().c_str());
+        this->techManager->research(tech);
+        this->spendResources(tech);
+        savedPlan.erase(i);
+      }
+      else
+        this->reserveResources(factory,tech);
+    }
+    else if (upgrade!=UpgradeTypes::None)
+    {
+      if (ctime<=time && hasResources(upgrade,btime))
+      {
+        if (this->showDebugInfo) Broodwar->printf("Upgrade %s",upgrade.getName().c_str());
+        this->upgradeManager->upgrade(upgrade);
+        this->spendResources(upgrade);
+        savedPlan.erase(i);
+      }
+      else
+        this->reserveResources(factory,upgrade);
+    }
+  }
+}
+void BuildOrderManager::updatePlan()
+{
+  this->savedPlan.clear();
   map< int, PriorityLevel >::iterator l2;
   for(map< int, PriorityLevel >::iterator l=items.begin();l!=items.end();l=l2)
   {
@@ -484,7 +511,7 @@ void BuildOrderManager::update()
     {
       //add the time to the sequence if it is in the future (and not -1)
       int time=nextFreeTime(*i);
-      if (time>Broodwar->getFrameCount())
+      if (time>-1)
         times.insert(time);
     }
 
@@ -509,124 +536,37 @@ void BuildOrderManager::update()
           {
             UnitType refinery=*Broodwar->self()->getRace().getRefinery();
             if (this->getPlannedCount(refinery)==0)
-            {
               this->build(1,refinery,l->first);
-            }
           }
         }
         else if (u!=UpgradeTypes::None)
         {
           if (this->getPlannedCount(*u.whatUpgrades())==0)
-          {
             this->build(1,*u.whatUpgrades(),l->first);
-          }
           //also check to see if we have enough gas, or a refinery planned
           if (u.gasPriceBase()+u.gasPriceFactor()*(BWAPI::Broodwar->self()->getUpgradeLevel(u)-1)>BWAPI::Broodwar->self()->cumulativeGas()-this->usedGas)
           {
             UnitType refinery=*Broodwar->self()->getRace().getRefinery();
             if (this->getPlannedCount(refinery)==0)
-            {
               this->build(1,refinery,l->first);
-            }
           }
           if (i->level>1)
           {
             if (u.getRace()==Races::Terran)
             {
               if (this->getPlannedCount(UnitTypes::Terran_Science_Facility)==0)
-              {
                 this->build(1,UnitTypes::Terran_Science_Facility,l->first);
-              }
             }
             else if (u.getRace()==Races::Protoss)
             {
               if (this->getPlannedCount(UnitTypes::Protoss_Templar_Archives)==0)
-              {
                 this->build(1,UnitTypes::Protoss_Templar_Archives,l->first);
-              }
             }
             else if (u.getRace()==Races::Zerg)
             {
               if (this->getPlannedCount(UnitTypes::Zerg_Lair)==0)
-              {
                 this->build(1,UnitTypes::Zerg_Lair,l->first);
-              }
             }
-          }
-        }
-      }
-    }
-
-    //research and upgrade what we can now
-    map<Unit*,set<UnitType> > buildableUnitTypesNow;
-    for(set<Unit*>::iterator i=techUnits.begin();i!=techUnits.end();i++)
-    {
-      Unit* techUnit=*i;
-      //get a unit type, taking into account the remaining unit counts and the set of units this factory can make right now
-      pair< TechType,UpgradeType > p=getTechOrUpgradeType(techsCanResearch(*i,Broodwar->getFrameCount()),upgradesCanResearch(*i,Broodwar->getFrameCount()),remainingTech);
-      TechType t=p.first;
-      UpgradeType u=p.second;
-      bool gasLimited=this->isGasLimited;
-      bool mineralLimited=this->isMineralLimited;
-      if (t!=TechTypes::None)
-      {
-        if (hasResources(t))
-        {
-          //tell tech unit to research t now
-          this->spendResources(t);//don't need to reserveResources() since we are spending resources instead
-          this->reservedUnits.insert(techUnit);
-          this->techManager->research(t);
-          if (showDebugInfo) BWAPI::Broodwar->printf("Researching %s",t.getName().c_str());
-          nextFreeTimeData[techUnit]=Broodwar->getFrameCount()+60;
-        }
-        else
-        {
-          this->reserveResources(techUnit,t);
-          this->reservedUnits.insert(techUnit);
-          debug("Plan to research %s",t.getName().c_str());
-          if (this->isResourceLimited())
-          {
-            debug("resource-limited");
-            return;
-          }
-          if (this->isMineralLimited && !mineralLimited)
-          {
-            debug("mineral-limited");
-          }
-          if (this->isGasLimited && !gasLimited)
-          {
-            debug("gas-limited");
-          }
-        }
-      }
-      else if (u!=UpgradeTypes::None)
-      {
-        if (hasResources(u))
-        {
-          //tell tech unit to upgrade u now
-          this->spendResources(u);//don't need to reserveResources() since we are spending resources instead
-          this->reservedUnits.insert(techUnit);
-          this->upgradeManager->upgrade(u);
-          if (showDebugInfo) BWAPI::Broodwar->printf("Upgrading %s",u.getName().c_str());
-          nextFreeTimeData[techUnit]=Broodwar->getFrameCount()+60;
-        }
-        else
-        {
-          this->reserveResources(techUnit,u);
-          this->reservedUnits.insert(techUnit);
-          debug("Plan to upgrade %s",u.getName().c_str());
-          if (this->isResourceLimited())
-          {
-            debug("resource-limited");
-            return;
-          }
-          if (this->isMineralLimited && !mineralLimited)
-          {
-            debug("mineral-limited");
-          }
-          if (this->isGasLimited && !gasLimited)
-          {
-            debug("gas-limited");
           }
         }
       }
@@ -664,26 +604,15 @@ void BuildOrderManager::update()
           {
             this->reserveResources(techUnit,t);
             this->reservedUnits.insert(techUnit);
-            debug("Plan research %s at %d",t.getName().c_str(),nextFreeTime(techUnit));
+            this->savedPlan.push_back(Type(t,techUnit,currentPriority,ctime));
           }
           else
           {
             this->reserveResources(techUnit,t);
             this->reservedUnits.insert(techUnit);
-            debug("Plan to research %s",t.getName().c_str());
+            this->savedPlan.push_back(Type(t,techUnit,currentPriority));
             if (this->isResourceLimited())
-            {
-              debug("resource-limited");
               return;
-            }
-            if (this->isMineralLimited && !mineralLimited)
-            {
-              debug("mineral-limited");
-            }
-            if (this->isGasLimited && !gasLimited)
-            {
-              debug("gas-limited");
-            }
           }
         }
         else if (u!=UpgradeTypes::None)
@@ -692,26 +621,15 @@ void BuildOrderManager::update()
           {
             this->reserveResources(techUnit,u);
             this->reservedUnits.insert(techUnit);
-            debug("Plan to upgrade %s at %d",u.getName().c_str(),nextFreeTime(techUnit));
+            this->savedPlan.push_back(Type(u,techUnit,currentPriority,ctime));
           }
           else
           {
             this->reserveResources(techUnit,u);
             this->reservedUnits.insert(techUnit);
-            debug("Plan to upgrade %s",u.getName().c_str());
+            this->savedPlan.push_back(Type(u,techUnit,currentPriority));
             if (this->isResourceLimited())
-            {
-              debug("resource-limited");
               return;
-            }
-            if (this->isMineralLimited && !mineralLimited)
-            {
-              debug("mineral-limited");
-            }
-            if (this->isGasLimited && !gasLimited)
-            {
-              debug("gas-limited");
-            }
           }
         }
       }
@@ -786,10 +704,10 @@ void BuildOrderManager::build(int count, BWAPI::UnitType t, int priority, BWAPI:
   if (t == BWAPI::UnitTypes::None || t == BWAPI::UnitTypes::Unknown) return;
   if (seedPosition == BWAPI::TilePositions::None || seedPosition == BWAPI::TilePositions::Unknown)
     seedPosition=BWAPI::Broodwar->self()->getStartLocation();
-
   if (items[priority].units[*t.whatBuilds().first].find(t)==items[priority].units[*t.whatBuilds().first].end())
     items[priority].units[*t.whatBuilds().first].insert(make_pair(t,UnitItem(t)));
   items[priority].units[*t.whatBuilds().first][t].setNonAdditional(count,seedPosition);
+  nextUpdateFrame=0;
 }
 
 void BuildOrderManager::buildAdditional(int count, BWAPI::UnitType t, int priority, BWAPI::TilePosition seedPosition)
@@ -801,6 +719,7 @@ void BuildOrderManager::buildAdditional(int count, BWAPI::UnitType t, int priori
   if (items[priority].units[*t.whatBuilds().first].find(t)==items[priority].units[*t.whatBuilds().first].end())
     items[priority].units[*t.whatBuilds().first].insert(make_pair(t,UnitItem(t)));
   items[priority].units[*t.whatBuilds().first][t].addAdditional(count,seedPosition);
+  nextUpdateFrame=0;
 }
 
 void BuildOrderManager::research(BWAPI::TechType t, int priority)
@@ -808,12 +727,14 @@ void BuildOrderManager::research(BWAPI::TechType t, int priority)
   if (t==BWAPI::TechTypes::None || t==BWAPI::TechTypes::Unknown) return;
 
   items[priority].techs.push_back(TechItem(t));
+  nextUpdateFrame=0;
 }
 
 void BuildOrderManager::upgrade(int level, BWAPI::UpgradeType t, int priority)
 {
   if (t==BWAPI::UpgradeTypes::None || t==BWAPI::UpgradeTypes::Unknown) return;
   items[priority].techs.push_back(TechItem(t,level));
+  nextUpdateFrame=0;
 }
 
 bool BuildOrderManager::hasResources(std::pair<int, BuildOrderManager::Resources> res)
@@ -1043,7 +964,7 @@ void BuildOrderManager::debug(const char* text, ...)
 
   if (this->showDebugInfo)
   {
-    Broodwar->drawTextScreen(5,y,"%d: %s",currentPriority,buffer);
+    Broodwar->drawTextScreen(5,y,"%s",buffer);
     y+=15;
   }
 }
