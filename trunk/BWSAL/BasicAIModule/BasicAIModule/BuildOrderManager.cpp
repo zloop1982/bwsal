@@ -350,26 +350,15 @@ bool BuildOrderManager::updateUnits()
       UnitType t=getUnitType(unitsCanMake(*f,ctime),remainingUnitCounts);
       if (t==UnitTypes::None)
         continue;
-      bool gasLimited=this->isGasLimited;
-      bool mineralLimited=this->isMineralLimited;
       int btime=ctime;
       if (factory->getType().isWorker())
         btime=ctime+24*4;
       currentlyPlannedCount[t]++;
-      if (hasResources(t,btime))
-      {
-        this->reserveResources(factory,t);
-        this->reservedUnits.insert(factory);
-        this->savedPlan.push_back(Type(t,factory,currentPriority,ctime));
-      }
-      else
-      {
-        this->reserveResources(factory,t);
-        this->reservedUnits.insert(factory);
-        this->savedPlan.push_back(Type(t,factory,currentPriority));
-        if (this->isResourceLimited())
-          return true;
-      }
+      this->reserveResources(factory,t);
+      this->reservedUnits.insert(factory);
+      this->savedPlan.push_back(Type(t,factory,currentPriority,ctime));
+      if (this->isResourceLimited())
+        return true;
     }
   }
   //false = not resource limited
@@ -389,18 +378,6 @@ void BuildOrderManager::update()
   this->isGasLimited=false;
   this->isMineralLimited=false;
   debug("time=%d",time);
-  for(list<Type>::iterator i=this->savedPlan.begin();i!=this->savedPlan.end();i++)
-  {
-    UnitType unit=(*i).unitType;
-    TechType tech=(*i).techType;
-    UpgradeType upgrade=(*i).upgradeType;
-    if (unit!=UnitTypes::None)
-        debug("%s at %d",unit.getName().c_str(),(*i).time);
-    if (tech!=TechTypes::None)
-        debug("%s at %d",tech.getName().c_str(),(*i).time);
-    if (upgrade!=UpgradeTypes::None)
-        debug("%s at %d",upgrade.getName().c_str(),(*i).time);
-  }
   list<Type>::iterator i2;
   for(list<Type>::iterator i=this->savedPlan.begin();i!=this->savedPlan.end();i=i2)
   {
@@ -419,6 +396,7 @@ void BuildOrderManager::update()
       btime=ctime+24*4;
     if (unit!=UnitTypes::None)
     {
+      debug("%s at %d",unit.getName().c_str(),(*i).time);
       if (ctime<=time && hasResources(unit,btime))
       {
         TilePosition tp=this->items[priority].units[factory->getType()][unit].decrementAdditional();
@@ -435,6 +413,7 @@ void BuildOrderManager::update()
     }
     else if (tech!=TechTypes::None)
     {
+      debug("%s at %d",tech.getName().c_str(),(*i).time);
       if (ctime<=time && hasResources(tech,btime))
       {
         if (this->showDebugInfo) Broodwar->printf("Research %s",tech.getName().c_str());
@@ -447,6 +426,7 @@ void BuildOrderManager::update()
     }
     else if (upgrade!=UpgradeTypes::None)
     {
+      debug("%s at %d",upgrade.getName().c_str(),(*i).time);
       if (ctime<=time && hasResources(upgrade,btime))
       {
         if (this->showDebugInfo) Broodwar->printf("Upgrade %s",upgrade.getName().c_str());
@@ -601,42 +581,21 @@ void BuildOrderManager::updatePlan()
         pair< TechType,UpgradeType > p=getTechOrUpgradeType(techsCanResearch(*i,ctime),upgradesCanResearch(*i,ctime),remainingTech);
         TechType t=p.first;
         UpgradeType u=p.second;
-        bool gasLimited=this->isGasLimited;
-        bool mineralLimited=this->isMineralLimited;
+        if (t==TechTypes::None && u==UpgradeTypes::None)
+          continue;
+        this->reservedUnits.insert(techUnit);
         if (t!=TechTypes::None)
         {
-          if (hasResources(t,ctime))
-          {
-            this->reserveResources(techUnit,t);
-            this->reservedUnits.insert(techUnit);
-            this->savedPlan.push_back(Type(t,techUnit,currentPriority,ctime));
-          }
-          else
-          {
-            this->reserveResources(techUnit,t);
-            this->reservedUnits.insert(techUnit);
-            this->savedPlan.push_back(Type(t,techUnit,currentPriority));
-            if (this->isResourceLimited())
-              return;
-          }
+          this->reserveResources(techUnit,t);
+          this->savedPlan.push_back(Type(t,techUnit,currentPriority,ctime));
         }
         else if (u!=UpgradeTypes::None)
         {
-          if (hasResources(u,ctime))
-          {
-            this->reserveResources(techUnit,u);
-            this->reservedUnits.insert(techUnit);
-            this->savedPlan.push_back(Type(u,techUnit,currentPriority,ctime));
-          }
-          else
-          {
-            this->reserveResources(techUnit,u);
-            this->reservedUnits.insert(techUnit);
-            this->savedPlan.push_back(Type(u,techUnit,currentPriority));
-            if (this->isResourceLimited())
-              return;
-          }
+          this->reserveResources(techUnit,u);
+          this->savedPlan.push_back(Type(u,techUnit,currentPriority,ctime));
         }
+        if (this->isResourceLimited())
+          return;
       }
     }
     //-------------------------------------------------------------------------------------------------------
