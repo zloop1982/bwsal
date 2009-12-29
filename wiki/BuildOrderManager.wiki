@@ -2,6 +2,14 @@
 
 Class header file: http://code.google.com/p/bwsal/source/browse/trunk/BWSAL/include/BuildOrderManager.h
 
+The build order manager accepts prioritized build, upgrade, and research commands and will attempt to execute the commands such that lower priority orders do not delay higher priority orders.
+
+The dependency resolver, if enabled, will ensure that the minimum number of required units are created before executing a build, research, or upgrade command, and if not, it will queue up the required units.
+
+For example, if you only execute build(30,UnitTypes::Protoss_Carrier,50), the dependency resolver will build an Assimilator (for gas), Pylon, Gateway, Cybernetics Core, Stargate, Fleet Beacon, and finally start building Carriers.
+
+Member functions:
+
   * [#update update]
   * [#getName getName]
   * [#build build]
