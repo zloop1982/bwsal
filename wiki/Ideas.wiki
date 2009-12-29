@@ -26,17 +26,6 @@ The Scout Manager does not determine how important each of these tasks are, or h
 
 = Other Ideas =
 
-  * UnitGroup class to make it easier to manipulate groups of units. Examples:
-
-SelectAll(UnitTypes::Terran_Marine).withInRadius(300,startPosition).attackUnit(enemy)
-
-SelectAll(UnitTypes::Protoss_Probe).isIdle().getCenter()
-
-perhaps a different sort of interface:
-
-AllUnits.filter(Broodwar->self()).filter(UnitTypes::Terran_Marine).getNearest(AllUnits.filter(Broodwar->enemy()).filter(UnitTypes::Zerg_Mutalisk).getCenter()).rightClick(Broodwar->getStartLocation())
-
-(rightclicks our marine that is closest to the center of the group of enemy mutalisks back to home base)
   * Improve the Supply Manager so it uses a more precise algorithm (currently just uses a simple heuristic)
   * Attack Manager - attack stuff, maybe break down into smaller managers
   * Contain Manager - contains the enemy with siege tanks, lurkers, etc.
