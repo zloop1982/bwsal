@@ -12,6 +12,7 @@ class SupplyManager
     void update();
     std::string getName() const;
     int getPlannedSupply() const;
+    int getSupplyTime(int supplyCount) const;
     BuildManager* buildManager;
     BuildOrderManager* buildOrderManager;
     int lastFrameCheck;

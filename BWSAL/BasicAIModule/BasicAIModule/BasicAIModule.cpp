@@ -16,9 +16,9 @@ void BasicAIModule::onStart()
   this->upgradeManager     = new UpgradeManager(&this->arbitrator);
   this->scoutManager       = new ScoutManager(&this->arbitrator);
   this->workerManager      = new WorkerManager(&this->arbitrator);
-  this->buildOrderManager  = new BuildOrderManager(this->buildManager,this->techManager,this->upgradeManager,this->workerManager);
-  this->baseManager        = new BaseManager();
   this->supplyManager      = new SupplyManager();
+  this->buildOrderManager  = new BuildOrderManager(this->buildManager,this->techManager,this->upgradeManager,this->workerManager,this->supplyManager);
+  this->baseManager        = new BaseManager();
   this->defenseManager     = new DefenseManager(&this->arbitrator);
   this->informationManager = new InformationManager();
   this->borderManager      = new BorderManager();
@@ -68,6 +68,8 @@ void BasicAIModule::onStart()
     this->buildOrderManager->build(20,workerType,78);
     this->buildOrderManager->buildAdditional(1,UnitTypes::Zerg_Spawning_Pool,60);
     this->buildOrderManager->buildAdditional(3,UnitTypes::Zerg_Zergling,82);
+    this->buildOrderManager->upgrade(1,UpgradeTypes::Antennae,40);
+    this->buildOrderManager->upgrade(1,UpgradeTypes::Pneumatized_Carapace,40);
   }
   else if (race == Races::Terran)
   {
