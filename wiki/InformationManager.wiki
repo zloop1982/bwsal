@@ -2,7 +2,7 @@
 
 Class header file: http://code.google.com/p/bwsal/source/browse/trunk/BWSAL/include/InformationManager.h
 
-Uses logic to infer things. For example, if you see a Corsair, the information manager will know a Stargate was created at some point, and you can determine an upper bound on when it was created. Also if you see a unit and never saw an onUnitDestroy message for it, the information manager will assume it still exists. Also keeps track of last seen positions of each unit and the time the unit was last seen.
+Uses logic to infer things. For example, if you see a Corsair, the information manager will know a Stargate was created at some point, and determines an upper bound on when it was created. Also if you see a unit and never saw an onUnitDestroy message for it, the information manager will assume it still exists. Also keeps track of last seen positions of each unit and the time the unit was last seen.
 
   * [#onUnitShow onUnitShow]
   * [#onUnitHide onUnitHide]
