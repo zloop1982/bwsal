@@ -10,6 +10,7 @@ BuildManager::BuildManager(Arbitrator::Arbitrator<BWAPI::Unit*,double>* arbitrat
   this->constructionManager=new ConstructionManager(this->arbitrator,this->buildingPlacer);
   this->productionManager=new ProductionManager(this->arbitrator,this->buildingPlacer);
   this->morphManager=new MorphManager(this->arbitrator);
+  this->debugMode = false;
 }
 
 BuildManager::~BuildManager()
@@ -25,6 +26,13 @@ void BuildManager::update()
   this->constructionManager->update();
   this->productionManager->update();
   this->morphManager->update();
+  if (this->debugMode)
+  {
+    for(int x=0;x<BWAPI::Broodwar->mapWidth();x++)
+      for(int y=0;y<BWAPI::Broodwar->mapHeight();y++)
+        if (this->buildingPlacer->isReserved(x,y))
+          BWAPI::Broodwar->drawBoxMap(x*32,y*32,x*32+32,y*32+32,BWAPI::Colors::Red);
+  }
 }
 
 std::string BuildManager::getName() const
@@ -112,4 +120,8 @@ void BuildManager::setBuildDistance(int distance)
 BWAPI::UnitType BuildManager::getBuildType(BWAPI::Unit* unit) const
 {
   return this->productionManager->getBuildType(unit);
+}
+void BuildManager::setDebugMode(bool debugMode)
+{
+  this->debugMode=debugMode;
 }

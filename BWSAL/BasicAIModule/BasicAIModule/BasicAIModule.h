@@ -19,6 +19,7 @@ class BasicAIModule : public BWAPI::AIModule
 {
 public:
   virtual void onStart();
+  virtual void onEnd(bool isWinner);
   virtual void onFrame();
   virtual void onUnitShow(BWAPI::Unit* unit);
   virtual void onUnitHide(BWAPI::Unit* unit);

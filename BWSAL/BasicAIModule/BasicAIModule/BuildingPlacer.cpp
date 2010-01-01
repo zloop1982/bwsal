@@ -169,7 +169,13 @@ void BuildingPlacer::setBuildDistance(int distance)
 {
   this->buildDistance=distance;
 }
-int BuildingPlacer::getBuildDistance()
+int BuildingPlacer::getBuildDistance() const
 {
   return this->buildDistance;
+}
+bool BuildingPlacer::isReserved(int x, int y) const
+{
+  if (x<0 || y<0 || x>=(int)reserveMap.getWidth() || y>=(int)reserveMap.getHeight())
+    return false;
+  return reserveMap[x][y];
 }
