@@ -26,7 +26,7 @@ BuildOrderManager::BuildOrderManager(BuildManager* buildManager, TechManager* te
   this->usedMinerals       = 0;
   this->usedGas            = 0;
   this->dependencyResolver = false;
-  this->showDebugInfo      = false;
+  this->debugMode          = false;
   UnitItem::getBuildManager() = buildManager;
   for(set<BWAPI::UnitType>::iterator i=UnitTypes::allUnitTypes().begin();i!=UnitTypes::allUnitTypes().end();i++)
   {
@@ -410,7 +410,7 @@ void BuildOrderManager::update()
           this->buildManager->build(unit,tp,true);
         else
           this->buildManager->build(unit,tp);
-        if (this->showDebugInfo) Broodwar->printf("Build %s",unit.getName().c_str());
+        if (this->debugMode) Broodwar->printf("Build %s",unit.getName().c_str());
         this->spendResources(unit);
         savedPlan.erase(i);
       }
@@ -422,7 +422,7 @@ void BuildOrderManager::update()
       debug("%s at %d",tech.getName().c_str(),(*i).time);
       if (ctime<=time && hasResources(tech,btime))
       {
-        if (this->showDebugInfo) Broodwar->printf("Research %s",tech.getName().c_str());
+        if (this->debugMode) Broodwar->printf("Research %s",tech.getName().c_str());
         this->techManager->research(tech);
         this->spendResources(tech);
         savedPlan.erase(i);
@@ -435,7 +435,7 @@ void BuildOrderManager::update()
       debug("%s at %d",upgrade.getName().c_str(),(*i).time);
       if (ctime<=time && hasResources(upgrade,btime))
       {
-        if (this->showDebugInfo) Broodwar->printf("Upgrade %s",upgrade.getName().c_str());
+        if (this->debugMode) Broodwar->printf("Upgrade %s",upgrade.getName().c_str());
         this->upgradeManager->upgrade(upgrade);
         this->spendResources(upgrade);
         savedPlan.erase(i);
@@ -876,9 +876,10 @@ void BuildOrderManager::enableDependencyResolver()
 {
   this->dependencyResolver=true;
 }
-void BuildOrderManager::enableDebugMode()
+void BuildOrderManager::setDebugMode(bool debugMode)
 {
-  this->showDebugInfo=true;
+  this->debugMode=debugMode;
+  this->buildManager->setDebugMode(debugMode);
 }
 
 
@@ -932,7 +933,7 @@ void BuildOrderManager::debug(const char* text, ...)
   vsnprintf_s(buffer, BUFFER_SIZE, BUFFER_SIZE, text, ap);
   va_end(ap);
 
-  if (this->showDebugInfo)
+  if (this->debugMode)
   {
     Broodwar->drawTextScreen(5,y,"%s",buffer);
     y+=15;

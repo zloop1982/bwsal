@@ -13,7 +13,8 @@ class BuildingPlacer
     void reserveTiles(BWAPI::TilePosition position, int width, int height);
     void freeTiles(BWAPI::TilePosition position, int width, int height);
     void setBuildDistance(int distance);
-    int getBuildDistance();
+    int getBuildDistance() const;
+    bool isReserved(int x, int y) const;
   private:
     Util::RectangleArray<bool> reserveMap;
     int buildDistance;

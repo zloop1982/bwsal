@@ -186,9 +186,9 @@ void ScoutManager::setScoutCount(int count)
   this->desiredScoutCount=count;
 }
 
-void ScoutManager::enableDebugMode()
+void ScoutManager::setDebugMode(bool debugMode)
 {
-  debugMode = true;
+  this->debugMode = debugMode;
 }
 
 void ScoutManager::drawAssignments()

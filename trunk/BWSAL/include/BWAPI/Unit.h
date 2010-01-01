@@ -74,6 +74,8 @@ namespace BWAPI
       virtual Position getRallyPosition() const = 0;
       virtual Unit* getRallyUnit() const = 0;
       virtual Unit* getAddon() const = 0;
+      virtual Unit* getHatchery() const = 0;
+      virtual std::set<Unit*> getLarva() const = 0;
       virtual int getUpgradeLevel(UpgradeType upgrade) const = 0;
 
       virtual bool exists() const = 0;
@@ -135,6 +137,7 @@ namespace BWAPI
       virtual bool setRallyPosition(Position target) = 0;
       virtual bool setRallyUnit(Unit* target) = 0;
       virtual bool repair(Unit* target) = 0;
+      virtual bool returnCargo() = 0;
       virtual bool morph(UnitType type) = 0;
       virtual bool burrow() = 0;
       virtual bool unburrow() = 0;

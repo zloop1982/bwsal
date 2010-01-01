@@ -1,4 +1,5 @@
 #include "BasicAIModule.h"
+#include "Util.h"
 using namespace BWAPI;
 
 void BasicAIModule::onStart()
@@ -121,7 +122,10 @@ void BasicAIModule::onStart()
 
 }
 
-
+void BasicAIModule::onEnd(bool isWinner)
+{
+  log("onEnd(%d)\n",isWinner);
+}
 void BasicAIModule::onFrame()
 {
   if (Broodwar->isReplay()) return;
@@ -176,6 +180,7 @@ void BasicAIModule::onFrame()
 
 void BasicAIModule::onUnitDestroy(BWAPI::Unit* unit)
 {
+  if (Broodwar->isReplay()) return;
   this->arbitrator.onRemoveObject(unit);
   this->buildManager->onRemoveUnit(unit);
   this->techManager->onRemoveUnit(unit);
@@ -189,32 +194,46 @@ void BasicAIModule::onUnitDestroy(BWAPI::Unit* unit)
 
 void BasicAIModule::onUnitShow(BWAPI::Unit* unit)
 {
+  if (Broodwar->isReplay()) return;
   this->informationManager->onUnitShow(unit);
   this->unitGroupManager->onUnitShow(unit);
 }
 void BasicAIModule::onUnitHide(BWAPI::Unit* unit)
 {
+  if (Broodwar->isReplay()) return;
   this->informationManager->onUnitHide(unit);
   this->unitGroupManager->onUnitHide(unit);
 }
 
 void BasicAIModule::onUnitMorph(BWAPI::Unit* unit)
 {
+  if (Broodwar->isReplay()) return;
   this->unitGroupManager->onUnitMorph(unit);
 }
 void BasicAIModule::onUnitRenegade(BWAPI::Unit* unit)
 {
+  if (Broodwar->isReplay()) return;
   this->unitGroupManager->onUnitRenegade(unit);
 }
 
 bool BasicAIModule::onSendText(std::string text)
 {
+  if (Broodwar->isReplay()) return true;
   UnitType type=UnitTypes::getUnitType(text);
   if (text=="debug")
   {
-    this->showManagerAssignments=true;
-    this->buildOrderManager->enableDebugMode();
-    this->scoutManager->enableDebugMode();
+    if (this->showManagerAssignments==false)
+    {
+      this->showManagerAssignments=true;
+      this->buildOrderManager->setDebugMode(true);
+      this->scoutManager->setDebugMode(true);
+    }
+    else
+    {
+      this->showManagerAssignments=false;
+      this->buildOrderManager->setDebugMode(false);
+      this->scoutManager->setDebugMode(false);
+    }
     return true;
   }
   if (text=="expand")

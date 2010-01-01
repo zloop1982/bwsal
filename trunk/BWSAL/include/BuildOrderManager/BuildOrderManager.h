@@ -55,7 +55,7 @@ class BuildOrderManager
 
     int getPlannedCount(BWAPI::UnitType t);
     void enableDependencyResolver();
-    void enableDebugMode();
+    void setDebugMode(bool debugMode);
     std::set<BWAPI::UnitType> unitsCanMake(BWAPI::Unit* builder, int time);
     std::set<BWAPI::TechType> techsCanResearch(BWAPI::Unit* techUnit, int time);
     std::set<BWAPI::UpgradeType> upgradesCanResearch(BWAPI::Unit* techUnit, int time);
@@ -95,6 +95,6 @@ class BuildOrderManager
     bool dependencyResolver;
     bool isMineralLimited;
     bool isGasLimited;
-    bool showDebugInfo;
+    bool debugMode;
     int nextUpdateFrame;
 };
