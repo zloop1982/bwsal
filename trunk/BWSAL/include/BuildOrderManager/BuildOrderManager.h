@@ -44,8 +44,8 @@ class BuildOrderManager
         bool hasAddon() const;
         bool isBeingConstructed() const;
         bool isCompleted() const;
+        bool isTraining() const;
         bool isUpgrading() const;
-      private:
         BWAPI::Unit* unit;
         int larvaSpawnTime;
     };
@@ -84,6 +84,12 @@ class BuildOrderManager
     std::set<BWAPI::TechType> techsCanResearch(MetaUnit* techUnit, int time);
     std::set<BWAPI::UpgradeType> upgradesCanResearch(MetaUnit* techUnit, int time);
 
+    int nextFreeTime(const MetaUnit* unit);
+    int nextFreeTime(BWAPI::UnitType t);
+    int nextFreeTime(const MetaUnit* unit, BWAPI::UnitType t);
+    int nextFreeTime(const MetaUnit* unit, BWAPI::TechType t);
+    int nextFreeTime(const MetaUnit* unit, BWAPI::UpgradeType t);
+
   private:
     bool hasResources(BWAPI::UnitType t, int time);
     bool hasResources(BWAPI::TechType t, int time);
@@ -96,11 +102,6 @@ class BuildOrderManager
     void unreserveResources(std::pair<int, BuildOrderManager::Resources> res);
     bool updateUnits();
     void updatePlan();
-    int nextFreeTime(const MetaUnit* unit);
-    int nextFreeTime(BWAPI::UnitType t);
-    int nextFreeTime(const MetaUnit* unit, BWAPI::UnitType t);
-    int nextFreeTime(const MetaUnit* unit, BWAPI::TechType t);
-    int nextFreeTime(const MetaUnit* unit, BWAPI::UpgradeType t);
     bool isResourceLimited();
     void removeCompletedItems(PriorityLevel* p);
     void debug(const char* text, ...);

@@ -86,6 +86,12 @@ bool BuildOrderManager::MetaUnit::isCompleted() const
     return unit->isCompleted();
   return false;
 }
+bool BuildOrderManager::MetaUnit::isTraining() const
+{
+  if (unit!=NULL)
+    return unit->isTraining();
+  return false;
+}
 bool BuildOrderManager::MetaUnit::isUpgrading() const
 {
   if (unit!=NULL)
