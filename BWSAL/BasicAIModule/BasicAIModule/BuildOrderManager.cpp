@@ -12,12 +12,14 @@ using namespace BWAPI;
 map<BWAPI::UnitType, map<BWAPI::UnitType, UnitItem* > >* globalUnitSet;
 int y;
 int currentPriority;
-map<const BuildOrderManager::MetaUnit*,int> nextFreeTimeData;
+map<const BWAPI::Unit*,int> nextFreeTimeData;
 map<BWAPI::UnitType, set<BWAPI::UnitType> > makes;
 map<BWAPI::UnitType, set<BWAPI::TechType> > researches;
 map<BWAPI::UnitType, set<BWAPI::UpgradeType> > upgrades;
+BuildOrderManager* buildOrderManager;
 BuildOrderManager::BuildOrderManager(BuildManager* buildManager, TechManager* techManager, UpgradeManager* upgradeManager, WorkerManager* workerManager, SupplyManager* supplyManager)
 {
+  buildOrderManager  = this;
   this->buildManager       = buildManager;
   this->techManager        = techManager;
   this->upgradeManager     = upgradeManager;
@@ -46,10 +48,10 @@ BuildOrderManager::BuildOrderManager(BuildManager* buildManager, TechManager* te
 int BuildOrderManager::nextFreeTime(const MetaUnit* unit)
 {
   int ctime=Broodwar->getFrameCount();
-  if (!unit->isCompleted())
+  if (!unit->isCompleted() && unit->unit!=NULL)
   {
-    if (unit->getType().getRace()==Races::Protoss && unit->getType().isBuilding() && unit->getRemainingBuildTime()>0 && nextFreeTimeData[unit]<ctime+24*3)
-      nextFreeTimeData[unit]=ctime+24*3;
+    if (unit->getType().getRace()==Races::Protoss && unit->getType().isBuilding() && unit->getRemainingBuildTime()>0 && nextFreeTimeData[unit->unit]<ctime+24*3)
+      nextFreeTimeData[unit->unit]=ctime+24*3;
     if (!unit->isBeingConstructed() && !unit->getType().isAddon())
       return -1;
   }
@@ -60,9 +62,10 @@ int BuildOrderManager::nextFreeTime(const MetaUnit* unit)
   natime=max(natime,ctime+unit->getRemainingTrainTime());
   natime=max(natime,ctime+unit->getRemainingResearchTime());
   natime=max(natime,ctime+unit->getRemainingUpgradeTime());
-  natime=max(natime,nextFreeTimeData[unit]);
-  if (natime==ctime && this->buildManager->getBuildType((Unit*)unit)!=UnitTypes::None && !unit->hasBuildUnit())
-    natime=ctime+this->buildManager->getBuildType((Unit*)unit).buildTime();
+  if (unit->unit!=NULL)
+    natime=max(natime,nextFreeTimeData[unit->unit]);
+  if (this->buildManager->getBuildType((Unit*)(unit->unit))!=UnitTypes::None && !unit->hasBuildUnit() && !unit->isTraining())
+    natime=max(natime,ctime+this->buildManager->getBuildType((Unit*)(unit->unit)).buildTime());
   return natime;
 }
 
@@ -254,7 +257,10 @@ pair<TechType,UpgradeType> getTechOrUpgradeType(set<TechType>& validTechTypes, s
   }
   return answer;
 }
-
+bool factoryCompare(const BuildOrderManager::MetaUnit* a, const BuildOrderManager::MetaUnit* b)
+{
+  return buildOrderManager->nextFreeTime(a)>buildOrderManager->nextFreeTime(b);
+}
 bool BuildOrderManager::updateUnits()
 {
   set<MetaUnit*> allUnits = this->MetaUnitPointers;
@@ -286,15 +292,16 @@ bool BuildOrderManager::updateUnits()
   }
 
   //get the set of factory Units
-  set<MetaUnit*> factories;
+  list<MetaUnit*> factories;
   for(set<MetaUnit*>::iterator i=allUnits.begin();i!=allUnits.end();i++)
   {
     MetaUnit* u=*i;
     UnitType type=u->getType();
     //only add the factory if it hasn't been reserved and if its a builder type that we need
     if (globalUnitSet->find(type)!=globalUnitSet->end() && this->reservedUnits.find(u)==this->reservedUnits.end())
-      factories.insert(u);
+      factories.push_back(u);
   }
+  factories.sort(factoryCompare);
 
   //find the sequence of interesting points in time in the future
   set<int> times;
@@ -304,7 +311,7 @@ bool BuildOrderManager::updateUnits()
     UnitType unitType=i->first;//builder type
 
     //iterate through all our factory Units
-    for(set<MetaUnit*>::iterator f=factories.begin();f!=factories.end();f++)
+    for(list<MetaUnit*>::iterator f=factories.begin();f!=factories.end();f++)
     {
       MetaUnit* u=*f;
       UnitType type=u->getType();
@@ -340,8 +347,8 @@ bool BuildOrderManager::updateUnits()
     int ctime=*t;
 
     //remove all factories that have been reserved
-    set<MetaUnit*>::iterator f2;
-    for(set<MetaUnit*>::iterator f=factories.begin();f!=factories.end();f=f2)
+    list<MetaUnit*>::iterator f2;
+    for(list<MetaUnit*>::iterator f=factories.begin();f!=factories.end();f=f2)
     {
       f2=f;
       f2++;
@@ -349,7 +356,7 @@ bool BuildOrderManager::updateUnits()
         factories.erase(f);
     }
     //iterate through all factories that haven't been reserved yet
-    for(set<MetaUnit*>::iterator f=factories.begin();f!=factories.end();f++)
+    for(list<MetaUnit*>::iterator f=factories.begin();f!=factories.end();f++)
     {
       MetaUnit* factory=*f;
       //get a unit type, taking into account the remaining unit counts and the set of units this factory can make at time ctime
@@ -402,7 +409,10 @@ void BuildOrderManager::update()
       btime=ctime+24*4;
     if (unit!=UnitTypes::None)
     {
-      debug("%s at %d",unit.getName().c_str(),(*i).time);
+      if ((*i).time>=time)
+        debug("%s at %d",unit.getName().c_str(),(*i).time);
+      else
+        debug("%s as soon as possible",unit.getName().c_str());
       if (ctime<=time && hasResources(unit,btime))
       {
         TilePosition tp=this->items[priority].units[factory->getType()][unit].decrementAdditional();
@@ -410,6 +420,7 @@ void BuildOrderManager::update()
           this->buildManager->build(unit,tp,true);
         else
           this->buildManager->build(unit,tp);
+        nextFreeTimeData[factory->unit]=time+24*6;
         if (this->debugMode) Broodwar->printf("Build %s",unit.getName().c_str());
         this->spendResources(unit);
         savedPlan.erase(i);
@@ -419,11 +430,15 @@ void BuildOrderManager::update()
     }
     else if (tech!=TechTypes::None)
     {
-      debug("%s at %d",tech.getName().c_str(),(*i).time);
+      if ((*i).time>=time)
+        debug("%s at %d",tech.getName().c_str(),(*i).time);
+      else
+        debug("%s as soon as possible",tech.getName().c_str());
       if (ctime<=time && hasResources(tech,btime))
       {
         if (this->debugMode) Broodwar->printf("Research %s",tech.getName().c_str());
         this->techManager->research(tech);
+        nextFreeTimeData[factory->unit]=time+24*6;
         this->spendResources(tech);
         savedPlan.erase(i);
       }
@@ -432,11 +447,15 @@ void BuildOrderManager::update()
     }
     else if (upgrade!=UpgradeTypes::None)
     {
-      debug("%s at %d",upgrade.getName().c_str(),(*i).time);
+      if ((*i).time>=time)
+        debug("%s at %d",upgrade.getName().c_str(),(*i).time);
+      else
+        debug("%s as soon as possible",upgrade.getName().c_str());
       if (ctime<=time && hasResources(upgrade,btime))
       {
         if (this->debugMode) Broodwar->printf("Upgrade %s",upgrade.getName().c_str());
         this->upgradeManager->upgrade(upgrade);
+        nextFreeTimeData[factory->unit]=time+24*6;
         this->spendResources(upgrade);
         savedPlan.erase(i);
       }
@@ -454,8 +473,13 @@ void BuildOrderManager::updatePlan()
   for(set<Unit*>::const_iterator i=BWAPI::Broodwar->self()->getUnits().begin();i!=BWAPI::Broodwar->self()->getUnits().end();i++)
   {
     MetaUnits.push_back(MetaUnit(*i));
+    if ((*i)->getType()==UnitTypes::Zerg_Hatchery || (*i)->getType()==UnitTypes::Zerg_Lair || (*i)->getType()==UnitTypes::Zerg_Hive)
+    {
+      int larva=(*i)->getLarva().size();
+      for(int j=0;j<10;j++)
+        MetaUnits.push_back(MetaUnit(Broodwar->getFrameCount()+(*i)->getRemainingTrainTime()+334*j));
+    }
   }
-  //add larva to MetaUnits
   for(list<MetaUnit>::iterator i=MetaUnits.begin();i!=MetaUnits.end();i++)
   {
     this->MetaUnitPointers.insert(&(*i));
