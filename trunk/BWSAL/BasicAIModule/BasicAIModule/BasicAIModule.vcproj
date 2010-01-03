@@ -411,6 +411,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\MetaUnit.cpp"
+					>
+				</File>
+				<File
 					RelativePath="..\..\include\BuildOrderManager\TechItem.h"
 					>
 				</File>

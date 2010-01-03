@@ -25,16 +25,40 @@ class BuildOrderManager
         int minerals;
         int gas;
     };
+    class MetaUnit
+    {
+      public:
+        MetaUnit(BWAPI::Unit* unit);
+        MetaUnit(int larvaSpawnTime);
+        int nextFreeTime() const;
+        int nextFreeTime(BWAPI::UnitType t) const;
+        int nextFreeTime(BWAPI::TechType t) const;
+        int nextFreeTime(BWAPI::UpgradeType t) const;
+        BWAPI::UnitType getType() const;
+        int getRemainingBuildTime() const;
+        int getRemainingTrainTime() const;
+        int getRemainingResearchTime() const;
+        int getRemainingUpgradeTime() const;
+        BWAPI::UpgradeType getUpgrade() const;
+        bool hasBuildUnit() const;
+        bool hasAddon() const;
+        bool isBeingConstructed() const;
+        bool isCompleted() const;
+        bool isUpgrading() const;
+      private:
+        BWAPI::Unit* unit;
+        int larvaSpawnTime;
+    };
     class Type
     {
       public:
-        Type(BWAPI::UnitType t, BWAPI::Unit* unit, int priority, int time=0) : unitType(t), unit(unit), priority(priority), time(time) {}
-      Type(BWAPI::TechType t, BWAPI::Unit* unit, int priority, int time=0) : techType(t), unit(unit), priority(priority), time(time) {}
-      Type(BWAPI::UpgradeType t, BWAPI::Unit* unit, int priority, int time=0) : upgradeType(t), unit(unit), priority(priority), time(time) {}
+      Type(BWAPI::UnitType t, MetaUnit* unit, int priority, int time=0) : unitType(t), unit(unit), priority(priority), time(time) {}
+      Type(BWAPI::TechType t, MetaUnit* unit, int priority, int time=0) : techType(t), unit(unit), priority(priority), time(time) {}
+      Type(BWAPI::UpgradeType t, MetaUnit* unit, int priority, int time=0) : upgradeType(t), unit(unit), priority(priority), time(time) {}
       BWAPI::UnitType unitType;
       BWAPI::TechType techType;
       BWAPI::UpgradeType upgradeType;
-      BWAPI::Unit* unit;
+      MetaUnit* unit;
       int priority;
       int time;
     };
@@ -56,27 +80,27 @@ class BuildOrderManager
     int getPlannedCount(BWAPI::UnitType t);
     void enableDependencyResolver();
     void setDebugMode(bool debugMode);
-    std::set<BWAPI::UnitType> unitsCanMake(BWAPI::Unit* builder, int time);
-    std::set<BWAPI::TechType> techsCanResearch(BWAPI::Unit* techUnit, int time);
-    std::set<BWAPI::UpgradeType> upgradesCanResearch(BWAPI::Unit* techUnit, int time);
+    std::set<BWAPI::UnitType> unitsCanMake(MetaUnit* builder, int time);
+    std::set<BWAPI::TechType> techsCanResearch(MetaUnit* techUnit, int time);
+    std::set<BWAPI::UpgradeType> upgradesCanResearch(MetaUnit* techUnit, int time);
 
   private:
     bool hasResources(BWAPI::UnitType t, int time);
     bool hasResources(BWAPI::TechType t, int time);
     bool hasResources(BWAPI::UpgradeType t, int time);
     bool hasResources(std::pair<int, BuildOrderManager::Resources> res);
-    std::pair<int, Resources> reserveResources(BWAPI::Unit* builder, BWAPI::UnitType unitType);
-    std::pair<int, Resources> reserveResources(BWAPI::Unit* techUnit, BWAPI::TechType techType);
-    std::pair<int, Resources> reserveResources(BWAPI::Unit* techUnit, BWAPI::UpgradeType upgradeType);
+    std::pair<int, Resources> reserveResources(MetaUnit* builder, BWAPI::UnitType unitType);
+    std::pair<int, Resources> reserveResources(MetaUnit* techUnit, BWAPI::TechType techType);
+    std::pair<int, Resources> reserveResources(MetaUnit* techUnit, BWAPI::UpgradeType upgradeType);
     void reserveResources(std::pair<int, BuildOrderManager::Resources> res);
     void unreserveResources(std::pair<int, BuildOrderManager::Resources> res);
     bool updateUnits();
     void updatePlan();
-    int nextFreeTime(const BWAPI::Unit* unit);
+    int nextFreeTime(const MetaUnit* unit);
     int nextFreeTime(BWAPI::UnitType t);
-    int nextFreeTime(const BWAPI::Unit* unit, BWAPI::UnitType t);
-    int nextFreeTime(const BWAPI::Unit* unit, BWAPI::TechType t);
-    int nextFreeTime(const BWAPI::Unit* unit, BWAPI::UpgradeType t);
+    int nextFreeTime(const MetaUnit* unit, BWAPI::UnitType t);
+    int nextFreeTime(const MetaUnit* unit, BWAPI::TechType t);
+    int nextFreeTime(const MetaUnit* unit, BWAPI::UpgradeType t);
     bool isResourceLimited();
     void removeCompletedItems(PriorityLevel* p);
     void debug(const char* text, ...);
@@ -88,8 +112,10 @@ class BuildOrderManager
     std::map<int, PriorityLevel > items;
     int usedMinerals;
     int usedGas;
+    std::list<MetaUnit> MetaUnits;
+    std::set<MetaUnit*> MetaUnitPointers;
     std::map<int, Resources> reservedResources;
-    std::set<BWAPI::Unit*> reservedUnits;
+    std::set<MetaUnit*> reservedUnits;
     std::map<BWAPI::UnitType,int> currentlyPlannedCount;
     std::list<Type> savedPlan;
     bool dependencyResolver;
