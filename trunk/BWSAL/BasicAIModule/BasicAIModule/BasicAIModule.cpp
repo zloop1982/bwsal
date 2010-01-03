@@ -67,7 +67,7 @@ void BasicAIModule::onStart()
     this->buildOrderManager->build(9,workerType,80);
     this->buildOrderManager->buildAdditional(3,UnitTypes::Zerg_Zergling,82);
     this->buildOrderManager->buildAdditional(1,UnitTypes::Zerg_Spawning_Pool,79);
-    this->buildOrderManager->build(20,workerType,78);
+    this->buildOrderManager->build(40,workerType,78);
     /*
     //12 hatch
     this->buildOrderManager->build(12,workerType,80);
@@ -169,7 +169,7 @@ void BasicAIModule::onFrame()
         char color = activeColor;
         for(std::list< std::pair< Arbitrator::Controller<BWAPI::Unit*,double>*, double> >::iterator j=bids.begin();j!=bids.end();j++)
         {
-          Broodwar->drawText(CoordinateType::Map,x,y+y_off,"%c%s: %d",color,j->first->getShortName().c_str(),(int)j->second);
+          Broodwar->drawTextMap(x,y+y_off,"%c%s: %d",color,j->first->getShortName().c_str(),(int)j->second);
           y_off+=15;
           color = inactiveColor;
         }

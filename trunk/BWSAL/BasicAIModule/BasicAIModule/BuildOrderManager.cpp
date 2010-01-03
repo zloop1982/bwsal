@@ -342,6 +342,7 @@ bool BuildOrderManager::updateUnits()
   //reserve units and resources for later
 
   //iterate through time (this gives earlier events higher priority)
+  times.insert(Broodwar->getFrameCount());
   for(set<int>::iterator t=times.begin();t!=times.end();t++)
   {
     int ctime=*t;
@@ -476,7 +477,9 @@ void BuildOrderManager::updatePlan()
     if ((*i)->getType()==UnitTypes::Zerg_Hatchery || (*i)->getType()==UnitTypes::Zerg_Lair || (*i)->getType()==UnitTypes::Zerg_Hive)
     {
       int larva=(*i)->getLarva().size();
-      for(int j=0;j<10;j++)
+      if ((*i)->getRemainingTrainTime()>0)
+        MetaUnits.push_back(MetaUnit(Broodwar->getFrameCount()+(*i)->getRemainingTrainTime()));
+      for(int j=1;j<10;j++)
         MetaUnits.push_back(MetaUnit(Broodwar->getFrameCount()+(*i)->getRemainingTrainTime()+334*j));
     }
   }

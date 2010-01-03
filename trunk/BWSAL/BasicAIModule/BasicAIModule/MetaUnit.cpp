@@ -35,13 +35,19 @@ int BuildOrderManager::MetaUnit::getRemainingBuildTime() const
 {
   if (unit!=NULL)
     return unit->getRemainingBuildTime();
-  return larvaSpawnTime;
+  int t=larvaSpawnTime-BWAPI::Broodwar->getFrameCount();
+  if (t<0)
+    return 0;
+  return t;
 }
 int BuildOrderManager::MetaUnit::getRemainingTrainTime() const
 {
   if (unit!=NULL)
     return unit->getRemainingTrainTime();
-  return larvaSpawnTime;
+  int t=larvaSpawnTime-BWAPI::Broodwar->getFrameCount();
+  if (t<0)
+    return 0;
+  return t;
 }
 int BuildOrderManager::MetaUnit::getRemainingResearchTime() const
 {
