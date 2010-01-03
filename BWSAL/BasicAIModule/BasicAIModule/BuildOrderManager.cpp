@@ -64,7 +64,7 @@ int BuildOrderManager::nextFreeTime(const MetaUnit* unit)
   natime=max(natime,ctime+unit->getRemainingUpgradeTime());
   if (unit->unit!=NULL)
     natime=max(natime,nextFreeTimeData[unit->unit]);
-  if (this->buildManager->getBuildType((Unit*)(unit->unit))!=UnitTypes::None && !unit->hasBuildUnit() && !unit->isTraining())
+  if (this->buildManager->getBuildType((Unit*)(unit->unit))!=UnitTypes::None && !unit->hasBuildUnit() && !unit->isTraining() && !unit->isMorphing())
     natime=max(natime,ctime+this->buildManager->getBuildType((Unit*)(unit->unit)).buildTime());
   return natime;
 }
@@ -77,8 +77,9 @@ int BuildOrderManager::nextFreeTime(UnitType t)
     return Broodwar->getFrameCount();
 
   //if no units of the given type are being constructed, return -1
-  if (Broodwar->self()->incompleteUnitCount(t)==0)
-    return -1;
+  if (t!=UnitTypes::Zerg_Larva)
+    if (Broodwar->self()->incompleteUnitCount(t)==0)
+      return -1;
 
   int time;
   bool setflag=false;

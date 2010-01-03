@@ -21,8 +21,10 @@ class MorphManager : public Arbitrator::Controller<BWAPI::Unit*,double>
     bool morph(BWAPI::UnitType type);
     int getPlannedCount(BWAPI::UnitType type) const;
     int getStartedCount(BWAPI::UnitType type) const;
+    BWAPI::UnitType getBuildType(BWAPI::Unit* unit) const;
 
   private:
+    bool canMake(BWAPI::Unit* builder, BWAPI::UnitType type);
     Arbitrator::Arbitrator<BWAPI::Unit*,double>* arbitrator;
     std::map<BWAPI::UnitType,std::list<BWAPI::UnitType> > morphQueues;
     std::map<BWAPI::Unit*,Unit> morphingUnits;
