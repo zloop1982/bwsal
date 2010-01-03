@@ -34,7 +34,8 @@ void SupplyManager::update()
     {
       for(std::set<BWAPI::Unit*>::iterator i = units.begin(); i != units.end(); i++)
       {
-        std::set<BWAPI::UnitType> m=this->buildOrderManager->unitsCanMake(*i,time);
+        BuildOrderManager::MetaUnit temp(*i);
+        std::set<BWAPI::UnitType> m=this->buildOrderManager->unitsCanMake(&temp,time);
         int max=0;
         for(std::set<BWAPI::UnitType>::iterator j=m.begin();j!=m.end();j++)
         {

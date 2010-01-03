@@ -12,7 +12,7 @@ using namespace BWAPI;
 map<BWAPI::UnitType, map<BWAPI::UnitType, UnitItem* > >* globalUnitSet;
 int y;
 int currentPriority;
-map<const Unit*,int> nextFreeTimeData;
+map<const BuildOrderManager::MetaUnit*,int> nextFreeTimeData;
 map<BWAPI::UnitType, set<BWAPI::UnitType> > makes;
 map<BWAPI::UnitType, set<BWAPI::TechType> > researches;
 map<BWAPI::UnitType, set<BWAPI::UpgradeType> > upgrades;
@@ -43,7 +43,7 @@ BuildOrderManager::BuildOrderManager(BuildManager* buildManager, TechManager* te
 }
 
 //returns the next frame that the given unit type will be ready to produce units or research tech or upgrades
-int BuildOrderManager::nextFreeTime(const Unit* unit)
+int BuildOrderManager::nextFreeTime(const MetaUnit* unit)
 {
   int ctime=Broodwar->getFrameCount();
   if (!unit->isCompleted())
@@ -61,7 +61,7 @@ int BuildOrderManager::nextFreeTime(const Unit* unit)
   natime=max(natime,ctime+unit->getRemainingResearchTime());
   natime=max(natime,ctime+unit->getRemainingUpgradeTime());
   natime=max(natime,nextFreeTimeData[unit]);
-  if (natime==ctime && this->buildManager->getBuildType((Unit*)unit)!=UnitTypes::None && unit->getBuildUnit()==NULL)
+  if (natime==ctime && this->buildManager->getBuildType((Unit*)unit)!=UnitTypes::None && !unit->hasBuildUnit())
     natime=ctime+this->buildManager->getBuildType((Unit*)unit).buildTime();
   return natime;
 }
@@ -77,11 +77,11 @@ int BuildOrderManager::nextFreeTime(UnitType t)
   if (Broodwar->self()->incompleteUnitCount(t)==0)
     return -1;
 
-  set<Unit*> allUnits = SelectAll(t);
   int time;
   bool setflag=false;
-  for(set<Unit*>::iterator i=allUnits.begin();i!=allUnits.end();i++)
+  for(set<MetaUnit*>::iterator i=this->MetaUnitPointers.begin();i!=this->MetaUnitPointers.end();i++)
   {
+    if ((*i)->getType()!=t) continue;
     int ntime=nextFreeTime(*i);
     if (ntime>-1)
     {
@@ -110,7 +110,7 @@ int BuildOrderManager::nextFreeTime(UnitType t)
 //returns the next available time that the given unit will be able to train the given unit type
 //takes into account required units
 //todo: take into account required tech and supply
-int BuildOrderManager::nextFreeTime(const Unit* unit, UnitType t)
+int BuildOrderManager::nextFreeTime(const MetaUnit* unit, UnitType t)
 {
   int time=nextFreeTime(unit);
   for(map<const UnitType*,int>::const_iterator i=t.requiredUnits().begin();i!=t.requiredUnits().end();i++)
@@ -120,13 +120,13 @@ int BuildOrderManager::nextFreeTime(const Unit* unit, UnitType t)
       return -1;
     if (ntime>time)
       time=ntime;
-    if (i->first->isAddon() && unit->getAddon()==NULL)
+    if (i->first->isAddon() && !unit->hasAddon())
       return -1;
   }
   return time;
 }
 
-int BuildOrderManager::nextFreeTime(const Unit* unit, TechType t)
+int BuildOrderManager::nextFreeTime(const MetaUnit* unit, TechType t)
 {
   int time=nextFreeTime(unit);
   //if something else is already researching it, this unit will never be able to research it
@@ -135,14 +135,14 @@ int BuildOrderManager::nextFreeTime(const Unit* unit, TechType t)
   return time;
 }
 
-int BuildOrderManager::nextFreeTime(const Unit* unit, UpgradeType t)
+int BuildOrderManager::nextFreeTime(const MetaUnit* unit, UpgradeType t)
 {
   int time=nextFreeTime(unit);
   if (!Broodwar->self()->isUpgrading(t))
     return time;
-  UnitGroup upgraders=SelectAll(*t.whatUpgrades());
-  for(std::set<Unit*>::iterator i=upgraders.begin();i!=upgraders.end();i++)
+  for(std::set<MetaUnit*>::iterator i=this->MetaUnitPointers.begin();i!=this->MetaUnitPointers.end();i++)
   {
+    if ((*i)->getType()!=*t.whatUpgrades()) continue;
     if ((*i)->isUpgrading() && (*i)->getUpgrade()==t)
     {
       time=max(time,nextFreeTime(*i));
@@ -156,7 +156,7 @@ bool BuildOrderManager::isResourceLimited()
   return this->isMineralLimited && this->isGasLimited;
 }
 //returns the set of unit types the given unit will be able to make at the given time
-set<BWAPI::UnitType> BuildOrderManager::unitsCanMake(BWAPI::Unit* builder, int time)
+set<BWAPI::UnitType> BuildOrderManager::unitsCanMake(MetaUnit* builder, int time)
 {
   set<BWAPI::UnitType> result;
   for(set<BWAPI::UnitType>::iterator i=makes[builder->getType()].begin();i!=makes[builder->getType()].end();i++)
@@ -168,7 +168,7 @@ set<BWAPI::UnitType> BuildOrderManager::unitsCanMake(BWAPI::Unit* builder, int t
   return result;
 }
 
-set<BWAPI::TechType> BuildOrderManager::techsCanResearch(BWAPI::Unit* techUnit, int time)
+set<BWAPI::TechType> BuildOrderManager::techsCanResearch(MetaUnit* techUnit, int time)
 {
   set<BWAPI::TechType> result;
   for(set<BWAPI::TechType>::iterator i=researches[techUnit->getType()].begin();i!=researches[techUnit->getType()].end();i++)
@@ -180,7 +180,7 @@ set<BWAPI::TechType> BuildOrderManager::techsCanResearch(BWAPI::Unit* techUnit, 
   return result;
 }
 
-set<BWAPI::UpgradeType> BuildOrderManager::upgradesCanResearch(BWAPI::Unit* techUnit, int time)
+set<BWAPI::UpgradeType> BuildOrderManager::upgradesCanResearch(MetaUnit* techUnit, int time)
 {
   set<BWAPI::UpgradeType> result;
   for(set<BWAPI::UpgradeType>::iterator i=upgrades[techUnit->getType()].begin();i!=upgrades[techUnit->getType()].end();i++)
@@ -257,7 +257,7 @@ pair<TechType,UpgradeType> getTechOrUpgradeType(set<TechType>& validTechTypes, s
 
 bool BuildOrderManager::updateUnits()
 {
-  set<Unit*> allUnits = Broodwar->self()->getUnits();
+  set<MetaUnit*> allUnits = this->MetaUnitPointers;
 
   //sanity check the data (not sure if we need to, but just in case)
   map<BWAPI::UnitType, map<BWAPI::UnitType, UnitItem* > >::iterator i2;
@@ -286,10 +286,10 @@ bool BuildOrderManager::updateUnits()
   }
 
   //get the set of factory Units
-  set<Unit*> factories;
-  for(set<Unit*>::iterator i=allUnits.begin();i!=allUnits.end();i++)
+  set<MetaUnit*> factories;
+  for(set<MetaUnit*>::iterator i=allUnits.begin();i!=allUnits.end();i++)
   {
-    Unit* u=*i;
+    MetaUnit* u=*i;
     UnitType type=u->getType();
     //only add the factory if it hasn't been reserved and if its a builder type that we need
     if (globalUnitSet->find(type)!=globalUnitSet->end() && this->reservedUnits.find(u)==this->reservedUnits.end())
@@ -304,9 +304,9 @@ bool BuildOrderManager::updateUnits()
     UnitType unitType=i->first;//builder type
 
     //iterate through all our factory Units
-    for(set<Unit*>::iterator f=factories.begin();f!=factories.end();f++)
+    for(set<MetaUnit*>::iterator f=factories.begin();f!=factories.end();f++)
     {
-      Unit* u=*f;
+      MetaUnit* u=*f;
       UnitType type=u->getType();
       if (type==i->first)//only look at units of this builder type
       {
@@ -340,8 +340,8 @@ bool BuildOrderManager::updateUnits()
     int ctime=*t;
 
     //remove all factories that have been reserved
-    set<Unit*>::iterator f2;
-    for(set<Unit*>::iterator f=factories.begin();f!=factories.end();f=f2)
+    set<MetaUnit*>::iterator f2;
+    for(set<MetaUnit*>::iterator f=factories.begin();f!=factories.end();f=f2)
     {
       f2=f;
       f2++;
@@ -349,9 +349,9 @@ bool BuildOrderManager::updateUnits()
         factories.erase(f);
     }
     //iterate through all factories that haven't been reserved yet
-    for(set<Unit*>::iterator f=factories.begin();f!=factories.end();f++)
+    for(set<MetaUnit*>::iterator f=factories.begin();f!=factories.end();f++)
     {
-      Unit* factory=*f;
+      MetaUnit* factory=*f;
       //get a unit type, taking into account the remaining unit counts and the set of units this factory can make at time ctime
       UnitType t=getUnitType(unitsCanMake(*f,ctime),remainingUnitCounts);
       if (t==UnitTypes::None)
@@ -392,7 +392,7 @@ void BuildOrderManager::update()
     UnitType unit=(*i).unitType;
     TechType tech=(*i).techType;
     UpgradeType upgrade=(*i).upgradeType;
-    Unit* factory=(*i).unit;
+    MetaUnit* factory=(*i).unit;
     int priority=(*i).priority;
     int ctime=(*i).time;
     if (ctime<Broodwar->getFrameCount())
@@ -406,7 +406,7 @@ void BuildOrderManager::update()
       if (ctime<=time && hasResources(unit,btime))
       {
         TilePosition tp=this->items[priority].units[factory->getType()][unit].decrementAdditional();
-        if (factory->getAddon()==NULL)
+        if (!factory->hasAddon())
           this->buildManager->build(unit,tp,true);
         else
           this->buildManager->build(unit,tp);
@@ -448,6 +448,18 @@ void BuildOrderManager::update()
 void BuildOrderManager::updatePlan()
 {
   this->savedPlan.clear();
+  
+  this->MetaUnits.clear();
+  this->MetaUnitPointers.clear();
+  for(set<Unit*>::const_iterator i=BWAPI::Broodwar->self()->getUnits().begin();i!=BWAPI::Broodwar->self()->getUnits().end();i++)
+  {
+    MetaUnits.push_back(MetaUnit(*i));
+  }
+  //add larva to MetaUnits
+  for(list<MetaUnit>::iterator i=MetaUnits.begin();i!=MetaUnits.end();i++)
+  {
+    this->MetaUnitPointers.insert(&(*i));
+  }
   for(set<UnitType>::iterator i=UnitTypes::allUnitTypes().begin();i!=UnitTypes::allUnitTypes().end();i++)
   {
     currentlyPlannedCount[*i]=this->buildManager->getPlannedCount(*i);
@@ -484,12 +496,12 @@ void BuildOrderManager::updatePlan()
       if (i->upgradeType!=UpgradeTypes::None)
         techUnitTypes.insert(*i->upgradeType.whatUpgrades());
     }
-    set<Unit*> allUnits=BWAPI::Broodwar->self()->getUnits();
+    set<MetaUnit*> allUnits=this->MetaUnitPointers;
     //get the set of tech Units
-    set<Unit*> techUnits;
-    for(set<Unit*>::iterator i=allUnits.begin();i!=allUnits.end();i++)
+    set<MetaUnit*> techUnits;
+    for(set<MetaUnit*>::iterator i=allUnits.begin();i!=allUnits.end();i++)
     {
-      Unit* u=*i;
+      MetaUnit* u=*i;
       UnitType type=u->getType();
       //only add the factory if it hasn't been reserved and if its a builder type that we need
       if (techUnitTypes.find(type)!=techUnitTypes.end() && this->reservedUnits.find(u)==this->reservedUnits.end())
@@ -498,7 +510,7 @@ void BuildOrderManager::updatePlan()
 
     //find the sequence of interesting points in time in the future
     set<int> times;
-    for(set<Unit*>::iterator i=techUnits.begin();i!=techUnits.end();i++)
+    for(set<MetaUnit*>::iterator i=techUnits.begin();i!=techUnits.end();i++)
     {
       //add the time to the sequence if it is in the future (and not -1)
       int time=nextFreeTime(*i);
@@ -571,8 +583,8 @@ void BuildOrderManager::updatePlan()
       int ctime=*t;
 
       //remove all tech units that have been reserved
-      set<Unit*>::iterator i2;
-      for(set<Unit*>::iterator i=techUnits.begin();i!=techUnits.end();i=i2)
+      set<MetaUnit*>::iterator i2;
+      for(set<MetaUnit*>::iterator i=techUnits.begin();i!=techUnits.end();i=i2)
       {
         i2=i;
         i2++;
@@ -580,9 +592,9 @@ void BuildOrderManager::updatePlan()
           techUnits.erase(i);
       }
       //iterate through all tech units that haven't been reserved yet
-      for(set<Unit*>::iterator i=techUnits.begin();i!=techUnits.end();i++)
+      for(set<MetaUnit*>::iterator i=techUnits.begin();i!=techUnits.end();i++)
       {
-        Unit* techUnit=*i;
+        MetaUnit* techUnit=*i;
         //get a unit type, taking into account the remaining unit counts and the set of units this factory can make right now
         pair< TechType,UpgradeType > p=getTechOrUpgradeType(techsCanResearch(*i,ctime),upgradesCanResearch(*i,ctime),remainingTech);
         TechType t=p.first;
@@ -820,7 +832,7 @@ int BuildOrderManager::getPlannedCount(BWAPI::UnitType t)
 }
 
 //reserves resources for this unit type
-pair<int, BuildOrderManager::Resources> BuildOrderManager::reserveResources(Unit* builder, UnitType unitType)
+pair<int, BuildOrderManager::Resources> BuildOrderManager::reserveResources(MetaUnit* builder, UnitType unitType)
 {
   int t=Broodwar->getFrameCount();
   if (builder)
@@ -833,7 +845,7 @@ pair<int, BuildOrderManager::Resources> BuildOrderManager::reserveResources(Unit
   return ret;
 }
 //reserves resources for this tech type
-pair<int, BuildOrderManager::Resources> BuildOrderManager::reserveResources(Unit* techUnit, TechType techType)
+pair<int, BuildOrderManager::Resources> BuildOrderManager::reserveResources(MetaUnit* techUnit, TechType techType)
 {
   int t=Broodwar->getFrameCount();
   if (techUnit)
@@ -846,7 +858,7 @@ pair<int, BuildOrderManager::Resources> BuildOrderManager::reserveResources(Unit
   return ret;
 }
 //reserves resources for this upgrade type
-pair<int, BuildOrderManager::Resources> BuildOrderManager::reserveResources(Unit* techUnit, UpgradeType upgradeType)
+pair<int, BuildOrderManager::Resources> BuildOrderManager::reserveResources(MetaUnit* techUnit, UpgradeType upgradeType)
 {
   int t=Broodwar->getFrameCount();
   if (techUnit)

@@ -57,16 +57,19 @@ void DefenseManager::update()
   }
   //Order all units to choke
   int i=0;
-  for (std::map<BWAPI::Unit*,DefenseData>::iterator u = defenders.begin(); u != defenders.end(); u++)
+  if (!myBorder.empty())
   {
-    if ((*u).second.mode == DefenseData::Idle || borderUpdated)
+    for (std::map<BWAPI::Unit*,DefenseData>::iterator u = defenders.begin(); u != defenders.end(); u++)
     {
-      BWAPI::Position chokePosition=myBorderVector[i]->getCenter();
-      i++;
-      if (i>=myBorderVector.size())
-        i=0;
-      (*u).first->attackMove(chokePosition);
-      (*u).second.mode = DefenseData::Moving;
+      if ((*u).second.mode == DefenseData::Idle || borderUpdated)
+      {
+        BWAPI::Position chokePosition=myBorderVector[i]->getCenter();
+        i++;
+        if (i>=(int)myBorderVector.size())
+          i=0;
+        (*u).first->attackMove(chokePosition);
+        (*u).second.mode = DefenseData::Moving;
+      }
     }
   }
 }
