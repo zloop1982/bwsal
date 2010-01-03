@@ -33,6 +33,7 @@ class ProductionManager : public Arbitrator::Controller<BWAPI::Unit*,double>
         BWAPI::Unit* unit;
         bool started;
     };
+    bool canMake(BWAPI::Unit* builder, BWAPI::UnitType type);
     Arbitrator::Arbitrator<BWAPI::Unit*,double>* arbitrator;
     std::map<BWAPI::UnitType,std::list<ProductionUnitType > > productionQueues;
     std::map<BWAPI::Unit*,Unit> producingUnits;

@@ -10,7 +10,7 @@ ProductionManager::ProductionManager(Arbitrator::Arbitrator<BWAPI::Unit*,double>
     startedCount[*i]=0;
   }
 }
-bool canMake(BWAPI::Unit* builder, BWAPI::UnitType type)
+bool ProductionManager::canMake(BWAPI::Unit* builder, BWAPI::UnitType type)
 {
   if (builder != NULL)
   {

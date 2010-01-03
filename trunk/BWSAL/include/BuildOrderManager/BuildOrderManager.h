@@ -44,6 +44,7 @@ class BuildOrderManager
         bool hasAddon() const;
         bool isBeingConstructed() const;
         bool isCompleted() const;
+        bool isMorphing() const;
         bool isTraining() const;
         bool isUpgrading() const;
         BWAPI::Unit* unit;

@@ -10,6 +10,73 @@ MorphManager::MorphManager(Arbitrator::Arbitrator<BWAPI::Unit*,double>* arbitrat
   }
 }
 
+bool MorphManager::canMake(BWAPI::Unit* builder, BWAPI::UnitType type)
+{
+  if (builder != NULL)
+  {
+    /* Check if the owner of the unit is you */
+    if (builder->getPlayer() != BWAPI::Broodwar->self())
+      return false;
+
+    /* Check if this unit can actually build the unit type */
+    if (builder->getType() != *(type.whatBuilds().first))
+      return false;
+
+    /* Carrier space */
+    if (builder->getType() == BWAPI::UnitTypes::Protoss_Carrier)
+    {
+      int max_amt = 4;
+      if (BWAPI::Broodwar->self()->getUpgradeLevel(BWAPI::UpgradeTypes::Carrier_Capacity)>0)
+        max_amt += 4;
+      if (builder->getInterceptorCount() + (int)builder->getTrainingQueue().size() >= max_amt)
+        return false;
+    }
+    /* Reaver Space */
+    if (builder->getType() == BWAPI::UnitTypes::Protoss_Reaver)
+    {
+      int max_amt = 5;
+      if (BWAPI::Broodwar->self()->getUpgradeLevel(BWAPI::UpgradeTypes::Reaver_Capacity) > 0)
+        max_amt += 5;
+      if (builder->getScarabCount() + (int)builder->getTrainingQueue().size() >= max_amt)
+        return false;
+    }
+  }
+
+  BWAPI::UnitType addon = BWAPI::UnitTypes::None;
+  for(std::map<const BWAPI::UnitType*, int>::const_iterator i = type.requiredUnits().begin(); i != type.requiredUnits().end(); i++)
+    if (i->first->isAddon())
+      addon=*i->first;
+
+  for(std::map<const BWAPI::UnitType*, int>::const_iterator i = type.requiredUnits().begin(); i != type.requiredUnits().end(); i++)
+  {
+    bool pass = false;
+    if (BWAPI::Broodwar->self()->completedUnitCount(*(i->first)) >= i->second)
+      pass = true;
+    if (*i->first == BWAPI::UnitTypes::Zerg_Hatchery)
+    {
+      if (BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Zerg_Lair) >= i->second)
+        pass = true;
+      if (BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Zerg_Hive) >= i->second)
+        pass = true;
+    }
+    if (*i->first == BWAPI::UnitTypes::Zerg_Lair)
+      if (BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Zerg_Hive) >= i->second)
+        pass = true;
+    if (pass == false)
+      return false;
+  }
+
+  if (*type.requiredTech() != BWAPI::TechTypes::None)
+    if (!BWAPI::Broodwar->self()->hasResearched(*(type.requiredTech())))
+      return false;
+
+  if (builder != NULL)
+    if (addon != BWAPI::UnitTypes::None && addon.whatBuilds().first==type.whatBuilds().first)
+      if (builder->getAddon() == NULL || builder->getAddon()->getType() != addon)
+        return false;
+  return true;
+}
+
 void MorphManager::onOffer(std::set<BWAPI::Unit*> units)
 {
   //go through all the units that are being offered to us
@@ -22,7 +89,7 @@ void MorphManager::onOffer(std::set<BWAPI::Unit*> units)
     {
       for(std::list<BWAPI::UnitType>::iterator t=q->second.begin();t!=q->second.end();t++) //loop through the queue
       {
-        if (BWAPI::Broodwar->canMake(*i,*t)) //only accept if the given unit can make the type of unit we want to make
+        if (canMake(*i,*t)) //only accept if the given unit can make the type of unit we want to make
         {
           Unit newUnit;
           newUnit.type=*t;
@@ -157,4 +224,10 @@ int MorphManager::getStartedCount(BWAPI::UnitType type) const
   if (i!=startedCount.end())
     return i->second;
   return 0;
+}
+BWAPI::UnitType MorphManager::getBuildType(BWAPI::Unit* unit) const
+{
+  if (morphingUnits.find(unit)==morphingUnits.end())
+    return BWAPI::UnitTypes::None;
+  return morphingUnits.find(unit)->second.type;
 }

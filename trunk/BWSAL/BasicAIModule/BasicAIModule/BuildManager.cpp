@@ -119,7 +119,10 @@ void BuildManager::setBuildDistance(int distance)
 }
 BWAPI::UnitType BuildManager::getBuildType(BWAPI::Unit* unit) const
 {
-  return this->productionManager->getBuildType(unit);
+  BWAPI::UnitType t=this->productionManager->getBuildType(unit);
+  if (t==BWAPI::UnitTypes::None)
+    t=this->morphManager->getBuildType(unit);
+  return t;
 }
 void BuildManager::setDebugMode(bool debugMode)
 {

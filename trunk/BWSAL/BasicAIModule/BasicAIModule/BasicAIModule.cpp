@@ -64,20 +64,25 @@ void BasicAIModule::onStart()
     this->scoutManager->setScoutCount(1);
 
     //9 pool
+    /*
     this->buildOrderManager->build(9,workerType,80);
     this->buildOrderManager->buildAdditional(3,UnitTypes::Zerg_Zergling,82);
     this->buildOrderManager->buildAdditional(1,UnitTypes::Zerg_Spawning_Pool,79);
     this->buildOrderManager->build(40,workerType,78);
-    /*
+    */
     //12 hatch
+    this->buildOrderManager->build(3,UnitTypes::Zerg_Overlord,83);
     this->buildOrderManager->build(12,workerType,80);
     this->baseManager->expand(natural,79);
-    this->buildOrderManager->build(20,workerType,78);
+    this->buildOrderManager->buildAdditional(1,UnitTypes::Zerg_Extractor,78);
+    this->buildOrderManager->build(20,workerType,77);
+    this->buildOrderManager->build(9,UnitTypes::Zerg_Overlord,76);
+    this->buildOrderManager->build(60,workerType,75);
     this->buildOrderManager->buildAdditional(1,UnitTypes::Zerg_Spawning_Pool,60);
     this->buildOrderManager->buildAdditional(3,UnitTypes::Zerg_Zergling,82);
-    this->buildOrderManager->upgrade(1,UpgradeTypes::Antennae,40);
-    this->buildOrderManager->upgrade(1,UpgradeTypes::Pneumatized_Carapace,40);
-    */
+    this->buildOrderManager->buildAdditional(1,UnitTypes::Zerg_Hatchery,50);
+    this->buildOrderManager->buildAdditional(1,UnitTypes::Zerg_Spire,45);
+    this->buildOrderManager->buildAdditional(9,UnitTypes::Zerg_Mutalisk,120);
   }
   else if (race == Races::Terran)
   {
