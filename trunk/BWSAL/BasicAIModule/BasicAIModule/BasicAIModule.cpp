@@ -71,18 +71,18 @@ void BasicAIModule::onStart()
     this->buildOrderManager->build(40,workerType,78);
     */
     //12 hatch
-    this->buildOrderManager->build(3,UnitTypes::Zerg_Overlord,83);
-    this->buildOrderManager->build(12,workerType,80);
+    this->buildOrderManager->build(9,UnitTypes::Zerg_Drone,82);
+    this->buildOrderManager->build(2,UnitTypes::Zerg_Overlord,81);
+    this->buildOrderManager->build(12,UnitTypes::Zerg_Drone,80);
     this->baseManager->expand(natural,79);
-    this->buildOrderManager->buildAdditional(1,UnitTypes::Zerg_Extractor,78);
-    this->buildOrderManager->build(20,workerType,77);
-    this->buildOrderManager->build(9,UnitTypes::Zerg_Overlord,76);
-    this->buildOrderManager->build(60,workerType,75);
-    this->buildOrderManager->buildAdditional(1,UnitTypes::Zerg_Spawning_Pool,60);
-    this->buildOrderManager->buildAdditional(3,UnitTypes::Zerg_Zergling,82);
-    this->buildOrderManager->buildAdditional(1,UnitTypes::Zerg_Hatchery,50);
-    this->buildOrderManager->buildAdditional(1,UnitTypes::Zerg_Spire,45);
-    this->buildOrderManager->buildAdditional(9,UnitTypes::Zerg_Mutalisk,120);
+    this->buildOrderManager->build(1,UnitTypes::Zerg_Extractor,78);
+    this->buildOrderManager->build(20,UnitTypes::Zerg_Drone,77);
+    this->buildOrderManager->build(60,UnitTypes::Zerg_Drone,75);
+    this->buildOrderManager->build(1,UnitTypes::Zerg_Spawning_Pool,60);
+    this->buildOrderManager->build(3,UnitTypes::Zerg_Zergling,82);
+    this->buildOrderManager->build(3,UnitTypes::Zerg_Hatchery,50);
+    this->buildOrderManager->build(1,UnitTypes::Zerg_Spire,45);
+    this->buildOrderManager->build(9,UnitTypes::Zerg_Mutalisk,120);
   }
   else if (race == Races::Terran)
   {
