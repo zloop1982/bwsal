@@ -8,10 +8,6 @@ Not a controller.
 
 A simple manager that can implement basic AI functionality for attacking. A force manager can be used to determine what groups a player's or enemy's units consist of, and can choose a strategy of where to position the player's units. We can use it currently to assign ScoutManager the positions it needs to scout and when. We can also use it to assign DefenseManager a new chokepoint to defend in the case that an expansions is made or lost. This way we can move strategic logic out of ScoutManager (and I would say DefenseManager, but it doesn't even have that =) to pave the way towards fixing it. Later we can split it up into a more complex array of managers, but for now we can use it to implement basic defend, retreat, or later, attack functionality.
 
-= Larva Manager =
-
-Something that predicts and manages larva that haven't spawned yet. Should work with the build order manager to plan what to do with larva when they spawn. It takes about 340 frames (not always the same amount) for a new larva to generate when larva count for a hatchery/lair/hive is less than three.
-
 = Scout Manager =
 
 Improve the scout manager so that it tries to stay alive as long as possible inside the enemy base once it finds the enemy base
