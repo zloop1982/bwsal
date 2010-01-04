@@ -4,6 +4,7 @@
 
   * [Arbitrator Arbitrator]
    * [Controller Controller]
+  * [EnhancedUI EnhancedUI]
   * [WorkerManager Worker Manager]
   * [BuildingPlacer Building Placer]
   * [BuildManager Build Manager]
@@ -16,3 +17,8 @@
   * [TechManager Tech Manager]
   * [UpgradeManager Upgrade Manager]
   * [ScoutManager Scout Manager]
+  * [DefenseManager Defense Manager]
+  * [BorderManager Border Manager]
+  * [InformationManager Information Manager]
+  * [UnitGroupManager Unit Group Manager]
+   * [UnitGroup Unit Group]
