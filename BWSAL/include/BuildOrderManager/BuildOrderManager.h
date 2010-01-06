@@ -90,6 +90,7 @@ class BuildOrderManager
     int nextFreeTime(const MetaUnit* unit, BWAPI::UnitType t);
     int nextFreeTime(const MetaUnit* unit, BWAPI::TechType t);
     int nextFreeTime(const MetaUnit* unit, BWAPI::UpgradeType t);
+    std::set<MetaUnit*> MetaUnitPointers;
 
   private:
     bool hasResources(BWAPI::UnitType t, int time);
@@ -115,7 +116,6 @@ class BuildOrderManager
     int usedMinerals;
     int usedGas;
     std::list<MetaUnit> MetaUnits;
-    std::set<MetaUnit*> MetaUnitPointers;
     std::map<int, Resources> reservedResources;
     std::set<MetaUnit*> reservedUnits;
     std::map<BWAPI::UnitType,int> currentlyPlannedCount;

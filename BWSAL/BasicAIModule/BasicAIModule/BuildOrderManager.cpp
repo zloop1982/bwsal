@@ -480,7 +480,7 @@ void BuildOrderManager::updatePlan()
       int larva=(*i)->getLarva().size();
       if ((*i)->getRemainingTrainTime()>0)
         MetaUnits.push_back(MetaUnit(Broodwar->getFrameCount()+(*i)->getRemainingTrainTime()));
-      for(int j=1;j<10;j++)
+      for(int j=1;j<4;j++)
         MetaUnits.push_back(MetaUnit(Broodwar->getFrameCount()+(*i)->getRemainingTrainTime()+334*j));
     }
   }

@@ -19,34 +19,27 @@ void SupplyManager::update()
 {
   if (BWAPI::Broodwar->getFrameCount()>lastFrameCheck+25)
   {
+    lastFrameCheck=BWAPI::Broodwar->getFrameCount();
     int productionCapacity       = 0;
     lastFrameCheck               = BWAPI::Broodwar->getFrameCount();
     std::set<BWAPI::Unit*> units = BWAPI::Broodwar->self()->getUnits();
     int supplyBuildTime = BWAPI::Broodwar->self()->getRace().getSupplyProvider()->buildTime();
-    int time = BWAPI::Broodwar->getFrameCount() + supplyBuildTime;
-    if (BWAPI::Broodwar->self()->getRace()==BWAPI::Races::Zerg)
+    int time = BWAPI::Broodwar->getFrameCount() + supplyBuildTime*2;
+    for(std::set<BuildOrderManager::MetaUnit*>::iterator i = this->buildOrderManager->MetaUnitPointers.begin(); i != this->buildOrderManager->MetaUnitPointers.end(); i++)
     {
-      productionCapacity += 6*SelectAll(BWAPI::UnitTypes::Zerg_Hatchery).size();
-      productionCapacity += 6*SelectAll(BWAPI::UnitTypes::Zerg_Lair).size();
-      productionCapacity += 6*SelectAll(BWAPI::UnitTypes::Zerg_Hive).size();
-    }
-    else
-    {
-      for(std::set<BWAPI::Unit*>::iterator i = units.begin(); i != units.end(); i++)
+      std::set<BWAPI::UnitType> m=this->buildOrderManager->unitsCanMake(*i,time);
+      int max=0;
+      for(std::set<BWAPI::UnitType>::iterator j=m.begin();j!=m.end();j++)
       {
-        BuildOrderManager::MetaUnit temp(*i);
-        std::set<BWAPI::UnitType> m=this->buildOrderManager->unitsCanMake(&temp,time);
-        int max=0;
-        for(std::set<BWAPI::UnitType>::iterator j=m.begin();j!=m.end();j++)
-        {
-          int s=j->supplyRequired();
-          if (j->buildTime()<supplyBuildTime && (*i)->getType().getRace()!=BWAPI::Races::Zerg)
-            s*=2;
-          if (s > max)
-            max=s;
-        }
-        productionCapacity += max;
+        int s=j->supplyRequired();
+        if (j->isTwoUnitsInOneEgg())
+          s*=2;
+        if (j->buildTime()<supplyBuildTime && (*i)->getType().getRace()!=BWAPI::Races::Zerg)
+          s*=2;
+        if (s > max)
+          max=s;
       }
+      productionCapacity += max;
     }
     if (getPlannedSupply() <= BWAPI::Broodwar->self()->supplyUsed() + productionCapacity)
     {

@@ -80,7 +80,8 @@ void BasicAIModule::onStart()
     this->buildOrderManager->build(60,UnitTypes::Zerg_Drone,75);
     this->buildOrderManager->build(1,UnitTypes::Zerg_Spawning_Pool,60);
     this->buildOrderManager->build(3,UnitTypes::Zerg_Zergling,82);
-    this->buildOrderManager->build(3,UnitTypes::Zerg_Hatchery,50);
+    this->buildOrderManager->build(1,UnitTypes::Zerg_Lair,55);
+    this->buildOrderManager->buildAdditional(1,UnitTypes::Zerg_Hatchery,50);
     this->buildOrderManager->build(1,UnitTypes::Zerg_Spire,45);
     this->buildOrderManager->build(9,UnitTypes::Zerg_Mutalisk,120);
   }
