@@ -2,7 +2,7 @@
 
 Class header file: http://code.google.com/p/bwsal/source/browse/trunk/BWSAL/include/DefenseManager.h
 
-The Defense Manager sends all non-worker units to the initial bases's chokepoint.
+The Defense Manager sends all non-worker units to a border assigned by the Border Manager.
 
   * [#update update]
   * [#getName getName]
