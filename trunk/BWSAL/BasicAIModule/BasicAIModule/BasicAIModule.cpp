@@ -135,6 +135,22 @@ void BasicAIModule::onStart()
 
 }
 
+BasicAIModule::~BasicAIModule()
+{
+  delete this->buildManager;
+  delete this->techManager;
+  delete this->upgradeManager;
+  delete this->scoutManager;
+  delete this->workerManager;
+  delete this->supplyManager;
+  delete this->buildOrderManager;
+  delete this->baseManager;
+  delete this->defenseManager;
+  delete this->informationManager;
+  delete this->borderManager;
+  delete this->unitGroupManager;
+  delete this->enhancedUI;
+}
 void BasicAIModule::onEnd(bool isWinner)
 {
   log("onEnd(%d)\n",isWinner);
