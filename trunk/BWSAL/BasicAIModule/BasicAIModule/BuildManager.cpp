@@ -70,7 +70,7 @@ bool BuildManager::build(BWAPI::UnitType type, BWAPI::TilePosition goalPosition,
   if (type==BWAPI::UnitTypes::None || type==BWAPI::UnitTypes::Unknown) return false;
 
   //send this order off to the right sub-manager
-  if (type.getRace()==BWAPI::Races::Zerg && type.isBuilding()==type.whatBuilds().first->isBuilding())
+  if (type.getRace()==BWAPI::Races::Zerg && type.isBuilding()==type.whatBuilds().first.isBuilding())
     return this->morphManager->morph(type);
   else
   {
@@ -84,7 +84,7 @@ bool BuildManager::build(BWAPI::UnitType type, BWAPI::TilePosition goalPosition,
 
 int BuildManager::getPlannedCount(BWAPI::UnitType type) const
 {
-  if (type.getRace()==BWAPI::Races::Zerg && type.isBuilding()==type.whatBuilds().first->isBuilding())
+  if (type.getRace()==BWAPI::Races::Zerg && type.isBuilding()==type.whatBuilds().first.isBuilding())
     return BWAPI::Broodwar->self()->completedUnitCount(type)+this->morphManager->getPlannedCount(type);
   else
   {
@@ -97,7 +97,7 @@ int BuildManager::getPlannedCount(BWAPI::UnitType type) const
 
 int BuildManager::getStartedCount(BWAPI::UnitType type) const
 {
-  if (type.getRace()==BWAPI::Races::Zerg && type.isBuilding()==type.whatBuilds().first->isBuilding())
+  if (type.getRace()==BWAPI::Races::Zerg && type.isBuilding()==type.whatBuilds().first.isBuilding())
     return BWAPI::Broodwar->self()->completedUnitCount(type)+this->morphManager->getStartedCount(type);
   else
   {

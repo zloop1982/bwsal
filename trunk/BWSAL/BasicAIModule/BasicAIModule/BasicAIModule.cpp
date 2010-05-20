@@ -39,7 +39,7 @@ void BasicAIModule::onStart()
   
   BWAPI::Race race = Broodwar->self()->getRace();
   BWAPI::Race enemyRace = Broodwar->enemy()->getRace();
-  BWAPI::UnitType workerType=*(race.getWorker());
+  BWAPI::UnitType workerType=race.getWorker();
   double minDist;
   BWTA::BaseLocation* natural=NULL;
   BWTA::BaseLocation* home=BWTA::getStartLocation(Broodwar->self());

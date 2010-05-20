@@ -19,7 +19,7 @@ bool ProductionManager::canMake(BWAPI::Unit* builder, BWAPI::UnitType type)
       return false;
 
     /* Check if this unit can actually build the unit type */
-    if (builder->getType() != *(type.whatBuilds().first))
+    if (builder->getType() != (type.whatBuilds().first))
       return false;
 
     /* Carrier space */
@@ -43,31 +43,31 @@ bool ProductionManager::canMake(BWAPI::Unit* builder, BWAPI::UnitType type)
   }
 
   BWAPI::UnitType addon = BWAPI::UnitTypes::None;
-  for(std::map<const BWAPI::UnitType*, int>::const_iterator i = type.requiredUnits().begin(); i != type.requiredUnits().end(); i++)
-    if (i->first->isAddon())
-      addon=*i->first;
+  for(std::map<BWAPI::UnitType, int>::const_iterator i = type.requiredUnits().begin(); i != type.requiredUnits().end(); i++)
+    if (i->first.isAddon())
+      addon=i->first;
 
-  for(std::map<const BWAPI::UnitType*, int>::const_iterator i = type.requiredUnits().begin(); i != type.requiredUnits().end(); i++)
+  for(std::map<BWAPI::UnitType, int>::const_iterator i = type.requiredUnits().begin(); i != type.requiredUnits().end(); i++)
   {
     bool pass = false;
-    if (BWAPI::Broodwar->self()->completedUnitCount(*(i->first)) >= i->second)
+    if (BWAPI::Broodwar->self()->completedUnitCount((i->first)) >= i->second)
       pass = true;
-    if (*i->first == BWAPI::UnitTypes::Zerg_Hatchery)
+    if (i->first == BWAPI::UnitTypes::Zerg_Hatchery)
     {
       if (BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Zerg_Lair) >= i->second)
         pass = true;
       if (BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Zerg_Hive) >= i->second)
         pass = true;
     }
-    if (*i->first == BWAPI::UnitTypes::Zerg_Lair)
+    if (i->first == BWAPI::UnitTypes::Zerg_Lair)
       if (BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Zerg_Hive) >= i->second)
         pass = true;
     if (pass == false)
       return false;
   }
 
-  if (*type.requiredTech() != BWAPI::TechTypes::None)
-    if (!BWAPI::Broodwar->self()->hasResearched(*(type.requiredTech())))
+  if (type.requiredTech() != BWAPI::TechTypes::None)
+    if (!BWAPI::Broodwar->self()->hasResearched((type.requiredTech())))
       return false;
 
   if (builder != NULL)
@@ -219,18 +219,18 @@ void ProductionManager::onRemoveUnit(BWAPI::Unit* unit)
 bool ProductionManager::train(BWAPI::UnitType type, bool forceNoAddon)
 {
   //production order starts here
-  if (!type.whatBuilds().first->canProduce() || type.isBuilding()) //we only accept things that can be produced
+  if (!type.whatBuilds().first.canProduce() || type.isBuilding()) //we only accept things that can be produced
     return false;
   //we don't care about zerg unless the unit can be produced in an infested command center
   if (type.getRace()==BWAPI::Races::Zerg)
-    if (*type.whatBuilds().first!=BWAPI::UnitTypes::Zerg_Infested_Command_Center)
+    if (type.whatBuilds().first!=BWAPI::UnitTypes::Zerg_Infested_Command_Center)
       return false;
 
   //add this unit type to the end of the queue
   ProductionUnitType newType;
   newType.type=type;
   newType.forceNoAddon=forceNoAddon;
-  productionQueues[*type.whatBuilds().first].push_back(newType);
+  productionQueues[type.whatBuilds().first].push_back(newType);
 
   plannedCount[type]++;
   return true;
