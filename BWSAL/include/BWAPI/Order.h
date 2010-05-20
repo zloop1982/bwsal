@@ -3,6 +3,11 @@
 #include <set>
 namespace BWAPI
 {
+  /** To get detailed information about what a unit is doing, you can use the Unit::getOrder method, which
+   * will return an Order object. Note that a single command, like gather minerals, can consist of several
+   * orders ( MoveToMinerals, HarvestMinerals2, MiningMinerals, ReturnMinerals, etc) which will indicate what
+   * state the unit is in while executing the command. For information about how to issue commands to units,
+   * go to Unit. */
   class Order
   {
     public:
@@ -13,15 +18,23 @@ namespace BWAPI
       bool operator==(const Order& other) const;
       bool operator!=(const Order& other) const;
       bool operator<(const Order& other) const;
+
+      /** Returns the unique ID for this order. */
       int getID() const;
+
+      /** Returns the name of this order. */
       std::string getName() const;
     private:
       int id;
   };
   namespace Orders
   {
+    /** Given the name of an order, getOrder() will return the corresponding order object. */
     Order getOrder(std::string& name);
+
+    /** Returns the set of all the Orders. */
     std::set<Order>& allOrders();
+
     void init();
     extern const Order Die;
     extern const Order Stop;
@@ -39,14 +52,14 @@ namespace BWAPI
     extern const Order Hover;
     extern const Order AttackMove;
     extern const Order InfestMine1;
-    extern const Order Nothing1;
-    extern const Order Powerup1;
+    extern const Order UnusedNothing;
+    extern const Order UnusedPowerup;
     extern const Order TowerGuard;
     extern const Order TowerAttack;
     extern const Order VultureMine;
     extern const Order StayinRange;
     extern const Order TurretAttack;
-    extern const Order Nothing2;
+    extern const Order Nothing;
     extern const Order Nothing3;
     extern const Order DroneStartBuild;
     extern const Order DroneBuild;
@@ -62,42 +75,42 @@ namespace BWAPI
     extern const Order PlaceAddon;
     extern const Order BuildAddon;
     extern const Order Train;
-    extern const Order RallyPoint1;
-    extern const Order RallyPoint2;
+    extern const Order RallyPointUnit;
+    extern const Order RallyPointTile;
     extern const Order ZergBirth;
-    extern const Order Morph1;
-    extern const Order Morph2;
-    extern const Order BuildSelf1;
+    extern const Order ZergUnitMorph;
+    extern const Order ZergBuildingMorph;
+    extern const Order TerranBuildSelf;
     extern const Order ZergBuildSelf;
-    extern const Order Build5;
-    extern const Order Enternyduscanal;
-    extern const Order BuildSelf2;
+    extern const Order BuildNydusExit;
+    extern const Order EnterNydusCanal;
+    extern const Order ProtossBuildSelf;
     extern const Order Follow;
     extern const Order Carrier;
-    extern const Order CarrierIgnore1;
+    extern const Order ReaverCarrierMove;
     extern const Order CarrierStop;
     extern const Order CarrierAttack1;
     extern const Order CarrierAttack2;
     extern const Order CarrierIgnore2;
     extern const Order CarrierFight;
-    extern const Order HoldPosition1;
+    extern const Order CarrierHoldPosition;
     extern const Order Reaver;
     extern const Order ReaverAttack1;
     extern const Order ReaverAttack2;
     extern const Order ReaverFight;
-    extern const Order ReaverHold;
+    extern const Order ReaverHoldPosition;
     extern const Order TrainFighter;
     extern const Order StrafeUnit1;
     extern const Order StrafeUnit2;
-    extern const Order RechargeShields1;
-    extern const Order Rechargeshields2;
+    extern const Order RechargeShieldsUnit;
+    extern const Order RechargeShieldsBattery;
     extern const Order ShieldBattery;
     extern const Order Return;
     extern const Order DroneLand;
     extern const Order BuildingLand;
-    extern const Order BuildingLiftoff;
-    extern const Order DroneLiftoff;
-    extern const Order Liftoff;
+    extern const Order BuildingLiftOff;
+    extern const Order DroneLiftOff;
+    extern const Order LiftingOff;
     extern const Order ResearchTech;
     extern const Order Upgrade;
     extern const Order Larva;
@@ -114,13 +127,13 @@ namespace BWAPI
     extern const Order Harvest3;
     extern const Order Harvest4;
     extern const Order ReturnMinerals;
-    extern const Order Harvest5;
+    extern const Order Interrupted;
     extern const Order EnterTransport;
-    extern const Order Pickup1;
-    extern const Order Pickup2;
-    extern const Order Pickup3;
+    extern const Order PickupIdle;
+    extern const Order PickupTransport;
+    extern const Order PickupBunker;
     extern const Order Pickup4;
-    extern const Order Powerup2;
+    extern const Order PowerupIdle;
     extern const Order SiegeMode;
     extern const Order TankMode;
     extern const Order WatchTarget;
@@ -130,8 +143,8 @@ namespace BWAPI
     extern const Order GuardianAspect;
     extern const Order WarpingArchon;
     extern const Order CompletingArchonsummon;
-    extern const Order HoldPosition2;
-    extern const Order HoldPosition3;
+    extern const Order HoldPosition;
+    extern const Order QueenHoldPosition;
     extern const Order Cloak;
     extern const Order Decloak;
     extern const Order Unload;
@@ -159,7 +172,7 @@ namespace BWAPI
     extern const Order Rightclickaction;
     extern const Order SapUnit;
     extern const Order SapLocation;
-    extern const Order HoldPosition4;
+    extern const Order SuicideHoldPosition;
     extern const Order Teleport;
     extern const Order TeleporttoLocation;
     extern const Order PlaceScanner;
