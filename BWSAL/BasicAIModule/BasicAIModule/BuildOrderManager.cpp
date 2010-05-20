@@ -32,15 +32,15 @@ BuildOrderManager::BuildOrderManager(BuildManager* buildManager, TechManager* te
   UnitItem::getBuildManager() = buildManager;
   for(set<BWAPI::UnitType>::iterator i=UnitTypes::allUnitTypes().begin();i!=UnitTypes::allUnitTypes().end();i++)
   {
-    makes[*(*i).whatBuilds().first].insert(*i);
+    makes[(*i).whatBuilds().first].insert(*i);
   }
   for(set<BWAPI::TechType>::iterator i=TechTypes::allTechTypes().begin();i!=TechTypes::allTechTypes().end();i++)
   {
-    researches[*i->whatResearches()].insert(*i);
+    researches[i->whatResearches()].insert(*i);
   }
   for(set<BWAPI::UpgradeType>::iterator i=UpgradeTypes::allUpgradeTypes().begin();i!=UpgradeTypes::allUpgradeTypes().end();i++)
   {
-    upgrades[*i->whatUpgrades()].insert(*i);
+    upgrades[i->whatUpgrades()].insert(*i);
   }
 }
 
@@ -117,14 +117,14 @@ int BuildOrderManager::nextFreeTime(UnitType t)
 int BuildOrderManager::nextFreeTime(const MetaUnit* unit, UnitType t)
 {
   int time=nextFreeTime(unit);
-  for(map<const UnitType*,int>::const_iterator i=t.requiredUnits().begin();i!=t.requiredUnits().end();i++)
+  for(map<UnitType,int>::const_iterator i=t.requiredUnits().begin();i!=t.requiredUnits().end();i++)
   {
-    int ntime=nextFreeTime(*i->first);
+    int ntime=nextFreeTime(i->first);
     if (ntime==-1)
       return -1;
     if (ntime>time)
       time=ntime;
-    if (i->first->isAddon() && !unit->hasAddon())
+    if (i->first.isAddon() && !unit->hasAddon())
       return -1;
   }
   return time;
@@ -146,7 +146,7 @@ int BuildOrderManager::nextFreeTime(const MetaUnit* unit, UpgradeType t)
     return time;
   for(std::set<MetaUnit*>::iterator i=this->MetaUnitPointers.begin();i!=this->MetaUnitPointers.end();i++)
   {
-    if ((*i)->getType()!=*t.whatUpgrades()) continue;
+    if ((*i)->getType()!=t.whatUpgrades()) continue;
     if ((*i)->isUpgrading() && (*i)->getUpgrade()==t)
     {
       time=max(time,nextFreeTime(*i));
@@ -520,9 +520,9 @@ void BuildOrderManager::updatePlan()
     for(list<TechItem>::iterator i=l->second.techs.begin();i!=l->second.techs.end();i++)
     {
       if (i->techType!=TechTypes::None)
-        techUnitTypes.insert(*i->techType.whatResearches());
+        techUnitTypes.insert(i->techType.whatResearches());
       if (i->upgradeType!=UpgradeTypes::None)
-        techUnitTypes.insert(*i->upgradeType.whatUpgrades());
+        techUnitTypes.insert(i->upgradeType.whatUpgrades());
     }
     set<MetaUnit*> allUnits=this->MetaUnitPointers;
     //get the set of tech Units
@@ -558,26 +558,26 @@ void BuildOrderManager::updatePlan()
         UpgradeType u=i->upgradeType;
         if (t!=TechTypes::None)
         {
-          if (this->getPlannedCount(*t.whatResearches())==0)
+          if (this->getPlannedCount(t.whatResearches())==0)
           {
-            this->build(1,*t.whatResearches(),l->first);
+            this->build(1,t.whatResearches(),l->first);
           }
           //also check to see if we have enough gas, or a refinery planned
           if (t.gasPrice()>BWAPI::Broodwar->self()->cumulativeGas()-this->usedGas)
           {
-            UnitType refinery=*Broodwar->self()->getRace().getRefinery();
+            UnitType refinery=Broodwar->self()->getRace().getRefinery();
             if (this->getPlannedCount(refinery)==0)
               this->build(1,refinery,l->first);
           }
         }
         else if (u!=UpgradeTypes::None)
         {
-          if (this->getPlannedCount(*u.whatUpgrades())==0)
-            this->build(1,*u.whatUpgrades(),l->first);
+          if (this->getPlannedCount(u.whatUpgrades())==0)
+            this->build(1,u.whatUpgrades(),l->first);
           //also check to see if we have enough gas, or a refinery planned
           if (u.gasPriceBase()+u.gasPriceFactor()*(BWAPI::Broodwar->self()->getUpgradeLevel(u)-1)>BWAPI::Broodwar->self()->cumulativeGas()-this->usedGas)
           {
-            UnitType refinery=*Broodwar->self()->getRace().getRefinery();
+            UnitType refinery=Broodwar->self()->getRace().getRefinery();
             if (this->getPlannedCount(refinery)==0)
               this->build(1,refinery,l->first);
           }
@@ -671,12 +671,12 @@ void BuildOrderManager::updatePlan()
         if (this->dependencyResolver)
         {
           //check dependencies (required units)
-          for(map<const BWAPI::UnitType*, int>::const_iterator k=j->first.requiredUnits().begin();k!=j->first.requiredUnits().end();k++)
+          for(map<BWAPI::UnitType, int>::const_iterator k=j->first.requiredUnits().begin();k!=j->first.requiredUnits().end();k++)
           {
-            if (*k->first == UnitTypes::Zerg_Larva) continue;
-            if (this->getPlannedCount(*k->first)==0)
+            if (k->first == UnitTypes::Zerg_Larva) continue;
+            if (this->getPlannedCount(k->first)==0)
             {
-              this->build(1,*k->first,l->first);
+              this->build(1,k->first,l->first);
             }
           }
           //also check to see if we have enough gas, or a refinery planned
@@ -684,7 +684,7 @@ void BuildOrderManager::updatePlan()
           {
             if (j->first!=UnitTypes::Zerg_Larva && j->first!=UnitTypes::Zerg_Egg && j->first!=UnitTypes::Zerg_Lurker_Egg && j->first!=UnitTypes::Zerg_Cocoon)
             {
-              UnitType refinery=*Broodwar->self()->getRace().getRefinery();
+              UnitType refinery=Broodwar->self()->getRace().getRefinery();
               if (this->getPlannedCount(refinery)==0)
               {
                 this->build(1,refinery,l->first);
@@ -714,9 +714,9 @@ void BuildOrderManager::build(int count, BWAPI::UnitType t, int priority, BWAPI:
   if (t == BWAPI::UnitTypes::None || t == BWAPI::UnitTypes::Unknown) return;
   if (seedPosition == BWAPI::TilePositions::None || seedPosition == BWAPI::TilePositions::Unknown)
     seedPosition=BWAPI::Broodwar->self()->getStartLocation();
-  if (items[priority].units[*t.whatBuilds().first].find(t)==items[priority].units[*t.whatBuilds().first].end())
-    items[priority].units[*t.whatBuilds().first].insert(make_pair(t,UnitItem(t)));
-  items[priority].units[*t.whatBuilds().first][t].setNonAdditional(count,seedPosition);
+  if (items[priority].units[t.whatBuilds().first].find(t)==items[priority].units[t.whatBuilds().first].end())
+    items[priority].units[t.whatBuilds().first].insert(make_pair(t,UnitItem(t)));
+  items[priority].units[t.whatBuilds().first][t].setNonAdditional(count,seedPosition);
   nextUpdateFrame=0;
 }
 
@@ -726,9 +726,9 @@ void BuildOrderManager::buildAdditional(int count, BWAPI::UnitType t, int priori
   if (seedPosition == BWAPI::TilePositions::None || seedPosition == BWAPI::TilePositions::Unknown)
     seedPosition=BWAPI::Broodwar->self()->getStartLocation();
 
-  if (items[priority].units[*t.whatBuilds().first].find(t)==items[priority].units[*t.whatBuilds().first].end())
-    items[priority].units[*t.whatBuilds().first].insert(make_pair(t,UnitItem(t)));
-  items[priority].units[*t.whatBuilds().first][t].addAdditional(count,seedPosition);
+  if (items[priority].units[t.whatBuilds().first].find(t)==items[priority].units[t.whatBuilds().first].end())
+    items[priority].units[t.whatBuilds().first].insert(make_pair(t,UnitItem(t)));
+  items[priority].units[t.whatBuilds().first][t].addAdditional(count,seedPosition);
   nextUpdateFrame=0;
 }
 
@@ -832,7 +832,7 @@ void BuildOrderManager::spendResources(BWAPI::UpgradeType t)
 int BuildOrderManager::getPlannedCount(BWAPI::UnitType t)
 {
   //builder unit type
-  UnitType builder=*t.whatBuilds().first;
+  UnitType builder=t.whatBuilds().first;
 
   int c=this->buildManager->getPlannedCount(t);
 

@@ -31,7 +31,7 @@ void ConstructionManager::onOffer(std::set<BWAPI::Unit*> units)
       for(std::set<BWAPI::Unit*>::iterator u = units.begin(); u != units.end(); u++)
       {
         //only consider this builder if it can build this type of building
-        if (*((*b)->type.whatBuilds().first)==(*u)->getType() && (!(*b)->type.isAddon() || (*u)->getAddon()==NULL))
+        if (((*b)->type.whatBuilds().first)==(*u)->getType() && (!(*b)->type.isAddon() || (*u)->getAddon()==NULL))
         {
           double dist = (*u)->getPosition().getDistance((*b)->position);
           if (dist < min_dist)
@@ -62,7 +62,7 @@ void ConstructionManager::onOffer(std::set<BWAPI::Unit*> units)
           if (builder->isLifted())
           {
             if (!this->placer->canBuildHereWithSpace((*b)->tilePosition,(*b)->type))
-              (*b)->tilePosition=placer->getBuildLocationNear((*b)->tilePosition,*(*b)->type.whatBuilds().first);
+              (*b)->tilePosition=placer->getBuildLocationNear((*b)->tilePosition,(*b)->type.whatBuilds().first);
           }
           else
           {
@@ -74,7 +74,7 @@ void ConstructionManager::onOffer(std::set<BWAPI::Unit*> units)
             if (!buildable)
             {
               this->placer->freeTiles((*b)->tilePosition, 4,3);
-              (*b)->tilePosition=placer->getBuildLocationNear((*b)->tilePosition,*(*b)->type.whatBuilds().first);
+              (*b)->tilePosition=placer->getBuildLocationNear((*b)->tilePosition,(*b)->type.whatBuilds().first);
             }
           }
           this->placer->reserveTiles((*b)->tilePosition, 4,3);
@@ -180,7 +180,7 @@ void ConstructionManager::update()
         if (BWAPI::Broodwar->canMake(NULL,b->type))
         {
           if (u == NULL) //if we don't have a builder, ask for one and wait for it to be offered
-            buildingsNeedingBuilders[*b->type.whatBuilds().first].insert(b);
+            buildingsNeedingBuilders[b->type.whatBuilds().first].insert(b);
           else
           {
             if (u->getAddon() == NULL) //if the addon does not exist yet
@@ -193,7 +193,7 @@ void ConstructionManager::update()
                   {
                     this->placer->freeTiles(b->tilePosition, 4,3);
                     this->placer->freeTiles(b->tilePosition+BWAPI::TilePosition(4,1), 2,2);
-                    b->tilePosition=placer->getBuildLocationNear(b->tilePosition,*b->type.whatBuilds().first);
+                    b->tilePosition=placer->getBuildLocationNear(b->tilePosition,b->type.whatBuilds().first);
                     this->placer->reserveTiles(b->tilePosition, 4,3);
                     this->placer->reserveTiles(b->tilePosition+BWAPI::TilePosition(4,1), 2,2);
                   }
@@ -306,7 +306,7 @@ void ConstructionManager::update()
         if (s == NULL) //if the building doesn't even exist
         {
           if (u == NULL) //ask for a builder if we don't have one yet
-            buildingsNeedingBuilders[*b->type.whatBuilds().first].insert(b);
+            buildingsNeedingBuilders[b->type.whatBuilds().first].insert(b);
           else //if we have a worker
           {
             if (!u->isConstructing()) //if the worker isn't constructing
@@ -345,7 +345,7 @@ void ConstructionManager::update()
           {
             //if the buildind is terran, the worker may have been killed
             if (u == NULL) //looks like the worker was killed, or revoked. In either case we need to ask for another worker to finish our building
-              buildingsNeedingBuilders[*b->type.whatBuilds().first].insert(b);
+              buildingsNeedingBuilders[b->type.whatBuilds().first].insert(b);
             else
             {
               //we have a worker, so lets rightClick it on the incomplete building so it can resume construction

@@ -199,7 +199,7 @@ void WorkerManager::rebalanceWorkers()
   updateWorkerAssignments();
   if (this->autoBuild)
   {
-    BWAPI::UnitType workerType=*BWAPI::Broodwar->self()->getRace().getWorker();
+    BWAPI::UnitType workerType=BWAPI::Broodwar->self()->getRace().getWorker();
     if (this->buildOrderManager->getPlannedCount(workerType)<optimalWorkerCount)
     {
       this->buildOrderManager->build(optimalWorkerCount,workerType,this->autoBuildPriority);

@@ -104,7 +104,7 @@ void TechManager::onRemoveUnit(BWAPI::Unit* unit)
   {
     BWAPI::TechType type=r->second;
     if (!BWAPI::Broodwar->self()->hasResearched(type))
-      researchQueues[*type.whatResearches()].push_front(type);
+      researchQueues[type.whatResearches()].push_front(type);
     researchingUnits.erase(r);
   }
 }
@@ -112,7 +112,7 @@ void TechManager::onRemoveUnit(BWAPI::Unit* unit)
 bool TechManager::research(BWAPI::TechType type)
 {
   //research order starts here
-  researchQueues[*type.whatResearches()].push_back(type); //add this tech to the end of the research queue
+  researchQueues[type.whatResearches()].push_back(type); //add this tech to the end of the research queue
   plannedTech.insert(type); //add this tech to our set of planned tech
   return true;
 }

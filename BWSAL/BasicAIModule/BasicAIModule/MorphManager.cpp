@@ -19,7 +19,7 @@ bool MorphManager::canMake(BWAPI::Unit* builder, BWAPI::UnitType type)
       return false;
 
     /* Check if this unit can actually build the unit type */
-    if (builder->getType() != *(type.whatBuilds().first))
+    if (builder->getType() != (type.whatBuilds().first))
       return false;
 
     /* Carrier space */
@@ -43,31 +43,31 @@ bool MorphManager::canMake(BWAPI::Unit* builder, BWAPI::UnitType type)
   }
 
   BWAPI::UnitType addon = BWAPI::UnitTypes::None;
-  for(std::map<const BWAPI::UnitType*, int>::const_iterator i = type.requiredUnits().begin(); i != type.requiredUnits().end(); i++)
-    if (i->first->isAddon())
-      addon=*i->first;
+  for(std::map<BWAPI::UnitType, int>::const_iterator i = type.requiredUnits().begin(); i != type.requiredUnits().end(); i++)
+    if (i->first.isAddon())
+      addon=i->first;
 
-  for(std::map<const BWAPI::UnitType*, int>::const_iterator i = type.requiredUnits().begin(); i != type.requiredUnits().end(); i++)
+  for(std::map<BWAPI::UnitType, int>::const_iterator i = type.requiredUnits().begin(); i != type.requiredUnits().end(); i++)
   {
     bool pass = false;
-    if (BWAPI::Broodwar->self()->completedUnitCount(*(i->first)) >= i->second)
+    if (BWAPI::Broodwar->self()->completedUnitCount(i->first) >= i->second)
       pass = true;
-    if (*i->first == BWAPI::UnitTypes::Zerg_Hatchery)
+    if (i->first == BWAPI::UnitTypes::Zerg_Hatchery)
     {
       if (BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Zerg_Lair) >= i->second)
         pass = true;
       if (BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Zerg_Hive) >= i->second)
         pass = true;
     }
-    if (*i->first == BWAPI::UnitTypes::Zerg_Lair)
+    if (i->first == BWAPI::UnitTypes::Zerg_Lair)
       if (BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Zerg_Hive) >= i->second)
         pass = true;
     if (pass == false)
       return false;
   }
 
-  if (*type.requiredTech() != BWAPI::TechTypes::None)
-    if (!BWAPI::Broodwar->self()->hasResearched(*(type.requiredTech())))
+  if (type.requiredTech() != BWAPI::TechTypes::None)
+    if (!BWAPI::Broodwar->self()->hasResearched((type.requiredTech())))
       return false;
 
   if (builder != NULL)
@@ -127,7 +127,7 @@ void MorphManager::onRevoke(BWAPI::Unit* unit, double bid)
   {
     BWAPI::UnitType type=m->second.type;
     if (m->first->getType()!=type || m->first->isMorphing())
-      morphQueues[*type.whatBuilds().first].push_front(type);
+      morphQueues[type.whatBuilds().first].push_front(type);
     morphingUnits.erase(m);
   }
 }
@@ -189,7 +189,7 @@ void MorphManager::onRemoveUnit(BWAPI::Unit* unit)
   if (m!=morphingUnits.end())
   {
     BWAPI::UnitType type=m->second.type;
-    morphQueues[*type.whatBuilds().first].push_front(type);
+    morphQueues[type.whatBuilds().first].push_front(type);
     morphingUnits.erase(m);
   }
 }
@@ -203,9 +203,9 @@ bool MorphManager::morph(BWAPI::UnitType type)
 
   //fix: we should check to make sure the type is not an addon
 
-  if (type.isBuilding()!=type.whatBuilds().first->isBuilding()) 
+  if (type.isBuilding()!=type.whatBuilds().first.isBuilding()) 
     return false;
-  morphQueues[*type.whatBuilds().first].push_back(type);
+  morphQueues[type.whatBuilds().first].push_back(type);
   plannedCount[type]++;
   return true;
 }

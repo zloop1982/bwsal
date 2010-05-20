@@ -23,7 +23,7 @@ void SupplyManager::update()
     int productionCapacity       = 0;
     lastFrameCheck               = BWAPI::Broodwar->getFrameCount();
     std::set<BWAPI::Unit*> units = BWAPI::Broodwar->self()->getUnits();
-    int supplyBuildTime = BWAPI::Broodwar->self()->getRace().getSupplyProvider()->buildTime();
+    int supplyBuildTime = BWAPI::Broodwar->self()->getRace().getSupplyProvider().buildTime();
     int time = BWAPI::Broodwar->getFrameCount() + supplyBuildTime*2;
     for(std::set<BuildOrderManager::MetaUnit*>::iterator i = this->buildOrderManager->MetaUnitPointers.begin(); i != this->buildOrderManager->MetaUnitPointers.end(); i++)
     {
@@ -43,7 +43,7 @@ void SupplyManager::update()
     }
     if (getPlannedSupply() <= BWAPI::Broodwar->self()->supplyUsed() + productionCapacity)
     {
-      this->buildOrderManager->buildAdditional(1,*BWAPI::Broodwar->self()->getRace().getSupplyProvider(),1000);
+      this->buildOrderManager->buildAdditional(1,BWAPI::Broodwar->self()->getRace().getSupplyProvider(),1000);
     }
   }
 }

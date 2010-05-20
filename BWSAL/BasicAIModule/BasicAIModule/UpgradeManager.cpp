@@ -123,7 +123,7 @@ void UpgradeManager::onRemoveUnit(BWAPI::Unit* unit)
   {
     Upgrade type=r->second;
     if (BWAPI::Broodwar->self()->getUpgradeLevel(type.type)<type.level)
-      upgradeQueues[*type.type.whatUpgrades()].push_front(type);
+      upgradeQueues[type.type.whatUpgrades()].push_front(type);
     upgradingUnits.erase(r);
   }
 }
@@ -136,7 +136,7 @@ bool UpgradeManager::upgrade(BWAPI::UpgradeType type, int level)
   Upgrade newUpgrade;
   newUpgrade.type=type;
   newUpgrade.level=level;
-  upgradeQueues[*type.whatUpgrades()].push_back(newUpgrade);
+  upgradeQueues[type.whatUpgrades()].push_back(newUpgrade);
   plannedLevel[type]=level;
   return true;
 }

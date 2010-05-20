@@ -96,7 +96,7 @@ void BaseManager::expand(BWTA::BaseLocation* location, int priority)
   if (location==NULL)
     return;
   addBase(location);
-  this->builder->buildAdditional(1,*BWAPI::Broodwar->self()->getRace().getCenter(),priority,location->getTilePosition());
+  this->builder->buildAdditional(1,BWAPI::Broodwar->self()->getRace().getCenter(),priority,location->getTilePosition());
 }
 
 
