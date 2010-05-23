@@ -141,7 +141,7 @@ void WorkerManager::rebalanceWorkers()
   currentWorkers.clear();
   resourceBase.clear();
   int remainingWorkers = this->workers.size();
-  int optimalWorkerCount = 0;
+  optimalWorkerCount = 0;
   
   // iterate over all the resources of each active base
   for(set<Base*>::iterator b = this->basesCache.begin(); b != this->basesCache.end(); b++)
@@ -314,6 +314,10 @@ double WorkerManager::getMineralRate() const
 double WorkerManager::getGasRate() const
 {
   return this->gasRate;
+}
+int WorkerManager::getOptimalWorkerCount() const
+{
+  return this->optimalWorkerCount;
 }
 void WorkerManager::enableAutoBuild()
 {
