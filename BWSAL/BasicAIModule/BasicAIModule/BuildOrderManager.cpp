@@ -124,7 +124,7 @@ int BuildOrderManager::nextFreeTime(const MetaUnit* unit, UnitType t)
       return -1;
     if (ntime>time)
       time=ntime;
-    if (i->first.isAddon() && !unit->hasAddon())
+    if (i->first.isAddon() && i->first.whatBuilds().first==unit->getType() && !unit->hasAddon())
       return -1;
   }
   return time;
