@@ -27,6 +27,7 @@ class WorkerManager : public Arbitrator::Controller<BWAPI::Unit*,double>
     void setWorkersPerGas(int count);
     double getMineralRate() const;
     double getGasRate() const;
+    int getOptimalWorkerCount() const;
     void enableAutoBuild();
     void disableAutoBuild();
     void setAutoBuildPriority(int priority);
@@ -51,4 +52,5 @@ class WorkerManager : public Arbitrator::Controller<BWAPI::Unit*,double>
     double gasRate;
     bool autoBuild;
     int autoBuildPriority;
+    int optimalWorkerCount;
 };
