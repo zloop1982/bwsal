@@ -313,10 +313,7 @@ void ConstructionManager::update()
             {
               double distance = u->getPosition().getDistance(b->position);
               if (distance > 100) //if its too far away, tell it to go to the build site
-              {
-                if(u->getHitPoints() > 0)//check unit wasnt destroyed enroute
                   u->rightClick(b->position);
-              }
               else //if its close enough, tell it to build
                 if (BWAPI::Broodwar->canBuildHere(u, b->tilePosition, b->type)) //if we can build here, tell the worker to build
                 {
