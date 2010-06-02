@@ -167,6 +167,10 @@ void WorkerManager::rebalanceWorkers()
       optimalWorkerCount+=3;
       resourceBase[*g] = *b;
       desiredWorkerCount[*g]=0;
+
+      if(remainingWorkers < 4)//always save some workers for minerals
+        continue;
+
       if ((*g)->getType().isRefinery() && (*g)->getPlayer()==Broodwar->self() && (*g)->isCompleted())
       {
         for(int w=0;w<this->WorkersPerGas && remainingWorkers>0;w++)
