@@ -6,6 +6,7 @@ BaseManager::BaseManager()
   this->builder = NULL;
   this->RefineryCurrent = 0;
   this->RefineryNeeded  = 1;
+  this->refineryBuildPriority = 0;
 }
 void BaseManager::setBuildOrderManager(BuildOrderManager* builder)
 {
@@ -117,7 +118,7 @@ void BaseManager::updateRefineries()
         BWTA::BaseLocation* location = (*b)->getBaseLocation();
         if (!this->hasRefinery(location))
         {
-           this->builder->buildAdditional(1,BWAPI::Broodwar->self()->getRace().getRefinery(),100,(*b)->getBaseLocation()->getTilePosition());
+           this->builder->buildAdditional(1,BWAPI::Broodwar->self()->getRace().getRefinery(),refineryBuildPriority,(*b)->getBaseLocation()->getTilePosition());
            this->RefineryCurrent+=1;  
            break;
         }
@@ -138,6 +139,16 @@ bool BaseManager::isRefineryNeeded()
 void BaseManager::incrementRefineryCurrent()
 {
   this->RefineryCurrent += 1;
+}
+
+void BaseManager::setRefineryBuildPriority(int priority)
+{
+  this->refineryBuildPriority = priority;
+}
+
+int BaseManager::getRefineryBuildPriority()
+{
+  return this->refineryBuildPriority;
 }
 
 void BaseManager::addBase(BWTA::BaseLocation* location)
