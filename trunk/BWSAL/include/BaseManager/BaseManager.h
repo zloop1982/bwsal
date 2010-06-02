@@ -25,6 +25,7 @@ class BaseManager
 
   private:
   void addBase(BWTA::BaseLocation* location);
+  void removeBase(BWTA::BaseLocation* location);
   BuildOrderManager* builder;
   BorderManager* borderManager;
   std::map<BWTA::BaseLocation*,Base*> location2base;
