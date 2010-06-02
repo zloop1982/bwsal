@@ -1,6 +1,5 @@
 #include <BuildOrderManager.h>
 #include <BuildManager.h>
-#include <BaseManager.h>
 #include <TechManager.h>
 #include <UpgradeManager.h>
 #include <WorkerManager.h>
@@ -18,11 +17,10 @@ map<BWAPI::UnitType, set<BWAPI::UnitType> > makes;
 map<BWAPI::UnitType, set<BWAPI::TechType> > researches;
 map<BWAPI::UnitType, set<BWAPI::UpgradeType> > upgrades;
 BuildOrderManager* buildOrderManager;
-BuildOrderManager::BuildOrderManager(BuildManager* buildManager, BaseManager* baseManager,  TechManager* techManager, UpgradeManager* upgradeManager, WorkerManager* workerManager, SupplyManager* supplyManager)
+BuildOrderManager::BuildOrderManager(BuildManager* buildManager, TechManager* techManager, UpgradeManager* upgradeManager, WorkerManager* workerManager, SupplyManager* supplyManager)
 {
   buildOrderManager  = this;
   this->buildManager       = buildManager;
-  this->baseManager        = baseManager;
   this->techManager        = techManager;
   this->upgradeManager     = upgradeManager;
   this->workerManager      = workerManager;
@@ -569,10 +567,7 @@ void BuildOrderManager::updatePlan()
           {
             UnitType refinery=Broodwar->self()->getRace().getRefinery();
             if (this->getPlannedCount(refinery)==0)
-            {
               this->build(1,refinery,l->first);
-              this->baseManager->incrementRefineryCurrent();
-            }
           }
         }
         else if (u!=UpgradeTypes::None)
@@ -584,10 +579,7 @@ void BuildOrderManager::updatePlan()
           {
             UnitType refinery=Broodwar->self()->getRace().getRefinery();
             if (this->getPlannedCount(refinery)==0)
-            {
               this->build(1,refinery,l->first);
-              this->baseManager->incrementRefineryCurrent();
-            }
           }
           if (i->level>1)
           {
@@ -694,10 +686,7 @@ void BuildOrderManager::updatePlan()
             {
               UnitType refinery=Broodwar->self()->getRace().getRefinery();
               if (this->getPlannedCount(refinery)==0)
-              {
                 this->build(1,refinery,l->first);
-                this->baseManager->incrementRefineryCurrent();
-              }
             }
           }
         }

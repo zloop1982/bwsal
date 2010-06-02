@@ -27,7 +27,6 @@ class BaseManager
 
   bool hasRefinery(BWTA::BaseLocation* location);
   bool isRefineryNeeded();
-  void incrementRefineryCurrent();
   void setRefineryBuildPriority(int priority);
   int  getRefineryBuildPriority();
 
@@ -39,6 +38,5 @@ class BaseManager
   std::map<BWTA::BaseLocation*,Base*> location2base;
   std::set<Base*> allBases;
   int RefineryNeeded;
-  int RefineryCurrent;
   int refineryBuildPriority;
 };
