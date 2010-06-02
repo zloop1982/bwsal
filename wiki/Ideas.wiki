@@ -64,7 +64,7 @@ Compute expected average damage the enemy can inflict per frame on each tile. Up
 
 = Risk Adverse Path Planner =
 
-Given set of fixed-location enemy units, start location A, goal location B, Plan path from A to B using A*. Give extra cost to tiles in range of enemy units based on data from the Expected Damage Calculator.
+Given set of fixed-location enemy units, start location A, goal location B, Plan path from A to B using A{{{*}}}. Give extra cost to tiles in range of enemy units based on data from the Expected Damage Calculator.
 
 = Other Ideas =
 
