@@ -29,22 +29,26 @@ The Scout Manager does not determine how important each of these tasks are, or h
 
 = Evasion Tool =
 
+Primary usage: To be used by scouting manager to keep scouting unit(s) alive.
+
 Inputs: Friendly unit to control, set of enemy units to evade.
 
 To keep the initial implementation simple, we can assume enemy units all move at the same speed and move at the speed of the friendly unit.
 
-Output: Set of tile positions which, any of which will let the unit survive as long as possible, assuming perfect chase behavior by enemy units.
+Output: Set of tile positions, any of which will let the unit survive as long as possible, assuming perfect chase behavior by enemy units. AI can then pick which tile to order the evading unit to move to.
 
 Algorithm:
-2 simultaneous breadth-first searches - 1 starting from friendly unit (call it BFS1) and 1 starting from all enemy units (call it BFS2) (just insert the tile position of each enemy unit into heap). Expand each BFS at same movement speed so tiles X units from friendly unit in BFS1 are considered at the same time as tiles X units from enemy units in BFS2.
+Two simultaneous breadth-first searches - one starting from friendly unit (call this search BFS1) and one starting from all enemy units (call it BFS2) (just insert the tile position of each enemy unit into heap). Expand each BFS at same movement speed so tiles X tiles from friendly unit in BFS1 are considered at the same time as tiles X tiles from enemy units in BFS2.
 
-If a tile in BFS1 has already been reached by BFS2, don't expand it (handle it as an unwalkable tile or something).
+If a tile in BFS1 has already been reached by BFS2, don't expand it (handle it as an unwalkable tile or something). This tile can be reached by the enemy first so the evading unit cannot consider it as a possibility.
 
 Let A = Tiles reached by BFS1. Let B = tiles reached by BFS2. Once A - B = 0, backstep 1 iteration to consider the last tiles reached by BFS1 but not BFS2.
 
 Return this set of tiles.
 
 = Chase Tool =
+
+Primary usage: For killing enemy scouting units.
 
 Inputs: Friendly units to control, enemy unit to chase.
 
@@ -55,14 +59,20 @@ Output: A tile position for each friendly unit that is adjacent to the unit's cu
 Algorithm:
 Not sure how best to approach this problem. 1 possible solution is to consider all possible adjacent tiles for each friendly unit (9^n cases), and run the evasion algorithm for each case, then pick the case that results in the minimum life-span of enemy unit.
 
+= Expected Damage Calculator =
+Compute expected average damage the enemy can inflict per frame on each tile. Update incrementally so the game doesn't slot to a crawl.
+
+= Risk Adverse Path Planner =
+
+Given set of fixed-location enemy units, start location A, goal location B, Plan path from A to B using A*. Give extra cost to tiles in range of enemy units based on data from the Expected Damage Calculator.
+
 = Other Ideas =
 
   * Improve the Supply Manager so it uses a more precise algorithm (currently just uses a simple heuristic)
   * Attack Manager - attack stuff, maybe break down into smaller managers
   * Contain Manager - contains the enemy with siege tanks, lurkers, etc.
   * Repair Manager - repair units that are damaged
-  * Threat Assessment Manager - influence maps. Determine which tiles are dangerous and how much. Also assign a priority to units that are attacking our base.
-  * Risk Adverse Path Manager - moves units to their destination using the safest path (recalculate paths when new threats are discovered i.e. Missile Turrets)
+  * Threat Assessment Manager - Assign a priority to units that are attacking our base.
   * Transport Manager - transports units to a given position, perhaps with a priority, using the risk adverse path planner to find safest paths
 
   * Add a function to the building placer which takes a choke point and list of building unit types (possibly with repetitions) and returns a list of unit type - build position pairs that can be used to block off the choke point.
