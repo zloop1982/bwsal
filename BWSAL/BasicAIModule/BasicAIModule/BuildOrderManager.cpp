@@ -868,6 +868,38 @@ int BuildOrderManager::getPlannedCount(BWAPI::UnitType t)
   return c;
 }
 
+//returns the BuildOrderManager's planned count of units for this type
+int BuildOrderManager::getPlannedCount(BWAPI::UnitType t, int minPriority)
+{
+  //builder unit type
+  UnitType builder=t.whatBuilds().first;
+
+  int c=this->buildManager->getPlannedCount(t);
+
+  //sum all the remaining units for every priority level
+  for(map<int, PriorityLevel>::iterator p=items.begin();p!=items.end();p++)
+  {
+    if (p->first<minPriority) continue; //don't consider planned units below min priority
+    map<BWAPI::UnitType, map<BWAPI::UnitType, UnitItem > >* units=&(p->second.units);
+    map<BWAPI::UnitType, map<BWAPI::UnitType, UnitItem > >::iterator i=units->find(builder);
+
+    if (i!=units->end())
+    {
+      map<BWAPI::UnitType, UnitItem >* units2=&(i->second);
+      map<BWAPI::UnitType, UnitItem >::iterator j=units2->find(t);
+      if (j!=units2->end())
+      {
+        c+=j->second.getRemainingCount(c);
+      }
+    }
+  }
+  if (t==UnitTypes::Zerg_Hatchery)
+    c+=this->getPlannedCount(UnitTypes::Zerg_Lair);
+  if (t==UnitTypes::Zerg_Lair)
+    c+=this->getPlannedCount(UnitTypes::Zerg_Hive);
+  return c;
+}
+
 //reserves resources for this unit type
 pair<int, BuildOrderManager::Resources> BuildOrderManager::reserveResources(MetaUnit* builder, UnitType unitType)
 {

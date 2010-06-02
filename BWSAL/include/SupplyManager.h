@@ -13,7 +13,9 @@ class SupplyManager
     std::string getName() const;
     int getPlannedSupply() const;
     int getSupplyTime(int supplyCount) const;
+    void setSeedPosition(BWAPI::TilePosition p);
     BuildManager* buildManager;
     BuildOrderManager* buildOrderManager;
     int lastFrameCheck;
+    BWAPI::TilePosition seedPosition;
 };
