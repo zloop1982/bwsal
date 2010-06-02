@@ -63,6 +63,13 @@ void BaseManager::addBase(BWTA::BaseLocation* location)
   this->location2base[location] = newBase;
   this->borderManager->addMyBase(location);
 }
+void BaseManager::removeBase(BWTA::BaseLocation* location)
+{
+  std::map<BWTA::BaseLocation*,Base*>::iterator removebase;
+
+  removebase = this->location2base.find(location);
+  this->location2base.erase(removebase);
+}
 Base* BaseManager::getBase(BWTA::BaseLocation* location)
 {
   std::map<BWTA::BaseLocation*,Base*>::iterator i=location2base.find(location);
@@ -128,6 +135,8 @@ void BaseManager::onRemoveUnit(BWAPI::Unit* unit)
       if (unit->isCompleted())
       {
         this->borderManager->removeMyBase((*b)->getBaseLocation());
+        BWTA::BaseLocation* blocation  = (*b)->getBaseLocation();
+        removeBase(blocation);
         allBases.erase(b);
       }
       else
