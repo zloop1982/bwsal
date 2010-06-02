@@ -301,7 +301,6 @@ class UnitGroup : public std::set<BWAPI::Unit*>
     UnitGroup operator*(const UnitGroup& other) const;//intersection
     UnitGroup operator^(const UnitGroup& other) const;//symmetric difference
     UnitGroup operator-(const UnitGroup& other) const;//difference
-    BWAPI::Position getCenter() const;
     UnitGroup inRadius(double radius,BWAPI::Position position) const;
     UnitGroup inRegion(BWTA::Region* region) const;
     UnitGroup onlyNearestChokepoint(BWTA::Chokepoint* choke) const;
@@ -338,6 +337,14 @@ class UnitGroup : public std::set<BWAPI::Unit*>
     UnitGroup not(FilterAttributeOrder a, BWAPI::Order type) const;
     UnitGroup not(FilterAttributePosition a, BWAPI::Position position) const;
     UnitGroup not(FilterAttributeTilePosition a, BWAPI::TilePosition position) const;
+
+    UnitGroup& operator+=(const UnitGroup& other);//union
+    UnitGroup& operator*=(const UnitGroup& other);//intersection
+    UnitGroup& operator^=(const UnitGroup& other);//symmetric difference
+    UnitGroup& operator-=(const UnitGroup& other);//difference
+    BWAPI::Unit* getNearest(BWAPI::Position position) const;
+    bool contains(BWAPI::Unit* u) const;
+    BWAPI::Position getCenter() const;
 
     bool attackMove(BWAPI::Position position) const;
     bool attackUnit(BWAPI::Unit* target) const;

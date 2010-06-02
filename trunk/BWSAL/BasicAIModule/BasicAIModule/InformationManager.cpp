@@ -33,11 +33,8 @@ void InformationManager::onUnitHide(BWAPI::Unit* unit)
 }
 void InformationManager::onUnitDestroy(BWAPI::Unit* unit)
 {
+  this->onUnitHide(unit);
   savedData[unit].exists=false;
-  savedData[unit].player=unit->getPlayer();
-  savedData[unit].type=unit->getType();
-  savedData[unit].position=unit->getPosition();
-  savedData[unit].lastSeenTime=BWAPI::Broodwar->getFrameCount();
   if (!BWAPI::Broodwar->self()->isEnemy(unit->getPlayer())) return;
   if (unit->getType().isResourceDepot())
   {

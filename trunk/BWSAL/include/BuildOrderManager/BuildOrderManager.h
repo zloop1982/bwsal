@@ -80,6 +80,7 @@ class BuildOrderManager
     void spendResources(BWAPI::UpgradeType t);
 
     int getPlannedCount(BWAPI::UnitType t);
+    int getPlannedCount(BWAPI::UnitType t, int minPriority);
     void enableDependencyResolver();
     void setDebugMode(bool debugMode);
     std::set<BWAPI::UnitType> unitsCanMake(MetaUnit* builder, int time);
