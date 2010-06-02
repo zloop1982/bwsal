@@ -27,6 +27,34 @@ The first two tasks usually occur at specific points in time (i.e. scout on fram
 
 The Scout Manager does not determine how important each of these tasks are, or how much units to use. Rather the AI tells the scout manager this information. The role of the scout manager is to scout based on the importance levels (i.e. find the best way to enter and scout the enemy base, given the units it has).
 
+= Evasion Tool =
+
+Inputs: Friendly unit to control, set of enemy units to evade.
+
+To keep the initial implementation simple, we can assume enemy units all move at the same speed and move at the speed of the friendly unit.
+
+Output: Set of tile positions which, any of which will let the unit survive as long as possible, assuming perfect chase behavior by enemy units.
+
+Algorithm:
+2 simultaneous breadth-first searches - 1 starting from friendly unit (call it BFS1) and 1 starting from all enemy units (call it BFS2) (just insert the tile position of each enemy unit into heap). Expand each BFS at same movement speed so tiles X units from friendly unit in BFS1 are considered at the same time as tiles X units from enemy units in BFS2.
+
+If a tile in BFS1 has already been reached by BFS2, don't expand it (handle it as an unwalkable tile or something).
+
+Let A = Tiles reached by BFS1. Let B = tiles reached by BFS2. Once A - B = 0, backstep 1 iteration to consider the last tiles reached by BFS1 but not BFS2.
+
+Return this set of tiles.
+
+= Chase Tool =
+
+Inputs: Friendly units to control, enemy unit to chase.
+
+To keep the initial implementation simple, we can assume all friendly units all move at the same speed and move at the speed of the enemy unit.
+
+Output: A tile position for each friendly unit that is adjacent to the unit's current location which will move units in correct direction for chase/containment of enemy unit.
+
+Algorithm:
+Not sure how best to approach this problem. 1 possible solution is to consider all possible adjacent tiles for each friendly unit (9^n cases), and run the evasion algorithm for each case, then pick the case that results in the minimum life-span of enemy unit.
+
 = Other Ideas =
 
   * Improve the Supply Manager so it uses a more precise algorithm (currently just uses a simple heuristic)
