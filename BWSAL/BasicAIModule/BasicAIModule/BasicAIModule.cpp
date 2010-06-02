@@ -20,7 +20,7 @@ void BasicAIModule::onStart()
   this->workerManager      = new WorkerManager(&this->arbitrator);
   this->supplyManager      = new SupplyManager();
   this->baseManager        = new BaseManager();
-  this->buildOrderManager  = new BuildOrderManager(this->buildManager,this->baseManager,this->techManager,this->upgradeManager,this->workerManager,this->supplyManager);
+  this->buildOrderManager  = new BuildOrderManager(this->buildManager,this->techManager,this->upgradeManager,this->workerManager,this->supplyManager);
   this->defenseManager     = new DefenseManager(&this->arbitrator);
   this->informationManager = new InformationManager();
   this->borderManager      = new BorderManager();

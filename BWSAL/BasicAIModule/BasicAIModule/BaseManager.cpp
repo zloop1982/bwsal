@@ -4,7 +4,6 @@
 BaseManager::BaseManager()
 {
   this->builder = NULL;
-  this->RefineryCurrent = 0;
   this->RefineryNeeded  = 1;
   this->refineryBuildPriority = 0;
 }
@@ -119,7 +118,6 @@ void BaseManager::updateRefineries()
         if (!this->hasRefinery(location))
         {
            this->builder->buildAdditional(1,BWAPI::Broodwar->self()->getRace().getRefinery(),refineryBuildPriority,(*b)->getBaseLocation()->getTilePosition());
-           this->RefineryCurrent+=1;  
            break;
         }
       }
@@ -130,15 +128,7 @@ void BaseManager::updateRefineries()
 
 bool BaseManager::isRefineryNeeded()
 {
-  if ((this->RefineryNeeded > this->RefineryCurrent))
-    return true;
-  else
-    return false;
-}
-
-void BaseManager::incrementRefineryCurrent()
-{
-  this->RefineryCurrent += 1;
+  return (this->RefineryNeeded > this->builder->getPlannedCount(BWAPI::Broodwar->self()->getRace().getRefinery()));
 }
 
 void BaseManager::setRefineryBuildPriority(int priority)
@@ -205,10 +195,7 @@ void BaseManager::expand(BWTA::BaseLocation* location, int priority)
     this->RefineryNeeded+=1;
 
     if (!(this->hasRefinery(location)))
-    {
       this->builder->buildAdditional(1,BWAPI::Broodwar->self()->getRace().getRefinery(),priority,location->getTilePosition());
-      this->RefineryCurrent+=1;    
-    }
   }
 }
 
@@ -267,7 +254,6 @@ void BaseManager::onRemoveUnit(BWAPI::Unit* unit)
     {
       (*b)->setRefinery(NULL);
       (*b)->setActiveGas(false);
-      this->RefineryCurrent -= 1;
       break;
     }
   }
