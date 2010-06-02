@@ -60,7 +60,7 @@ Algorithm:
 Not sure how best to approach this problem. 1 possible solution is to consider all possible adjacent tiles for each friendly unit (9^n cases), and run the evasion algorithm for each case, then pick the case that results in the minimum life-span of enemy unit.
 
 = Expected Damage Calculator =
-Compute expected average damage the enemy can inflict per frame on each tile. Update incrementally so the game doesn't slot to a crawl.
+Compute expected average damage the enemy can inflict per frame on each tile. Update incrementally so the game doesn't slow to a crawl.
 
 = Risk Adverse Path Planner =
 
