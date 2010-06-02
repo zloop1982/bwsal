@@ -4,6 +4,7 @@
 #include "UnitItem.h"
 #include "TechItem.h"
 class BuildManager;
+class BaseManager;
 class TechManager;
 class UpgradeManager;
 class WorkerManager;
@@ -64,7 +65,7 @@ class BuildOrderManager
       int time;
     };
 
-    BuildOrderManager(BuildManager* buildManager, TechManager* techManager, UpgradeManager* upgradeManager, WorkerManager* workerManager, SupplyManager* supplyManager);
+    BuildOrderManager(BuildManager* buildManager, BaseManager* baseManager, TechManager* techManager, UpgradeManager* upgradeManager, WorkerManager* workerManager, SupplyManager* supplyManager);
     void update();
     std::string getName() const;
     void build(int count, BWAPI::UnitType t, int priority, BWAPI::TilePosition seedPosition=BWAPI::TilePositions::None);
@@ -108,6 +109,7 @@ class BuildOrderManager
     void removeCompletedItems(PriorityLevel* p);
     void debug(const char* text, ...);
     BuildManager* buildManager;
+    BaseManager* baseManager;
     TechManager* techManager;
     UpgradeManager* upgradeManager;
     WorkerManager* workerManager;
