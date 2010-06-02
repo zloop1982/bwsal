@@ -133,6 +133,7 @@ void BasicAIModule::onStart()
   }
   this->workerManager->enableAutoBuild();
   this->workerManager->setAutoBuildPriority(40);
+  this->baseManager->setRefineryBuildPriority(30);
 
 }
 
