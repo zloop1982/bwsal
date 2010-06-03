@@ -1,5 +1,6 @@
 #include <BWAPI/AIModule.h>
-#include <BWAPI/AttackType.h>
+#include <BWAPI/Bullet.h>
+#include <BWAPI/BulletType.h>
 #include <BWAPI/Color.h>
 #include <BWAPI/Constants.h>
 #include <BWAPI/CoordinateType.h>
@@ -11,6 +12,7 @@
 #include <BWAPI/Flag.h>
 #include <BWAPI/Force.h>
 #include <BWAPI/Game.h>
+#include <BWAPI/GameType.h>
 #include <BWAPI/Input.h>
 #include <BWAPI/Latency.h>
 #include <BWAPI/Order.h>
