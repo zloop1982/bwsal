@@ -712,6 +712,11 @@ void BuildOrderManager::build(int count, BWAPI::UnitType t, int priority, BWAPI:
   if (t == BWAPI::UnitTypes::None || t == BWAPI::UnitTypes::Unknown) return;
   if (seedPosition == BWAPI::TilePositions::None || seedPosition == BWAPI::TilePositions::Unknown)
     seedPosition=BWAPI::Broodwar->self()->getStartLocation();
+  if (t==UnitTypes::Protoss_Pylon && this->getPlannedCount(t)==0)
+  {
+    if (!this->buildManager->getBuildingPlacer()->canBuildHereWithSpace(seedPosition, t, 3))
+      seedPosition = this->buildManager->getBuildingPlacer()->getBuildLocationNear(seedPosition, t, 3);
+  }
   if (items[priority].units[t.whatBuilds().first].find(t)==items[priority].units[t.whatBuilds().first].end())
     items[priority].units[t.whatBuilds().first].insert(make_pair(t,UnitItem(t)));
   items[priority].units[t.whatBuilds().first][t].setNonAdditional(count,seedPosition);
