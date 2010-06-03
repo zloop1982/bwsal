@@ -75,7 +75,7 @@ ScoutManager::ScoutManager(Arbitrator::Arbitrator<BWAPI::Unit*,double> *arbitrat
 
   std::list<BWTA::BaseLocation*> path=getBestPath(startLocations).first;
   for(std::list<BWTA::BaseLocation*>::iterator p=path.begin();p!=path.end();p++)
-    positionsToScout.push_back((*p)->getPosition());
+    baseLocationsToScout.push_back(*p);
   this->debugMode=false;
 }
 
@@ -153,6 +153,10 @@ void ScoutManager::update()
     drawAssignments();
   }
 }
+void ScoutManager::setInformationManager(InformationManager* infoManager)
+{
+  this->informationManager = infoManager;
+}
 
 std::string ScoutManager::getName() const
 {
@@ -168,13 +172,13 @@ void ScoutManager::onRemoveUnit(BWAPI::Unit* unit)
 {
   if (scouts.find(unit) != scouts.end())
   {
-    BWAPI::Position lostTarget = scouts[unit].target;
-    if (positionsExplored.find(lostTarget) == positionsExplored.end())
+    BWTA::BaseLocation* lostTarget = scouts[unit].target;
+    if (baseLocationsExplored.find(lostTarget) == baseLocationsExplored.end())
     {
-      positionsToScout.push_back(lostTarget);
+      baseLocationsToScout.push_back(lostTarget);
       if (debugMode)
       {
-        BWAPI::Broodwar->printf("Reassigning (%d,%d)", lostTarget.x(), lostTarget.y());
+        BWAPI::Broodwar->printf("Reassigning (%d,%d)", lostTarget->getPosition().x(), lostTarget->getPosition().y());
       }
     }
     scouts.erase(unit);
@@ -199,7 +203,7 @@ void ScoutManager::drawAssignments()
     if ((*s).second.mode != ScoutData::Idle)
     {
       BWAPI::Position scoutPos = (*s).first->getPosition();
-      BWAPI::Position targetPos = (*s).second.target;
+      BWAPI::Position targetPos = (*s).second.target->getPosition();
       BWAPI::Broodwar->drawLineMap(scoutPos.x(), scoutPos.y(), targetPos.x(), targetPos.y(), BWAPI::Colors::Yellow);
       BWAPI::Broodwar->drawCircleMap(scoutPos.x(), scoutPos.y(), 6, BWAPI::Colors::Yellow);
       BWAPI::Broodwar->drawCircleMap(targetPos.x(), targetPos.y(), (*s).first->getType().sightRange(), BWAPI::Colors::Yellow);
@@ -237,41 +241,64 @@ void ScoutManager::updateScoutAssignments()
   for(u = scouts.begin(); u != scouts.end(); u++)
   {
     if ( (*u).second.mode == ScoutData::Searching
-      && (*u).first->getPosition().getDistance((*u).second.target) < (*u).first->getType().sightRange())
+      && (*u).first->getPosition().getDistance((*u).second.target->getPosition()) < (*u).first->getType().sightRange())
     {
-      BWAPI::Position exploredPosition  = (*u).second.target;
-      positionsToScout.remove(exploredPosition);
-      positionsExplored.insert(exploredPosition);
+      bool empty = true;
+      for(int x=(*u).second.target->getTilePosition().x();x<(*u).second.target->getTilePosition().x()+4;x++)
+      {
+        for(int y=(*u).second.target->getTilePosition().y();y<(*u).second.target->getTilePosition().y()+3;y++)
+        {
+          std::set<BWAPI::Unit*> unitsOnTile = BWAPI::Broodwar->unitsOnTile(x,y);
+          for each(BWAPI::Unit* u in unitsOnTile)
+          {
+            if (u->getType().isResourceDepot())
+            {
+              empty = false;
+              break;
+            }
+          }
+          if (!empty) break;
+        }
+        if (!empty) break;
+      }
+      if (empty)
+      {
+        this->informationManager->setBaseEmpty((*u).second.target);
+      }
+      BWTA::BaseLocation* exploredBaseLocation  = (*u).second.target;
+      baseLocationsToScout.remove(exploredBaseLocation);
+      
+      baseLocationsExplored.insert(exploredBaseLocation);
       (*u).second.mode = ScoutData::Idle;
       if (debugMode)
       {
-        BWAPI::Broodwar->printf("Sucessfully scouted (%d,%d)", exploredPosition.x(), exploredPosition.y());
+        BWAPI::Broodwar->printf("Sucessfully scouted (%d,%d)", exploredBaseLocation->getPosition().x(), exploredBaseLocation->getPosition().y());
       }
     }
   }
 
   // Set scouts to scout.
-  if (positionsToScout.size() > 0) // are there still positions to scout?
+  if (baseLocationsToScout.size() > 0) // are there still positions to scout?
   {
-    std::list<BWAPI::Position>::iterator p;
-    for(u = scouts.begin(); u != scouts.end() && !positionsToScout.empty(); u++) 
+    std::list<BWTA::BaseLocation*>::iterator p;
+    for(u = scouts.begin(); u != scouts.end() && !baseLocationsToScout.empty(); u++) 
     { // for
       if ((*u).second.mode == ScoutData::Idle)
       {
-        std::map<double, BWAPI::Position> distanceMap;
-        for (p = positionsToScout.begin(); p != positionsToScout.end(); p++)
+        std::map<double, BWTA::BaseLocation*> distanceMap;
+        for (p = baseLocationsToScout.begin(); p != baseLocationsToScout.end(); p++)
         {
-          double distance = (*u).first->getPosition().getDistance(*p);
+          double distance = (*u).first->getPosition().getDistance((*p)->getPosition());
           distanceMap[distance] = *p;
         }
-        BWAPI::Position target = distanceMap.begin()->second;
+        BWTA::BaseLocation* target = distanceMap.begin()->second;
         (*u).second.mode = ScoutData::Searching;
-        (*u).first->rightClick(target);
+        (*u).first->rightClick(target->getPosition());
         (*u).second.target = target;
-        positionsToScout.remove(target);
+        baseLocationsToScout.remove(target);
         if (debugMode)
         {
-          BWAPI::Broodwar->printf("Scouting (%d,%d)", target.x(), target.y());
+          BWAPI::Broodwar->printf("Scouting (%d,%d)", target->getPosition().x(), target->getPosition().y());
         }
       }
     } // for
