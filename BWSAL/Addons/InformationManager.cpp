@@ -9,6 +9,14 @@ InformationManager::InformationManager()
     buildTime[BWAPI::UnitTypes::Zerg_Larva]=0;
     buildTime[BWAPI::UnitTypes::Zerg_Overlord]=0;
   }
+  startLocationCouldContainEnemy = BWTA::getStartLocations();
+  startLocationCouldContainEnemy.erase(BWTA::getStartLocation(BWAPI::Broodwar->self()));
+  scoutedAnEnemyBase = false;
+  if (startLocationCouldContainEnemy.size()==1)
+  {
+    enemyBases.insert(*startLocationCouldContainEnemy.begin());
+    scoutedAnEnemyBase = true;
+  }
 }
 void InformationManager::onUnitShow(BWAPI::Unit* unit)
 {
@@ -17,11 +25,22 @@ void InformationManager::onUnitShow(BWAPI::Unit* unit)
   int time=BWAPI::Broodwar->getFrameCount();
   BWAPI::UnitType type=unit->getType();
   updateBuildTime(type,time-type.buildTime());
+  if (scoutedAnEnemyBase == false && unit->getType().isBuilding())
+  {
+    BWTA::Region* r=BWTA::getRegion(unit->getTilePosition());
+    if (r->getBaseLocations().size()==1)
+    {
+      BWTA::BaseLocation* b = *(r->getBaseLocations().begin());
+      enemyBases.insert(b);
+      scoutedAnEnemyBase = true;
+    }
+  }
   if (unit->getType().isResourceDepot())
   {
     BWTA::BaseLocation* b=BWTA::getNearestBaseLocation(unit->getTilePosition());
     enemyBases.insert(b);
     enemyBaseCenters[b]=unit;
+    scoutedAnEnemyBase = true;
   }
 }
 void InformationManager::onUnitHide(BWAPI::Unit* unit)
@@ -113,6 +132,16 @@ int InformationManager::getBuildTime(BWAPI::UnitType type) const
 const std::set<BWTA::BaseLocation*>& InformationManager::getEnemyBases() const
 {
   return this->enemyBases;
+}
+
+void InformationManager::setBaseEmpty(BWTA::BaseLocation* base)
+{
+  this->startLocationCouldContainEnemy.erase(base);
+  if (startLocationCouldContainEnemy.size()==1)
+  {
+    enemyBases.insert(*startLocationCouldContainEnemy.begin());
+    scoutedAnEnemyBase = true;
+  }
 }
 
 void InformationManager::updateBuildTime(BWAPI::UnitType type, int time)

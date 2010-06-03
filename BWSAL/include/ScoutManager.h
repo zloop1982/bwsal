@@ -1,5 +1,6 @@
 #pragma once
 #include <Arbitrator.h>
+#include <InformationManager.h>
 #include <BWAPI.h>
 
 class ScoutManager : public Arbitrator::Controller<BWAPI::Unit*,double>
@@ -17,13 +18,14 @@ class ScoutManager : public Arbitrator::Controller<BWAPI::Unit*,double>
           Fleeing
         };
         ScoutData(){ mode = Idle; }
-        BWAPI::Position target;
+        BWTA::BaseLocation* target;
         ScoutMode mode;
     };
     ScoutManager(Arbitrator::Arbitrator<BWAPI::Unit*,double>* arbitrator);
     virtual void onOffer(std::set<BWAPI::Unit*> units);
     virtual void onRevoke(BWAPI::Unit* unit, double bid);
     virtual void update();
+    void setInformationManager(InformationManager* infoManager);
 
     virtual std::string getName() const;
     virtual std::string getShortName() const;
@@ -37,8 +39,8 @@ class ScoutManager : public Arbitrator::Controller<BWAPI::Unit*,double>
     std::map<BWAPI::Unit*, ScoutData> scouts;
     Arbitrator::Arbitrator<BWAPI::Unit*,double>* arbitrator;
     
-    std::list<BWAPI::Position> positionsToScout;
-    std::set<BWAPI::Position> positionsExplored;
+    std::list<BWTA::BaseLocation*> baseLocationsToScout;
+    std::set<BWTA::BaseLocation*> baseLocationsExplored;
     BWTA::BaseLocation *myStartLocation;
         
   private:
@@ -47,6 +49,7 @@ class ScoutManager : public Arbitrator::Controller<BWAPI::Unit*,double>
     void addScout(BWAPI::Unit* unit);
     void updateScoutAssignments();
     void drawAssignments();
+    InformationManager* informationManager;
     
     size_t desiredScoutCount;
     int scoutingStartFrame;

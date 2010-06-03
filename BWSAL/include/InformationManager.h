@@ -17,6 +17,7 @@ class InformationManager
     bool enemyHasBuilt(BWAPI::UnitType type) const;
     int getBuildTime(BWAPI::UnitType type) const;
     const std::set<BWTA::BaseLocation*>& getEnemyBases() const;
+    void setBaseEmpty(BWTA::BaseLocation* base);
   private:
     class UnitData
     {
@@ -33,4 +34,6 @@ class InformationManager
     std::map<BWAPI::UnitType, int> buildTime;
     std::set<BWTA::BaseLocation*> enemyBases;
     std::map<BWTA::BaseLocation*,BWAPI::Unit*> enemyBaseCenters;
+    std::set<BWTA::BaseLocation*> startLocationCouldContainEnemy;
+    bool scoutedAnEnemyBase;
 };
