@@ -4,6 +4,7 @@
 #include "ForceData.h"
 #include "PlayerData.h"
 #include "UnitData.h"
+#include "BulletData.h"
 #include "Event.h"
 #include "Command.h"
 #include "Shape.h"
@@ -28,6 +29,10 @@ namespace BWAPIC
     //unit table
     int unitArray[1700];
 
+    //bullets
+    BulletData bullets[100];
+
+    int gameType;
     int latency;
     int frameCount;
 

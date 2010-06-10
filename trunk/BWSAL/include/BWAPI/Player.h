@@ -34,7 +34,7 @@ namespace BWAPI
       virtual Race getRace() const = 0;
 
       /** Returns the type of the player. */
-      virtual PlayerType playerType() const = 0;
+      virtual PlayerType getType() const = 0;
 
       /** Returns the force the player is on. */
       virtual Force* getForce() const = 0;
@@ -120,5 +120,8 @@ namespace BWAPI
       /** Returns true if the player is upgrading the given upgrade. To order a unit to upgrade a given
        * upgrade type, see Unit::upgrade. */
       virtual bool isUpgrading(UpgradeType upgrade) const = 0;
+
+      /** Returns the max energy of the given unit type, taking into account upgrades */
+      virtual int maxEnergy(UnitType unit) const = 0;
   };
 };

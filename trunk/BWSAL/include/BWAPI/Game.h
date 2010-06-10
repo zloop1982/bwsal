@@ -9,6 +9,7 @@
 #include <BWAPI/Error.h>
 #include <BWAPI/Event.h>
 #include <BWAPI/Flag.h>
+#include <BWAPI/GameType.h>
 #include <BWAPI/Race.h>
 #include <BWAPI/Order.h>
 #include <BWAPI/Latency.h>
@@ -22,6 +23,7 @@ namespace BWAPI
   class Force;
   class Player;
   class Unit;
+  class Bullet;
 
   /** The abstract Game class is implemented by BWAPI and offers many methods for retrieving information
    * about the current Broodwar game, including the set of players, units, map information, as well as
@@ -37,7 +39,7 @@ namespace BWAPI
        * all the neutral units such as minerals, critters, etc. */
       virtual std::set< Player* >& getPlayers() = 0;
 
-      /** Returns all the visible units. If Flag?::CompleteMapInformation?  is enabled, the set of all units
+      /** Returns all the visible units. If Flag::CompleteMapInformation is enabled, the set of all units
        * is returned, not just visible ones. Note that units inside refineries are not included in this set
        * yet. */
       virtual std::set< Unit* >& getAllUnits() = 0;
@@ -60,11 +62,19 @@ namespace BWAPI
       /** Returns the set of all neutral units (including mined out and other inaccessible ones). */
       virtual std::set< Unit* >& getStaticNeutralUnits() = 0;
 
+      /** Returns all visible bullets. If Flag::CompleteMapInformation is enabled, the set of all bullets is
+       * returned, not just visible ones. */
+
+      virtual std::set< Bullet* >& getBullets() = 0;
+
       /** Returns the list of events */
       virtual std::list< Event >& getEvents() = 0;
 
       /** Returns a pointer to a Unit given an index. */
       virtual Unit *indexToUnit(int unitIndex) = 0;
+
+      /** Returns the game type */
+      virtual GameType getGameType() = 0;
 
       /** Returns the amount of latency the current game has. Currently only returns Latency::SinglePlayer,
        * Latency::LanLow, Latency::LanMedium, or Latency::LanHigh. */
