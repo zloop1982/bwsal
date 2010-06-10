@@ -21,7 +21,7 @@ namespace BWAPI
       virtual std::string getName() const;
       virtual const std::set<Unit*>& getUnits() const;
       virtual Race getRace() const;
-      virtual PlayerType playerType() const;
+      virtual PlayerType getType() const;
       virtual Force* getForce() const;
       virtual bool isAlly(Player* player) const;
       virtual bool isEnemy(Player* player) const;
@@ -51,5 +51,7 @@ namespace BWAPI
       virtual bool hasResearched(TechType tech) const;
       virtual bool isResearching(TechType tech) const;
       virtual bool isUpgrading(UpgradeType upgrade) const;
+
+      virtual int maxEnergy(UnitType unit) const;
   };
 };
