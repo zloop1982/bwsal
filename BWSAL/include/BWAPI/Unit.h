@@ -9,7 +9,7 @@
 #include <BWAPI/Position.h>
 #include <BWAPI/TilePosition.h>
 #include <BWAPI/UnitCommand.h>
-
+#include <BWAPI/Client/UnitData.h>
 namespace BWAPI
 {
   class Player;
@@ -50,16 +50,25 @@ namespace BWAPI
       /** Returns the current type of the unit. */
       virtual UnitType getType() const = 0;
 
-      /** Returns the initial type of the unit or Unknown if it wasn't a neutral unit at the beginning of the
-       * game. */
-      virtual UnitType getInitialType() const = 0;
+      /** Returns the position of the unit on the map. */
+      virtual Position getPosition() const = 0;
+
+      /** Returns the build tile position of the unit on the map. Useful if the unit is a building. The tile
+       * position is of the top left corner of the building. */
+      virtual TilePosition getTilePosition() const = 0;
+
+      /** Returns the direction the unit is facing, measured in radians. An angle of 0 means the unit is
+       * facing east. */
+      virtual double getAngle() const = 0;
+
+      /** Returns the x component of the unit's velocity, measured in pixels per frame. */
+      virtual double getVelocityX() const = 0;
+
+      /** Returns the y component of the unit's velocity, measured in pixels per frame. */
+      virtual double getVelocityY() const = 0;
 
       /** Returns the unit's current amount of hit points. */
       virtual int getHitPoints() const = 0;
-
-      /** Returns the unit's initial amount of hit points, or 0 if it wasn't a neutral unit at the beginning
-       * of the game. */
-      virtual int getInitialHitPoints() const = 0;
 
       /** Returns the unit's current amount of shields. */
       virtual int getShields() const = 0;
@@ -72,12 +81,48 @@ namespace BWAPI
        * (can also be called on a refinery/assimilator/extractor). */
       virtual int getResources() const = 0;
 
+      /** Returns the edge-to-edge distance between the current unit and the target unit. */
+      virtual double getDistance(Unit* target) const = 0;
+
+      /** Returns the distance from the edge of the current unit to the target position. */
+      virtual double getDistance(Position target) const = 0;
+
+      /** Returns the player's current upgrade level for the given upgrade, if the unit is affected by this
+       * upgrade.*/
+      virtual int getUpgradeLevel(UpgradeType upgrade) const = 0;
+
+      /** Returns the initial type of the unit or Unknown if it wasn't a neutral unit at the beginning of the
+       * game. */
+      virtual UnitType getInitialType() const = 0;
+
+      /** Returns the initial position of the unit on the map, or Positions::Unknown if the unit wasn't a
+       * neutral unit at the beginning of the game. */
+      virtual Position getInitialPosition() const = 0;
+
+      /** Returns the initial build tile position of the unit on the map, or TilePositions::Unknown if the
+       * unit wasn't a neutral unit at the beginning of the game. The tile position is of the top left corner
+       * of the building. */
+      virtual TilePosition getInitialTilePosition() const = 0;
+
+      /** Returns the unit's initial amount of hit points, or 0 if it wasn't a neutral unit at the beginning
+       * of the game. */
+      virtual int getInitialHitPoints() const = 0;
+
       /** Returns the unit's initial amount of containing resources, or 0 if the unit wasn't a neutral unit
        * at the beginning of the game. */
       virtual int getInitialResources() const = 0;
 
       /** Returns the unit's current kill count. */
       virtual int getKillCount() const = 0;
+
+      /** Returns the number of interceptors the Protoss Carrier has. */
+      virtual int getInterceptorCount() const = 0;
+
+      /** Returns the number of scarabs in the Protoss Reaver. */
+      virtual int getScarabCount() const = 0;
+
+      /** Returns the number of spider mines in the Terran Vulture. */
+      virtual int getSpiderMineCount() const = 0;
 
       /** Returns unit's ground weapon cooldown. It is 0 if the unit is ready to attack. */
       virtual int getGroundWeaponCooldown() const = 0;
@@ -107,6 +152,9 @@ namespace BWAPI
       /** Returns the time until the maelstrom wears off. 0 -> No maelstrom present. */
       virtual int getMaelstromTimer() const = 0;
 
+      // TODO: add doc
+      virtual int getOrderTimer() const = 0;
+
       /** Returns the time until the plague wears off. 0 -> No plague present. */
       virtual int getPlagueTimer() const = 0;
 
@@ -121,37 +169,46 @@ namespace BWAPI
       /** Returns the time until the stimpack wears off. 0 -> No stimpack boost present. */
       virtual int getStimTimer() const = 0;
 
-      /** Returns the position of the unit on the map. */
-      virtual Position getPosition() const = 0;
+      /** Returns the building type a worker is about to construct. If the unit is a morphing Zerg unit or an
+       * incomplete building, this returns the UnitType the unit is about to become upon completion.*/
+      virtual UnitType getBuildType() const = 0;
 
-      /** Returns the initial position of the unit on the map, or Positions::Unknown if the unit wasn't a
-       * neutral unit at the beginning of the game. */
-      virtual Position getInitialPosition() const = 0;
+     /** Returns the list of units queued up to be trained.
+       * \see Unit::train, Unit::cancelTrain, Unit::isTraining. */
+      virtual std::list<UnitType > getTrainingQueue() const = 0;
 
-      /** Returns the build tile position of the unit on the map. Useful if the unit is a building. The tile
-       * position is of the top left corner of the building. */
-      virtual TilePosition getTilePosition() const = 0;
+      /** Returns the tech that the unit is currently researching. If the unit is not researching anything,
+       * TechTypes::None is returned.
+       * \see Unit::research, Unit::cancelResearch, Unit::isResearching, Unit::getRemainingResearchTime. */
+      virtual TechType getTech() const = 0;
 
-      /** Returns the initial build tile position of the unit on the map, or TilePositions::Unknown if the
-       * unit wasn't a neutral unit at the beginning of the game. The tile position is of the top left corner
-       * of the building. */
-      virtual TilePosition getInitialTilePosition() const = 0;
+      /** Returns the upgrade that the unit is currently upgrading. If the unit is not upgrading anything,
+       * UpgradeTypes::None is returned.
+       * \see Unit::upgrade, Unit::cancelUpgrade, Unit::isUpgrading, Unit::getRemainingUpgradeTime. */
+      virtual UpgradeType getUpgrade() const = 0;
 
-      /** Returns the edge-to-edge distance between the current unit and the target unit. */
-      virtual double getDistance(Unit* target) const = 0;
+      /** Returns the remaining build time of a unit/building that is being constructed. */
+      virtual int getRemainingBuildTime() const = 0;
 
-      /** Returns the distance from the edge of the current unit to the target position. */
-      virtual double getDistance(Position target) const = 0;
+      /** Returns the remaining time of the unit that is currently being trained. If the unit is a Hatchery,
+       * Lair, or Hive, this returns the amount of time until the next larva spawns, or 0 if the unit already
+       * has 3 larva. */
+      virtual int getRemainingTrainTime() const = 0;
 
-      /** Returns the direction the unit is facing, measured in radians. An angle of 0 means the unit is
-       * facing east. */
-      virtual double getAngle() const = 0;
+      /** Returns the amount of time until the unit is done researching its current tech. If the unit is not
+       * researching anything, 0 is returned.
+       * \see Unit::research, Unit::cancelResearch, Unit::isResearching, Unit::getTech. */
+      virtual int getRemainingResearchTime() const = 0;
 
-      /** Returns the x component of the unit's velocity, measured in pixels per frame. */
-      virtual double getVelocityX() const = 0;
+      /** Returns the amount of time until the unit is done upgrading its current upgrade. If the unit is not
+       * upgrading anything, 0 is returned.
+       * \see Unit::upgrade, Unit::cancelUpgrade, Unit::isUpgrading, Unit::getUpgrade. */
+      virtual int getRemainingUpgradeTime() const = 0;
 
-      /** Returns the y component of the unit's velocity, measured in pixels per frame. */
-      virtual double getVelocityY() const = 0;
+      /** If the unit is an SCV that is constructing a building, this will return the building it is
+       * constructing. If the unit is a Terran building that is being constructed, this will return the SCV
+       * that is constructing it. */
+      virtual Unit* getBuildUnit() const = 0;
 
       /** Generally returns the appropriate target unit after issuing an order that accepts a target unit
        * (i.e. attack, repair, gather, follow, etc.). To check for a target that has been acquired
@@ -169,68 +226,7 @@ namespace BWAPI
        * an enemy probe comes in range of your marine, the marine will start attacking it, and getOrderTarget
        * will be set in this case, but not getTarget. */
       virtual Unit* getOrderTarget() const = 0;
-      virtual int getOrderTimer() const = 0;
       virtual Order getSecondaryOrder() const = 0;
-
-      /** If the unit is an SCV that is constructing a building, this will return the building it is
-       * constructing. If the unit is a Terran building that is being constructed, this will return the SCV
-       * that is constructing it. */
-      virtual Unit* getBuildUnit() const = 0;
-
-      /** Returns the building type a worker is about to construct. If the unit is a morphing Zerg unit or an
-       * incomplete building, this returns the UnitType the unit is about to become upon completion.*/
-      virtual UnitType getBuildType() const = 0;
-
-      /** Returns the remaining build time of a unit/building that is being constructed. */
-      virtual int getRemainingBuildTime() const = 0;
-
-      /** Returns the remaining time of the unit that is currently being trained. If the unit is a Hatchery,
-       * Lair, or Hive, this returns the amount of time until the next larva spawns, or 0 if the unit already
-       * has 3 larva. */
-      virtual int getRemainingTrainTime() const = 0;
-
-      // TODO: add doc
-      virtual Unit* getChild() const = 0;
-
-      /** Returns the list of units queued up to be trained.
-       * \see Unit::train, Unit::cancelTrain, Unit::isTraining. */
-      virtual std::list<UnitType > getTrainingQueue() const = 0;
-
-      /** Returns the dropship, shuttle, overlord, or bunker that is this unit is loaded in to. */
-      virtual Unit* getTransport() const = 0;
-
-      /** Returns a list of the units loaded into a Terran Bunker, Terran Dropship, Protoss Shuttle, or Zerg
-       * Overlord. */
-      virtual std::list<Unit*> getLoadedUnits() const = 0;
-
-      /** Returns the number of interceptors the Protoss Carrier has. */
-      virtual int getInterceptorCount() const = 0;
-
-      /** Returns the number of scarabs in the Protoss Reaver. */
-      virtual int getScarabCount() const = 0;
-
-      /** Returns the number of spider mines in the Terran Vulture. */
-      virtual int getSpiderMineCount() const = 0;
-
-      /** Returns the tech that the unit is currently researching. If the unit is not researching anything,
-       * TechTypes::None is returned.
-       * \see Unit::research, Unit::cancelResearch, Unit::isResearching, Unit::getRemainingResearchTime. */
-      virtual TechType getTech() const = 0;
-
-      /** Returns the upgrade that the unit is currently upgrading. If the unit is not upgrading anything,
-       * UpgradeTypes::None is returned.
-       * \see Unit::upgrade, Unit::cancelUpgrade, Unit::isUpgrading, Unit::getRemainingUpgradeTime. */
-      virtual UpgradeType getUpgrade() const = 0;
-
-      /** Returns the amount of time until the unit is done researching its current tech. If the unit is not
-       * researching anything, 0 is returned.
-       * \see Unit::research, Unit::cancelResearch, Unit::isResearching, Unit::getTech. */
-      virtual int getRemainingResearchTime() const = 0;
-
-      /** Returns the amount of time until the unit is done upgrading its current upgrade. If the unit is not
-       * upgrading anything, 0 is returned.
-       * \see Unit::upgrade, Unit::cancelUpgrade, Unit::isUpgrading, Unit::getUpgrade. */
-      virtual int getRemainingUpgradeTime() const = 0;
 
       /** Returns the position the building is rallied to. If the building does not produce units,
        * Positions::None is returned.
@@ -245,6 +241,25 @@ namespace BWAPI
       /** Returns the add-on of this unit, or NULL if the unit doesn't have an add-on. */
       virtual Unit* getAddon() const = 0;
 
+      /** Returns the corresponding connected nydus canal of this unit, or NULL if the unit does not have a
+       * connected nydus canal. */
+      virtual Unit* getNydusExit() const = 0;
+
+      /** Returns the dropship, shuttle, overlord, or bunker that is this unit is loaded in to. */
+      virtual Unit* getTransport() const = 0;
+
+      /** Returns a list of the units loaded into a Terran Bunker, Terran Dropship, Protoss Shuttle, or Zerg
+       * Overlord. */
+      virtual std::set<Unit*> getLoadedUnits() const = 0;
+
+      /** For Protoss Interceptors, this returns the Carrier unit this Interceptor is controlled by. For all
+       * other unit types this function returns NULL. */
+      virtual Unit* getCarrier() const = 0;
+
+      /** Returns the set of interceptors controlled by this unit. If the unit has no interceptors, or is not
+       * a Carrier, this function returns an empty set. */
+      virtual std::set<Unit*> getInterceptors() const = 0;
+
       /** For Zerg Larva, this returns the Hatchery, Lair, or Hive unit this Larva was spawned from. For all
        * other unit types this function returns NULL. */
       virtual Unit* getHatchery() const = 0;
@@ -253,10 +268,6 @@ namespace BWAPI
        * or Hive, this function returns an empty set. Equivalent to clicking "Select Larva" from the Starcraft
        * GUI. */
       virtual std::set<Unit*> getLarva() const = 0;
-
-      /** Returns true if the owner of this player has upgraded the given upgrade type, and this unit is
-       * affected by this upgrade. */
-      virtual int getUpgradeLevel(UpgradeType upgrade) const = 0;
 
       /**
        * 3 cases to consider:
@@ -268,6 +279,9 @@ namespace BWAPI
        * \see Unit::isVisible.
        * */
       virtual bool exists() const = 0;
+
+      /* Returns true if the Nuclear Missile Silo has a nuke */
+      virtual bool hasNuke() const = 0;
 
       /** Returns true if the unit is currently accelerating. */
       virtual bool isAccelerating() const = 0;
@@ -285,7 +299,7 @@ namespace BWAPI
       /** Returns true if the unit is a mineral patch or refinery that is being gathered. */
       virtual bool isBeingGathered() const = 0;
 
-      /** Returns true if the unit is currently being healed by a Terran Medic. */
+      /** Returns true if the unit is currently being healed by a Terran Medic, or repaired by a Terran SCV. */
       virtual bool isBeingHealed() const = 0;
 
       /** Returns true if the unit is currently blind from a Medic's Optical Flare. */
@@ -321,6 +335,9 @@ namespace BWAPI
       /** Returns true if the unit has a defense matrix from a Terran Science Vessel. */
       virtual bool isDefenseMatrixed() const = 0;
 
+      /** Returns true if the unit is detected. */
+      virtual bool isDetected() const = 0;
+
       /** Returns true if the unit has been ensnared by a Zerg Queen. */
       virtual bool isEnsnared() const = 0;
 
@@ -342,6 +359,10 @@ namespace BWAPI
        * units only if Complete Map Information is enabled.
        * \see Unit::getRemoveTimer. */
       virtual bool isHallucination() const = 0;
+
+      /** Returns true if the unit is holding position
+       * \see Unit::holdPosition. */
+      virtual bool isHoldingPosition() const = 0;
 
       /** Returns true if the unit is not doing anything.
        * \see Unit::stop. */
@@ -441,17 +462,19 @@ namespace BWAPI
       virtual bool issueCommand(UnitCommand command) = 0;
 
       /** Orders the unit to attack move to the specified location. */
-      virtual bool attackMove(Position position) = 0;
+      virtual bool attackMove(Position target) = 0;
 
       /** Orders the unit to attack the specified unit. */
       virtual bool attackUnit(Unit* target) = 0;
 
-      /** Works like the right click in the GUI. */
-      virtual bool rightClick(Position position) = 0;
+      /** Orders the unit to build the given unit type at the given position. Note that if the player does not
+       * have enough resources when the unit attempts to place the building down, the order will fail. The
+       * tile position specifies where the top left corner of the building will be placed. */
+      virtual bool build(TilePosition target, UnitType type) = 0;
 
-      /** Works like the right click in the GUI. Right click on a mineral patch to order a worker to mine,
-       * right click on an enemy to attack it. */
-      virtual bool rightClick(Unit* target) = 0;
+      /** Orders the unit to build the given addon. The unit must be a Terran building that can have an addon
+       * and the specified unit type must be an addon unit type. */
+      virtual bool buildAddon(UnitType type) = 0;
 
       /** Orders this unit to add the specified unit type to the training queue. Note that the player must
        * have sufficient resources to train. If you wish to make units from a hatchery, use getLarva to get
@@ -459,14 +482,9 @@ namespace BWAPI
        * command can also be used to make interceptors and scarabs. */
       virtual bool train(UnitType type) = 0;
 
-      /** Orders the unit to build the given unit type at the given position. Note that if the player does not
-       * have enough resources when the unit attempts to place the building down, the order will fail. The
-       * tile position specifies where the top left corner of the building will be placed. */
-      virtual bool build(TilePosition position, UnitType type) = 0;
-
-      /** Orders the unit to build the given addon. The unit must be a Terran building that can have an addon
-       * and the specified unit type must be an addon unit type. */
-      virtual bool buildAddon(UnitType type) = 0;
+      /** Orders the unit to morph into the specified unit type. Returns false if given a wrong type.
+       * \see Unit::cancelMorph, Unit::isMorphing. */
+      virtual bool morph(UnitType type) = 0;
 
       /** Orders the unit to research the given tech type.
        * \see Unit::cancelResearch, Unit::Unit#isResearching, Unit::getRemainingResearchTime, Unit::getTech. */
@@ -476,20 +494,6 @@ namespace BWAPI
        * \see Unit::cancelUpgrade, Unit::Unit#isUpgrading, Unit::getRemainingUpgradeTime, Unit::getUpgrade. */
       virtual bool upgrade(UpgradeType upgrade) = 0;
 
-      /** Orders the unit to stop. */
-      virtual bool stop() = 0;
-
-      /** Orders the unit to hold its position.*/
-      virtual bool holdPosition() = 0;
-
-      /** Orders the unit to patrol between its current position and the specified position.
-       * \see Unit::isPatrolling.  */
-      virtual bool patrol(Position position) = 0;
-
-      /** Orders the unit to follow the specified unit.
-       * \see Unit::isFollowing. */
-      virtual bool follow(Unit* target) = 0;
-
       /** Orders the unit to set its rally position to the specified position.
        * \see Unit::setRallyUnit, Unit::getRallyPosition, Unit::getRallyUnit. */
       virtual bool setRallyPosition(Position target) = 0;
@@ -498,19 +502,37 @@ namespace BWAPI
        * \see Unit::setRallyPosition, Unit::getRallyPosition, Unit::getRallyUnit. */
       virtual bool setRallyUnit(Unit* target) = 0;
 
-      /** Orders the unit to repair the specified unit. Only Terran SCVs can be ordered to repair, and the
-       * target must be a mechanical Terran unit or building.
-       * \see Unit::isRepairing. */
-      virtual bool repair(Unit* target) = 0;
+      /** Orders the unit to move from its current position to the specified position.
+       * \see Unit::isMoving.  */
+      virtual bool move(Position target) = 0;
+
+      /** Orders the unit to patrol between its current position and the specified position.
+       * \see Unit::isPatrolling.  */
+      virtual bool patrol(Position target) = 0;
+
+      /** Orders the unit to hold its position.*/
+      virtual bool holdPosition() = 0;
+
+      /** Orders the unit to stop. */
+      virtual bool stop() = 0;
+
+      /** Orders the unit to follow the specified unit.
+       * \see Unit::isFollowing. */
+      virtual bool follow(Unit* target) = 0;
+
+      /** Orders the unit to gather the specified unit (must be mineral or refinery type).
+       * \see Unit::isGatheringGas, Unit::isGatheringMinerals. */
+      virtual bool gather(Unit* target) = 0;
 
       /** Orders the unit to return its cargo to a nearby resource depot such as a Command Center. Only
        * workers that are carrying minerals or gas can be ordered to return cargo.
        * \see Unit::isCarryingGas, Unit::isCarryingMinerals. */
       virtual bool returnCargo() = 0;
 
-      /** Orders the unit to morph into the specified unit type. Returns false if given a wrong type.
-       * \see Unit::cancelMorph, Unit::isMorphing. */
-      virtual bool morph(UnitType type) = 0;
+      /** Orders the unit to repair the specified unit. Only Terran SCVs can be ordered to repair, and the
+       * target must be a mechanical Terran unit or building.
+       * \see Unit::isRepairing. */
+      virtual bool repair(Unit* target) = 0;
 
       /** Orders the unit to burrow. Either the unit must be a Zerg Lurker, or the unit must be a Zerg ground
        * unit and burrow tech must be researched.
@@ -522,14 +544,6 @@ namespace BWAPI
        * */
       virtual bool unburrow() = 0;
 
-      /** Orders the unit to siege. Note: unit must be a Terran siege tank.
-       * \see Unit::unsiege, Unit::isSieged. */
-      virtual bool siege() = 0;
-
-      /** Orders the unit to unsiege. Note: unit must be a Terran siege tank.
-       * \see: Unit::unsiege, Unit::isSieged. */
-      virtual bool unsiege() = 0;
-
       /** Orders the unit to cloak.
        * \see: Unit::decloak, Unit::isCloaked. */
       virtual bool cloak() = 0;
@@ -538,13 +552,21 @@ namespace BWAPI
        * \see: Unit::cloak, Unit::isCloaked. */
       virtual bool decloak() = 0;
 
+      /** Orders the unit to siege. Note: unit must be a Terran siege tank.
+       * \see Unit::unsiege, Unit::isSieged. */
+      virtual bool siege() = 0;
+
+      /** Orders the unit to unsiege. Note: unit must be a Terran siege tank.
+       * \see: Unit::unsiege, Unit::isSieged. */
+      virtual bool unsiege() = 0;
+
       /** Orders the unit to lift. Note: unit must be a Terran building that can be lifted.
        * \see Unit::land, Unit::isLifted.  */
       virtual bool lift() = 0;
 
       /** Orders the unit to land. Note: unit must be a Terran building that is currently lifted.
        * \see Unit::lift, Unit::isLifted. */
-      virtual bool land(TilePosition position) = 0;
+      virtual bool land(TilePosition target) = 0;
 
       /** Orders the unit to load the target unit.
        * \see Unit::unload, Unit::unloadAll, Unit::getLoadedUnits, Unit:isLoaded. */
@@ -562,20 +584,26 @@ namespace BWAPI
        * Dropship, Protoss Shuttle, or Zerg Overlord. If the unit is a Terran Bunker, the units will be
        * unloaded right outside the bunker, like in the first version of unloadAll.
        * \see Unit::load, Unit::unload, Unit::unloadAll, Unit::getLoadedUnits, Unit:isLoaded. */
-      virtual bool unloadAll(Position position) = 0;
+      virtual bool unloadAll(Position target) = 0;
 
-      /** Orders the building to stop being constructed.
-       * \see Unit::beingConstructed. */
-      virtual bool cancelConstruction() = 0;
+      /** Works like the right click in the GUI. */
+      virtual bool rightClick(Position target) = 0;
+
+      /** Works like the right click in the GUI. Right click on a mineral patch to order a worker to mine,
+       * right click on an enemy to attack it. */
+      virtual bool rightClick(Unit* target) = 0;
 
       /** Orders the SCV to stop constructing the building, and the building is left in a partially complete
        * state until it is canceled, destroyed, or completed.
        * \see Unit::isConstructing. */
       virtual bool haltConstruction() = 0;
 
-      /** Orders the unit to stop morphing.
-       * \see Unit::morph, Unit::isMorphing. */
-      virtual bool cancelMorph() = 0;
+      /** Orders the building to stop being constructed.
+       * \see Unit::beingConstructed. */
+      virtual bool cancelConstruction() = 0;
+
+      /** Orders the unit to stop making the addon. */
+      virtual bool cancelAddon() = 0;
 
       /** Orders the unit to remove the last unit from its training queue.
        * \see Unit::train, Unit::cancelTrain, Unit::isTraining, Unit::getTrainingQueue. */
@@ -585,8 +613,9 @@ namespace BWAPI
        * \see Unit::train, Unit::cancelTrain, Unit::isTraining, Unit::getTrainingQueue. */
       virtual bool cancelTrain(int slot) = 0;
 
-      /** Orders the unit to stop making the addon. */
-      virtual bool cancelAddon() = 0;
+      /** Orders the unit to stop morphing.
+       * \see Unit::morph, Unit::isMorphing. */
+      virtual bool cancelMorph() = 0;
 
       /** Orders the unit to cancel a research in progress.
        * \see Unit::research, Unit::isResearching, Unit::getTech. */
@@ -602,7 +631,7 @@ namespace BWAPI
 
       /** Orders the unit to use a tech requiring a position target (ie Dark Swarm). Returns true if it is a
        * valid tech.*/
-      virtual bool useTech(TechType tech, Position position) = 0;
+      virtual bool useTech(TechType tech, Position target) = 0;
 
       /** Orders the unit to use a tech requiring a unit target (ie Irradiate). Returns true if it is a valid
        * tech.*/

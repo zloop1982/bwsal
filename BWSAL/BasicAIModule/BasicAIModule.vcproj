@@ -3,8 +3,9 @@
 	ProjectType="Visual C++"
 	Version="9.00"
 	Name="BasicAIModule"
-	ProjectGUID="{56DDBBA2-58FB-467D-8923-A214B16649F5}"
+	ProjectGUID="{2E63AE74-758A-4607-9DE4-D28E814A6E13}"
 	RootNamespace="ExampleAIModule"
+	Keyword="Win32Proj"
 	TargetFrameworkVersion="196613"
 	>
 	<Platforms>
@@ -20,7 +21,7 @@
 			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="2"
-			CharacterSet="2"
+			CharacterSet="1"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -41,9 +42,11 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="../include"
+				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_USRDLL;EXAMPLEAIMODULE_EXPORTS"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
+				UsePrecompiledHeader="0"
 				WarningLevel="3"
 				DebugInformationFormat="4"
 			/>
@@ -58,8 +61,11 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="../lib/BWAPI.lib ../lib/BWTA.lib"
+				AdditionalOptions="/NODEFAULTLIB:library"
+				AdditionalDependencies="../lib/Debug/BWAPI.lib ../lib/Debug/BWTA.lib ../lib/Debug/tinyxmld.lib ../lib/Debug/CGAL-vc90-mt-gd.lib ../lib/Debug/libboost_thread-vc90-mt-gd-1_40.lib ../lib/Debug/gmp-vc90-mt-gd.lib ../lib/Debug/mpfr-vc90-mt-gd.lib"
+				LinkIncremental="2"
 				GenerateDebugInformation="true"
+				SubSystem="2"
 				TargetMachine="1"
 			/>
 			<Tool
@@ -89,7 +95,8 @@
 			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="2"
-			CharacterSet="2"
+			UseOfMFC="0"
+			CharacterSet="1"
 			WholeProgramOptimization="1"
 			>
 			<Tool
@@ -111,10 +118,11 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
-				FavorSizeOrSpeed="0"
 				AdditionalIncludeDirectories="../include"
+				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;EXAMPLEAIMODULE_EXPORTS"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
+				UsePrecompiledHeader="0"
 				WarningLevel="3"
 				DebugInformationFormat="3"
 			/>
@@ -129,9 +137,10 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="../lib/BWAPI.lib ../lib/BWTA.lib ../lib/CGAL-vc90-mt.lib ../lib/gmp-vc90-mt.lib ../lib/libboost_thread-vc90-mt-1_40.lib ../lib/mpfr-vc90-mt.lib"
-				GenerateDebugInformation="false"
-				ProgramDatabaseFile=""
+				AdditionalDependencies="../lib/Release/BWAPI.lib ../lib/Release/BWTA.lib ../lib/Release/tinyxml.lib ../lib/Release/CGAL-vc90-mt.lib ../lib/Release/libboost_thread-vc90-mt-1_40.lib ../lib/Release/gmp-vc90-mt.lib ../lib/Release/mpfr-vc90-mt.lib"
+				LinkIncremental="1"
+				GenerateDebugInformation="true"
+				SubSystem="2"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
 				TargetMachine="1"
@@ -232,30 +241,6 @@
 				</File>
 			</Filter>
 			<Filter
-				Name="BuildingPlacer"
-				>
-				<File
-					RelativePath="..\Addons\BuildingPlacer.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\include\BuildingPlacer.h"
-					>
-				</File>
-			</Filter>
-			<Filter
-				Name="SupplyManager"
-				>
-				<File
-					RelativePath="..\Addons\SupplyManager.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\include\SupplyManager.h"
-					>
-				</File>
-			</Filter>
-			<Filter
 				Name="Arbitrator"
 				>
 				<File
@@ -268,6 +253,90 @@
 				</File>
 				<File
 					RelativePath="..\include\Arbitrator\Heap.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="BaseManager"
+				>
+				<File
+					RelativePath="..\Addons\Base.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\include\BaseManager\Base.h"
+					>
+				</File>
+				<File
+					RelativePath="..\Addons\BaseManager.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\include\BaseManager\BaseManager.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="BorderManager"
+				>
+				<File
+					RelativePath="..\Addons\BorderManager.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\include\BorderManager.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="BuildingPlacer"
+				>
+				<File
+					RelativePath="..\Addons\BuildingPlacer.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\include\BuildingPlacer.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="BuildManager"
+				>
+				<File
+					RelativePath="..\Addons\BuildManager.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\include\BuildManager.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="BuildOrderManager"
+				>
+				<File
+					RelativePath="..\Addons\BuildOrderManager.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\include\BuildOrderManager\BuildOrderManager.h"
+					>
+				</File>
+				<File
+					RelativePath="..\Addons\MetaUnit.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\include\BuildOrderManager\TechItem.h"
+					>
+				</File>
+				<File
+					RelativePath="..\Addons\UnitItem.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\include\BuildOrderManager\UnitItem.h"
 					>
 				</File>
 			</Filter>
@@ -308,126 +377,6 @@
 				</File>
 			</Filter>
 			<Filter
-				Name="BaseManager"
-				>
-				<File
-					RelativePath="..\Addons\Base.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\include\BaseManager\Base.h"
-					>
-				</File>
-				<File
-					RelativePath="..\Addons\BaseManager.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\include\BaseManager\BaseManager.h"
-					>
-				</File>
-			</Filter>
-			<Filter
-				Name="ProductionManager"
-				>
-				<File
-					RelativePath="..\Addons\ProductionManager.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\include\ProductionManager.h"
-					>
-				</File>
-			</Filter>
-			<Filter
-				Name="MorphManager"
-				>
-				<File
-					RelativePath="..\Addons\MorphManager.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\include\MorphManager.h"
-					>
-				</File>
-			</Filter>
-			<Filter
-				Name="BuildManager"
-				>
-				<File
-					RelativePath="..\Addons\BuildManager.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\include\BuildManager.h"
-					>
-				</File>
-			</Filter>
-			<Filter
-				Name="TechManager"
-				>
-				<File
-					RelativePath="..\Addons\TechManager.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\include\TechManager.h"
-					>
-				</File>
-			</Filter>
-			<Filter
-				Name="UpgradeManager"
-				>
-				<File
-					RelativePath="..\Addons\UpgradeManager.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\include\UpgradeManager.h"
-					>
-				</File>
-			</Filter>
-			<Filter
-				Name="ScoutManager"
-				>
-				<File
-					RelativePath="..\Addons\ScoutManager.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\include\ScoutManager.h"
-					>
-				</File>
-			</Filter>
-			<Filter
-				Name="BuildOrderManager"
-				>
-				<File
-					RelativePath="..\Addons\BuildOrderManager.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\include\BuildOrderManager\BuildOrderManager.h"
-					>
-				</File>
-				<File
-					RelativePath="..\Addons\MetaUnit.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\include\BuildOrderManager\TechItem.h"
-					>
-				</File>
-				<File
-					RelativePath="..\Addons\UnitItem.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\include\BuildOrderManager\UnitItem.h"
-					>
-				</File>
-			</Filter>
-			<Filter
 				Name="DefenseManager"
 				>
 				<File
@@ -452,6 +401,66 @@
 				</File>
 			</Filter>
 			<Filter
+				Name="MorphManager"
+				>
+				<File
+					RelativePath="..\Addons\MorphManager.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\include\MorphManager.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="ProductionManager"
+				>
+				<File
+					RelativePath="..\Addons\ProductionManager.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\include\ProductionManager.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="ScoutManager"
+				>
+				<File
+					RelativePath="..\Addons\ScoutManager.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\include\ScoutManager.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="SupplyManager"
+				>
+				<File
+					RelativePath="..\Addons\SupplyManager.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\include\SupplyManager.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="TechManager"
+				>
+				<File
+					RelativePath="..\Addons\TechManager.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\include\TechManager.h"
+					>
+				</File>
+			</Filter>
+			<Filter
 				Name="UnitGroupManager"
 				>
 				<File
@@ -472,14 +481,14 @@
 				</File>
 			</Filter>
 			<Filter
-				Name="BorderManager"
+				Name="UpgradeManager"
 				>
 				<File
-					RelativePath="..\Addons\BorderManager.cpp"
+					RelativePath="..\Addons\UpgradeManager.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\include\BorderManager.h"
+					RelativePath="..\include\UpgradeManager.h"
 					>
 				</File>
 			</Filter>

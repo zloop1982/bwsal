@@ -28,7 +28,7 @@ namespace BWAPI
       int addCommand(BWAPIC::Command &c);
       void clearAll();
 
-      BWAPIC::GameData* data;
+      GameData* data;
       std::vector<ForceImpl> forceVector;
       std::vector<PlayerImpl> playerVector;
       std::vector<UnitImpl> unitVector;
@@ -36,7 +36,6 @@ namespace BWAPI
 
       std::set<Force*> forces;
       std::set<Player*> players;
-      std::set<Unit*> notDestroyedUnits;//allUnits that may still be alive
       std::set<Unit*> accessibleUnits;//all units that are accessible (and definitely alive)
       //notDestroyedUnits - accessibleUnits = all units that may or may not be alive (status unknown)
       std::set<Unit*> minerals;
@@ -60,15 +59,12 @@ namespace BWAPI
     public :
       Event makeEvent(BWAPIC::Event e);
       int addUnitCommand(BWAPIC::UnitCommand& c);
-      GameImpl(BWAPIC::GameData* data);
+      bool inGame;
+      GameImpl(GameData* data);
       void onMatchStart();
       void onMatchEnd();
       void onMatchFrame();
       std::set<Unit*>& getPlayerUnits(const Player* player);
-
-      Force* getForce(int forceID);
-      Player* getPlayer(int playerID);
-      Unit* getUnit(int unitID);
 
       virtual std::set< Force* >& getForces();
       virtual std::set< Player* >& getPlayers();
@@ -80,14 +76,20 @@ namespace BWAPI
       virtual std::set< Unit* >& getStaticMinerals();
       virtual std::set< Unit* >& getStaticGeysers();
       virtual std::set< Unit* >& getStaticNeutralUnits();
-      virtual std::set< Bullet* >& getBullets();
 
+      virtual std::set< Bullet* >& getBullets();
       virtual std::list< Event>& getEvents();
-      virtual Unit *indexToUnit(int unitIndex);
+
+      virtual Force* getForce(int forceID);
+      virtual Player* getPlayer(int playerID);
+      virtual Unit* getUnit(int unitID);
+      virtual Unit* indexToUnit(int unitIndex);
 
       virtual GameType getGameType();
       virtual int getLatency();
       virtual int getFrameCount();
+      virtual int getFPS();
+      virtual double getAverageFPS();
       virtual int getMouseX();
       virtual int getMouseY();
       virtual BWAPI::Position getMousePosition();
@@ -108,24 +110,25 @@ namespace BWAPI
       virtual std::set<Unit*>& unitsOnTile(int x, int y);
       virtual Error  getLastError() const;
 
-      virtual int  mapWidth();
-      virtual int  mapHeight();
-      virtual std::string  mapFilename();
-      virtual std::string  mapName();
-      virtual int getMapHash();
+      virtual int         mapWidth();
+      virtual int         mapHeight();
+      virtual std::string mapFileName();
+      virtual std::string mapPathName();
+      virtual std::string mapName();
+      virtual std::string mapHash();
 
-      virtual int  getGroundHeight(int x, int y);
       virtual bool isWalkable(int x, int y);
+      virtual int  getGroundHeight(int x, int y);
+      virtual int  getGroundHeight(TilePosition position);
       virtual bool isBuildable(int x, int y);
-      virtual bool isVisible(int x, int y);
-      virtual bool isExplored(int x, int y);
-      virtual bool hasCreep(int x, int y);
-      virtual bool hasPower(int x, int y, int tileWidth, int tileHeight);
-
       virtual bool isBuildable(TilePosition position);
+      virtual bool isVisible(int x, int y);
       virtual bool isVisible(TilePosition position);
+      virtual bool isExplored(int x, int y);
       virtual bool isExplored(TilePosition position);
+      virtual bool hasCreep(int x, int y);
       virtual bool hasCreep(TilePosition position);
+      virtual bool hasPower(int x, int y, int tileWidth, int tileHeight);
       virtual bool hasPower(TilePosition position, int tileWidth, int tileHeight);
 
       virtual bool canBuildHere(Unit* builder, TilePosition position, UnitType type);
@@ -154,6 +157,7 @@ namespace BWAPI
       virtual Player*  self();
       virtual Player*  enemy();
 
+      virtual void setTextSize(int size = 1);
       virtual void drawText(int ctype, int x, int y, const char* text, ...);
       virtual void drawTextMap(int x, int y, const char* text, ...);
       virtual void drawTextMouse(int x, int y, const char* text, ...);

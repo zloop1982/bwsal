@@ -222,17 +222,17 @@ void BasicAIModule::onUnitDestroy(BWAPI::Unit* unit)
   this->baseManager->onRemoveUnit(unit);
 }
 
-void BasicAIModule::onUnitShow(BWAPI::Unit* unit)
+void BasicAIModule::onUnitDiscover(BWAPI::Unit* unit)
 {
   if (Broodwar->isReplay()) return;
-  this->informationManager->onUnitShow(unit);
-  this->unitGroupManager->onUnitShow(unit);
+  this->informationManager->onUnitDiscover(unit);
+  this->unitGroupManager->onUnitDiscover(unit);
 }
-void BasicAIModule::onUnitHide(BWAPI::Unit* unit)
+void BasicAIModule::onUnitEvade(BWAPI::Unit* unit)
 {
   if (Broodwar->isReplay()) return;
-  this->informationManager->onUnitHide(unit);
-  this->unitGroupManager->onUnitHide(unit);
+  this->informationManager->onUnitEvade(unit);
+  this->unitGroupManager->onUnitEvade(unit);
 }
 
 void BasicAIModule::onUnitMorph(BWAPI::Unit* unit)
@@ -246,9 +246,13 @@ void BasicAIModule::onUnitRenegade(BWAPI::Unit* unit)
   this->unitGroupManager->onUnitRenegade(unit);
 }
 
-bool BasicAIModule::onSendText(std::string text)
+void BasicAIModule::onSendText(std::string text)
 {
-  if (Broodwar->isReplay()) return true;
+  if (Broodwar->isReplay())
+  {
+    Broodwar->sendText("%s",text.c_str());
+    return;
+  }
   UnitType type=UnitTypes::getUnitType(text);
   if (text=="debug")
   {
@@ -264,11 +268,14 @@ bool BasicAIModule::onSendText(std::string text)
       this->buildOrderManager->setDebugMode(false);
       this->scoutManager->setDebugMode(false);
     }
-    return true;
+    Broodwar->printf("%s",text.c_str());
+    return;
   }
   if (text=="expand")
   {
     this->baseManager->expand();
+    Broodwar->printf("%s",text.c_str());
+    return;
   }
   if (type!=UnitTypes::Unknown)
   {
@@ -292,5 +299,5 @@ bool BasicAIModule::onSendText(std::string text)
         Broodwar->printf("You typed '%s'!",text.c_str());
     }
   }
-  return true;
+  Broodwar->sendText("%s",text.c_str());
 }

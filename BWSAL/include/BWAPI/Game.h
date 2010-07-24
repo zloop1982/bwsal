@@ -3,6 +3,7 @@
 #include <list>
 #include <map>
 #include <set>
+#include <vector>
 
 #include <BWAPI/Color.h>
 #include <BWAPI/CoordinateType.h>
@@ -70,8 +71,17 @@ namespace BWAPI
       /** Returns the list of events */
       virtual std::list< Event >& getEvents() = 0;
 
+      /** Returns the force with the given ID, or NULL if no force has the given ID */
+      virtual Force* getForce(int forceID) = 0;
+
+      /** Returns the player with the given ID, or NULL if no player has the given ID */
+      virtual Player* getPlayer(int playerID) = 0;
+
+      /** Returns the unit with the given ID, or NULL if no unit has the given ID */
+      virtual Unit* getUnit(int unitID) = 0;
+
       /** Returns a pointer to a Unit given an index. */
-      virtual Unit *indexToUnit(int unitIndex) = 0;
+      virtual Unit* indexToUnit(int unitIndex) = 0;
 
       /** Returns the game type */
       virtual GameType getGameType() = 0;
@@ -84,6 +94,10 @@ namespace BWAPI
        * Game::getFrameCount will not increase however AIModule::onFrame will still be called while paused.
        * On Fastest, there are about 23.8 - 24 frames per second. */
       virtual int getFrameCount() = 0;
+
+      /** Returns the Frames Per Second (FPS) that the game is currently running at */
+      virtual int getFPS() = 0;
+      virtual double getAverageFPS() = 0;
 
       /** Returns the horizontal coordinate of the mouse on the screen. Returns 0 if Flag::UserInput? is
        * disabled. */
@@ -164,16 +178,16 @@ namespace BWAPI
       virtual int mapHeight() = 0;
 
       /** Returns the file name of the current map. */
-      virtual std::string mapFilename() = 0;
+      virtual std::string mapFileName() = 0;
+
+      /** Returns the full path name of the current map. */
+      virtual std::string mapPathName() = 0;
 
       /** Returns the name/title of the current map. */
       virtual std::string mapName() = 0;
 
-      /** Returns a unique identifier for the given map data that does not depend on the file name. */
-      virtual int getMapHash() = 0;
-
-      /** Returns the ground height of the given walk tile. 0 = normal, 1 = high ground. */
-      virtual int  getGroundHeight(int x, int y) = 0;
+      /** Returns the SHA-1 hash of the map file. */
+      virtual std::string mapHash() = 0;
 
       /** Returns true if the specified walk tile is walkable. The values of x and y are in walk tile
        * coordinates (different from build tile coordinates). Note that this just uses the static map data.
@@ -181,34 +195,38 @@ namespace BWAPI
        * currently walkable. To do this, see unitsOnTile. */
       virtual bool isWalkable(int x, int y) = 0;
 
+      /** Returns the ground height of the given build tile. 0 = normal, 1 = high ground.  2 = very high ground. */
+      virtual int  getGroundHeight(int x, int y) = 0;
+      /** Returns the ground height of the given build tile. 0 = normal, 1 = high ground. 2 = very high ground. */
+      virtual int  getGroundHeight(TilePosition position) = 0;
+
       /** Returns true if the specified build tile is buildable. Note that this just uses the static map data.
        * You will also need to make sure no ground units on the tile to see if its currently buildable. To do
        * this, see unitsOnTile. */
       virtual bool isBuildable(int x, int y) = 0;
+      /** \copydoc isBuildable(int, int) */
+      virtual bool isBuildable(TilePosition position) = 0;
 
       /** Returns true if the specified build tile is visible. If the tile is concealed by fog of war, the
        * function will return false. */
       virtual bool isVisible(int x, int y) = 0;
+      /** \copydoc isVisible(int, int) */
+      virtual bool isVisible(TilePosition position) = 0;
 
       /** Returns true if the specified build tile has been explored (i.e. was visible at some point in the
        * match). */
       virtual bool isExplored(int x, int y) = 0;
+      /** \copydoc isExplored(int, int) */
+      virtual bool isExplored(TilePosition position) = 0;
 
       /** Returns true if the specified build tile has zerg creep on it. If the tile is concealed by fog of
        * war, the function will return false. */
       virtual bool hasCreep(int x, int y) = 0;
+      /** \copydoc hasCreep(int, int) */
+      virtual bool hasCreep(TilePosition position) = 0;
 
       /** Returns true if the given build location is powered by a nearby friendly pylon. */
       virtual bool hasPower(int x, int y, int tileWidth, int tileHeight) = 0;
-
-      /** \copydoc isBuildable(int, int) */
-      virtual bool isBuildable(TilePosition position) = 0;
-      /** \copydoc isVisible(int, int) */
-      virtual bool isVisible(TilePosition position) = 0;
-      /** \copydoc isExplored(int, int) */
-      virtual bool isExplored(TilePosition position) = 0;
-      /** \copydoc hasCreep(int, int) */
-      virtual bool hasCreep(TilePosition position) = 0;
       /** \copydoc hasPower(int, int, int, int) */
       virtual bool hasPower(TilePosition position, int tileWidth, int tileHeight) = 0;
 
@@ -300,8 +318,7 @@ namespace BWAPI
        * return NULL. */
       virtual Player* enemy() = 0;
 
-      // TODO: group methods
-
+      virtual void setTextSize(int size = 1) = 0;
       /** Draws text on the screen at the given position. Text can be drawn in different colors by using the
        * following control characters: TODO: add image from wiki.*/
       virtual void drawText(int ctype, int x, int y, const char* text, ...) = 0;

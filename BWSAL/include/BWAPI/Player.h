@@ -8,7 +8,7 @@
 #include <BWAPI/UpgradeType.h>
 #include <BWAPI/PlayerType.h>
 #include <BWAPI/UnitType.h>
-
+#include <BWAPI/Client/PlayerData.h>
 namespace BWAPI
 {
   class Unit;

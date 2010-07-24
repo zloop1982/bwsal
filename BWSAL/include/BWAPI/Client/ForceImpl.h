@@ -12,10 +12,11 @@ namespace BWAPI
   class ForceImpl : public Force
   {
     private:
-      const BWAPIC::ForceData* self;
+      const ForceData* self;
       int id;
     public:
       ForceImpl(int id);
+      virtual int getID() const;
       virtual std::string getName() const;
       virtual std::set<Player*> getPlayers() const;
   };

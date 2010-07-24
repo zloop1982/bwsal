@@ -265,7 +265,7 @@ void RushBot::onFrame()
     UnitGroup army = SelectAll()(canAttack)(canMove).not(isWorker);
     if (startedAttacking==false)
     {
-      if (army.size()>=this->initialPushSize)
+      if ((int)army.size()>=this->initialPushSize)
         startedAttacking = true;
     }
     if (startedAttacking)
@@ -318,17 +318,17 @@ void RushBot::onUnitDestroy(BWAPI::Unit* unit)
   this->baseManager->onRemoveUnit(unit);
 }
 
-void RushBot::onUnitShow(BWAPI::Unit* unit)
+void RushBot::onUnitDiscover(BWAPI::Unit* unit)
 {
   if (Broodwar->isReplay()) return;
-  this->informationManager->onUnitShow(unit);
-  this->unitGroupManager->onUnitShow(unit);
+  this->informationManager->onUnitDiscover(unit);
+  this->unitGroupManager->onUnitDiscover(unit);
 }
-void RushBot::onUnitHide(BWAPI::Unit* unit)
+void RushBot::onUnitEvade(BWAPI::Unit* unit)
 {
   if (Broodwar->isReplay()) return;
-  this->informationManager->onUnitHide(unit);
-  this->unitGroupManager->onUnitHide(unit);
+  this->informationManager->onUnitEvade(unit);
+  this->unitGroupManager->onUnitEvade(unit);
 }
 
 void RushBot::onUnitMorph(BWAPI::Unit* unit)
@@ -342,9 +342,13 @@ void RushBot::onUnitRenegade(BWAPI::Unit* unit)
   this->unitGroupManager->onUnitRenegade(unit);
 }
 
-bool RushBot::onSendText(std::string text)
+void RushBot::onSendText(std::string text)
 {
-  if (Broodwar->isReplay()) return true;
+  if (Broodwar->isReplay())
+  {
+    Broodwar->sendText("%s",text.c_str());
+    return;
+  }
   UnitType type=UnitTypes::getUnitType(text);
   if (text=="debug")
   {
@@ -360,11 +364,14 @@ bool RushBot::onSendText(std::string text)
       this->buildOrderManager->setDebugMode(false);
       this->scoutManager->setDebugMode(false);
     }
-    return true;
+    Broodwar->printf("%s",text.c_str());
+    return;
   }
   if (text=="expand")
   {
     this->baseManager->expand();
+    Broodwar->printf("%s",text.c_str());
+    return;
   }
   if (type!=UnitTypes::Unknown)
   {
@@ -388,5 +395,5 @@ bool RushBot::onSendText(std::string text)
         Broodwar->printf("You typed '%s'!",text.c_str());
     }
   }
-  return true;
+  Broodwar->sendText("%s",text.c_str());
 }

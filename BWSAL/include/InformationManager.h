@@ -6,8 +6,8 @@ class InformationManager
 {
   public:
     InformationManager();
-    void onUnitShow(BWAPI::Unit* unit);
-    void onUnitHide(BWAPI::Unit* unit);
+    void onUnitDiscover(BWAPI::Unit* unit);
+    void onUnitEvade(BWAPI::Unit* unit);
     void onUnitDestroy(BWAPI::Unit* unit);
     BWAPI::Player* getPlayer(BWAPI::Unit* unit) const;
     BWAPI::UnitType getType(BWAPI::Unit* unit) const;

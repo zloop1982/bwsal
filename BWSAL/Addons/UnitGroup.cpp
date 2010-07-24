@@ -755,9 +755,6 @@ Unit* getUnit(Unit* u,FilterAttributeUnit a)
     case GetBuildUnit:
       return u->getBuildUnit();
     break;
-    case GetChild:
-      return u->getChild();
-    break;
     case GetTransport:
       return u->getTransport();
     break;

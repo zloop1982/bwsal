@@ -253,7 +253,6 @@ enum FilterAttributeUnit
   GetTarget,
   GetOrderTarget,
   GetBuildUnit,
-  GetChild,
   GetTransport,
   GetRallyUnit,
   GetAddon
