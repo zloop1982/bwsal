@@ -76,6 +76,7 @@ ScoutManager::ScoutManager(Arbitrator::Arbitrator<BWAPI::Unit*,double> *arbitrat
   std::list<BWTA::BaseLocation*> path=getBestPath(startLocations).first;
   for(std::list<BWTA::BaseLocation*>::iterator p=path.begin();p!=path.end();p++)
     baseLocationsToScout.push_back(*p);
+  baseLocationsExplored.insert(myStartLocation);
   this->debugMode=false;
 }
 
@@ -92,9 +93,8 @@ void ScoutManager::onOffer(std::set<BWAPI::Unit*> units)
     {
       arbitrator->accept(this, *u);
       units.erase(u);
-      continue;
     }
-    if ((*u)->getType() == BWAPI::UnitTypes::Zerg_Overlord && needMoreScouts())
+    else if ((*u)->getType() == BWAPI::UnitTypes::Zerg_Overlord && needMoreScouts())
     {
       arbitrator->accept(this, *u);
       addScout(*u);
@@ -111,9 +111,8 @@ void ScoutManager::onOffer(std::set<BWAPI::Unit*> units)
     {
       arbitrator->accept(this, *u);
       units.erase(u);
-      continue;
     }
-    if ((*u)->getType().isWorker() && needMoreScouts())
+    else if ((*u)->getType().isWorker() && needMoreScouts())
     {
       arbitrator->accept(this, *u);
       addScout(*u);
@@ -141,9 +140,12 @@ void ScoutManager::update()
   }
   else
   {
-    while (scouts.size()>desiredScoutCount)
+    int sCount = desiredScoutCount;
+    if (baseLocationsExplored.size()==BWAPI::Broodwar->getStartLocations().size())
+      sCount = 0;
+    while ((int)scouts.size()>sCount)
     {
-      arbitrator->setBid(this, scouts.begin()->first,0);
+      arbitrator->removeBid(this, scouts.begin()->first);
       scouts.erase(scouts.begin());
     }
   }
@@ -218,7 +220,10 @@ bool ScoutManager::isScouting() const
 
 bool ScoutManager::needMoreScouts() const
 {
-  return scouts.size() < desiredScoutCount;
+  int sCount = desiredScoutCount;
+  if (baseLocationsExplored.size()==BWAPI::Broodwar->getStartLocations().size())
+    sCount = 0;
+  return (int)scouts.size() < sCount;
 }
 
 void ScoutManager::requestScout(double bid)
