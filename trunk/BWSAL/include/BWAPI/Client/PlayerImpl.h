@@ -11,9 +11,9 @@ namespace BWAPI
   class PlayerImpl : public Player
   {
     private:
-      const BWAPIC::PlayerData* self;
       int id;
     public:
+      PlayerData* self;
       std::set<Unit*> units;
       void clear();
       PlayerImpl(int id);

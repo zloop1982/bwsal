@@ -9,7 +9,7 @@
 #include "Command.h"
 #include "Shape.h"
 
-namespace BWAPIC
+namespace BWAPI
 {
   struct GameData
   {
@@ -35,6 +35,8 @@ namespace BWAPIC
     int gameType;
     int latency;
     int frameCount;
+    int fps;
+    double averageFPS;
 
     // user input
     int mouseX;
@@ -49,12 +51,13 @@ namespace BWAPIC
     // map
     int mapWidth;
     int mapHeight;
-    char mapFilename[260];  //size based on broodwar memory
-    char mapName[32];      //size based on broodwar memory
-    int mapHash;
+    char mapFileName[261];  //size based on broodwar memory
+    char mapPathName[261];  //size based on broodwar memory
+    char mapName[33];      //size based on broodwar memory
+    char mapHash[41];
 
     //tile data
-    int getGroundHeight[1024][1024];
+    int getGroundHeight[256][256];
     bool isWalkable[1024][1024]; 
     bool isBuildable[256][256];
     bool isVisible[256][256];
@@ -82,21 +85,21 @@ namespace BWAPIC
 
     //events from server to client
     int eventCount;
-    Event events[1000];
+    BWAPIC::Event events[10000];
 
     //strings (used in events, shapes, and commands)
     int stringCount;
-    char strings[1000][256];
+    char strings[20000][256];
 
     //shapes, commands, unitCommands, from client to server
     int shapeCount;
-    Shape shapes[10000];
+    BWAPIC::Shape shapes[20000];
 
     int commandCount;
-    Command commands[10000];
+    BWAPIC::Command commands[20000];
 
     int unitCommandCount;
-    UnitCommand unitCommands[10000];
+    BWAPIC::UnitCommand unitCommands[20000];
 
   };
 }

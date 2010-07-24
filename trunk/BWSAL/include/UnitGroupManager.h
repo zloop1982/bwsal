@@ -5,8 +5,8 @@ class UnitGroupManager
 {
   public:
     UnitGroupManager();
-    void onUnitShow(BWAPI::Unit* unit);
-    void onUnitHide(BWAPI::Unit* unit);
+    void onUnitDiscover(BWAPI::Unit* unit);
+    void onUnitEvade(BWAPI::Unit* unit);
     void onUnitMorph(BWAPI::Unit* unit);
     void onUnitRenegade(BWAPI::Unit* unit);
 };
