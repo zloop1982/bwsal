@@ -100,6 +100,15 @@ Example of how to use Task Streams and Task Stream Observers:
 
   * Say you want to pump Marines out of one of your barracks. You could make a basic unit pump observer that always sets the current task and next task to "Train Marine", and then attach this observer to a new task stream. In this new task stream you set the worker to the barracks you want to pump marines out of. You could also then decide to attach the Basic Worker Terminator, or the Basic Worker Finding to the task stream depending on if you want the task stream of pumping marines to terminate if the barracks gets destroyed, or continue with a different barracks if the first gets destroyed.
 
+Example of a possible Task Stream list:
+
+|| Task Stream Name || Worker ID || Current Task || Next Task || Observers ||
+|| Pump SCVs || 6 (a command center) || Train SCV || Train SCV || Unit Pump, Basic Worker Terminator ||
+|| Unit Composition || 7 (a barracks) || Train Marine || Train Medic || Unit Composition Manager, Basic Worker Terminator ||
+|| Unit Composition || 8 (another barracks) || Train Marine || Train Marine || Unit Composition Manager, Basic Worker Terminator ||
+|| Unit Composition || 9 (another barracks) || Train Medic || Train Marine || Unit Composition Manager, Basic Worker Terminator ||
+|| Make Factory || 3 (an scv) || Build Factory || None || Basic Worker Finder, Basic Task Stream Terminator ||
+
 = Threat Manager =
 Will create a virtual "heatmap" of danger it will encounter if it moves to that position. Can be used to route units through the path with minimum danger. Takes into account tech levels. For example, a Dark Templar will have 0 threat against Zerg where the Overlords cannot see. Against Protoss it will generally have a small baselevel threat due to the possibility of hidden enemy Observers. Dropships will route themselves through areas where they cannot be seen (edge of map, elevated unaccessible territory, etc). Dragoons will prefer to maneuver with an Observor to negate the threat of mines. A full microing solution will have to take into account temporal elements, so this is just a stand-in or foundation for a better solution.
 
