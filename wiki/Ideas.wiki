@@ -107,7 +107,8 @@ Example of a possible Task Stream list:
 || Unit Composition || 7 (a barracks) || Train Marine || Train Medic || Unit Composition Manager, Basic Worker Terminator ||
 || Unit Composition || 8 (another barracks) || Train Marine || Train Marine || Unit Composition Manager, Basic Worker Terminator ||
 || Unit Composition || 9 (another barracks) || Train Medic || Train Marine || Unit Composition Manager, Basic Worker Terminator ||
-|| Make Factory || 3 (an scv) || Build Factory || None || Basic Worker Finder, Basic Task Stream Terminator ||
+|| Make Factory || 3 (an scv) || Build Factory || None || Basic Worker Finder, Basic Building Placer, Basic Task Stream Terminator ||
+
 
 = Threat Manager =
 Will create a virtual "heatmap" of danger it will encounter if it moves to that position. Can be used to route units through the path with minimum danger. Takes into account tech levels. For example, a Dark Templar will have 0 threat against Zerg where the Overlords cannot see. Against Protoss it will generally have a small baselevel threat due to the possibility of hidden enemy Observers. Dropships will route themselves through areas where they cannot be seen (edge of map, elevated unaccessible territory, etc). Dragoons will prefer to maneuver with an Observor to negate the threat of mines. A full microing solution will have to take into account temporal elements, so this is just a stand-in or foundation for a better solution.
