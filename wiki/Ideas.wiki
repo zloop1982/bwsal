@@ -3,9 +3,11 @@
 Ideas for new BWSAL functionality, in no particular order
 
 = Macro Manager =
-Idea for a more modular and extensible approach to macro management. This would replace the build order manager, build manager, construction manager, production manager, morph manager, tech manager, and upgrade manager.
+The Macro Manager would be a more modular and extensible approach to macro management. This would replace the build order manager, build manager, construction manager, production manager, morph manager, tech manager, and upgrade manager.
 
-The Macro Manager could also be called the Task Stream Manager as it would maintain/manage a list of Task Streams, ordered by priority in descending order. The classes for a Task, Task Stream, and Task Stream Observer would look something like this:
+The Macro Manager could also be called the Task Stream Manager as it would maintain/manage a list of Task Streams, ordered by priority in descending order. Similar to the Build Order Manager, the Macro Manager would first try to execute the highest priority Task Stream, and then attempt to execute the second-highest Task Stream if doing so would not delay the highest Task Stream, etc. Unlike the Build Order Manager, however, there would usually be at most one Task Stream per production facility. The Task Streams would be editable and cancel-able (unlike orders given to the Build Order Manager). Also if a Task Stream was marked as 'Urgent', the Macro Manager may cancel active tasks of lower priority so as to begin execution of the urgent Task Stream as soon as possible.
+
+The classes for a Task, Task Stream, and Task Stream Observer would look something like this:
 
 {{{
 class Task
@@ -68,15 +70,21 @@ class TaskStreamObserver
 
 A Task object represents any sort of Macro-management task that can be executed, including training a unit, morphing a unit, constructing a building (with a field to specify build location), researching a technology, and upgrading an upgrade.
 
-A Task Stream object maintains a Status, a current Task, a next Task, a Worker unit, and an urgency flag:
+A Task Stream object maintains a Status, a current Task, a next Task, a Worker unit, and an Urgent flag:
 
   * Status - The status field will indicate if the task is executing, waiting for some condition to occur (like sufficient minerals), or has an error which needs to be resolved by a TaskStreamObserver (like the worker unit died, or the build location is blocked).
   * Current Task - the Task that this TaskStream is current trying to execute.
   * Next Task - the next Task that this Task Stream will immediately try to execute as soon as the current task is done.
   * Worker - the worker that is assigned to this task stream and will be used to execute the task. If the MacroManager cannot get ownership of the worker unit from the Arbitrator, the worker field will be reset to NULL and the status of the TaskStream will be set to ErrorWorkerNotSpecified.
-  * Urgency - if true, the macro manager will try to start the current task in this stream even at the expence of canceling tasks that are already in progress from lower priority task streams.
+  * Urgent flag - If a Task Stream is marked as Urgent, the Macro Manager may cancel lower priority Task Streams if doing so would enable the Urgent Task Stream to begin.
 
-Once the current task is done, the next task is moved into the current task field and the field for next task is cleared/emptied.
+Two examples of how to use the Urgent flag:
+
+Example A: Say the AI scouts that the opponent is getting Dark Templar, and suddenly as an urgent need to get a Comsat Station add-on. The AI could add a Task Stream for building a Comsat Station to the top of the Task Stream list and mark it as Urgent. Since the Comsat Station Task Stream has a higher priority than the SCV Pump Task Stream, the Macro Manager would cancel any SCV that might be in production, and then start building the Comsat Station. If the Comsat Station Task Stream was not marked as urgent in this scenario, the Macro Manager would wait for the SCV to complete before building the Comsat Station.
+
+Example B: Say the AI scouts that the opponent is getting Mutalisks, and thus wants to build an E-bay as fast as possible, but does not want to cancel or delay its SCV production, but is willing to cancel/delay some lower priority Task Streams that are pumping marines. In this case, the AI could add an urgent Task Stream for building the E-bay and insert it right below the Task Stream for producing SCVs. If the AI did not have enough money to immediately begin producing the E-bay, but did have some Marines in production, the AI would cancel some of those Marines so it would have enough money to begin construction on the E-bay. The SCV Production Task Stream would be unaffected by the Urgent E-bay Task Stream as it occurs above the Urgent E-bay Task Stream in the list of Task Streams.
+
+Once the current task in a Task Stream is done, the next task is moved into the current task field and the field for next task is cleared/emptied.
 
 From the MacroManager class, there would be functions to observe the list of Task Streams, modify the order of Task Streams, and add or remove Task Streams.
 
