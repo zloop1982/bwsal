@@ -24,6 +24,7 @@ class TaskStream
   void notifyObservers();
   enum Status
   {
+    Executing_Task,
     Error_Worker_Not_Specified,
     Error_Task_Not_Specified,
     Error_Location_Not_Specified,
@@ -48,6 +49,9 @@ class TaskStream
   void setNextTask(Task* t);
   Task getNextTask() const;
 
+  void setName(String s);
+  String getName() const;
+
   //perhaps an arbitrarily long list of tasks?
   
 }
@@ -55,7 +59,8 @@ class TaskStream
 class TaskStreamObserver
 {
   public:
-  receiveTaskStreamPing(TaskStream* ts);
+  receiveTaskStreamStatus(TaskStream* fromStream, Status s);
+  receiveTaskStreamCompletion(TaskStream* fromStream, Task completedTask);
 }
 
 
@@ -70,6 +75,28 @@ A Task Stream object maintains a Status, a current Task, a next Task, a Worker u
   * Next Task - the next Task that this Task Stream will immediately try to execute as soon as the current task is done.
   * Worker - the worker that is assigned to this task stream and will be used to execute the task. If the MacroManager cannot get ownership of the worker unit from the Arbitrator, the worker field will be reset to NULL and the status of the TaskStream will be set to ErrorWorkerNotSpecified.
   * Urgency - if true, the macro manager will try to start the current task in this stream even at the expence of canceling tasks that are already in progress from lower priority task streams.
+
+From the MacroManager class, there would be functions to observe the list of Task Streams, modify the order of Task Streams, and add or remove Task Streams.
+
+Also, any class that implements the TaskStreamObserver class could attach itself to a TaskStream, and would then get pinged whenever the status of the TaskStream changes.
+
+Some basic TaskStreamObservers that could be created/used:
+
+Basic Worker Finder - When this Task Stream Observer is pinged by a Task Stream with a status of Error_Worker_Not_Specified, it finds a suitable worker for the Task Stream based on the type of unit needed to execute the current Task in the Task Stream. When multiple workers are found, the Basic Worker Finder prefers workers that are closer to the build location of the current task in the task stream.
+
+Basic Building Placer - When this Task Stream Observer is pinged by a Task Stream with a status of Error_Location_Not_Specified, Error_Location_Unreachable, or Error_Location_Blocked, it finds a new place to build the building by looking in an outward search from its current location.
+
+Basic Task Stream Terminator - When this Task Stream Observer is pinged by a Task Stream with a status of Error_Task_Not_Specified, it will terminate the task stream.
+
+Basic Worker Terminator - When this Task Stream Observer is pinged by a Task Stream with a status of Error_Worker_Not_Specified it will terminate the task stream.
+
+Example of how to use Task Streams and Task Stream Observers:
+
+  * Say the Base Manager wants to expand to a BaseLocation at (137,42). The BaseManager could create a new TaskStream for this task, attach itself to this TaskStream as an Observer, set the current Task in the task stream to "Build Nexus at (137,42)", set the next Task in the task stream to "Build Pylon at (137,45)", and then insert the TaskStream into the Macro Manager's TaskStream list at the desired location depending on the priority of expanding. For example if you don't want the act of expanding to halt or delay army production, the TaskStream for expanding should be below all the task streams responsible for army production. The BaseManager doesn't really care what probe is used to complete this task, so the BaseManager would also attach the Basic Worker Finder as an observer to this Task Stream, which would find a free nearby worker to use for the Task Stream. However the BaseManager would NOT attach the Basic Building Placer because it doesn't want the build location to change if the original build location of (137,42) is blocked. Instead it will handle the Error_Location_Blocked status message itself (perhaps by telling the army manager to destroy whatever is blocking it). Once both tasks in the task stream are done, the task stream should automatically terminate so the Base Manager could also attach the Basic Task Stream Terminator to the task stream.
+
+  * Say the Supply Manager determines that it is time to make a new supply depot. The Supply Manager would create a new Task Stream for this task, attach itself to this Task Stream as an observer, set the current Task in the task stream to "Build Supply Depot at TilePosition::None", and then insert the Task Stream into the top of the Macro Manager's Task Stream list. The Supply Manager would also attach the Basic Building Placer, Basic Worker Finder, and Basic Task Stream Terminator as observers to this Task Stream.
+
+  * Say you want to pump Marines out of one of your barracks. You could make a basic unit pump observer that always sets the current task and next task to "Train Marine", and then attach this observer to a new task stream. In this new task stream you set the worker to the barracks you want to pump marines out of. You could also then decide to attach the Basic Worker Terminator, or the Basic Worker Finding to the task stream depending on if you want the task stream of pumping marines to terminate if the barracks gets destroyed, or continue with a different barracks if the first gets destroyed.
 
 = Threat Manager =
 Will create a virtual "heatmap" of danger it will encounter if it moves to that position. Can be used to route units through the path with minimum danger. Takes into account tech levels. For example, a Dark Templar will have 0 threat against Zerg where the Overlords cannot see. Against Protoss it will generally have a small baselevel threat due to the possibility of hidden enemy Observers. Dropships will route themselves through areas where they cannot be seen (edge of map, elevated unaccessible territory, etc). Dragoons will prefer to maneuver with an Observor to negate the threat of mines. A full microing solution will have to take into account temporal elements, so this is just a stand-in or foundation for a better solution.
