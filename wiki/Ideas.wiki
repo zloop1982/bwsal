@@ -2,6 +2,62 @@
 
 Ideas for new BWSAL functionality, in no particular order
 
+= Macro Manager =
+Idea for a more modular and extensible approach to macro management. This would replace the build order manager, build manager, construction manager, production manager, morph manager, tech manager, and upgrade manager.
+
+The Macro Manager could also be called the Task Stream Manager as it would maintain/manage a list of task streams, ordered by priority. The classes for a Task, Task Stream, and Task Stream Observer would look something like this:
+
+{{{
+class Task
+{
+  UnitType a;
+  TechType b;
+  UpgradeType c;
+  TilePosition t;
+}
+
+class TaskStream
+{
+  public:
+  attach(TaskStreamObserver);
+  detach(TaskStreamObserver);
+  notifyObservers();
+  enum Status
+  {
+    ErrorWorkerNotSpecified,
+    ErrorTaskNotSpecified,
+    ErrorLocationNotSpecified,
+    ErrorLocationUnreachable,
+    ErrorLocationBlocked,
+    ErrorTaskRequiresAddon,
+    WaitingForMinerals,
+    WaitingForGas,
+    WaitingForSupply,
+    WaitingForRequiredBuildings
+  }
+  Status getStatus() const;
+
+  setWorker(Unit* w);
+  Unit* getWorker() const;
+
+  setCurrentTask(Task t);
+  Task getCurrentTask() const;
+
+  setNextTask(Task* t);
+  Task getNextTask() const;
+  
+}
+
+class TaskStreamObserver
+{
+  public:
+  recieveTaskStreamPing(TaskStream*);
+}
+
+
+}}}
+
+
 = Threat Manager =
 Will create a virtual "heatmap" of danger it will encounter if it moves to that position. Can be used to route units through the path with minimum danger. Takes into account tech levels. For example, a Dark Templar will have 0 threat against Zerg where the Overlords cannot see. Against Protoss it will generally have a small baselevel threat due to the possibility of hidden enemy Observers. Dropships will route themselves through areas where they cannot be seen (edge of map, elevated unaccessible territory, etc). Dragoons will prefer to maneuver with an Observor to negate the threat of mines. A full microing solution will have to take into account temporal elements, so this is just a stand-in or foundation for a better solution.
 
