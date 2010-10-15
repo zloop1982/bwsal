@@ -76,6 +76,8 @@ A Task Stream object maintains a Status, a current Task, a next Task, a Worker u
   * Worker - the worker that is assigned to this task stream and will be used to execute the task. If the MacroManager cannot get ownership of the worker unit from the Arbitrator, the worker field will be reset to NULL and the status of the TaskStream will be set to ErrorWorkerNotSpecified.
   * Urgency - if true, the macro manager will try to start the current task in this stream even at the expence of canceling tasks that are already in progress from lower priority task streams.
 
+Once the current task is done, the next task is moved into the current task field and the field for next task is cleared/emptied.
+
 From the MacroManager class, there would be functions to observe the list of Task Streams, modify the order of Task Streams, and add or remove Task Streams.
 
 Also, any class that implements the TaskStreamObserver class could attach itself to a TaskStream, and would then get pinged whenever the status of the TaskStream changes.
