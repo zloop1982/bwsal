@@ -8,7 +8,7 @@ class TaskStreamObserver;
 class TaskStream : public Arbitrator::Controller<BWAPI::Unit*,double>
 {
   public:
-    TaskStream();
+    TaskStream(Task t=Task(), Task nt=Task());
     virtual void onOffer(std::set<BWAPI::Unit*> units);
     virtual void onRevoke(BWAPI::Unit* unit, double bid);
     virtual void update();
@@ -22,6 +22,7 @@ class TaskStream : public Arbitrator::Controller<BWAPI::Unit*,double>
 
     enum Status
     {
+      Not_Initialized,
       Error_Worker_Not_Specified,
       Error_Task_Not_Specified,
       Error_Location_Not_Specified,
@@ -38,6 +39,7 @@ class TaskStream : public Arbitrator::Controller<BWAPI::Unit*,double>
       Executing_Task,
     };
     Status getStatus() const;
+    std::string getStatusString() const;
 
     void setWorker(BWAPI::Unit* w);
     BWAPI::Unit* getWorker() const;
@@ -51,6 +53,7 @@ class TaskStream : public Arbitrator::Controller<BWAPI::Unit*,double>
     Task getNextTask() const;
 
     void setName(std::string s);
+    void printToScreen(int x, int y);
 
   private:
     bool urgent;

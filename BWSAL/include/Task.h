@@ -1,6 +1,7 @@
 #pragma once
 #include <BWAPI.h>
-namespace TaskType
+#include <Resources.h>
+namespace TaskTypes
 {
   enum Enum
   {
@@ -29,14 +30,17 @@ class Task
     bool operator==(const BWAPI::UpgradeType &t) const;
     bool operator==(const BWAPI::TilePosition &p) const;
 
-    TaskType::Enum getType() const;
+    TaskTypes::Enum getType() const;
     BWAPI::UnitType getUnit() const;
     BWAPI::TechType getTech() const;
     BWAPI::UpgradeType getUpgrade() const;
     BWAPI::TilePosition getTilePosition() const;
+    Resources getResources(BWAPI::Player* player = NULL) const;
+    std::string getName() const;
+    std::string getVerb() const;
 
   private:
-    TaskType::Enum type;
+    TaskTypes::Enum type;
     int id;
     BWAPI::TilePosition position;
 };

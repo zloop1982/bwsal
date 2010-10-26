@@ -8,6 +8,8 @@
 class MacroAIModule : public BWAPI::AIModule
 {
   public:
+    MacroAIModule();
+    ~MacroAIModule();
     virtual void onStart();
     virtual void onEnd(bool isWinner);
     virtual void onFrame();

@@ -218,14 +218,6 @@
 					>
 				</File>
 				<File
-					RelativePath="..\Addons\Resources.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\include\Resources.h"
-					>
-				</File>
-				<File
 					RelativePath="..\Addons\Task.cpp"
 					>
 				</File>
@@ -259,6 +251,26 @@
 				</File>
 				<File
 					RelativePath="..\include\Arbitrator\Heap.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="ResourceTimeline"
+				>
+				<File
+					RelativePath="..\Addons\Resources.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\include\Resources.h"
+					>
+				</File>
+				<File
+					RelativePath="..\Addons\ResourceTimeline.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\include\ResourceTimeline.h"
 					>
 				</File>
 			</Filter>
