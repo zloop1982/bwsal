@@ -1,9 +1,13 @@
 #pragma once
+#include <BWAPI.h>
 class Resources
 {
   public:
     Resources(int m = 0, int g = 0, int s = 0) : minerals(m),gas(g),supply(0) {}
-
+    Resources(BWAPI::Player* player);
+    Resources(BWAPI::UnitType type);
+    Resources(BWAPI::TechType type);
+    Resources(BWAPI::UpgradeType type, int level = 1);
     Resources& operator=(const Resources &r);
     Resources& set(int m, int g = 0, int s = 0);
     Resources& setMinerals(int m);
@@ -21,6 +25,7 @@ class Resources
 
     bool operator==(const Resources &r) const;
     bool operator<(const Resources &r) const;
+    bool isValid() const;
 
     Resources operator+(const Resources &r) const;
     Resources operator-(const Resources &r) const;

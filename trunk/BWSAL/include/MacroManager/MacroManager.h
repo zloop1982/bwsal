@@ -1,6 +1,7 @@
 #pragma once
 #include <BWAPI.h>
 #include <Arbitrator.h>
+#include <ResourceTimeline.h>
 class TaskStream;
 class MacroManager
 {
@@ -10,6 +11,7 @@ class MacroManager
 
     std::list< TaskStream > taskStreams;
     TaskStream* getTaskStream(BWAPI::Unit* unit);
+    ResourceTimeline rtl;
 private:
     std::map< BWAPI::Unit*, TaskStream* > unitToTaskStream;
 };
