@@ -4,9 +4,9 @@ Resources::Resources(BWAPI::Player* player)
 {
   if (player==NULL)
   {
-    minerals = 0;
-    gas      = 0;
-    supply   = 0;
+    minerals = 0.0;
+    gas      = 0.0;
+    supply   = 0.0;
   }
   else
   {
@@ -14,6 +14,21 @@ Resources::Resources(BWAPI::Player* player)
     gas      = player->gas();
     supply   = player->supplyTotal() - player->supplyUsed();
   }
+}
+Resources CumulativeResources(BWAPI::Player* player)
+{
+  Resources r;
+  if (player==NULL)
+  {
+    r.setMinerals(0.0);
+    r.setGas(0.0);
+  }
+  else
+  {
+    r.setMinerals(player->cumulativeMinerals());
+    r.setGas(player->cumulativeGas());
+  }
+  return r;
 }
 Resources::Resources(BWAPI::UnitType type)
 {
@@ -25,13 +40,13 @@ Resources::Resources(BWAPI::TechType type)
 {
   minerals = type.mineralPrice();
   gas      = type.gasPrice();
-  supply   = 0;
+  supply   = 0.0;
 }
 Resources::Resources(BWAPI::UpgradeType type, int level)
 {
   minerals = type.mineralPriceBase() + type.mineralPriceFactor()*(level-1);
   gas      = type.gasPriceBase() + type.gasPriceFactor()*(level-1);
-  supply   = 0;
+  supply   = 0.0;
 }
 Resources& Resources::operator=(const Resources &r)
 {
@@ -40,39 +55,39 @@ Resources& Resources::operator=(const Resources &r)
   supply   = r.supply;
   return *this;
 }
-Resources& Resources::set(int m, int g, int s)
+Resources& Resources::set(double m, double g, double s)
 {
   minerals = m;
   gas      = g;
   supply   = s;
   return *this;
 }
-Resources& Resources::setMinerals(int m)
+Resources& Resources::setMinerals(double m)
 {
   minerals = m;
   return *this;
 }
-Resources& Resources::setGas(int g)
+Resources& Resources::setGas(double g)
 {
   gas = g;
   return *this;
 }
-Resources& Resources::setSupply(int s)
+Resources& Resources::setSupply(double s)
 {
   supply = s;
   return *this;
 }
-Resources& Resources::addMinerals(int m)
+Resources& Resources::addMinerals(double m)
 {
   minerals += m;
   return *this;
 }
-Resources& Resources::addGas(int g)
+Resources& Resources::addGas(double g)
 {
   gas += g;
   return *this;
 }
-Resources& Resources::addSupply(int s)
+Resources& Resources::addSupply(double s)
 {
   supply += s;
   return *this;
@@ -91,15 +106,22 @@ Resources& Resources::operator-=(const Resources &r)
   supply   -= r.supply;
   return *this;
 }
-int Resources::getMinerals() const
+Resources& Resources::operator/=(double value)
+{
+  minerals /= value;
+  gas      /= value;
+  supply   /= value;
+  return *this;
+}
+double Resources::getMinerals() const
 {
   return minerals;
 }
-int Resources::getGas() const
+double Resources::getGas() const
 {
   return gas;
 }
-int Resources::getSupply() const
+double Resources::getSupply() const
 {
   return supply;
 }
@@ -122,4 +144,9 @@ Resources Resources::operator+(const Resources &r) const
 Resources Resources::operator-(const Resources &r) const
 {
   return Resources(minerals-r.minerals,gas-r.gas,supply-r.supply);
+}
+
+Resources Resources::operator/(double value) const
+{
+  return Resources(minerals/value,gas/value,supply/value);
 }
