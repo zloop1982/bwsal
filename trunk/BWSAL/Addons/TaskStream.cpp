@@ -3,22 +3,53 @@
 using namespace BWAPI;
 TaskStream::TaskStream(Task t, Task nt)
 {
-  task = t;
-  nextTask = nt;
-  worker = NULL;
-  status = Not_Initialized;
+  task        = t;
+  nextTask    = nt;
+  worker      = NULL;
+  buildUnit   = NULL;
+  status      = None;
+  isStarted   = false;
+  isCompleted = false;
+  name        = "Task Stream";
+}
+TaskStream::~TaskStream()
+{
+  //delete observers that we own
+  for each(std::pair<TaskStreamObserver*, bool> obs in observers)
+  {
+    if (obs.second)
+      delete obs.first;
+  }
+  observers.clear();
+}
+void TaskStream::terminate()
+{
+  TheMacroManager->killSet.insert(this);
 }
 void TaskStream::onOffer(std::set<BWAPI::Unit*> units)
 {
+  for each(Unit* u in units)
+  {
+    if (u == worker)
+      TheArbitrator->accept(this,u);
+    else
+      TheArbitrator->decline(this,u,0);
+  }
 }
 void TaskStream::onRevoke(BWAPI::Unit* unit, double bid)
 {
+  setWorker(NULL);
 }
-void TaskStream::update()
+void TaskStream::computeStatus()
 {
   if (worker == NULL || !worker->exists())
   {
     status = Error_Worker_Not_Specified;
+    return;
+  }
+  if (TheArbitrator->getHighestBidder(worker).first!=this)
+  {
+    status = Error_Worker_Not_Owned;
     return;
   }
   if (task == NULL)
@@ -29,7 +60,7 @@ void TaskStream::update()
   if (task.getType()==TaskTypes::Unit)
   {
     UnitType ut = task.getUnit();
-    if (ut.isBuilding() && !ut.whatBuilds().first.isBuilding())
+    if (ut.isBuilding() && !ut.whatBuilds().first.isBuilding() && buildUnit == NULL)
     {
       if (task.getTilePosition().isValid()==false)
       {
@@ -57,7 +88,7 @@ void TaskStream::update()
     }
     for each(std::pair<UnitType, int> t in ut.requiredUnits())
     {
-      if (t.second < Broodwar->self()->completedUnitCount(t.first))
+      if (t.second > Broodwar->self()->completedUnitCount(t.first))
       {
         status = Waiting_For_Required_Units;
         return;
@@ -77,16 +108,6 @@ void TaskStream::update()
       return;
     }
   }
-  if (TheArbitrator->getHighestBidder(worker).first!=this)
-  {
-    status = Waiting_For_Worker;
-    return;
-  }
-  //if current task is completed
-  //{
-  //  task = nextTask
-  //  nextTask = Task()
-  //}
   if (status != Executing_Task)
   {
     if (TheMacroManager->rtl.reserveResources(Broodwar->getFrameCount(),task.getResources()))
@@ -104,25 +125,79 @@ void TaskStream::update()
       return;
     }
   }
+}
+void TaskStream::update()
+{
   if (status == Executing_Task)
   {
+    if (isCompleted)
+    {
+      notifyCompletedTask();
+      isStarted = false;
+      isCompleted = false;
+      status = None;
+      task = nextTask;
+      nextTask = Task();
+      Broodwar->printf("Completed Task!");
+    }
     Broodwar->drawTextMap(worker->getPosition().x(),worker->getPosition().y(),"Task: %s",task.getName().c_str());
   }
+  else
+  {
+    if (status != Error_Worker_Not_Specified && status != Error_Worker_Not_Owned)
+    {
+      if (worker->isResearching())
+        worker->cancelResearch();
+      else if (worker->isUpgrading())
+        worker->cancelUpgrade();
+      else if (worker->isTraining())
+        worker->cancelTrain();
+      else if (worker->isMorphing())
+        worker->cancelMorph();
+      else if (worker->isConstructing())
+      {
+        if (worker->getBuildUnit() && worker->getBuildUnit()->getType().isBuilding())
+          worker->getBuildUnit()->cancelConstruction();
+        worker->cancelConstruction();
+      }
+      else if (worker->isIdle()==false)
+      {
+        worker->stop();
+      }
+    }
+  }
+  for each(std::pair<TaskStreamObserver*, bool> obs in observers)
+  {
+    obs.first->update(this);
+  }
+  Status oldStatus = status;
+  computeStatus();
+  if (status != oldStatus)
+  {
+    notifyNewStatus();
+  }
 }
-void TaskStream::attach(TaskStreamObserver* obs)
+void TaskStream::attach(TaskStreamObserver* obs, bool owned)
 {
-  observers.insert(obs);
+  observers.insert(std::make_pair(obs, owned));
 }
 void TaskStream::detach(TaskStreamObserver* obs)
 {
   observers.erase(obs);
 }
 
-void TaskStream::notifyObservers()
+void TaskStream::notifyNewStatus()
 {
-  for each(TaskStreamObserver* obs in observers)
+  for each(std::pair<TaskStreamObserver*, bool> obs in observers)
   {
-    //obs->notify();
+    obs.first->newStatus(this);
+  }
+}
+void TaskStream::notifyCompletedTask()
+{
+  for each(std::pair<TaskStreamObserver*, bool> obs in observers)
+  {
+    obs.first->completedTask(this,task);
   }
 }
 TaskStream::Status TaskStream::getStatus() const
@@ -133,11 +208,14 @@ std::string TaskStream::getStatusString() const
 {
   switch (status)
   {
-    case Not_Initialized:
-      return "Not_Initialized";
+    case None:
+      return "None";
     break;
     case Error_Worker_Not_Specified:
       return "Error_Worker_Not_Specified";
+    break;
+    case Error_Worker_Not_Owned:
+      return "Error_Worker_Not_Owned";
     break;
     case Error_Task_Not_Specified:
       return "Error_Task_Not_Specified";
@@ -163,9 +241,6 @@ std::string TaskStream::getStatusString() const
     case Waiting_For_Required_Upgrade:
       return "Waiting_For_Required_Upgrade";
     break;
-    case Waiting_For_Worker:
-      return "Waiting_For_Worker";
-    break;
     case Waiting_For_Supply:
       return "Waiting_For_Supply";
     break;
@@ -186,19 +261,34 @@ std::string TaskStream::getStatusString() const
 void TaskStream::setWorker(BWAPI::Unit* w)
 {
   if (worker!=NULL)
+  {
     TheArbitrator->removeBid(this,worker);
+    TheMacroManager->unitToTaskStream.erase(worker);
+  }
   worker = w;
-  TheArbitrator->setBid(this,worker,100);
+  if (worker!=NULL)
+  {
+    TheArbitrator->setBid(this,worker,100);
+    TheMacroManager->unitToTaskStream[worker] = this;
+  }
 }
 BWAPI::Unit* TaskStream::getWorker() const
 {
   return worker;
 }
+void TaskStream::setBuildUnit(BWAPI::Unit* b)
+{
+  buildUnit = b;
+}
+BWAPI::Unit* TaskStream::getBuildUnit() const
+{
+  return buildUnit;
+}
 void TaskStream::setTask(Task t)
 {
   task = t;
 }
-Task TaskStream::getTask() const
+Task& TaskStream::getTask()
 {
   return task;
 }
@@ -214,7 +304,7 @@ void TaskStream::setNextTask(Task t)
 {
   nextTask = t;
 }
-Task TaskStream::getNextTask() const
+Task& TaskStream::getNextTask()
 {
   return nextTask;
 }
@@ -232,5 +322,22 @@ std::string TaskStream::getShortName() const
 }
 void TaskStream::printToScreen(int x, int y)
 {
-  Broodwar->drawTextScreen(x,y,"Task: %s %s, Status: %s, Worker: %x",task.getVerb().c_str(),task.getName().c_str(),getStatusString().c_str(),worker);
+  Broodwar->drawTextScreen(x,y,"Task: %s %s, Status: %s, Worker: %x, Started: %d",task.getVerb().c_str(),task.getName().c_str(),getStatusString().c_str(),worker,isStarted);
+}
+
+void TaskStream::setTaskStarted(bool started)
+{
+  isStarted = started;
+}
+void TaskStream::completeTask()
+{
+  isCompleted = true;
+}
+bool TaskStream::isTaskStarted() const
+{
+  return isStarted;
+}
+bool TaskStream::isTaskCompleted() const
+{
+  return isCompleted;
 }

@@ -8,11 +8,10 @@ class MacroManager
   public:
     MacroManager(Arbitrator::Arbitrator<BWAPI::Unit*,double>* arbitrator);
     void update();
-
-    std::list< TaskStream > taskStreams;
+    std::list< TaskStream* > taskStreams;
+    std::set< TaskStream* > killSet;
     TaskStream* getTaskStream(BWAPI::Unit* unit);
     ResourceTimeline rtl;
-private:
     std::map< BWAPI::Unit*, TaskStream* > unitToTaskStream;
 };
 extern MacroManager* TheMacroManager;

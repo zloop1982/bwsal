@@ -237,6 +237,34 @@
 					RelativePath="..\include\MacroManager\TaskStreamObserver.h"
 					>
 				</File>
+				<Filter
+					Name="TaskStreamObservers"
+					>
+					<File
+						RelativePath="..\Addons\BasicTaskExecutor.cpp"
+						>
+					</File>
+					<File
+						RelativePath="..\include\BasicTaskExecutor.h"
+						>
+					</File>
+					<File
+						RelativePath="..\Addons\TerminateIfWorkerLost.cpp"
+						>
+					</File>
+					<File
+						RelativePath="..\include\TerminateIfWorkerLost.h"
+						>
+					</File>
+					<File
+						RelativePath="..\Addons\UnitPump.cpp"
+						>
+					</File>
+					<File
+						RelativePath="..\include\UnitPump.h"
+						>
+					</File>
+				</Filter>
 			</Filter>
 			<Filter
 				Name="Arbitrator"

@@ -22,6 +22,10 @@ class Task
     Task& operator=(const BWAPI::TechType &t);
     Task& operator=(const BWAPI::UpgradeType &t);
     Task& operator=(const BWAPI::TilePosition &p);
+    Task& setType(const BWAPI::UnitType &t);
+    Task& setType(const BWAPI::TechType &t);
+    Task& setType(const BWAPI::UpgradeType &t);
+    Task& setTilePosition(const BWAPI::TilePosition &p);
 
     bool operator==(void* ptr) const;
     bool operator==(const Task &t) const;
@@ -29,6 +33,7 @@ class Task
     bool operator==(const BWAPI::TechType &t) const;
     bool operator==(const BWAPI::UpgradeType &t) const;
     bool operator==(const BWAPI::TilePosition &p) const;
+    bool isBeingExecutedBy(const BWAPI::Unit* unit) const;
 
     TaskTypes::Enum getType() const;
     BWAPI::UnitType getUnit() const;
