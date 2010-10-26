@@ -13,6 +13,7 @@ class MacroAIModule : public BWAPI::AIModule
     virtual void onStart();
     virtual void onEnd(bool isWinner);
     virtual void onFrame();
+    virtual void onSendText(std::string text);
   private:
     Arbitrator::Arbitrator<BWAPI::Unit*,double> arbitrator;
     MacroManager* macroManager;

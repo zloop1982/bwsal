@@ -49,6 +49,29 @@ Task& Task::operator=(const BWAPI::TilePosition &p)
   position = p;
   return *this;
 }
+Task& Task::setType(const BWAPI::UnitType &t)
+{
+  type     = TaskTypes::Unit;
+  id       = t.getID();
+  return *this;
+}
+Task& Task::setType(const BWAPI::TechType &t)
+{
+  type     = TaskTypes::Tech;
+  id       = t.getID();
+  return *this;
+}
+Task& Task::setType(const BWAPI::UpgradeType &t)
+{
+  type     = TaskTypes::Upgrade;
+  id       = t.getID();
+  return *this;
+}
+Task& Task::setTilePosition(const BWAPI::TilePosition &p)
+{
+  position = p;
+  return *this;
+}
 
 
 bool Task::operator==(void* ptr) const
@@ -139,4 +162,26 @@ std::string Task::getVerb() const
     return "Research";
   //type == TaskTypes::Upgrade
   return "Upgrade";
+}
+bool Task::isBeingExecutedBy(const BWAPI::Unit* unit) const
+{
+  if (type == TaskTypes::Unit)
+  {
+    UnitType ut=getUnit();
+    if (ut.getRace()==Races::Zerg && ut.isBuilding()==ut.whatBuilds().first.isBuilding())
+      return (unit->isMorphing() && unit->getBuildType() == ut);
+    UnitType buildType = unit->getBuildType();
+    if (buildType == UnitTypes::None && unit->getBuildUnit()!=NULL)
+      buildType = unit->getBuildUnit()->getType();
+
+    if (ut.isBuilding())
+      return buildType == ut;
+    else
+      return (unit->isTraining() && unit->getTrainingQueue().front() == ut);
+  }
+  else if (type == TaskTypes::Tech)
+    return (unit->isResearching() && unit->getTech() == getTech());
+  else if (type == TaskTypes::Upgrade)
+    return (unit->isUpgrading() && unit->getUpgrade() == getUpgrade());
+  return false;
 }
