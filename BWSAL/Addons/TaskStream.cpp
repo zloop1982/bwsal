@@ -25,6 +25,8 @@ TaskStream::~TaskStream()
 void TaskStream::terminate()
 {
   TheMacroManager->killSet.insert(this);
+  if (worker!=NULL)
+    TheArbitrator->removeBid(this,worker);
 }
 void TaskStream::onOffer(std::set<BWAPI::Unit*> units)
 {

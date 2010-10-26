@@ -2,6 +2,7 @@
 #include <BasicTaskExecutor.h>
 #include <UnitPump.h>
 #include <TerminateIfWorkerLost.h>
+#include <TerminateIfEmpty.h>
 using namespace BWAPI;
 MacroAIModule::MacroAIModule()
 {
@@ -26,7 +27,7 @@ void MacroAIModule::onStart()
       worker = u;
   }
   ts->setWorker(worker);
-  ts->attach(new BasicTaskExecutor(),false);
+  ts->attach(BasicTaskExecutor::getInstance(),false);
   ts->attach(new UnitPump(UnitTypes::Terran_SCV),true);
   ts->attach(new TerminateIfWorkerLost(),true);
 }
@@ -78,6 +79,7 @@ void MacroAIModule::onSendText(std::string text)
         worker = u;
     }
     ts->setWorker(worker);
-    ts->attach(new BasicTaskExecutor(),false);
+    ts->attach(BasicTaskExecutor::getInstance(),false);
+    ts->attach(new TerminateIfEmpty(),true);
   }
 }
