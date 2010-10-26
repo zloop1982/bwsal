@@ -8,5 +8,10 @@
 class MacroAIModule : public BWAPI::AIModule
 {
   public:
-  Arbitrator::Arbitrator<BWAPI::Unit*,double> arbitrator;
+    virtual void onStart();
+    virtual void onEnd(bool isWinner);
+    virtual void onFrame();
+  private:
+    Arbitrator::Arbitrator<BWAPI::Unit*,double> arbitrator;
+    MacroManager* macroManager;
 };

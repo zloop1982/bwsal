@@ -2,11 +2,13 @@
 #include <Task.h>
 #include <Arbitrator.h>
 #include <BWAPI.h>
+#include <MacroManager.h>
+
 class TaskStreamObserver;
 class TaskStream : public Arbitrator::Controller<BWAPI::Unit*,double>
 {
   public:
-    TaskStream(Arbitrator::Arbitrator<BWAPI::Unit*,double>* arbitrator);
+    TaskStream();
     virtual void onOffer(std::set<BWAPI::Unit*> units);
     virtual void onRevoke(BWAPI::Unit* unit, double bid);
     virtual void update();
@@ -58,5 +60,4 @@ class TaskStream : public Arbitrator::Controller<BWAPI::Unit*,double>
     Status status;
     std::string name;
     std::set<TaskStreamObserver* > observers;
-    Arbitrator::Arbitrator<BWAPI::Unit*,double>* arbitrator;
 };

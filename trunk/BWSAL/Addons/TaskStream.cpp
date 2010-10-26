@@ -1,9 +1,8 @@
 #include <MacroManager/TaskStream.h>
 #include <MacroManager/TaskStreamObserver.h>
 using namespace BWAPI;
-TaskStream::TaskStream(Arbitrator::Arbitrator<BWAPI::Unit*,double>* arbitrator)
+TaskStream::TaskStream()
 {
-  this->arbitrator = arbitrator;
 }
 void TaskStream::onOffer(std::set<BWAPI::Unit*> units)
 {
@@ -74,7 +73,7 @@ void TaskStream::update()
       return;
     }
   }
-  if (arbitrator->getHighestBidder(worker).first!=this)
+  if (TheArbitrator->getHighestBidder(worker).first!=this)
   {
     status = Waiting_For_Worker;
     return;

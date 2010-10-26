@@ -210,7 +210,19 @@
 				Name="MacroManager"
 				>
 				<File
+					RelativePath="..\Addons\MacroManager.cpp"
+					>
+				</File>
+				<File
 					RelativePath="..\include\MacroManager\MacroManager.h"
+					>
+				</File>
+				<File
+					RelativePath="..\Addons\Resources.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\include\Resources.h"
 					>
 				</File>
 				<File
