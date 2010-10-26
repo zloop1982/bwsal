@@ -254,12 +254,13 @@ namespace BWAPI
       virtual std::set< TilePosition >& getStartLocations() = 0;
 
       /** Prints text on the screen. Text is not sent to other players in multiplayer games. */
-      virtual void printf(const char *text, ...) = 0;
+      virtual void printf(const char *format, ...) = 0;
 
       /** Sends text to other players - as if it were entered in chat. In single player games and replays,
        * this will just print the text on the screen. If the game is a single player match and not a replay,
        * then this function can be used to execute cheat codes, i.e. Broodwar->sendText("show me the money"). */
-      virtual void sendText(const char *text, ...) = 0;
+      virtual void sendText(const char *format, ...) = 0;
+      virtual void sendTextEx(bool toAllies, const char *format, ...) = 0;
 
       /** Used to change the race while in a lobby. Note that there is no onLobbyEnter callback yet, so this
        * function cannot be used at this time. */
@@ -368,6 +369,30 @@ namespace BWAPI
 
       /** Retrieves the screen buffer for the game (excluding the HUD) */
       virtual void *getScreenBuffer() = 0;
+
+      /** Retrieves latency values for the game. Includes latency, speed, and mode */
+      virtual int getLatencyFrames() = 0;
+      virtual int getLatencyTime() = 0;
+      virtual int getRemainingLatencyFrames() = 0;
+      virtual int getRemainingLatencyTime() = 0;
+
+      /** Retrieves the current revision of BWAPI. */
+      virtual int getRevision() = 0;
+
+      /** Retrieves the debug state of the BWAPI build. */
+      virtual bool isDebug() = 0;
+
+      /** Returns true if latency compensation is enabled */
+      virtual bool isLatComEnabled() = 0;
+
+      /** Use to enable or disable latency compensation. Default: Enabled */
+      virtual void setLatCom(bool isEnabled) = 0;
+
+      /** Retrieves the number of frames in the replay */
+      virtual int getReplayFrameCount() = 0;
+
+      /** Sets the rendering state of the Starcraft GUI */
+      virtual void setGUI(bool enabled = true) = 0;
   };
   extern Game* Broodwar;
 }

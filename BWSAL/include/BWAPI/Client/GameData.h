@@ -16,7 +16,7 @@ namespace BWAPI
     GameData();
     //forces
     int forceCount;
-    ForceData forces[4];
+    ForceData forces[5];
 
     //players
     int playerCount;
@@ -34,6 +34,14 @@ namespace BWAPI
 
     int gameType;
     int latency;
+    int latencyFrames;
+    int latencyTime;
+    int remainingLatencyFrames;
+    int remainingLatencyTime;
+    int revision;
+    bool isDebug;
+    bool hasLatCom;
+    int replayFrameCount;
     int frameCount;
     int fps;
     double averageFPS;
