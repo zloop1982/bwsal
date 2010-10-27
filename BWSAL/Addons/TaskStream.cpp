@@ -222,10 +222,12 @@ void TaskStream::updateStatus()
 void TaskStream::attach(TaskStreamObserver* obs, bool owned)
 {
   observers.insert(std::make_pair(obs, owned));
+  obs->attached(this);
 }
 void TaskStream::detach(TaskStreamObserver* obs)
 {
   observers.erase(obs);
+  obs->detached(this);
 }
 
 void TaskStream::notifyNewStatus()

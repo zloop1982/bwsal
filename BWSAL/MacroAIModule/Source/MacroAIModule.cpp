@@ -1,5 +1,6 @@
 #include "MacroAIModule.h"
 #include <BasicTaskExecutor.h>
+#include <SpiralBuildingPlacer.h>
 #include <UnitPump.h>
 #include <TerminateIfWorkerLost.h>
 #include <TerminateIfEmpty.h>
@@ -84,5 +85,6 @@ void MacroAIModule::onSendText(std::string text)
     ts->setWorker(worker);
     ts->attach(BasicTaskExecutor::getInstance(),false);
     ts->attach(new TerminateIfEmpty(),true);
+    ts->attach(SpiralBuildingPlacer::getInstance(),false);
   }
 }

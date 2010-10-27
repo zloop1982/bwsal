@@ -46,15 +46,16 @@ bool BuildingPlacer::canBuildHereWithSpace(BWAPI::TilePosition position, BWAPI::
   if (starty<0) return false;
   int endx = position.x() + width + buildDist;
   if (endx>BWAPI::Broodwar->mapWidth()) return false;
-  if (endx<position.x() + width) return false;
   int endy = position.y() + height + buildDist;
   if (endy>BWAPI::Broodwar->mapHeight()) return false;
 
-  for(int x = startx; x < endx; x++)
-    for(int y = starty; y < endy; y++)
-      if (!type.isRefinery())
-        if (!buildable(x, y) || reserveMap[x][y])
-          return false;
+  if (!type.isRefinery())
+  {
+    for(int x = startx; x < endx; x++)
+      for(int y = starty; y < endy; y++)
+          if (!buildable(x, y) || reserveMap[x][y])
+            return false;
+  }
 
   if (position.x()>3)
   {
