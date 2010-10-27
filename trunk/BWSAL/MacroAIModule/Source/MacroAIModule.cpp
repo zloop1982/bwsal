@@ -6,20 +6,22 @@
 using namespace BWAPI;
 MacroAIModule::MacroAIModule()
 {
-  macroManager = NULL;
 }
 MacroAIModule::~MacroAIModule()
 {
-  if (macroManager != NULL)
-    delete macroManager;
-  macroManager = NULL;
+  if (TheMacroManager != NULL)
+    delete TheMacroManager;
+  if (TheResourceRates != NULL)
+    delete TheResourceRates;
 }
 void MacroAIModule::onStart()
 {
   Broodwar->enableFlag(Flag::UserInput);
-  macroManager = new MacroManager(&arbitrator);
+  MacroManager::create(&arbitrator);
+  ResourceRates::create();
+
   TaskStream* ts = new TaskStream();
-  macroManager->taskStreams.push_back(ts);
+  TheMacroManager->taskStreams.push_back(ts);
   Unit* worker = NULL;
   for each(Unit* u in Broodwar->self()->getUnits())
   {
@@ -36,8 +38,9 @@ void MacroAIModule::onEnd(bool isWinner)
 }
 void MacroAIModule::onFrame()
 {
-  macroManager->update();
-  arbitrator.update();
+  TheMacroManager->update();
+  TheArbitrator->update();
+  TheResourceRates->update();
   std::set<Unit*> units=Broodwar->self()->getUnits();
   for(std::set<Unit*>::iterator i=units.begin();i!=units.end();i++)
   {
@@ -71,7 +74,7 @@ void MacroAIModule::onSendText(std::string text)
     else
       tp.x()-=7;
     ts->getTask().setTilePosition(tp);
-    macroManager->taskStreams.push_back(ts);
+    TheMacroManager->taskStreams.push_back(ts);
     Unit* worker = NULL;
     for each(Unit* u in Broodwar->self()->getUnits())
     {

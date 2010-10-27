@@ -110,22 +110,47 @@ void TaskStream::computeStatus()
       return;
     }
   }
-  if (status != Executing_Task)
+  if (!isStarted)
   {
-    if (TheMacroManager->rtl.reserveResources(Broodwar->getFrameCount(),task.getResources()))
+    predictedStartFrame1=TheMacroManager->rtl.getFirstValidTime(task.getResources());
+    if (predictedStartFrame1!=-1)
+      TheMacroManager->rtl.reserveResources(predictedStartFrame1,task.getResources());
+  }
+  else
+  {
+    if (isStarted && task.getType()==TaskTypes::Unit && buildUnit!=NULL)
     {
-      status = Executing_Task;
+      int supplyProvided = task.getUnit().supplyProvided();
+      if (supplyProvided>0)
+      {
+        int predictedEndFrame = Broodwar->getFrameCount()+buildUnit->getRemainingBuildTime();
+        TheMacroManager->rtl.registerSupplyIncrease(predictedEndFrame,supplyProvided);
+      }
     }
+  }
+  if (predictedStartFrame1!=-1)
+  {
+    predictedStartFrame2=TheMacroManager->rtl.getFirstValidTime(nextTask.getResources());
+    if (predictedStartFrame2!=-1)
+    {
+      if (predictedStartFrame2<predictedStartFrame1+task.getTime())
+        predictedStartFrame2=predictedStartFrame1+task.getTime();
+      TheMacroManager->rtl.reserveResources(predictedStartFrame2,nextTask.getResources());
+    }
+  }
+  if (predictedStartFrame1<=Broodwar->getFrameCount())
+  {
+    status = Executing_Task;
+  }
+  else
+  {
+    if (TheMacroManager->rtl.getLastError() == ResourceTimeline::Insufficient_Supply)
+      status = Waiting_For_Supply;
+    else if (TheMacroManager->rtl.getLastError() == ResourceTimeline::Insufficient_Gas)
+      status = Waiting_For_Gas;
     else
-    {
-      if (TheMacroManager->rtl.getLastError() == ResourceTimeline::Insufficient_Supply)
-        status = Waiting_For_Supply;
-      else if (TheMacroManager->rtl.getLastError() == ResourceTimeline::Insufficient_Gas)
-        status = Waiting_For_Gas;
-      else
-        status = Waiting_For_Minerals;
-      return;
-    }
+      status = Waiting_For_Minerals;
+    return;
   }
 }
 void TaskStream::update()
@@ -324,7 +349,7 @@ std::string TaskStream::getShortName() const
 }
 void TaskStream::printToScreen(int x, int y)
 {
-  Broodwar->drawTextScreen(x,y,"Task: %s %s, Status: %s, Worker: %x, Started: %d",task.getVerb().c_str(),task.getName().c_str(),getStatusString().c_str(),worker,isStarted);
+  Broodwar->drawTextScreen(x,y,"Task: %s %s, Status: %s, Worker: %x, Started: %d, psf: %d, %d",task.getVerb().c_str(),task.getName().c_str(),getStatusString().c_str(),worker,isStarted,predictedStartFrame1,predictedStartFrame2);
 }
 
 void TaskStream::setTaskStarted(bool started)

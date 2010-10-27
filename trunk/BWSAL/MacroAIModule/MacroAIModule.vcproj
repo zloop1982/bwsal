@@ -310,6 +310,18 @@
 					>
 				</File>
 			</Filter>
+			<Filter
+				Name="ResourceRates"
+				>
+				<File
+					RelativePath="..\Addons\ResourceRates.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\include\ResourceRates.h"
+					>
+				</File>
+			</Filter>
 		</Filter>
 	</Files>
 	<Globals>

@@ -7,6 +7,7 @@ class ResourceTimeline
     ResourceTimeline();
     void reset(const Resources &r, double mgr, double ggr);
     bool reserveResources(int frame, const Resources &r);
+    int getFirstValidTime(const Resources &r);
     
     enum ErrorCode
     {

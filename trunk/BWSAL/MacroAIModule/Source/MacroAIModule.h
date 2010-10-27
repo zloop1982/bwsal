@@ -4,6 +4,7 @@
 #include <Arbitrator.h>
 #include <WorkerManager.h>
 #include <MacroManager.h>
+#include <ResourceRates.h>
 
 class MacroAIModule : public BWAPI::AIModule
 {
@@ -16,5 +17,4 @@ class MacroAIModule : public BWAPI::AIModule
     virtual void onSendText(std::string text);
   private:
     Arbitrator::Arbitrator<BWAPI::Unit*,double> arbitrator;
-    MacroManager* macroManager;
 };

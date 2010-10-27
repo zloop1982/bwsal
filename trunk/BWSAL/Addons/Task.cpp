@@ -145,6 +145,20 @@ Resources Task::getResources(BWAPI::Player* player) const
     level++;
   return Resources(UpgradeType(id),level);
 }
+int Task::getTime(BWAPI::Player* player) const
+{
+  if (type == TaskTypes::Unit)
+    return UnitType(id).buildTime();
+  if (type == TaskTypes::Tech)
+    return TechType(id).researchTime();
+  //type == TaskTypes::Upgrade
+  if (player == NULL) // assume self() if the user doesn't specify a player
+    player = Broodwar->self();
+  int level = player->getUpgradeLevel(UpgradeType(id)) + 1;
+  if (player->isUpgrading(UpgradeType(id)))
+    level++;
+  return UpgradeType(id).upgradeTimeBase()+UpgradeType(id).upgradeTimeFactor()*(level-1);
+}
 std::string Task::getName() const
 {
   if (type == TaskTypes::Unit)
