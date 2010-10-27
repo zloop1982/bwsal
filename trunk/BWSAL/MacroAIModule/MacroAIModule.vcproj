@@ -249,6 +249,14 @@
 						>
 					</File>
 					<File
+						RelativePath="..\Addons\SpiralBuildingPlacer.cpp"
+						>
+					</File>
+					<File
+						RelativePath="..\include\SpiralBuildingPlacer.h"
+						>
+					</File>
+					<File
 						RelativePath="..\Addons\TerminateIfEmpty.cpp"
 						>
 					</File>

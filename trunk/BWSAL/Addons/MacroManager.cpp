@@ -51,6 +51,7 @@ void MacroManager::update()
     ts->update();
     ts->updateStatus();
   }
+  //run through everything again in case some lower priority streams (supply depots, pylons, etc) have enabled some high priority streams to proceed
   for each(TaskStream* ts in taskStreams)
   {
     ts->updateStatus();

@@ -1,73 +1,73 @@
 #include <Task.h>
 using namespace BWAPI;
 
-Task::Task(const BWAPI::UnitType &t,    const BWAPI::TilePosition &p)
+Task::Task(const BWAPI::UnitType t,    const BWAPI::TilePosition p)
 {
   type     = TaskTypes::Unit;
   id       = t.getID();
   position = p;
 }
-Task::Task(const BWAPI::TechType &t,    const BWAPI::TilePosition &p)
+Task::Task(const BWAPI::TechType t,    const BWAPI::TilePosition p)
 {
   type     = TaskTypes::Tech;
   id       = t.getID();
   position = p;
 }
-Task::Task(const BWAPI::UpgradeType &t, const BWAPI::TilePosition &p)
+Task::Task(const BWAPI::UpgradeType t, const BWAPI::TilePosition p)
 {
   type     = TaskTypes::Upgrade;
   id       = t.getID();
   position = p;
 }
-Task& Task::operator=(const Task &t)
+Task& Task::operator=(const Task t)
 {
   type     = t.type;
   id       = t.id;
   position = t.position;
   return *this;
 }
-Task& Task::operator=(const BWAPI::UnitType &t)
+Task& Task::operator=(const BWAPI::UnitType t)
 {
   type     = TaskTypes::Unit;
   id       = t.getID();
   return *this;
 }
-Task& Task::operator=(const BWAPI::TechType &t)
+Task& Task::operator=(const BWAPI::TechType t)
 {
   type     = TaskTypes::Tech;
   id       = t.getID();
   return *this;
 }
-Task& Task::operator=(const BWAPI::UpgradeType &t)
+Task& Task::operator=(const BWAPI::UpgradeType t)
 {
   type     = TaskTypes::Upgrade;
   id       = t.getID();
   return *this;
 }
-Task& Task::operator=(const BWAPI::TilePosition &p)
+Task& Task::operator=(const BWAPI::TilePosition p)
 {
   position = p;
   return *this;
 }
-Task& Task::setType(const BWAPI::UnitType &t)
+Task& Task::setType(const BWAPI::UnitType t)
 {
   type     = TaskTypes::Unit;
   id       = t.getID();
   return *this;
 }
-Task& Task::setType(const BWAPI::TechType &t)
+Task& Task::setType(const BWAPI::TechType t)
 {
   type     = TaskTypes::Tech;
   id       = t.getID();
   return *this;
 }
-Task& Task::setType(const BWAPI::UpgradeType &t)
+Task& Task::setType(const BWAPI::UpgradeType t)
 {
   type     = TaskTypes::Upgrade;
   id       = t.getID();
   return *this;
 }
-Task& Task::setTilePosition(const BWAPI::TilePosition &p)
+Task& Task::setTilePosition(const BWAPI::TilePosition p)
 {
   position = p;
   return *this;
