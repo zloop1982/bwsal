@@ -14,6 +14,7 @@ class TaskStream : public Arbitrator::Controller<BWAPI::Unit*,double>
     virtual void onOffer(std::set<BWAPI::Unit*> units);
     virtual void onRevoke(BWAPI::Unit* unit, double bid);
     virtual void update();
+    void updateStatus();
     virtual std::string getName() const;
     virtual std::string getShortName() const;
 
@@ -66,8 +67,10 @@ class TaskStream : public Arbitrator::Controller<BWAPI::Unit*,double>
 
     void setName(std::string s);
     void printToScreen(int x, int y);
-
+    bool reserved1;
+    bool reserved2;
   private:
+    bool killSwitch;
     void computeStatus();
     bool urgent;
     bool isCompleted;
@@ -79,6 +82,7 @@ class TaskStream : public Arbitrator::Controller<BWAPI::Unit*,double>
     BWAPI::Unit* worker;
     BWAPI::Unit* buildUnit;
     Status status;
+    Status lastStatus;
     std::string name;
     std::map<TaskStreamObserver*, bool > observers;
 };

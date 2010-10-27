@@ -10,6 +10,7 @@ TaskStream::TaskStream(Task t, Task nt)
   status      = None;
   isStarted   = false;
   isCompleted = false;
+  killSwitch  = false;
   name        = "Task Stream";
 }
 TaskStream::~TaskStream()
@@ -17,16 +18,18 @@ TaskStream::~TaskStream()
   //delete observers that we own
   for each(std::pair<TaskStreamObserver*, bool> obs in observers)
   {
+    obs.first->detached(this);
     if (obs.second)
       delete obs.first;
   }
   observers.clear();
+  TheArbitrator->removeAllBids(this);
 }
 void TaskStream::terminate()
 {
   TheMacroManager->killSet.insert(this);
-  if (worker!=NULL)
-    TheArbitrator->removeBid(this,worker);
+  TheArbitrator->removeAllBids(this);
+  killSwitch = true;
 }
 void TaskStream::onOffer(std::set<BWAPI::Unit*> units)
 {
@@ -49,7 +52,7 @@ void TaskStream::computeStatus()
     status = Error_Worker_Not_Specified;
     return;
   }
-  if (TheArbitrator->getHighestBidder(worker).first!=this)
+  if (TheArbitrator->hasBid(worker)==false || TheArbitrator->getHighestBidder(worker).first!=this)
   {
     status = Error_Worker_Not_Owned;
     return;
@@ -110,32 +113,38 @@ void TaskStream::computeStatus()
       return;
     }
   }
-  if (!isStarted)
+  bool reserved1last = reserved1;
+  bool reserved2last = reserved2;
+  if (!isStarted && !reserved1)
   {
     predictedStartFrame1=TheMacroManager->rtl.getFirstValidTime(task.getResources());
     if (predictedStartFrame1!=-1)
-      TheMacroManager->rtl.reserveResources(predictedStartFrame1,task.getResources());
-  }
-  else
-  {
-    if (isStarted && task.getType()==TaskTypes::Unit && buildUnit!=NULL)
     {
-      int supplyProvided = task.getUnit().supplyProvided();
-      if (supplyProvided>0)
+      if (!reserved1last)
       {
-        int predictedEndFrame = Broodwar->getFrameCount()+buildUnit->getRemainingBuildTime();
-        TheMacroManager->rtl.registerSupplyIncrease(predictedEndFrame,supplyProvided);
+        TheMacroManager->rtl.reserveResources(predictedStartFrame1,task.getResources());
+        reserved1=true;
       }
     }
   }
   if (predictedStartFrame1!=-1)
   {
+    if (task.getType()==TaskTypes::Unit && task.getUnit().supplyProvided()>0 && !reserved1last)
+    {
+      TheMacroManager->rtl.registerSupplyIncrease(predictedStartFrame1+task.getTime(), task.getUnit().supplyProvided());
+      reserved1=true;
+    }
+
     predictedStartFrame2=TheMacroManager->rtl.getFirstValidTime(nextTask.getResources());
     if (predictedStartFrame2!=-1)
     {
       if (predictedStartFrame2<predictedStartFrame1+task.getTime())
         predictedStartFrame2=predictedStartFrame1+task.getTime();
-      TheMacroManager->rtl.reserveResources(predictedStartFrame2,nextTask.getResources());
+      if (!reserved2last)
+      {
+        TheMacroManager->rtl.reserveResources(predictedStartFrame2,nextTask.getResources());
+        reserved2=true;
+      }
     }
   }
   if (predictedStartFrame1<=Broodwar->getFrameCount())
@@ -155,6 +164,7 @@ void TaskStream::computeStatus()
 }
 void TaskStream::update()
 {
+  if (killSwitch) return;
   if (status == Executing_Task)
   {
     if (isCompleted)
@@ -197,12 +207,17 @@ void TaskStream::update()
   {
     obs.first->update(this);
   }
-  Status oldStatus = status;
+  lastStatus = status;
+  reserved1 = false;
+  reserved2 = false;
+}
+void TaskStream::updateStatus()
+{
+  if (killSwitch) return;
   computeStatus();
-  if (status != oldStatus)
-  {
+  if (status != lastStatus)
     notifyNewStatus();
-  }
+  lastStatus=status;
 }
 void TaskStream::attach(TaskStreamObserver* obs, bool owned)
 {

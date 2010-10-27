@@ -19,7 +19,7 @@ class ResourceTimeline
     ErrorCode getLastError() const;
     bool registerSupplyIncrease(int frame, int supply);
     bool unregisterSupplyIncrease(int frame, int supply);
-  private:
+//  private:
     ErrorCode lastError;
     double mineralGatherRate;
     double gasGatherRate;

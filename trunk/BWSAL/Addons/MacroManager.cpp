@@ -38,13 +38,28 @@ void MacroManager::update()
   Broodwar->drawTextScreen(452,16,"\x07%d",(int)(TheResourceRates->getGatherRate().getMinerals()*23*60));
   Broodwar->drawTextScreen(520,16,"\x07%d",(int)(TheResourceRates->getGatherRate().getGas()*23*60));
   killSet.clear();
-  int y=20;
-  Broodwar->drawTextScreen(10,0,"Frame: %d",Broodwar->getFrameCount());
+  int y=25;
+  Broodwar->drawTextScreen(10,5,"Frame: %d",Broodwar->getFrameCount());
   for each(TaskStream* ts in taskStreams)
   {
     //update this task stream
     ts->update();
+  }
+  for each(TaskStream* ts in taskStreams)
+  {
+    //update this task stream
+    ts->update();
+    ts->updateStatus();
+  }
+  for each(TaskStream* ts in taskStreams)
+  {
+    ts->updateStatus();
     ts->printToScreen(10,y);
+    y+=20;
+  }
+  for(std::map<int, Resources>::iterator i=rtl.resourceEvents.begin();i!=rtl.resourceEvents.end();i++)
+  {
+    Broodwar->drawTextScreen(10,y,"%d: (m:%f, g:%f, s:%f)",(*i).first,(*i).second.getMinerals(),(*i).second.getGas(),(*i).second.getSupply());
     y+=20;
   }
 }
