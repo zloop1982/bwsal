@@ -58,7 +58,8 @@ int ResourceTimeline::getFirstValidTime(const Resources &r)
   int lastInvalidEventFrame = -1;
   Resources invalidRes;
   Resources res = currentResources;
-  bool isValid = true;
+  bool isValid = false;
+  int validEventFrame = -1;
   for(std::map<int, Resources>::iterator i=resourceEvents.begin();i!=resourceEvents.end();i++)
   {
     int currentFrame = i->first;
@@ -70,17 +71,29 @@ int ResourceTimeline::getFirstValidTime(const Resources &r)
     {
       invalidRes=res;
       lastInvalidEventFrame = currentFrame;
+      isValid = false;
     }
+    else
+    {
+      if (!isValid)
+        validEventFrame = currentFrame;
+      isValid = true;
+    }
+    lastFrame = currentFrame;
   }
   resourceEvents[frame]+=r;
 
   if (lastInvalidEventFrame==-1)
     return frame;
   double t=lastInvalidEventFrame;
-  if (invalidRes.getSupply()<0 || 
-     (invalidRes.getMinerals()<0 && mineralGatherRate==0) ||
-     (invalidRes.getGas()<0 && gasGatherRate==0))
+  if (invalidRes.getSupply()<-0.1 || 
+     (invalidRes.getMinerals()<-0.1 && mineralGatherRate==0) ||
+     (invalidRes.getGas()<-0.1 && gasGatherRate==0))
+  {
+    if (validEventFrame>lastInvalidEventFrame)
+      return validEventFrame;
     return -1;
+  }
   if (invalidRes.getMinerals()<0)
   {
     double t2=lastInvalidEventFrame-(invalidRes.getMinerals())/mineralGatherRate;
@@ -93,8 +106,9 @@ int ResourceTimeline::getFirstValidTime(const Resources &r)
     if (t2>t)
       t=t2;
   }
-  if (t>(int)t) t=(int)t+1;
-  return t;
+  int ti=(int)t;
+  if (t>(int)t) ti++;
+  return ti;
 }
 ResourceTimeline::ErrorCode ResourceTimeline::getLastError() const
 {

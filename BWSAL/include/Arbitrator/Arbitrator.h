@@ -15,6 +15,7 @@ namespace Arbitrator
     bool setBid(Controller<_Tp,_Val>* c, std::set<_Tp> objs, _Val bid);
     bool removeBid(Controller<_Tp,_Val>* c, _Tp obj);
     bool removeBid(Controller<_Tp,_Val>* c, std::set<_Tp> objs);
+    bool removeAllBids(Controller<_Tp,_Val>* c);
     bool accept(Controller<_Tp,_Val>* c, _Tp obj, _Val bid);
     bool accept(Controller<_Tp,_Val>* c, std::set<_Tp> objs, _Val bid);
     bool accept(Controller<_Tp,_Val>* c, _Tp obj);
@@ -94,12 +95,20 @@ namespace Arbitrator
   template <class _Tp,class _Val>
   bool Arbitrator<_Tp,_Val>::removeBid(Controller<_Tp,_Val>* c, std::set<_Tp> objs)
   {
-    bool result;
+    bool result=false;
     for (std::set<_Tp>::const_iterator o = objs.begin(); o != objs.end(); o++)
     {
       result |= removeBid(c, *o);
     }
     return result;
+  }
+
+  template <class _Tp,class _Val>
+  bool Arbitrator<_Tp,_Val>::removeAllBids(Controller<_Tp,_Val>* c)
+  {
+    if (objects.find(c)==objects.end())
+      return false;
+    return removeBid(c,objects[c]);
   }
 
   template <class _Tp,class _Val>
