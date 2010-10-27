@@ -74,6 +74,8 @@ class TaskStream : public Arbitrator::Controller<BWAPI::Unit*,double>
     bool isStarted;
     Task task;
     Task nextTask;
+    int predictedStartFrame1;
+    int predictedStartFrame2;
     BWAPI::Unit* worker;
     BWAPI::Unit* buildUnit;
     Status status;

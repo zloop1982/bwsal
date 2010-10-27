@@ -41,6 +41,7 @@ class Task
     BWAPI::UpgradeType getUpgrade() const;
     BWAPI::TilePosition getTilePosition() const;
     Resources getResources(BWAPI::Player* player = NULL) const;
+    int getTime(BWAPI::Player* player = NULL) const;
     std::string getName() const;
     std::string getVerb() const;
 
