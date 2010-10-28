@@ -34,7 +34,7 @@ AIs that can implement the following principles effectively _should_ macro well 
   # Use all workers to their "maximal effectiveness"
     * Generally, this means keep workers gathering resources unless their are scouting or constructing a building
   # Always use all production buildings that produce units in your desired army composition. Never let production buildings be idle.
-  # Avoid these three blocking situations:
+  # AIs should anticipate, predict, and plan to avoid these four blocking situations:
     # Supply block: A situation where the limiting factor to your macro is insufficient supply.
       * Solution: Build another supply depot/pylon/overlord.
       * This blocking situation is mostly avoidable with proper build ordering (unless the enemy kills of your scouting overlord :P).
@@ -42,6 +42,10 @@ AIs that can implement the following principles effectively _should_ macro well 
       * Solution: Build another production building.
       * This blocking situation is unavoidable in the short term because scouting information might drastically change your desired army composition.
       * In the long term, you can build sufficient production buildings to not be production blocked.
+    # Tech block: A situation where the limiting factory to your macro is insufficient tech buildings (i.e. not having a cybernetics core when you want to just make dragoons).
+      * Solution: Build required tech buildings.
+      * This blocking situation is unavoidable in the short term because scouting information might drastically change your desired army composition.
+      * In the long term, you can build sufficient tech buildings to not be tech blocked.
     # Resource block: A situation where the limiting factor to your macro is insufficient resources (i.e. building 3 factories when you can only afford to produce out of 2 factories).
       * Solution: Increase resource gather rates.
       * This blocking situation is unavoidable in both the short term and long term because you have a limited number of resources.
