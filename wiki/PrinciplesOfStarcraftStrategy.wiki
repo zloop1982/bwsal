@@ -1,4 +1,7 @@
-AIs that can implement the following principles effectively should perform well in RTS games.
+= Priciples of Starcraft Strategy =
+
+== Principles of Macro Mechanics ==
+AIs that can implement the following principles effectively _should_ macro well in RTS games.
 
   # Scout the opponent to find the following types of information:
     * Starting location
@@ -23,3 +26,13 @@ AIs that can implement the following principles effectively should perform well 
   # Make the composition of production buildings that can be used to produce your desired unit composition
   # Don't make so many production buildings that you cannot afford to use them all constantly.
   # Never queue up more than 2 units in any building.
+
+== Principles of Middle Mechanics ==
+
+How to decide which base to attack, and when to attack or retreat.
+
+  * Based on relative army sizes, positioning
+
+== Principles of Micro Mechanics ==
+
+How to control army units to their optimal effectiveness.
