@@ -1,0 +1,25 @@
+AIs that can implement the following principles effectively should perform well in RTS games.
+
+1. Scout the opponent to find the following types of information:
+ a) Starting location
+b) Bases: (Quantity, Location, Time of Construction, Approximate Mineral & Gas Gather Rates)
+	c) Production buildings (Type, Quantity, Location, Time of Construction)
+	d) Tech buildings (Type, Quantity, Location, Time of Construction)
+	e) Army unit composition (Type, Quantity)
+	f) Army position and movement
+2. From the scouting information you need to determine and re-evaluate the following about your strategy:
+	a) Desired unit composition
+	b) Desired production facility composition
+3. Use all workers to their "maximal effectiveness"
+	a) Generally, this means keep workers gathering resources unless their are scouting or constructing a building
+4. Don't get supply blocked. Supply block: A situation where the limiting factor to your macro is insufficient supply.
+5. Don't get production blocked. Production block: A situation where the limiting factor to your macro is insufficient production buildings (i.e. building only 1 factory when you can afford to produce out of 2).
+6. Don't get resource blocked. Resource block: A situation where the limiting factor to your macro is insufficient resources (i.e. building 3 factories when you can only afford to produce out of 2).
+7. Produce the minimum number of required production structures required to construct your desired army unit composition at the optimal rate.
+7. Produce workers until they are able to fully saturate the number of bases you plan to have in X minutes
+8. Use knowledge of opponent's army unit composition to determine suitable counter unit composition, given your current unit composition and production capabilities
+9. Always use all of your production buildings that can produce a unit in your desired unit composition
+10. Make enough production buildings to use all your resources
+11. Make the composition of production buildings that can be used to produce your desired unit composition
+12. Don't make so many production buildings that you cannot afford to use them all constantly.
+13. Never queue up more than 2 units in any building.
