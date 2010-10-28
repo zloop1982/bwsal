@@ -5,27 +5,39 @@ AIs that can implement the following principles effectively _should_ macro well 
 
   # Scout the opponent to find the following types of information:
     * Starting location
-    * Bases: (Quantity, Location, Time of Construction, Approximate Mineral & Gas Gather Rates)
-    * Production buildings (Type, Quantity, Location, Time of Construction)
-    * Tech buildings (Type, Quantity, Location, Time of Construction)
-    * Army unit composition (Type, Quantity)
+    * Bases (Expansions + Original Base).
+      * Quantity - how many bases?
+      * Location - where are the bases?
+      * Time of Construction - when were the bases constructed?
+      * Approximate Mineral & Gas Gather Rates
+    * Production buildings:
+      * Type - what type of production buildings?
+      * Quantity - how many production buildings of each type?
+      * Time of Construction - when was each production building constructed?
+      * Location - where are the production buildings located?
+    * Tech buildings:
+      * Type - what tech path?
+      * Quantity - how many tech buildings?
+      * Time of Construction - when was each tech building constructed?
+      * Location - where are the tech buildings located?
+    * Army unit composition:
+      * Type Ratio - what types of units are in the opponent's army?
+      * Quantity - how many of each unit type?
     * Army position and movement
-  # From the scouting information you need to determine and re-evaluate the following about your strategy:
-    * Desired unit composition
-    * Desired production facility composition
+      * Where is the enemy's main army?
+      * Is it moving? If so, why? (Attack | Defend another base | Map control)
+  # From the scouting information you should to determine and continuous re-evaluate the following about your strategy:
+    * Desired unit composition to counter the enemy's army
+    * Desired production buildings composition needed to produce the desired unit composition
   # Use all workers to their "maximal effectiveness"
     * Generally, this means keep workers gathering resources unless their are scouting or constructing a building
-  # Don't get supply blocked. Supply block: A situation where the limiting factor to your macro is insufficient supply.
-  # Don't get production blocked. Production block: A situation where the limiting factor to your macro is insufficient production buildings (i.e. building only 1 factory when you can afford to produce out of 2).
-  # Don't get resource blocked. Resource block: A situation where the limiting factor to your macro is insufficient resources (i.e. building 3 factories when you can only afford to produce out of 2).
-  # Produce the minimum number of required production structures required to construct your desired army unit composition at the optimal rate.
-  # Produce workers until they are able to fully saturate the number of bases you plan to have in X minutes
-  # Use knowledge of opponent's army unit composition to determine suitable counter unit composition, given your current unit composition and production capabilities
-  # Always use all of your production buildings that can produce a unit in your desired unit composition
-  # Make enough production buildings to use all your resources
-  # Make the composition of production buildings that can be used to produce your desired unit composition
-  # Don't make so many production buildings that you cannot afford to use them all constantly.
-  # Never queue up more than 2 units in any building.
+  # Avoid these three situations:
+    # Supply block: A situation where the limiting factor to your macro is insufficient supply.
+    # Production block: A situation where the limiting factor to your macro is insufficient production buildings (i.e. building only 1 factory when you can afford to continuously produce out of 2 factories).
+    # Resource block: A situation where the limiting factor to your macro is insufficient resources (i.e. building 3 factories when you can only afford to produce out of 2 factories).
+  # Produce the minimum number of desired production buildings to construct your desired army unit composition at the optimal rate (optimal rate = not blocked by any of the three types).
+  # Produce workers until they are able to fully saturate the number of bases you plan to have in X minutes. Maybe X is about 3?
+  # Never queue up more than 1 unit in any production building. Unless a unit is about to finish.
 
 == Principles of Middle Mechanics ==
 
