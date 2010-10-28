@@ -10,17 +10,17 @@ AIs that can implement the following principles effectively _should_ macro well 
     * Bases (Expansions + Original Base).
       * Quantity - how many bases does the opponent have?
       * Location - where is each base?
-      * Time of Construction - when was each base constructed?
+      * Time of Construction - approximately when was each base constructed?
       * Worker saturation - use to approximate Mineral & Gas Gather Rates
     * Production buildings:
       * Type - what type of production buildings?
       * Quantity - how many production buildings of each type?
-      * Time of Construction - when was each production building constructed?
+      * Time of Construction - approximately when was each production building constructed?
       * Location - where are the production buildings located?
     * Tech buildings:
       * Type - what tech path?
       * Quantity - how many tech buildings?
-      * Time of Construction - when was each tech building constructed?
+      * Time of Construction - approximately when was each tech building constructed?
       * Location - where are the tech buildings located?
     * Army unit composition:
       * Type - what types of units are in the opponent's army?
