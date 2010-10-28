@@ -3,7 +3,7 @@
 == Principles of Macro Mechanics ==
 AIs that can implement the following principles effectively _should_ macro well in RTS games.
 
-  # Scout the opponent to find the following types of information:
+  # Scout the opponent to find the following types of information about the opponent:
     * Starting location
     * Bases (Expansions + Original Base).
       * Quantity - how many bases?
