@@ -8,10 +8,10 @@ AIs that can implement the following principles effectively should perform well 
     * Army unit composition (Type, Quantity)
     * Army position and movement
   # From the scouting information you need to determine and re-evaluate the following about your strategy:
-	* Desired unit composition
-	* Desired production facility composition
+    * Desired unit composition
+    * Desired production facility composition
   # Use all workers to their "maximal effectiveness"
-	* Generally, this means keep workers gathering resources unless their are scouting or constructing a building
+    * Generally, this means keep workers gathering resources unless their are scouting or constructing a building
   # Don't get supply blocked. Supply block: A situation where the limiting factor to your macro is insufficient supply.
   # Don't get production blocked. Production block: A situation where the limiting factor to your macro is insufficient production buildings (i.e. building only 1 factory when you can afford to produce out of 2).
   # Don't get resource blocked. Resource block: A situation where the limiting factor to your macro is insufficient resources (i.e. building 3 factories when you can only afford to produce out of 2).
