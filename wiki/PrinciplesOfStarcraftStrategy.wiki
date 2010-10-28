@@ -3,13 +3,13 @@
 == Principles of Macro Mechanics ==
 AIs that can implement the following principles effectively _should_ macro well in RTS games.
 
-  # Scout the opponent to find the following types of information about the opponent:
+  # Scout the opponent to find the following types of information:
     * Starting location
     * Bases (Expansions + Original Base).
-      * Quantity - how many bases?
-      * Location - where are the bases?
-      * Time of Construction - when were the bases constructed?
-      * Approximate Mineral & Gas Gather Rates
+      * Quantity - how many bases does the opponent have?
+      * Location - where is each base?
+      * Time of Construction - when was each base constructed?
+      * Worker saturation - use to approximate Mineral & Gas Gather Rates
     * Production buildings:
       * Type - what type of production buildings?
       * Quantity - how many production buildings of each type?
