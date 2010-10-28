@@ -63,6 +63,12 @@ How to decide which base to attack, when to attack or retreat, what choke points
 
   * Based on relative army sizes, positioning
 
+
+  * Retreat if you have a smaller army
+  * Expand if you have a larger army
+  * Attack if the opponent does not have a large enough army to defend all expansions
+  * Harass if you do not have a large enough army to defend all expansions
+
 == Principles of Micro Mechanics ==
 
 How to control army units to their optimal effectiveness.
