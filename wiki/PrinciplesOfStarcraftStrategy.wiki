@@ -45,7 +45,7 @@ AIs that can implement the following principles effectively _should_ macro well 
     # Resource block: A situation where the limiting factor to your macro is insufficient resources (i.e. building 3 factories when you can only afford to produce out of 2 factories).
       * Solution: Increase resource gather rates.
       * This blocking situation is unavoidable in both the short term and long term because you have a limited number of resources.
-  # If you are not in one of the three blocking situations and producing your desired unit composition, and your desired unit composition is optimal against the enemy's unit composition, you are macroing perfectly (impossible in practice).
+  # If you are not being blocked by any of the three situations, and producing your desired unit composition, and your desired unit composition is optimal against the enemy's unit composition, you are macroing perfectly (impossible in practice).
   # Produce the minimum number of desired production buildings to construct your desired army unit composition at the optimal rate (optimal rate =~ not blocked by any of the three types).
   # Produce workers until they are able to fully saturate the number of bases you plan to have in X minutes. Maybe X is about 3?
   # Never queue up more than 1 unit in any production building. Unless a unit is about to finish.
