@@ -1,13 +1,13 @@
 AIs that can implement the following principles effectively should perform well in RTS games.
 
-1. Scout the opponent to find the following types of information:
- a) Starting location
+# Scout the opponent to find the following types of information:
+  * Starting location
 b) Bases: (Quantity, Location, Time of Construction, Approximate Mineral & Gas Gather Rates)
-	c) Production buildings (Type, Quantity, Location, Time of Construction)
-	d) Tech buildings (Type, Quantity, Location, Time of Construction)
-	e) Army unit composition (Type, Quantity)
-	f) Army position and movement
-2. From the scouting information you need to determine and re-evaluate the following about your strategy:
+  * Production buildings (Type, Quantity, Location, Time of Construction)
+  * Tech buildings (Type, Quantity, Location, Time of Construction)
+  * Army unit composition (Type, Quantity)
+  * Army position and movement
+# From the scouting information you need to determine and re-evaluate the following about your strategy:
 	a) Desired unit composition
 	b) Desired production facility composition
 3. Use all workers to their "maximal effectiveness"
