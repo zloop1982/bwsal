@@ -76,3 +76,8 @@ How to decide which base to attack, when to attack or retreat, what choke points
 == Principles of Micro Mechanics ==
 
 How to control army units to their optimal effectiveness.
+
+  * Target fire the unit with the highest damage rate/hit points.
+  * Always attack something, move during weapon cooldown
+  * Pull back units that are damaged.
+  * Tell high level army manager to retreat if the enemy is inflicting more damage.
