@@ -3,7 +3,7 @@
 Lowerlogic's principles of Starcraft Strategy (hopefully to be implemented in BWSAL some day)
 
 == Principles of Macro Mechanics ==
-AIs that can implement the following principles effectively _should_ macro well in RTS games.
+AIs that can implement the following principles effectively _should_ macro well in RTS games. Note this is for 'standard' gameplay and does not take into account all-in type strategies.
 
   # Scout the opponent to find the following types of information:
     * Starting location
@@ -33,13 +33,20 @@ AIs that can implement the following principles effectively _should_ macro well 
     * Desired production buildings composition needed to produce the desired unit composition
   # Use all workers to their "maximal effectiveness"
     * Generally, this means keep workers gathering resources unless their are scouting or constructing a building
+  # Always use all production buildings that produce units in your desired army composition. Never let production buildings be idle.
   # Avoid these three blocking situations:
-    # Supply block: A situation where the limiting factor to your macro is insufficient supply. Solution: Build another supply depot. This blocking situation is avoidable.
-    # Production block: A situation where the limiting factor to your macro is insufficient production buildings (i.e. building only 1 factory when you can afford to continuously produce out of 2 factories). Solution: Build another production building. This blocking situation is unavoidable in the short term because scouting information might drastically change your desired army composition. In the long term, you can build sufficient production buildings to not be production blocked.
-    # Resource block: A situation where the limiting factor to your macro is insufficient resources (i.e. building 3 factories when you can only afford to produce out of 2 factories). Solution: Increase resource gather rates. This blocking situation is unavoidable in both the short term and long term because you have a limited number of resources.
-  # If you are not in one of the three blocking situations, you are producing at an optimal rate (impossible in practice).
+    # Supply block: A situation where the limiting factor to your macro is insufficient supply.
+      * Solution: Build another supply depot/pylon/overlord.
+      * This blocking situation is mostly avoidable with proper build ordering (unless the enemy kills of your scouting overlord :P).
+    # Production block: A situation where the limiting factor to your macro is insufficient production buildings (i.e. building only 1 factory when you can afford to continuously produce out of 2 factories).
+      * Solution: Build another production building.
+      * This blocking situation is unavoidable in the short term because scouting information might drastically change your desired army composition.
+      * In the long term, you can build sufficient production buildings to not be production blocked.
+    # Resource block: A situation where the limiting factor to your macro is insufficient resources (i.e. building 3 factories when you can only afford to produce out of 2 factories).
+      * Solution: Increase resource gather rates.
+      * This blocking situation is unavoidable in both the short term and long term because you have a limited number of resources.
+  # If you are not in one of the three blocking situations and producing your desired unit composition, you are macroing perfectly (impossible in practice).
   # Produce the minimum number of desired production buildings to construct your desired army unit composition at the optimal rate (optimal rate =~ not blocked by any of the three types).
-  # Always use all production buildings that produce units in your desired army composition. A production building should only be idle if you are resource blocked (unavoidable) or supply blocked (avoidable).
   # Produce workers until they are able to fully saturate the number of bases you plan to have in X minutes. Maybe X is about 3?
   # Never queue up more than 1 unit in any production building. Unless a unit is about to finish.
   # Expand whenever it is "safe" to do so.
