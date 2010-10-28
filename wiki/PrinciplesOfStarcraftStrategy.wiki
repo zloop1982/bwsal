@@ -1,6 +1,6 @@
 = Priciples of Starcraft Strategy =
 
-Lowerlogic's principles of Starcraft Strategy (hopefully to be implemented in BWSAL some day)
+Lowerlogic's principles of Starcraft Strategy (hopefully to be implemented using BWSAL some day)
 
 == Principles of Macro Mechanics ==
 AIs that can implement the following principles effectively _should_ macro well in RTS games. Note this is for 'standard' gameplay and does not take into account all-in type strategies.
