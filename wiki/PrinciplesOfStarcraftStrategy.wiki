@@ -56,7 +56,7 @@ AIs that can implement the following principles effectively _should_ macro well 
 
 == Principles of Middle Mechanics ==
 
-How to decide which base to attack, and when to attack or retreat.
+How to decide which base to attack, when to attack or retreat, what choke points to control, etc.
 
   * Based on relative army sizes, positioning
 
