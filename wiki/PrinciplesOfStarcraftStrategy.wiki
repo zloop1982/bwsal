@@ -46,12 +46,13 @@ AIs that can implement the following principles effectively _should_ macro well 
       * Solution: Increase resource gather rates.
       * This blocking situation is unavoidable in both the short term and long term because you have a limited number of resources.
   # If you are not being blocked by any of the three situations, and producing your desired unit composition, and your desired unit composition is optimal against the enemy's unit composition, you are macroing perfectly (impossible in practice).
-  # Produce the minimum number of desired production buildings and supply depots to avoid the first two blocking situations. (i.e. don't produce 10 barracks if you just need three barracks to avoid being production blocked with your current income rate).
+  # Construct the minimum number of desired production buildings and supply depots to avoid the first two blocking situations. (i.e. don't produce 10 barracks if you just need three barracks to avoid being production blocked with your current income rate).
   # Produce workers until they are able to fully saturate the number of bases you plan to have in X minutes. Maybe X is about 5?
   # Never queue up more than 1 unit in any production building. Unless a unit is about to finish.
   # Expand whenever it is "safe" to do so.
     * You are attacking, or
-    * Enemy is retreating, or
+    * The opponent is retreating, or
+    * The opponent is expanding, or
     * You have a larger army
 
 == Principles of Middle Mechanics ==
