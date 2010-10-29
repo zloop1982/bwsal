@@ -5,13 +5,14 @@ using namespace BWAPI;
 using namespace std;
 TaskStream::TaskStream(Task t, Task nt)
 {
-  task[0]     = t;
-  task[1]     = nt;
-  worker      = NULL;
-  buildUnit   = NULL;
-  status      = None;
-  killSwitch  = false;
-  name        = "Task Stream";
+  task[0]    = t;
+  task[1]    = nt;
+  worker     = NULL;
+  buildUnit  = NULL;
+  status     = None;
+  killSwitch = false;
+  name       = "Task Stream";
+  plannedAdditionalResources = false;
 }
 TaskStream::~TaskStream()
 {
@@ -191,6 +192,7 @@ void TaskStream::computeStatus()
         if (task[i].getUnit().isTwoUnitsInOneEgg())
           count = 2;
         TheMacroManager->uctl.registerUnitCountChange(task[i].getStartFrame()+task[i].getTime(), task[i].getUnit(), count);
+        plannedAdditionalResources = true;
       }
 
       task[i].setReservedFinishDataThisFrame(true);
@@ -238,13 +240,15 @@ void TaskStream::update()
     obs.first->update(this);
   }
 }
-void TaskStream::updateStatus()
+bool TaskStream::updateStatus()
 {
-  if (killSwitch) return;
+  plannedAdditionalResources = false;
+  if (killSwitch) return false;
   Status lastStatus = status;
   computeStatus();
   if (status != lastStatus)
     notifyNewStatus();
+  return plannedAdditionalResources;
 }
 void TaskStream::attach(TaskStreamObserver* obs, bool owned)
 {
@@ -422,4 +426,5 @@ void TaskStream::clearPlanningData()
   task[1].setReservedFinishDataThisFrame(task[0].isCompleted());
   if (!task[1].hasSpentResources())
     task[1].setStartFrame(-1);
+  plannedAdditionalResources = false;
 }

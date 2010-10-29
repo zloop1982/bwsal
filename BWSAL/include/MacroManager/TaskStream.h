@@ -15,7 +15,7 @@ class TaskStream : public Arbitrator::Controller<BWAPI::Unit*,double>
     virtual void onRevoke(BWAPI::Unit* unit, double bid);
     virtual void update();
     void clearPlanningData();
-    void updateStatus();
+    bool updateStatus(); //returns true if planned additional resources (units, supply)
     virtual std::string getName() const;
     virtual std::string getShortName() const;
 
@@ -75,6 +75,7 @@ class TaskStream : public Arbitrator::Controller<BWAPI::Unit*,double>
     bool workerReady;
     bool locationReady;
     Task task[2];
+    bool plannedAdditionalResources;
     BWAPI::Unit* worker;
     BWAPI::Unit* buildUnit;
     Status status;
