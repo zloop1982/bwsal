@@ -87,11 +87,17 @@ int ResourceTimeline::getFirstValidTime(const Resources &r)
     return frame;
   double t=lastInvalidEventFrame;
   if (invalidRes.getSupply()<-0.1 || 
-     (invalidRes.getMinerals()<-0.1 && mineralGatherRate==0) ||
-     (invalidRes.getGas()<-0.1 && gasGatherRate==0))
+     (invalidRes.getGas()<-0.1 && gasGatherRate==0) ||
+     (invalidRes.getMinerals()<-0.1 && mineralGatherRate==0))
   {
     if (validEventFrame>lastInvalidEventFrame)
       return validEventFrame;
+    if (invalidRes.getSupply()<-0.1)
+      lastError = Insufficient_Supply;
+    else if (invalidRes.getGas()<-0.1 && gasGatherRate==0)
+      lastError = Insufficient_Gas;
+    else if (invalidRes.getMinerals()<-0.1 && mineralGatherRate==0)
+      lastError = Insufficient_Minerals;
     return -1;
   }
   if (invalidRes.getMinerals()<0)
