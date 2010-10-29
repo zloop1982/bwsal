@@ -9,6 +9,7 @@ Task::Task(const BWAPI::UnitType t,    const BWAPI::TilePosition p)
   startFrame                 = -1;
   spentResources             = false;
   reservedResourcesThisFrame = false;
+  createdSupplyThisFrame     = false;
   completed                  = false;
 }
 Task::Task(const BWAPI::TechType t,    const BWAPI::TilePosition p)
@@ -19,6 +20,7 @@ Task::Task(const BWAPI::TechType t,    const BWAPI::TilePosition p)
   startFrame                 = -1;
   spentResources             = false;
   reservedResourcesThisFrame = false;
+  createdSupplyThisFrame     = false;
   completed                  = false;
 }
 Task::Task(const BWAPI::UpgradeType t, const BWAPI::TilePosition p)
@@ -29,6 +31,7 @@ Task::Task(const BWAPI::UpgradeType t, const BWAPI::TilePosition p)
   startFrame                 = -1;
   spentResources             = false;
   reservedResourcesThisFrame = false;
+  createdSupplyThisFrame     = false;
   completed                  = false;
 }
 Task& Task::operator=(const Task t)
@@ -39,8 +42,8 @@ Task& Task::operator=(const Task t)
   startFrame                 = t.startFrame;
   spentResources             = t.spentResources;
   reservedResourcesThisFrame = t.reservedResourcesThisFrame;
+  createdSupplyThisFrame     = t.createdSupplyThisFrame;
   completed                  = t.completed;
-
   return *this;
 }
 Task& Task::setType(const BWAPI::UnitType t)
@@ -81,6 +84,7 @@ bool Task::operator==(const Task &t) const
   if (startFrame                 != t.startFrame) return false;
   if (spentResources             != t.spentResources) return false;
   if (reservedResourcesThisFrame != t.reservedResourcesThisFrame) return false;
+  if (createdSupplyThisFrame     != t.createdSupplyThisFrame) return false;
   if (completed                  != t.completed) return false;
   return true;
 }
@@ -238,7 +242,6 @@ bool Task::hasSpentResources() const
 {
   return spentResources;
 }
-
 void Task::setReservedResourcesThisFrame(bool reserved)
 {
   reservedResourcesThisFrame = reserved;
@@ -247,7 +250,14 @@ bool Task::hasReservedResourcesThisFrame() const
 {
   return reservedResourcesThisFrame;
 }
-
+void Task::setCreatedSupplyThisFrame(bool created)
+{
+  createdSupplyThisFrame = created;
+}
+bool Task::hasCreatedSupplyThisFrame() const
+{
+  return createdSupplyThisFrame;
+}
 void Task::setCompleted(bool c)
 {
   completed = c;

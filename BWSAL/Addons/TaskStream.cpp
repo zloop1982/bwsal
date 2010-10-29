@@ -132,21 +132,27 @@ void TaskStream::computeStatus()
   for(int i=0;i<2;i++)
   {
     if (i>0 && task[i-1].getStartFrame()==-1) break;
-    if (task[i].hasReservedResourcesThisFrame()) continue;
-    int frame = TheMacroManager->rtl.getFirstValidTime(task[i].getResources());
+    if (!task[i].hasReservedResourcesThisFrame())
+    {
+      int frame = TheMacroManager->rtl.getFirstValidTime(task[i].getResources());
 
-    if (frame==-1 && i==0)
-      error = TheMacroManager->rtl.getLastError();
-    if (i>0 && frame!=-1)
-      frame = max(frame,task[i-1].getStartFrame()+task[i-1].getTime());
+      if (frame==-1 && i==0)
+        error = TheMacroManager->rtl.getLastError();
+      if (i>0 && frame!=-1)
+        frame = max(frame,task[i-1].getStartFrame()+task[i-1].getTime());
 
-    if (frame==-1) break;
+      if (frame==-1) break;
 
-    task[i].setStartFrame(frame);
-    TheMacroManager->rtl.reserveResources(frame,task[i].getResources());
-    task[i].setReservedResourcesThisFrame(true);
-    if (task[i].getType()==TaskTypes::Unit && task[i].getUnit().supplyProvided()>0)
-      TheMacroManager->rtl.registerSupplyIncrease(frame+task[i].getTime(), task[i].getUnit().supplyProvided());
+      task[i].setStartFrame(frame);
+      TheMacroManager->rtl.reserveResources(frame,task[i].getResources());
+      task[i].setReservedResourcesThisFrame(true);
+    }
+    if (task[i].hasReservedResourcesThisFrame() && !task[0].hasCreatedSupplyThisFrame())
+    {
+      if (task[i].getType()==TaskTypes::Unit && task[i].getUnit().supplyProvided()>0)
+        TheMacroManager->rtl.registerSupplyIncrease(task[i].getStartFrame()+task[i].getTime(), task[i].getUnit().supplyProvided());
+      task[i].setCreatedSupplyThisFrame(true);
+    }
   }
   if (task[0].getStartFrame()!=-1 && task[0].getStartFrame()<=Broodwar->getFrameCount())
   {
@@ -381,9 +387,11 @@ bool TaskStream::isLocationReady() const
 void TaskStream::clearPlanningData()
 {
   task[0].setReservedResourcesThisFrame(task[0].hasSpentResources());
+  task[0].setCreatedSupplyThisFrame(task[0].isCompleted());
   if (!task[0].hasSpentResources())
-  task[0].setStartFrame(-1);
+    task[0].setStartFrame(-1);
   task[1].setReservedResourcesThisFrame(task[1].hasSpentResources());
+  task[1].setCreatedSupplyThisFrame(task[0].isCompleted());
   if (!task[1].hasSpentResources())
     task[1].setStartFrame(-1);
 }
