@@ -10,12 +10,18 @@ class BasicTaskExecutor : public TaskStreamObserver
     virtual void newStatus(TaskStream* ts);
     virtual void completedTask(TaskStream* ts, const Task &t);
     virtual void update(TaskStream* ts);
+    void computeBuildUnit(TaskStream* ts);
+    void computeIsExecuting(TaskStream* ts);
+    void computeIsCompleted(TaskStream* ts);
+    void computeIsReady(TaskStream* ts);
+    void getReady(TaskStream* ts);
+    void execute(TaskStream* ts);
   private:
     struct data
     {
-      BWAPI::Unit* buildUnit;
+      bool isExecuting;
+      bool isReady;
       int targetLevel;
-      bool started;
     };
     std::map< TaskStream*, data > taskStreams;
 };

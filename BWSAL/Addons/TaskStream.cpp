@@ -1,15 +1,15 @@
 #include <MacroManager/TaskStream.h>
 #include <MacroManager/TaskStreamObserver.h>
+#include <math.h>
 using namespace BWAPI;
+using namespace std;
 TaskStream::TaskStream(Task t, Task nt)
 {
-  task        = t;
-  nextTask    = nt;
+  task[0]     = t;
+  task[1]     = nt;
   worker      = NULL;
   buildUnit   = NULL;
   status      = None;
-  isStarted   = false;
-  isCompleted = false;
   killSwitch  = false;
   name        = "Task Stream";
 }
@@ -36,7 +36,11 @@ void TaskStream::onOffer(std::set<BWAPI::Unit*> units)
   for each(Unit* u in units)
   {
     if (u == worker)
+    {
       TheArbitrator->accept(this,u);
+      TheArbitrator->setBid(this,u,100);
+      workerReady = true;
+    }
     else
       TheArbitrator->decline(this,u,0);
   }
@@ -47,9 +51,43 @@ void TaskStream::onRevoke(BWAPI::Unit* unit, double bid)
 }
 void TaskStream::computeStatus()
 {
+  locationReady = true;
+  workerReady = (worker != NULL) && worker->exists() && TheArbitrator->hasBid(worker) && TheArbitrator->getHighestBidder(worker).first==this;
+  if (task[0].getType()==TaskTypes::Unit)
+  {
+    UnitType ut = task[0].getUnit();
+    if (ut.isBuilding() && !ut.whatBuilds().first.isBuilding() && buildUnit == NULL)
+    {
+      if (task[0].getTilePosition().isValid()==false || !Broodwar->canBuildHere(worker,task[0].getTilePosition(),ut))
+        locationReady = false;
+    }
+  }
+  if (task[0] == NULL)
+  {
+    status = Error_Task_Not_Specified;
+    return;
+  }
+  if (task[0].getType()==TaskTypes::Unit)
+  {
+    UnitType ut = task[0].getUnit();
+    if (ut.isBuilding() && !ut.whatBuilds().first.isBuilding() && buildUnit == NULL)
+    {
+      if (task[0].getTilePosition().isValid()==false)
+      {
+        status = Error_Location_Not_Specified;
+        return;
+      }
+      if (!Broodwar->canBuildHere(worker,task[0].getTilePosition(),ut))
+      {
+        status = Error_Location_Blocked;
+        return;
+      }
+    }
+  }
   if (worker == NULL || !worker->exists())
   {
     status = Error_Worker_Not_Specified;
+    worker = NULL;
     return;
   }
   if (TheArbitrator->hasBid(worker)==false || TheArbitrator->getHighestBidder(worker).first!=this)
@@ -57,32 +95,9 @@ void TaskStream::computeStatus()
     status = Error_Worker_Not_Owned;
     return;
   }
-  if (task == NULL)
+  if (task[0].getType()==TaskTypes::Unit)
   {
-    status = Error_Task_Not_Specified;
-    return;
-  }
-  if (task.getType()==TaskTypes::Unit)
-  {
-    UnitType ut = task.getUnit();
-    if (ut.isBuilding() && !ut.whatBuilds().first.isBuilding() && buildUnit == NULL)
-    {
-      if (task.getTilePosition().isValid()==false)
-      {
-        status = Error_Location_Not_Specified;
-        return;
-      }
-      if (!worker->hasPath(Position(task.getTilePosition())))
-      {
-        status = Error_Location_Unreachable;
-        return;
-      }
-      if (!Broodwar->canBuildHere(worker,task.getTilePosition(),ut))
-      {
-        status = Error_Location_Blocked;
-        return;
-      }
-    }
+    UnitType ut = task[0].getUnit();
     for each(std::pair<UnitType, int> t in ut.requiredUnits())
     {
       if (t.first.isAddon() && t.first.whatBuilds().first == worker->getType() && worker->getAddon() == NULL)
@@ -105,57 +120,43 @@ void TaskStream::computeStatus()
       return;
     }
   }
-  if (task.getType()==TaskTypes::Upgrade)
+  if (task[0].getType()==TaskTypes::Upgrade)
   {
-    if (Broodwar->self()->isUpgrading(task.getUpgrade()))
+    if (Broodwar->self()->isUpgrading(task[0].getUpgrade()))
     {
       status = Waiting_For_Required_Upgrade;
       return;
     }
   }
-  bool reserved1last = reserved1;
-  bool reserved2last = reserved2;
-  if (!isStarted && !reserved1)
+  ResourceTimeline::ErrorCode error = ResourceTimeline::None;
+  for(int i=0;i<2;i++)
   {
-    predictedStartFrame1=TheMacroManager->rtl.getFirstValidTime(task.getResources());
-    if (predictedStartFrame1!=-1)
-    {
-      if (!reserved1last)
-      {
-        TheMacroManager->rtl.reserveResources(predictedStartFrame1,task.getResources());
-        reserved1=true;
-      }
-    }
-  }
-  if (predictedStartFrame1!=-1)
-  {
-    if (task.getType()==TaskTypes::Unit && task.getUnit().supplyProvided()>0 && !reserved1last)
-    {
-      TheMacroManager->rtl.registerSupplyIncrease(predictedStartFrame1+task.getTime(), task.getUnit().supplyProvided());
-      reserved1=true;
-    }
+    if (i>0 && task[i-1].getStartFrame()==-1) break;
+    if (task[i].hasReservedResourcesThisFrame()) continue;
+    int frame = TheMacroManager->rtl.getFirstValidTime(task[i].getResources());
 
-    predictedStartFrame2=TheMacroManager->rtl.getFirstValidTime(nextTask.getResources());
-    if (predictedStartFrame2!=-1)
-    {
-      if (predictedStartFrame2<predictedStartFrame1+task.getTime())
-        predictedStartFrame2=predictedStartFrame1+task.getTime();
-      if (!reserved2last)
-      {
-        TheMacroManager->rtl.reserveResources(predictedStartFrame2,nextTask.getResources());
-        reserved2=true;
-      }
-    }
+    if (frame==-1 && i==0)
+      error = TheMacroManager->rtl.getLastError();
+    if (i>0 && frame!=-1)
+      frame = max(frame,task[i-1].getStartFrame()+task[i-1].getTime());
+
+    if (frame==-1) break;
+
+    task[i].setStartFrame(frame);
+    TheMacroManager->rtl.reserveResources(frame,task[i].getResources());
+    task[i].setReservedResourcesThisFrame(true);
+    if (task[i].getType()==TaskTypes::Unit && task[i].getUnit().supplyProvided()>0)
+      TheMacroManager->rtl.registerSupplyIncrease(frame+task[i].getTime(), task[i].getUnit().supplyProvided());
   }
-  if (predictedStartFrame1<=Broodwar->getFrameCount())
+  if (task[0].getStartFrame()!=-1 && task[0].getStartFrame()<=Broodwar->getFrameCount())
   {
     status = Executing_Task;
   }
   else
   {
-    if (TheMacroManager->rtl.getLastError() == ResourceTimeline::Insufficient_Supply)
+    if (error == ResourceTimeline::Insufficient_Supply)
       status = Waiting_For_Supply;
-    else if (TheMacroManager->rtl.getLastError() == ResourceTimeline::Insufficient_Gas)
+    else if (error == ResourceTimeline::Insufficient_Gas)
       status = Waiting_For_Gas;
     else
       status = Waiting_For_Minerals;
@@ -167,21 +168,20 @@ void TaskStream::update()
   if (killSwitch) return;
   if (status == Executing_Task)
   {
-    if (isCompleted)
+    if (task[0].isCompleted())
     {
       notifyCompletedTask();
-      isStarted = false;
-      isCompleted = false;
       status = None;
-      task = nextTask;
-      nextTask = Task();
+      task[0] = task[1];
+      task[1] = Task();
+      buildUnit = NULL;
       Broodwar->printf("Completed Task!");
     }
-    Broodwar->drawTextMap(worker->getPosition().x(),worker->getPosition().y(),"Task: %s",task.getName().c_str());
+    Broodwar->drawTextMap(worker->getPosition().x(),worker->getPosition().y(),"Task: %s",task[0].getName().c_str());
   }
   else
   {
-    if (status != Error_Worker_Not_Specified && status != Error_Worker_Not_Owned)
+    if (workerReady)
     {
       if (worker->isResearching())
         worker->cancelResearch();
@@ -197,27 +197,20 @@ void TaskStream::update()
           worker->getBuildUnit()->cancelConstruction();
         worker->cancelConstruction();
       }
-      else if (worker->isIdle()==false)
-      {
-        worker->stop();
-      }
     }
   }
   for each(std::pair<TaskStreamObserver*, bool> obs in observers)
   {
     obs.first->update(this);
   }
-  lastStatus = status;
-  reserved1 = false;
-  reserved2 = false;
 }
 void TaskStream::updateStatus()
 {
   if (killSwitch) return;
+  Status lastStatus = status;
   computeStatus();
   if (status != lastStatus)
     notifyNewStatus();
-  lastStatus=status;
 }
 void TaskStream::attach(TaskStreamObserver* obs, bool owned)
 {
@@ -241,7 +234,7 @@ void TaskStream::notifyCompletedTask()
 {
   for each(std::pair<TaskStreamObserver*, bool> obs in observers)
   {
-    obs.first->completedTask(this,task);
+    obs.first->completedTask(this,task[0]);
   }
 }
 TaskStream::Status TaskStream::getStatus() const
@@ -266,9 +259,6 @@ std::string TaskStream::getStatusString() const
     break;
     case Error_Location_Not_Specified:
       return "Error_Location_Not_Specified";
-    break;
-    case Error_Location_Unreachable:
-      return "Error_Location_Unreachable";
     break;
     case Error_Location_Blocked:
       return "Error_Location_Blocked";
@@ -315,6 +305,7 @@ void TaskStream::setWorker(BWAPI::Unit* w)
     TheArbitrator->setBid(this,worker,100);
     TheMacroManager->unitToTaskStream[worker] = this;
   }
+  workerReady = false;
 }
 BWAPI::Unit* TaskStream::getWorker() const
 {
@@ -330,11 +321,11 @@ BWAPI::Unit* TaskStream::getBuildUnit() const
 }
 void TaskStream::setTask(Task t)
 {
-  task = t;
+  task[0] = t;
 }
 Task& TaskStream::getTask()
 {
-  return task;
+  return task[0];
 }
 void TaskStream::setUrgent(bool isUrgent)
 {
@@ -346,11 +337,11 @@ bool TaskStream::isUrgent() const
 }
 void TaskStream::setNextTask(Task t)
 {
-  nextTask = t;
+  task[1] = t;
 }
 Task& TaskStream::getNextTask()
 {
-  return nextTask;
+  return task[1];
 }
 void TaskStream::setName(std::string s)
 {
@@ -366,22 +357,33 @@ std::string TaskStream::getShortName() const
 }
 void TaskStream::printToScreen(int x, int y)
 {
-  Broodwar->drawTextScreen(x,y,"Task: %s %s, Status: %s, Worker: %x, Started: %d, psf: %d, %d",task.getVerb().c_str(),task.getName().c_str(),getStatusString().c_str(),worker,isStarted,predictedStartFrame1,predictedStartFrame2);
+  Broodwar->drawTextScreen(x,y,"[ ] %s - %d ",
+    getStatusString().c_str(),
+    task[0].isCompleted());
+  Broodwar->drawTextScreen(x+200,y,"%s %s %d",
+    task[0].getVerb().c_str(),
+    task[0].getName().c_str(),
+    task[0].getStartFrame());
+  Broodwar->drawTextScreen(x+350,y,"%s %s %d",
+    task[1].getVerb().c_str(),
+    task[1].getName().c_str(),
+    task[1].getStartFrame());
 }
 
-void TaskStream::setTaskStarted(bool started)
+bool TaskStream::isWorkerReady() const
 {
-  isStarted = started;
+  return workerReady;
 }
-void TaskStream::completeTask()
+bool TaskStream::isLocationReady() const
 {
-  isCompleted = true;
+  return locationReady;
 }
-bool TaskStream::isTaskStarted() const
+void TaskStream::clearPlanningData()
 {
-  return isStarted;
-}
-bool TaskStream::isTaskCompleted() const
-{
-  return isCompleted;
+  task[0].setReservedResourcesThisFrame(task[0].hasSpentResources());
+  if (!task[0].hasSpentResources())
+  task[0].setStartFrame(-1);
+  task[1].setReservedResourcesThisFrame(task[1].hasSpentResources());
+  if (!task[1].hasSpentResources())
+    task[1].setStartFrame(-1);
 }

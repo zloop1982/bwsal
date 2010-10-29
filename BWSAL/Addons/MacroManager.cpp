@@ -19,6 +19,8 @@ MacroManager::MacroManager(Arbitrator::Arbitrator<BWAPI::Unit*,double>* arbitrat
 MacroManager::~MacroManager()
 {
   TheMacroManager = NULL;
+  for(std::list<TaskStream*>::iterator i=taskStreams.begin();i!=taskStreams.end();i++)
+    delete *i;
 }
 void MacroManager::update()
 {
@@ -35,26 +37,22 @@ void MacroManager::update()
     }
     delete ts;
   }
+  for each(TaskStream* ts in taskStreams)
+    ts->clearPlanningData();
   Broodwar->drawTextScreen(452,16,"\x07%d",(int)(TheResourceRates->getGatherRate().getMinerals()*23*60));
   Broodwar->drawTextScreen(520,16,"\x07%d",(int)(TheResourceRates->getGatherRate().getGas()*23*60));
   killSet.clear();
   int y=25;
   Broodwar->drawTextScreen(10,5,"Frame: %d",Broodwar->getFrameCount());
   for each(TaskStream* ts in taskStreams)
-  {
-    //update this task stream
+    ts->updateStatus();
+  for each(TaskStream* ts in taskStreams)
+    ts->updateStatus();
+  for each(TaskStream* ts in taskStreams)
     ts->update();
-  }
+
   for each(TaskStream* ts in taskStreams)
   {
-    //update this task stream
-    ts->update();
-    ts->updateStatus();
-  }
-  //run through everything again in case some lower priority streams (supply depots, pylons, etc) have enabled some high priority streams to proceed
-  for each(TaskStream* ts in taskStreams)
-  {
-    ts->updateStatus();
     ts->printToScreen(10,y);
     y+=20;
   }

@@ -14,6 +14,7 @@ class TaskStream : public Arbitrator::Controller<BWAPI::Unit*,double>
     virtual void onOffer(std::set<BWAPI::Unit*> units);
     virtual void onRevoke(BWAPI::Unit* unit, double bid);
     virtual void update();
+    void clearPlanningData();
     void updateStatus();
     virtual std::string getName() const;
     virtual std::string getShortName() const;
@@ -28,11 +29,10 @@ class TaskStream : public Arbitrator::Controller<BWAPI::Unit*,double>
     enum Status
     {
       None,
+      Error_Task_Not_Specified,
       Error_Worker_Not_Specified,
       Error_Worker_Not_Owned,
-      Error_Task_Not_Specified,
       Error_Location_Not_Specified,
-      Error_Location_Unreachable,
       Error_Location_Blocked,
       Error_Task_Requires_Addon,
       Waiting_For_Required_Units,
@@ -54,8 +54,9 @@ class TaskStream : public Arbitrator::Controller<BWAPI::Unit*,double>
 
     void setTaskStarted(bool started);
     void completeTask();
-    bool isTaskStarted() const;
-    bool isTaskCompleted() const;
+
+    bool isWorkerReady() const;
+    bool isLocationReady() const;
 
     void setTask(Task t);
     Task& getTask();
@@ -67,22 +68,16 @@ class TaskStream : public Arbitrator::Controller<BWAPI::Unit*,double>
 
     void setName(std::string s);
     void printToScreen(int x, int y);
-    bool reserved1;
-    bool reserved2;
   private:
-    bool killSwitch;
     void computeStatus();
+    bool killSwitch;
     bool urgent;
-    bool isCompleted;
-    bool isStarted;
-    Task task;
-    Task nextTask;
-    int predictedStartFrame1;
-    int predictedStartFrame2;
+    bool workerReady;
+    bool locationReady;
+    Task task[2];
     BWAPI::Unit* worker;
     BWAPI::Unit* buildUnit;
     Status status;
-    Status lastStatus;
     std::string name;
     std::map<TaskStreamObserver*, bool > observers;
 };
