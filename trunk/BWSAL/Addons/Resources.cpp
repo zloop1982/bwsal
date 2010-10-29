@@ -3,32 +3,16 @@
 Resources::Resources(BWAPI::Player* player)
 {
   if (player==NULL)
-  {
-    minerals = 0.0;
-    gas      = 0.0;
-    supply   = 0.0;
-  }
-  else
-  {
-    minerals = player->minerals();
-    gas      = player->gas();
-    supply   = player->supplyTotal() - player->supplyUsed();
-  }
+    player = BWAPI::Broodwar->self();
+  minerals = player->minerals();
+  gas      = player->gas();
+  supply   = player->supplyTotal() - player->supplyUsed();
 }
 Resources CumulativeResources(BWAPI::Player* player)
 {
-  Resources r;
   if (player==NULL)
-  {
-    r.setMinerals(0.0);
-    r.setGas(0.0);
-  }
-  else
-  {
-    r.setMinerals(player->cumulativeMinerals());
-    r.setGas(player->cumulativeGas());
-  }
-  return r;
+    player = BWAPI::Broodwar->self();
+  return Resources(player->cumulativeMinerals(),player->cumulativeGas(),player->supplyTotal() - player->supplyUsed());
 }
 Resources::Resources(BWAPI::UnitType type)
 {

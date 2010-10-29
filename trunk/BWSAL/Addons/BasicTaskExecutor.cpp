@@ -1,4 +1,5 @@
 #include <BasicTaskExecutor.h>
+#include <MacroManager.h>
 using namespace BWAPI;
 BasicTaskExecutor* instance = NULL;
 BasicTaskExecutor* BasicTaskExecutor::getInstance()
@@ -156,7 +157,11 @@ void BasicTaskExecutor::execute(TaskStream* ts)
     if (ut.getRace()==Races::Zerg && ut.isBuilding()==ut.whatBuilds().first.isBuilding())
     {
       if (worker->morph(ut))
+      {
         ts->getTask().setSpentResources(true);
+        TheMacroManager->spentResources+=ts->getTask().getResources();
+      }
+
     }
     else if (ut.isBuilding())
     {
@@ -167,24 +172,29 @@ void BasicTaskExecutor::execute(TaskStream* ts)
         worker->rightClick(targetPosition);
       else
       {
-        Resources r=Resources(Broodwar->self());
-        if (r.getMinerals()>ut.mineralPrice()+2 && (r.getGas()>ut.gasPrice()+2 || r.getGas()==0))
+        if (worker->build(ts->getTask().getTilePosition(),ut))
         {
-          if (worker->build(ts->getTask().getTilePosition(),ut))
-            ts->getTask().setSpentResources(true);
+          ts->getTask().setSpentResources(true);
+          TheMacroManager->spentResources+=ts->getTask().getResources();
         }
       }
     }
     else
     {
       if (worker->train(ut))
+      {
         ts->getTask().setSpentResources(true);
+      TheMacroManager->spentResources+=ts->getTask().getResources();
+      }
     }
   }
   else if (type == TaskTypes::Tech)
   {
     if (worker->research(ts->getTask().getTech()))
+    {
       ts->getTask().setSpentResources(true);
+      TheMacroManager->spentResources+=ts->getTask().getResources();
+    }
   }
   else if (type == TaskTypes::Upgrade)
   {
@@ -192,6 +202,7 @@ void BasicTaskExecutor::execute(TaskStream* ts)
     {
       ts->getTask().setSpentResources(true);
       taskStreams[ts].targetLevel = Broodwar->self()->getUpgradeLevel(ts->getTask().getUpgrade())+1;
+      TheMacroManager->spentResources+=ts->getTask().getResources();
     }
   }
 }

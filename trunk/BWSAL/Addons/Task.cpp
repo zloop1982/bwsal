@@ -141,6 +141,17 @@ BWAPI::UnitType Task::getWorkerType() const
     return UpgradeType(id).whatUpgrades();
   return UnitTypes::None;
 }
+std::map<BWAPI::UnitType, int> Task::getRequiredUnits() const
+{
+  std::map<BWAPI::UnitType, int> r;
+  if (type == TaskTypes::Unit)
+    r=UnitType(id).requiredUnits();
+  else if (type == TaskTypes::Tech)
+    r.insert(std::make_pair(TechType(id).whatResearches(),1));
+  else if (type == TaskTypes::Upgrade)
+    r.insert(std::make_pair(UpgradeType(id).whatUpgrades(),1));
+  return r;
+}
 Resources Task::getResources(BWAPI::Player* player) const
 {
   if (type == TaskTypes::Unit)

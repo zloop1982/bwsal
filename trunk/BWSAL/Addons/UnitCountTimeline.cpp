@@ -15,6 +15,8 @@ int UnitCountTimeline::getFirstTime(BWAPI::UnitType t, int count)
   int frame = Broodwar->getFrameCount();
   if (c >= count)
     return frame;
+  if (unitEvents.find(t)==unitEvents.end())
+    return -1;
   std::map<int, int>* events = &(unitEvents.find(t)->second);
   for(std::map<int, int>::iterator i=events->begin();i!=events->end();i++)
   {
