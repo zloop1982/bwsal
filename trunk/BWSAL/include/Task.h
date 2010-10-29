@@ -18,10 +18,6 @@ class Task
     Task(const BWAPI::UpgradeType t,                          const BWAPI::TilePosition p = BWAPI::TilePositions::None);
 
     Task& operator=(const Task t);
-    Task& operator=(const BWAPI::UnitType t);
-    Task& operator=(const BWAPI::TechType t);
-    Task& operator=(const BWAPI::UpgradeType t);
-    Task& operator=(const BWAPI::TilePosition p);
     Task& setType(const BWAPI::UnitType t);
     Task& setType(const BWAPI::TechType t);
     Task& setType(const BWAPI::UpgradeType t);
@@ -40,14 +36,33 @@ class Task
     BWAPI::TechType getTech() const;
     BWAPI::UpgradeType getUpgrade() const;
     BWAPI::TilePosition getTilePosition() const;
+    BWAPI::UnitType getWorkerType() const;
     Resources getResources(BWAPI::Player* player = NULL) const;
     int getTime(BWAPI::Player* player = NULL) const;
     std::string getName() const;
     std::string getVerb() const;
 
+    void setStartFrame(int frame);
+    int getStartFrame() const;
+
+    int getRemainingTime(BWAPI::Player* player = NULL) const;
+
+    void setSpentResources(bool spent);
+    bool hasSpentResources() const;
+
+    void setReservedResourcesThisFrame(bool reserved);
+    bool hasReservedResourcesThisFrame() const;
+
+    void setCompleted(bool c);
+    bool isCompleted() const;
+
   private:
     TaskTypes::Enum type;
     int id;
     BWAPI::TilePosition position;
+    int startFrame;
+    bool spentResources;
+    bool reservedResourcesThisFrame;
+    bool completed;
 };
 

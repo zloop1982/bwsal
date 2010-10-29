@@ -232,7 +232,7 @@ namespace Arbitrator
   bool Arbitrator<_Tp,_Val>::hasBid(_Tp obj) const
   {
     //returns true if the given object exists in the bids map
-    return (bids.find(obj)!=bids.end());
+    return (bids.find(obj)!=bids.end() && !bids.find(obj)->second.empty());
   }
 
   template <class _Tp,class _Val>
