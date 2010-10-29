@@ -83,8 +83,8 @@ void MacroAIModule::onFrame()
       land_index=(int)TheMacroManager->taskStreams.size()-1;
     if (land_index!=drag_index)
     {
-      std::list<TaskStream*>::iterator td;
-      std::list<TaskStream*>::iterator tl;
+      std::list<TaskStream*>::iterator td=TheMacroManager->taskStreams.end();
+      std::list<TaskStream*>::iterator tl=TheMacroManager->taskStreams.end();
       TaskStream* tm=NULL;
       int j=0;
       for(std::list<TaskStream*>::iterator i=TheMacroManager->taskStreams.begin();i!=TheMacroManager->taskStreams.end();i++)
@@ -95,9 +95,12 @@ void MacroAIModule::onFrame()
           tl=i;
         j++;
       }
-      tm=*td;
-      *td=*tl;
-      *tl=tm;
+      if (td!=TheMacroManager->taskStreams.end() && tl!=TheMacroManager->taskStreams.end())
+      {
+        tm=*td;
+        *td=*tl;
+        *tl=tm;
+      }
       drag_index = land_index;
     }
     if (!Broodwar->getMouseState(M_LEFT) && lastMouseClick)

@@ -167,8 +167,12 @@ void BasicTaskExecutor::execute(TaskStream* ts)
         worker->rightClick(targetPosition);
       else
       {
-        if (worker->build(ts->getTask().getTilePosition(),ut))
-          ts->getTask().setSpentResources(true);
+        Resources r=Resources(Broodwar->self());
+        if (r.getMinerals()>ut.mineralPrice()+2 && (r.getGas()>ut.gasPrice()+2 || r.getGas()==0))
+        {
+          if (worker->build(ts->getTask().getTilePosition(),ut))
+            ts->getTask().setSpentResources(true);
+        }
       }
     }
     else
