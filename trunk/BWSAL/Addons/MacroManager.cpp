@@ -47,10 +47,19 @@ void MacroManager::update()
   killSet.clear();
   int y=25;
   Broodwar->drawTextScreen(10,5,"Frame: %d",Broodwar->getFrameCount());
-  for each(TaskStream* ts in taskStreams)
-    ts->updateStatus();
-  for each(TaskStream* ts in taskStreams)
-    ts->updateStatus();
+  bool plannedAdditionalResources = true;
+  while(plannedAdditionalResources)
+  {
+    plannedAdditionalResources = false;
+    for each(TaskStream* ts in taskStreams)
+    {
+      if (ts->updateStatus())
+      {
+        plannedAdditionalResources = true;
+        break;
+      }
+    }
+  }
   for each(TaskStream* ts in taskStreams)
     ts->update();
 
