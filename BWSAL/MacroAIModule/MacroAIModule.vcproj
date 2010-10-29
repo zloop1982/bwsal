@@ -338,6 +338,18 @@
 					>
 				</File>
 			</Filter>
+			<Filter
+				Name="UnitCountTimeline"
+				>
+				<File
+					RelativePath="..\Addons\UnitCountTimeline.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\include\UnitCountTimeline.h"
+					>
+				</File>
+			</Filter>
 		</Filter>
 	</Files>
 	<Globals>

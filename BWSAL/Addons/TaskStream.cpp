@@ -106,6 +106,10 @@ void TaskStream::computeStatus()
         return;
       }
     }
+  }
+  if (task[0].getType()==TaskTypes::Unit)
+  {
+    UnitType ut = task[0].getUnit();
     for each(std::pair<UnitType, int> t in ut.requiredUnits())
     {
       if (t.second > Broodwar->self()->completedUnitCount(t.first))
@@ -147,11 +151,19 @@ void TaskStream::computeStatus()
       TheMacroManager->rtl.reserveResources(frame,task[i].getResources());
       task[i].setReservedResourcesThisFrame(true);
     }
-    if (task[i].hasReservedResourcesThisFrame() && !task[0].hasCreatedSupplyThisFrame())
+    if (task[i].hasReservedResourcesThisFrame() && !task[0].hasReservedFinishDataThisFrame())
     {
-      if (task[i].getType()==TaskTypes::Unit && task[i].getUnit().supplyProvided()>0)
-        TheMacroManager->rtl.registerSupplyIncrease(task[i].getStartFrame()+task[i].getTime(), task[i].getUnit().supplyProvided());
-      task[i].setCreatedSupplyThisFrame(true);
+      if (task[i].getType()==TaskTypes::Unit)
+      {
+        if (task[i].getUnit().supplyProvided()>0)
+          TheMacroManager->rtl.registerSupplyIncrease(task[i].getStartFrame()+task[i].getTime(), task[i].getUnit().supplyProvided());
+        int count = 1;
+        if (task[i].getUnit().isTwoUnitsInOneEgg())
+          count = 2;
+        TheMacroManager->uctl.registerUnitCountChange(task[i].getStartFrame()+task[i].getTime(), task[i].getUnit(), count);
+      }
+
+      task[i].setReservedFinishDataThisFrame(true);
     }
   }
   if (task[0].getStartFrame()!=-1 && task[0].getStartFrame()<=Broodwar->getFrameCount())
@@ -387,11 +399,11 @@ bool TaskStream::isLocationReady() const
 void TaskStream::clearPlanningData()
 {
   task[0].setReservedResourcesThisFrame(task[0].hasSpentResources());
-  task[0].setCreatedSupplyThisFrame(task[0].isCompleted());
+  task[0].setReservedFinishDataThisFrame(task[0].isCompleted());
   if (!task[0].hasSpentResources())
     task[0].setStartFrame(-1);
   task[1].setReservedResourcesThisFrame(task[1].hasSpentResources());
-  task[1].setCreatedSupplyThisFrame(task[0].isCompleted());
+  task[1].setReservedFinishDataThisFrame(task[0].isCompleted());
   if (!task[1].hasSpentResources())
     task[1].setStartFrame(-1);
 }
