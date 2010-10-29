@@ -3,47 +3,47 @@ using namespace BWAPI;
 
 Task::Task(const BWAPI::UnitType t,    const BWAPI::TilePosition p)
 {
-  type                       = TaskTypes::Unit;
-  id                         = t.getID();
-  position                   = p;
-  startFrame                 = -1;
-  spentResources             = false;
-  reservedResourcesThisFrame = false;
-  createdSupplyThisFrame     = false;
-  completed                  = false;
+  type                        = TaskTypes::Unit;
+  id                          = t.getID();
+  position                    = p;
+  startFrame                  = -1;
+  spentResources              = false;
+  reservedResourcesThisFrame  = false;
+  reservedFinishDataThisFrame = false;
+  completed                   = false;
 }
 Task::Task(const BWAPI::TechType t,    const BWAPI::TilePosition p)
 {
   type     = TaskTypes::Tech;
   id       = t.getID();
   position = p;
-  startFrame                 = -1;
-  spentResources             = false;
-  reservedResourcesThisFrame = false;
-  createdSupplyThisFrame     = false;
-  completed                  = false;
+  startFrame                  = -1;
+  spentResources              = false;
+  reservedResourcesThisFrame  = false;
+  reservedFinishDataThisFrame = false;
+  completed                   = false;
 }
 Task::Task(const BWAPI::UpgradeType t, const BWAPI::TilePosition p)
 {
   type     = TaskTypes::Upgrade;
   id       = t.getID();
   position = p;
-  startFrame                 = -1;
-  spentResources             = false;
-  reservedResourcesThisFrame = false;
-  createdSupplyThisFrame     = false;
-  completed                  = false;
+  startFrame                  = -1;
+  spentResources              = false;
+  reservedResourcesThisFrame  = false;
+  reservedFinishDataThisFrame = false;
+  completed                   = false;
 }
 Task& Task::operator=(const Task t)
 {
-  type                       = t.type;
-  id                         = t.id;
-  position                   = t.position;
-  startFrame                 = t.startFrame;
-  spentResources             = t.spentResources;
-  reservedResourcesThisFrame = t.reservedResourcesThisFrame;
-  createdSupplyThisFrame     = t.createdSupplyThisFrame;
-  completed                  = t.completed;
+  type                        = t.type;
+  id                          = t.id;
+  position                    = t.position;
+  startFrame                  = t.startFrame;
+  spentResources              = t.spentResources;
+  reservedResourcesThisFrame  = t.reservedResourcesThisFrame;
+  reservedFinishDataThisFrame = t.reservedFinishDataThisFrame;
+  completed                   = t.completed;
   return *this;
 }
 Task& Task::setType(const BWAPI::UnitType t)
@@ -78,14 +78,14 @@ bool Task::operator==(void* ptr) const
 }
 bool Task::operator==(const Task &t) const
 {
-  if (type                       != t.type) return false;
-  if (id                         != t.id) return false;
-  if (position                   != t.position) return false;
-  if (startFrame                 != t.startFrame) return false;
-  if (spentResources             != t.spentResources) return false;
-  if (reservedResourcesThisFrame != t.reservedResourcesThisFrame) return false;
-  if (createdSupplyThisFrame     != t.createdSupplyThisFrame) return false;
-  if (completed                  != t.completed) return false;
+  if (type                        != t.type) return false;
+  if (id                          != t.id) return false;
+  if (position                    != t.position) return false;
+  if (startFrame                  != t.startFrame) return false;
+  if (spentResources              != t.spentResources) return false;
+  if (reservedResourcesThisFrame  != t.reservedResourcesThisFrame) return false;
+  if (reservedFinishDataThisFrame != t.reservedFinishDataThisFrame) return false;
+  if (completed                   != t.completed) return false;
   return true;
 }
 bool Task::operator==(const BWAPI::UnitType &t) const
@@ -250,13 +250,13 @@ bool Task::hasReservedResourcesThisFrame() const
 {
   return reservedResourcesThisFrame;
 }
-void Task::setCreatedSupplyThisFrame(bool created)
+void Task::setReservedFinishDataThisFrame(bool reserved)
 {
-  createdSupplyThisFrame = created;
+  reservedFinishDataThisFrame = reserved;
 }
-bool Task::hasCreatedSupplyThisFrame() const
+bool Task::hasReservedFinishDataThisFrame() const
 {
-  return createdSupplyThisFrame;
+  return reservedFinishDataThisFrame;
 }
 void Task::setCompleted(bool c)
 {

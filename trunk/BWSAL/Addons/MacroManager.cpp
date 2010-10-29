@@ -25,6 +25,7 @@ MacroManager::~MacroManager()
 void MacroManager::update()
 {
   rtl.reset(Resources(Broodwar->self()),TheResourceRates->getGatherRate().getMinerals(),TheResourceRates->getGatherRate().getGas());
+  uctl.reset();
   for each(TaskStream* ts in killSet)
   {
     for(std::list<TaskStream*>::iterator i=taskStreams.begin();i!=taskStreams.end();i++)

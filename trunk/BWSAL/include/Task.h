@@ -53,8 +53,8 @@ class Task
     void setReservedResourcesThisFrame(bool reserved);
     bool hasReservedResourcesThisFrame() const;
 
-    void setCreatedSupplyThisFrame(bool created);
-    bool hasCreatedSupplyThisFrame() const;
+    void setReservedFinishDataThisFrame(bool reserved);
+    bool hasReservedFinishDataThisFrame() const;
 
     void setCompleted(bool c);
     bool isCompleted() const;
@@ -66,7 +66,7 @@ class Task
     int startFrame;
     bool spentResources;
     bool reservedResourcesThisFrame;
-    bool createdSupplyThisFrame;
+    bool reservedFinishDataThisFrame;
     bool completed;
 };
 

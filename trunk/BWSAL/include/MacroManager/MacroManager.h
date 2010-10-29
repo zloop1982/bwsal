@@ -2,6 +2,7 @@
 #include <BWAPI.h>
 #include <Arbitrator.h>
 #include <ResourceTimeline.h>
+#include <UnitCountTimeline.h>
 class TaskStream;
 class MacroManager
 {
@@ -14,6 +15,7 @@ class MacroManager
     std::set< TaskStream* > killSet;
     TaskStream* getTaskStream(BWAPI::Unit* unit);
     ResourceTimeline rtl;
+    UnitCountTimeline uctl;
     std::map< BWAPI::Unit*, TaskStream* > unitToTaskStream;
 };
 extern MacroManager* TheMacroManager;
