@@ -110,14 +110,6 @@ void TaskStream::computeStatus()
   if (task[0].getType()==TaskTypes::Unit)
   {
     UnitType ut = task[0].getUnit();
-    for each(std::pair<UnitType, int> t in ut.requiredUnits())
-    {
-      if (t.second > Broodwar->self()->completedUnitCount(t.first))
-      {
-        status = Waiting_For_Required_Units;
-        return;
-      }
-    }
     if (ut.requiredTech()!=TechTypes::None && Broodwar->self()->hasResearched(ut.requiredTech())==false)
     {
       status = Waiting_For_Required_Tech;
@@ -126,29 +118,67 @@ void TaskStream::computeStatus()
   }
   if (task[0].getType()==TaskTypes::Upgrade)
   {
-    if (Broodwar->self()->isUpgrading(task[0].getUpgrade()))
+    if (Broodwar->self()->isUpgrading(task[0].getUpgrade()) && status != Executing_Task)
     {
       status = Waiting_For_Required_Upgrade;
       return;
     }
   }
-  ResourceTimeline::ErrorCode error = ResourceTimeline::None;
   for(int i=0;i<2;i++)
   {
     if (i>0 && task[i-1].getStartFrame()==-1) break;
     if (!task[i].hasReservedResourcesThisFrame())
     {
-      int frame = TheMacroManager->rtl.getFirstValidTime(task[i].getResources());
+      int first_resource_frame = TheMacroManager->rtl.getFirstValidTime(task[i].getResources());
+      int first_valid_frame = first_resource_frame;
+      ResourceTimeline::ErrorCode res_error = TheMacroManager->rtl.getLastError();
+      bool waitForRequiredUnits = false;
+      map<UnitType, int> requiredUnits = task[i].getRequiredUnits();
+      if (first_valid_frame!=-1)
+      {
+        for each(std::pair<UnitType, int> t in requiredUnits)
+        {
+          int first_unit_frame = TheMacroManager->uctl.getFirstTime(t.first,t.second);
+          if (first_unit_frame == -1) //required count of this type will not be reached in foreseeable future
+          {
+            first_valid_frame = -1;
+            waitForRequiredUnits = true;
+            break;
+          }
+          if (first_unit_frame>first_valid_frame) //required count of this type occur after we have sufficient resources
+          {
+            first_valid_frame=first_unit_frame;
+            waitForRequiredUnits = true;
+          }
+        }
+      }
+      if (i>0 && first_valid_frame!=-1)
+        first_valid_frame = max(first_valid_frame,task[i-1].getStartFrame()+task[i-1].getTime());
 
-      if (frame==-1 && i==0)
-        error = TheMacroManager->rtl.getLastError();
-      if (i>0 && frame!=-1)
-        frame = max(frame,task[i-1].getStartFrame()+task[i-1].getTime());
+      task[i].setStartFrame(first_valid_frame);
+      //if we need to wait to start the first task, compute the correct status
+      if ( i==0 ) //compute task stream status based on status of first unit
+      {
+        if (task[0].getStartFrame()!=-1 && task[0].getStartFrame()<=Broodwar->getFrameCount())
+          status = Executing_Task;
+        else
+        {
+          if (waitForRequiredUnits)
+            status = Waiting_For_Required_Units;
+          else
+          {
+            if (res_error == ResourceTimeline::Insufficient_Supply)
+              status = Waiting_For_Supply;
+            else if (res_error == ResourceTimeline::Insufficient_Gas)
+              status = Waiting_For_Gas;
+            else
+              status = Waiting_For_Minerals;
+          }
+        }
+      }
 
-      if (frame==-1) break;
-
-      task[i].setStartFrame(frame);
-      TheMacroManager->rtl.reserveResources(frame,task[i].getResources());
+      if (first_valid_frame==-1) break;
+      TheMacroManager->rtl.reserveResources(first_valid_frame,task[i].getResources());
       task[i].setReservedResourcesThisFrame(true);
     }
     if (task[i].hasReservedResourcesThisFrame() && !task[0].hasReservedFinishDataThisFrame())
@@ -165,20 +195,6 @@ void TaskStream::computeStatus()
 
       task[i].setReservedFinishDataThisFrame(true);
     }
-  }
-  if (task[0].getStartFrame()!=-1 && task[0].getStartFrame()<=Broodwar->getFrameCount())
-  {
-    status = Executing_Task;
-  }
-  else
-  {
-    if (error == ResourceTimeline::Insufficient_Supply)
-      status = Waiting_For_Supply;
-    else if (error == ResourceTimeline::Insufficient_Gas)
-      status = Waiting_For_Gas;
-    else
-      status = Waiting_For_Minerals;
-    return;
   }
 }
 void TaskStream::update()

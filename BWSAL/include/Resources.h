@@ -3,7 +3,7 @@
 class Resources
 {
   public:
-    Resources(double m = 0.0, double g = 0.0, double s = 0.0) : minerals(m),gas(g),supply(0) {}
+    Resources(double m = 0.0, double g = 0.0, double s = 0.0) : minerals(m),gas(g),supply(s) {}
     Resources(BWAPI::Player* player);
     Resources(BWAPI::UnitType type);
     Resources(BWAPI::TechType type);

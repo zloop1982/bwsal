@@ -37,6 +37,7 @@ class Task
     BWAPI::UpgradeType getUpgrade() const;
     BWAPI::TilePosition getTilePosition() const;
     BWAPI::UnitType getWorkerType() const;
+    std::map<BWAPI::UnitType, int> getRequiredUnits() const;
     Resources getResources(BWAPI::Player* player = NULL) const;
     int getTime(BWAPI::Player* player = NULL) const;
     std::string getName() const;

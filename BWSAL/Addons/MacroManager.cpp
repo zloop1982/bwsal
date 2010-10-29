@@ -24,7 +24,9 @@ MacroManager::~MacroManager()
 }
 void MacroManager::update()
 {
-  rtl.reset(Resources(Broodwar->self()),TheResourceRates->getGatherRate().getMinerals(),TheResourceRates->getGatherRate().getGas());
+  spentResources.setSupply(0);//don't keep track of spent supply
+  Resources r = CumulativeResources(Broodwar->self())-spentResources;
+  rtl.reset(r,TheResourceRates->getGatherRate().getMinerals(),TheResourceRates->getGatherRate().getGas());
   uctl.reset();
   for each(TaskStream* ts in killSet)
   {

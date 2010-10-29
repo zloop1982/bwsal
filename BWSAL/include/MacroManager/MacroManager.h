@@ -16,6 +16,7 @@ class MacroManager
     TaskStream* getTaskStream(BWAPI::Unit* unit);
     ResourceTimeline rtl;
     UnitCountTimeline uctl;
+    Resources spentResources;
     std::map< BWAPI::Unit*, TaskStream* > unitToTaskStream;
 };
 extern MacroManager* TheMacroManager;
