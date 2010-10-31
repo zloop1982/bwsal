@@ -1,5 +1,5 @@
 #include <Resources.h>
-
+#include <sstream>
 Resources::Resources(BWAPI::Player* player)
 {
   if (player==NULL)
@@ -133,4 +133,10 @@ Resources Resources::operator-(const Resources &r) const
 Resources Resources::operator/(double value) const
 {
   return Resources(minerals/value,gas/value,supply/value);
+}
+std::string Resources::toString() const
+{
+  std::stringstream s;
+  s << "(Minerals = " << minerals << ", Gas = " << gas << ", Supply = " << supply << ")";
+  return s.str();
 }

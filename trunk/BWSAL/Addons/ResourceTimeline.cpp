@@ -17,6 +17,58 @@ void ResourceTimeline::reset(const Resources &r, double mgr, double ggr)
   gasGatherRate = ggr;
   lastError = None;
 }
+
+Resources ResourceTimeline::getActualResourcesAtTime(int frame)
+{
+  if (resourceEvents.find(frame)==resourceEvents.end())
+    resourceEvents.insert(std::make_pair(frame,Resources()));
+  int lastFrame = Broodwar->getFrameCount();
+  Resources res = currentResources;
+  bool isValid = true;
+  for(std::map<int, Resources>::iterator i=resourceEvents.begin();i!=resourceEvents.end();i++)
+  {
+    int currentFrame = i->first;
+    int duration = currentFrame - lastFrame;
+    res.addMinerals((int)(duration*mineralGatherRate));
+    res.addGas((int)(duration*gasGatherRate));
+    if (currentFrame == frame)
+      break;
+    lastFrame = currentFrame;
+  }
+  return res;
+}
+Resources ResourceTimeline::getAvailableResourcesAtTime(int frame)
+{
+  if (resourceEvents.find(frame)==resourceEvents.end())
+    resourceEvents.insert(std::make_pair(frame,Resources()));
+  int lastFrame = Broodwar->getFrameCount();
+  Resources res = currentResources;
+  Resources availRes;
+  for(std::map<int, Resources>::iterator i=resourceEvents.begin();i!=resourceEvents.end();i++)
+  {
+    int currentFrame = i->first;
+    int duration = currentFrame - lastFrame;
+    res.addMinerals((int)(duration*mineralGatherRate));
+    res.addGas((int)(duration*gasGatherRate));
+    res+=i->second;
+    if (currentFrame == frame)
+    {
+      availRes=res;
+    }
+    else if (currentFrame>frame)
+    {
+      if (res.getMinerals()<availRes.getMinerals())
+        availRes.setMinerals(res.getMinerals());
+      if (res.getGas()<availRes.getGas())
+        availRes.setGas(res.getGas());
+      if (res.getSupply()<availRes.getSupply())
+        availRes.setSupply(res.getSupply());
+    }
+    lastFrame = currentFrame;
+  }
+  return availRes;
+}
+
 bool ResourceTimeline::reserveResources(int frame, const Resources &r)
 {
   resourceEvents[frame]-=r;
@@ -35,6 +87,7 @@ bool ResourceTimeline::reserveResources(int frame, const Resources &r)
       isValid = false;
       break;
     }
+    lastFrame = currentFrame;
   }
   if (isValid)
     lastError = None;
