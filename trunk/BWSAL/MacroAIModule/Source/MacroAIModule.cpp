@@ -6,6 +6,10 @@
 #include <TerminateIfEmpty.h>
 #include <BasicWorkerFinder.h>
 #include <UnitCompositionProducer.h>
+#include <MacroManager.h>
+#include <ResourceRates.h>
+#include <MacroSupplyManager.h>
+
 using namespace BWAPI;
 int drag_index = -1;
 bool lastMouseClick = false;
@@ -17,6 +21,8 @@ MacroAIModule::~MacroAIModule()
 {
   if (TheMacroManager != NULL)
     delete TheMacroManager;
+  if (TheMacroSupplyManager != NULL)
+    delete TheMacroSupplyManager;
   if (TheResourceRates != NULL)
     delete TheResourceRates;
 }
@@ -24,6 +30,7 @@ void MacroAIModule::onStart()
 {
   Broodwar->enableFlag(Flag::UserInput);
   MacroManager::create(&arbitrator);
+  MacroSupplyManager::create();
   ResourceRates::create();
 
   TaskStream* ts = new TaskStream();
@@ -49,6 +56,7 @@ void MacroAIModule::onEnd(bool isWinner)
 void MacroAIModule::onFrame()
 {
   infantryProducer->update();
+  TheMacroSupplyManager->update();
   TheMacroManager->update();
   TheArbitrator->update();
   TheResourceRates->update();

@@ -24,7 +24,6 @@ Resources ResourceTimeline::getActualResourcesAtTime(int frame)
     resourceEvents.insert(std::make_pair(frame,Resources()));
   int lastFrame = Broodwar->getFrameCount();
   Resources res = currentResources;
-  bool isValid = true;
   for(std::map<int, Resources>::iterator i=resourceEvents.begin();i!=resourceEvents.end();i++)
   {
     int currentFrame = i->first;
@@ -67,6 +66,17 @@ Resources ResourceTimeline::getAvailableResourcesAtTime(int frame)
     lastFrame = currentFrame;
   }
   return availRes;
+}
+int ResourceTimeline::getFinalSupply()
+{
+  int lastFrame = Broodwar->getFrameCount();
+  Resources res = currentResources;
+  int supply = (int)(currentResources.getSupply());
+  for(std::map<int, Resources>::iterator i=resourceEvents.begin();i!=resourceEvents.end();i++)
+  {
+    supply+=(int)(i->second.getSupply());
+  }
+  return supply;
 }
 
 bool ResourceTimeline::reserveResources(int frame, const Resources &r)
