@@ -2,9 +2,6 @@
 #include <BWAPI.h>
 #include <BWTA.h>
 #include <Arbitrator.h>
-#include <WorkerManager.h>
-#include <MacroManager.h>
-#include <ResourceRates.h>
 
 class MacroAIModule : public BWAPI::AIModule
 {

@@ -390,6 +390,18 @@
 					>
 				</File>
 			</Filter>
+			<Filter
+				Name="MacroSupplyManager"
+				>
+				<File
+					RelativePath="..\Addons\MacroSupplyManager.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\include\MacroSupplyManager.h"
+					>
+				</File>
+			</Filter>
 		</Filter>
 	</Files>
 	<Globals>
