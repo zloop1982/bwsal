@@ -30,6 +30,8 @@ void MacroManager::update()
   Resources r = CumulativeResources(Broodwar->self())-spentResources;
   rtl.reset(r,TheResourceRates->getGatherRate().getMinerals(),TheResourceRates->getGatherRate().getGas());
   uctl.reset();
+  ttl.reset();
+  utl.reset();
   for each(TaskStream* ts in killSet)
   {
     for(std::list<TaskStream*>::iterator i=taskStreams.begin();i!=taskStreams.end();i++)

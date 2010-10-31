@@ -15,12 +15,13 @@ class Task
   public:
     Task(const BWAPI::UnitType t = BWAPI::UnitTypes::None,    const BWAPI::TilePosition p = BWAPI::TilePositions::None);
     Task(const BWAPI::TechType t,                             const BWAPI::TilePosition p = BWAPI::TilePositions::None);
-    Task(const BWAPI::UpgradeType t,                          const BWAPI::TilePosition p = BWAPI::TilePositions::None);
+    Task(const BWAPI::UpgradeType t, int l = -1,              const BWAPI::TilePosition p = BWAPI::TilePositions::None);
 
     Task& operator=(const Task t);
-    Task& setType(const BWAPI::UnitType t);
-    Task& setType(const BWAPI::TechType t);
-    Task& setType(const BWAPI::UpgradeType t);
+    Task& setType(const BWAPI::UnitType t,    const BWAPI::TilePosition p = BWAPI::TilePositions::None);
+    Task& setType(const BWAPI::TechType t,    const BWAPI::TilePosition p = BWAPI::TilePositions::None);
+    Task& setType(const BWAPI::UpgradeType t, int l = -1,    const BWAPI::TilePosition p = BWAPI::TilePositions::None);
+    Task& setLevel(int l);
     Task& setTilePosition(const BWAPI::TilePosition p);
 
     bool operator==(void* ptr) const;
@@ -35,11 +36,12 @@ class Task
     BWAPI::UnitType getUnit() const;
     BWAPI::TechType getTech() const;
     BWAPI::UpgradeType getUpgrade() const;
+    int getLevel() const;
     BWAPI::TilePosition getTilePosition() const;
     BWAPI::UnitType getWorkerType() const;
     std::map<BWAPI::UnitType, int> getRequiredUnits() const;
-    Resources getResources(BWAPI::Player* player = NULL) const;
-    int getTime(BWAPI::Player* player = NULL) const;
+    Resources getResources() const;
+    int getTime() const;
     std::string getName() const;
     std::string getVerb() const;
 
@@ -64,6 +66,7 @@ class Task
   private:
     TaskTypes::Enum type;
     int id;
+    int level;
     BWAPI::TilePosition position;
     int startTime;
     bool spentResources;

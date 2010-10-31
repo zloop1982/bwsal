@@ -3,6 +3,8 @@
 #include <Arbitrator.h>
 #include <ResourceTimeline.h>
 #include <UnitCountTimeline.h>
+#include <TechTimeline.h>
+#include <UpgradeTimeline.h>
 class TaskStream;
 class MacroManager
 {
@@ -16,6 +18,8 @@ class MacroManager
     std::set< TaskStream* > killSet;
     ResourceTimeline rtl;
     UnitCountTimeline uctl;
+    TechTimeline ttl;
+    UpgradeTimeline utl;
     Resources spentResources;
     std::map< BWAPI::Unit*, TaskStream* > unitToTaskStream;
 };

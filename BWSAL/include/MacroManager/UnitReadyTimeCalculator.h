@@ -18,7 +18,10 @@ namespace UnitReadyTimeStatus
 class UnitReadyTimeCalculator
 {
   public:
+    static void init();
     static int getReadyTime(BWAPI::Unit* unit, bool considerTasks = false);
     static int getReadyTime(BWAPI::Unit* unit, const Task &task, UnitReadyTimeStatus::Enum &reason, bool considerResources = true, bool considerTasks = false);
-
+    static std::set<BWAPI::UnitType> getPossibleUnitTypes(BWAPI::Unit* unit, int time = BWAPI::Broodwar->getFrameCount(), bool considerResources = true, bool considerTasks = false);
+//    static std::set<BWAPI::UpgradeType> getPossibleUpgradeTypes(BWAPI::Unit* unit, int time = BWAPI::Broodwar->getFrameCount());
+//    static std::set<BWAPI::TechType> getPossibleTechTypes(BWAPI::Unit* unit, int time = BWAPI::Broodwar->getFrameCount());
 };

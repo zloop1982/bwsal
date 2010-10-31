@@ -112,23 +112,6 @@ void TaskStream::computeStatus()
       }
     }
   }
-  if (task[0].getType()==TaskTypes::Unit)
-  {
-    UnitType ut = task[0].getUnit();
-    if (ut.requiredTech()!=TechTypes::None && Broodwar->self()->hasResearched(ut.requiredTech())==false)
-    {
-      status = Waiting_For_Required_Tech;
-      return;
-    }
-  }
-  if (task[0].getType()==TaskTypes::Upgrade)
-  {
-    if (Broodwar->self()->isUpgrading(task[0].getUpgrade()) && status != Executing_Task)
-    {
-      status = Waiting_For_Required_Upgrade;
-      return;
-    }
-  }
   for(int i=0;i<2;i++)
   {
     if (i>0 && task[i-1].getStartTime()==-1) break;
@@ -166,6 +149,8 @@ void TaskStream::computeStatus()
 
       if (first_valid_frame==-1) break;
       TheMacroManager->rtl.reserveResources(first_valid_frame,task[i].getResources());
+      if (task[i].getType()==TaskTypes::Tech)
+        TheMacroManager->ttl.registerTechStart(first_valid_frame,task[i].getTech());
       task[i].setReservedResourcesThisFrame(true);
     }
     if (task[i].hasReservedResourcesThisFrame() && !task[0].hasReservedFinishDataThisFrame())
@@ -178,6 +163,10 @@ void TaskStream::computeStatus()
         if (task[i].getUnit().isTwoUnitsInOneEgg())
           count = 2;
         TheMacroManager->uctl.registerUnitCountChange(task[i].getFinishTime(), task[i].getUnit(), count);
+        if (task[i].getType()==TaskTypes::Tech)
+          TheMacroManager->ttl.registerTechFinish(task[i].getFinishTime(),task[i].getTech());
+        if (task[i].getType()==TaskTypes::Upgrade)
+          TheMacroManager->utl.registerUpgradeLevelIncrease(task[i].getFinishTime(),task[i].getUpgrade());
         plannedAdditionalResources = true;
       }
 
