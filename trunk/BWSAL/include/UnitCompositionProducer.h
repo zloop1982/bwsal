@@ -10,7 +10,7 @@ class UnitCompositionProducer : public TaskStreamObserver
     virtual void detached(TaskStream* ts);
     void update();
     void setUnitWeight(BWAPI::UnitType t, double weight);
-    BWAPI::UnitType getNextUnitType();
+    BWAPI::UnitType getNextUnitType(BWAPI::Unit* worker);
   private:
     std::set<TaskStream*> streams;
     BWAPI::UnitType workerType;
