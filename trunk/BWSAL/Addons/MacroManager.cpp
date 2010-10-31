@@ -68,9 +68,18 @@ void MacroManager::update()
     ts->printToScreen(10,y);
     y+=20;
   }
+  /*
   for(std::map<int, Resources>::iterator i=rtl.resourceEvents.begin();i!=rtl.resourceEvents.end();i++)
   {
     Broodwar->drawTextScreen(10,y,"%d: (m:%f, g:%f, s:%f)",(*i).first,(*i).second.getMinerals(),(*i).second.getGas(),(*i).second.getSupply());
     y+=20;
   }
+  */
+}
+TaskStream* MacroManager::getTaskStream(BWAPI::Unit* unit) const
+{
+  std::map<BWAPI::Unit*, TaskStream*>::const_iterator i=unitToTaskStream.find(unit);
+  if (i==unitToTaskStream.end())
+    return NULL;
+  return i->second;
 }

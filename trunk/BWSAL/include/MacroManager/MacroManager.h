@@ -11,9 +11,9 @@ class MacroManager
     MacroManager(Arbitrator::Arbitrator<BWAPI::Unit*,double>* arbitrator);
     ~MacroManager();
     void update();
+    TaskStream* getTaskStream(BWAPI::Unit* unit) const;
     std::list< TaskStream* > taskStreams;
     std::set< TaskStream* > killSet;
-    TaskStream* getTaskStream(BWAPI::Unit* unit);
     ResourceTimeline rtl;
     UnitCountTimeline uctl;
     Resources spentResources;

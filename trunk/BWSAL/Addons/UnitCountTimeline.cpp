@@ -31,3 +31,13 @@ void UnitCountTimeline::registerUnitCountChange(int frame, BWAPI::UnitType t, in
 {
   unitEvents[t][frame]+=count;
 }
+int UnitCountTimeline::getFinalCount(BWAPI::UnitType t)
+{
+  int c = Broodwar->self()->completedUnitCount(t);
+  if (unitEvents.find(t)==unitEvents.end())
+    return c;
+  std::map<int, int>* events = &(unitEvents.find(t)->second);
+  for(std::map<int, int>::iterator i=events->begin();i!=events->end();i++)
+    c+=(*i).second;
+  return c;
+}
