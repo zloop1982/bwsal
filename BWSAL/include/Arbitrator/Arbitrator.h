@@ -118,6 +118,8 @@ namespace Arbitrator
       return false;
     if (!inOnOffer) //can only call decline from the onOffer() callback
       return false;
+    if (hasBid(obj)==false)
+      return false;
     if (bids[obj].top().first != c) //only the top bidder/controller can decline an object
       return false;
     updatedObjects.insert(obj);

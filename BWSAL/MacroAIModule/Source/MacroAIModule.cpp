@@ -5,9 +5,11 @@
 #include <TerminateIfWorkerLost.h>
 #include <TerminateIfEmpty.h>
 #include <BasicWorkerFinder.h>
+#include <UnitCompositionProducer.h>
 using namespace BWAPI;
 int drag_index = -1;
 bool lastMouseClick = false;
+UnitCompositionProducer* infantryProducer = NULL;
 MacroAIModule::MacroAIModule()
 {
 }
@@ -36,12 +38,17 @@ void MacroAIModule::onStart()
   ts->attach(BasicTaskExecutor::getInstance(),false);
   ts->attach(new UnitPump(UnitTypes::Terran_SCV),true);
   ts->attach(new TerminateIfWorkerLost(),true);
+  infantryProducer = new UnitCompositionProducer(UnitTypes::Terran_Barracks);
+  infantryProducer->setUnitWeight(UnitTypes::Terran_Marine,2.0);
+  infantryProducer->setUnitWeight(UnitTypes::Terran_Medic,1.0);
+  infantryProducer->setUnitWeight(UnitTypes::Terran_Firebat,0.5);
 }
 void MacroAIModule::onEnd(bool isWinner)
 {
 }
 void MacroAIModule::onFrame()
 {
+  infantryProducer->update();
   TheMacroManager->update();
   TheArbitrator->update();
   TheResourceRates->update();

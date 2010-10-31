@@ -43,7 +43,10 @@ void TaskStream::onOffer(std::set<BWAPI::Unit*> units)
       workerReady = true;
     }
     else
+    {
       TheArbitrator->decline(this,u,0);
+      TheArbitrator->removeBid(this,u);
+    }
   }
 }
 void TaskStream::onRevoke(BWAPI::Unit* unit, double bid)

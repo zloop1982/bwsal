@@ -281,6 +281,14 @@
 						>
 					</File>
 					<File
+						RelativePath="..\Addons\UnitCompositionProducer.cpp"
+						>
+					</File>
+					<File
+						RelativePath="..\include\UnitCompositionProducer.h"
+						>
+					</File>
+					<File
 						RelativePath="..\Addons\UnitPump.cpp"
 						>
 					</File>
