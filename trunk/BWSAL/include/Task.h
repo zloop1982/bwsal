@@ -43,8 +43,9 @@ class Task
     std::string getName() const;
     std::string getVerb() const;
 
-    void setStartFrame(int frame);
-    int getStartFrame() const;
+    void setStartTime(int time);
+    int getStartTime() const;
+    int getFinishTime() const;
 
     int getRemainingTime(BWAPI::Player* player = NULL) const;
 
@@ -64,7 +65,7 @@ class Task
     TaskTypes::Enum type;
     int id;
     BWAPI::TilePosition position;
-    int startFrame;
+    int startTime;
     bool spentResources;
     bool reservedResourcesThisFrame;
     bool reservedFinishDataThisFrame;

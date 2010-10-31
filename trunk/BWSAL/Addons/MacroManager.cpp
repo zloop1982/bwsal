@@ -1,7 +1,9 @@
 #include <MacroManager.h>
 #include <BWAPI.h>
 #include <ResourceRates.h>
+#include <math.h>
 using namespace BWAPI;
+using namespace std;
 MacroManager* TheMacroManager = NULL;
 Arbitrator::Arbitrator<BWAPI::Unit*,double>* TheArbitrator = NULL;
 

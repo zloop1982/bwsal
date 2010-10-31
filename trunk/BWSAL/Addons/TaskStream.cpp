@@ -1,5 +1,6 @@
 #include <MacroManager/TaskStream.h>
 #include <MacroManager/TaskStreamObserver.h>
+#include <MacroManager/UnitReadyTimeCalculator.h>
 #include <math.h>
 using namespace BWAPI;
 using namespace std;
@@ -130,54 +131,36 @@ void TaskStream::computeStatus()
   }
   for(int i=0;i<2;i++)
   {
-    if (i>0 && task[i-1].getStartFrame()==-1) break;
+    if (i>0 && task[i-1].getStartTime()==-1) break;
     if (!task[i].hasReservedResourcesThisFrame())
     {
-      int first_resource_frame = TheMacroManager->rtl.getFirstValidTime(task[i].getResources());
-      int first_valid_frame = first_resource_frame;
-      ResourceTimeline::ErrorCode res_error = TheMacroManager->rtl.getLastError();
-      bool waitForRequiredUnits = false;
-      map<UnitType, int> requiredUnits = task[i].getRequiredUnits();
-      if (first_valid_frame!=-1)
-      {
-        for each(std::pair<UnitType, int> t in requiredUnits)
-        {
-          int first_unit_frame = TheMacroManager->uctl.getFirstTime(t.first,t.second);
-          if (first_unit_frame == -1) //required count of this type will not be reached in foreseeable future
-          {
-            first_valid_frame = -1;
-            waitForRequiredUnits = true;
-            break;
-          }
-          if (first_unit_frame>first_valid_frame) //required count of this type occur after we have sufficient resources
-          {
-            first_valid_frame=first_unit_frame;
-            waitForRequiredUnits = true;
-          }
-        }
-      }
+      UnitReadyTimeStatus::Enum reason;
+      int first_valid_frame = UnitReadyTimeCalculator::getReadyTime(worker, task[i], reason, true, false);
       if (i>0 && first_valid_frame!=-1)
-        first_valid_frame = max(first_valid_frame,task[i-1].getStartFrame()+task[i-1].getTime());
+      {
+        if (first_valid_frame<task[i-1].getFinishTime())
+          first_valid_frame=task[i-1].getFinishTime();
+        reason = UnitReadyTimeStatus::Waiting_For_Worker_To_Be_Ready;
+      }
 
-      task[i].setStartFrame(first_valid_frame);
+      task[i].setStartTime(first_valid_frame);
       //if we need to wait to start the first task, compute the correct status
       if ( i==0 ) //compute task stream status based on status of first unit
       {
-        if (task[0].getStartFrame()!=-1 && task[0].getStartFrame()<=Broodwar->getFrameCount())
+        if (task[0].getStartTime()!=-1 && task[0].getStartTime()<=Broodwar->getFrameCount())
           status = Executing_Task;
         else
         {
-          if (waitForRequiredUnits)
+          if (reason == UnitReadyTimeStatus::Waiting_For_Worker_To_Be_Ready)
+            status = Waiting_For_Worker_To_Be_Ready;
+          else if (reason == UnitReadyTimeStatus::Waiting_For_Required_Units)
             status = Waiting_For_Required_Units;
+          else if (reason == UnitReadyTimeStatus::Waiting_For_Supply)
+            status = Waiting_For_Supply;
+          else if (reason == UnitReadyTimeStatus::Waiting_For_Gas)
+            status = Waiting_For_Gas;
           else
-          {
-            if (res_error == ResourceTimeline::Insufficient_Supply)
-              status = Waiting_For_Supply;
-            else if (res_error == ResourceTimeline::Insufficient_Gas)
-              status = Waiting_For_Gas;
-            else
-              status = Waiting_For_Minerals;
-          }
+            status = Waiting_For_Minerals;
         }
       }
 
@@ -190,11 +173,11 @@ void TaskStream::computeStatus()
       if (task[i].getType()==TaskTypes::Unit)
       {
         if (task[i].getUnit().supplyProvided()>0)
-          TheMacroManager->rtl.registerSupplyIncrease(task[i].getStartFrame()+task[i].getTime(), task[i].getUnit().supplyProvided());
+          TheMacroManager->rtl.registerSupplyIncrease(task[i].getFinishTime(), task[i].getUnit().supplyProvided());
         int count = 1;
         if (task[i].getUnit().isTwoUnitsInOneEgg())
           count = 2;
-        TheMacroManager->uctl.registerUnitCountChange(task[i].getStartFrame()+task[i].getTime(), task[i].getUnit(), count);
+        TheMacroManager->uctl.registerUnitCountChange(task[i].getFinishTime(), task[i].getUnit(), count);
         plannedAdditionalResources = true;
       }
 
@@ -307,6 +290,9 @@ std::string TaskStream::getStatusString() const
     case Error_Task_Requires_Addon:
       return "Error_Task_Requires_Addon";
     break;
+    case Waiting_For_Worker_To_Be_Ready:
+      return "Waiting_For_Worker_To_Be_Ready";
+    break;
     case Waiting_For_Required_Units:
       return "Waiting_For_Required_Units";
     break;
@@ -404,11 +390,11 @@ void TaskStream::printToScreen(int x, int y)
   Broodwar->drawTextScreen(x+200,y,"%s %s %d",
     task[0].getVerb().c_str(),
     task[0].getName().c_str(),
-    task[0].getStartFrame());
+    task[0].getStartTime());
   Broodwar->drawTextScreen(x+350,y,"%s %s %d",
     task[1].getVerb().c_str(),
     task[1].getName().c_str(),
-    task[1].getStartFrame());
+    task[1].getStartTime());
 }
 
 bool TaskStream::isWorkerReady() const
@@ -424,10 +410,26 @@ void TaskStream::clearPlanningData()
   task[0].setReservedResourcesThisFrame(task[0].hasSpentResources());
   task[0].setReservedFinishDataThisFrame(task[0].isCompleted());
   if (!task[0].hasSpentResources())
-    task[0].setStartFrame(-1);
+    task[0].setStartTime(-1);
   task[1].setReservedResourcesThisFrame(task[1].hasSpentResources());
   task[1].setReservedFinishDataThisFrame(task[0].isCompleted());
   if (!task[1].hasSpentResources())
-    task[1].setStartFrame(-1);
+    task[1].setStartTime(-1);
   plannedAdditionalResources = false;
+}
+int TaskStream::getStartTime() const
+{
+  return task[0].getStartTime();
+}
+int TaskStream::getFinishTime() const
+{
+  if (task[0]==NULL)
+    return Broodwar->getFrameCount();
+  if (task[0].getFinishTime() == -1)
+    return -1;
+  if (task[1]==NULL)
+    return task[0].getFinishTime();
+  if (task[1].getFinishTime() == -1)
+    return -1;
+  return task[1].getFinishTime();
 }

@@ -35,6 +35,7 @@ class TaskStream : public Arbitrator::Controller<BWAPI::Unit*,double>
       Error_Location_Not_Specified,
       Error_Location_Blocked,
       Error_Task_Requires_Addon,
+      Waiting_For_Worker_To_Be_Ready,
       Waiting_For_Required_Units,
       Waiting_For_Required_Tech,
       Waiting_For_Required_Upgrade,
@@ -51,6 +52,8 @@ class TaskStream : public Arbitrator::Controller<BWAPI::Unit*,double>
 
     void setBuildUnit(BWAPI::Unit* b);
     BWAPI::Unit* getBuildUnit() const;
+    int getStartTime() const;
+    int getFinishTime() const;
 
     void setTaskStarted(bool started);
     void completeTask();

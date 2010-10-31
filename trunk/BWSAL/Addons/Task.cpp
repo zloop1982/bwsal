@@ -6,7 +6,7 @@ Task::Task(const BWAPI::UnitType t,    const BWAPI::TilePosition p)
   type                        = TaskTypes::Unit;
   id                          = t.getID();
   position                    = p;
-  startFrame                  = -1;
+  startTime                   = -1;
   spentResources              = false;
   reservedResourcesThisFrame  = false;
   reservedFinishDataThisFrame = false;
@@ -14,10 +14,10 @@ Task::Task(const BWAPI::UnitType t,    const BWAPI::TilePosition p)
 }
 Task::Task(const BWAPI::TechType t,    const BWAPI::TilePosition p)
 {
-  type     = TaskTypes::Tech;
-  id       = t.getID();
-  position = p;
-  startFrame                  = -1;
+  type                        = TaskTypes::Tech;
+  id                          = t.getID();
+  position                    = p;
+  startTime                   = -1;
   spentResources              = false;
   reservedResourcesThisFrame  = false;
   reservedFinishDataThisFrame = false;
@@ -25,10 +25,10 @@ Task::Task(const BWAPI::TechType t,    const BWAPI::TilePosition p)
 }
 Task::Task(const BWAPI::UpgradeType t, const BWAPI::TilePosition p)
 {
-  type     = TaskTypes::Upgrade;
-  id       = t.getID();
-  position = p;
-  startFrame                  = -1;
+  type                        = TaskTypes::Upgrade;
+  id                          = t.getID();
+  position                    = p;
+  startTime                   = -1;
   spentResources              = false;
   reservedResourcesThisFrame  = false;
   reservedFinishDataThisFrame = false;
@@ -39,7 +39,7 @@ Task& Task::operator=(const Task t)
   type                        = t.type;
   id                          = t.id;
   position                    = t.position;
-  startFrame                  = t.startFrame;
+  startTime                   = t.startTime;
   spentResources              = t.spentResources;
   reservedResourcesThisFrame  = t.reservedResourcesThisFrame;
   reservedFinishDataThisFrame = t.reservedFinishDataThisFrame;
@@ -81,7 +81,7 @@ bool Task::operator==(const Task &t) const
   if (type                        != t.type) return false;
   if (id                          != t.id) return false;
   if (position                    != t.position) return false;
-  if (startFrame                  != t.startFrame) return false;
+  if (startTime                   != t.startTime) return false;
   if (spentResources              != t.spentResources) return false;
   if (reservedResourcesThisFrame  != t.reservedResourcesThisFrame) return false;
   if (reservedFinishDataThisFrame != t.reservedFinishDataThisFrame) return false;
@@ -228,19 +228,27 @@ bool Task::isBeingExecutedBy(const BWAPI::Unit* unit) const
     return (unit->isUpgrading() && unit->getUpgrade() == getUpgrade());
   return false;
 }
-void Task::setStartFrame(int frame)
+void Task::setStartTime(int time)
 {
-  startFrame = frame;
+  startTime = time;
 }
-int Task::getStartFrame() const
+int Task::getStartTime() const
 {
-  return startFrame;
+  return startTime;
+}
+int Task::getFinishTime() const
+{
+  if (startTime<0) return -1;
+  return startTime+getTime();
 }
 
 int Task::getRemainingTime(BWAPI::Player* player) const
 {
-  if (startFrame<0) return -1;
-  int t=getTime()-(Broodwar->getFrameCount()-startFrame);
+  if (startTime<0) return -1;
+  int t=0;
+  int timePassed=Broodwar->getFrameCount()-startTime;
+  if (timePassed<0) timePassed=0;
+  t=getTime()-timePassed;
   if (t<0) return 0;
   return t;
 }
