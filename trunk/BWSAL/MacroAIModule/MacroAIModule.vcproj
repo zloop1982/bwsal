@@ -366,6 +366,30 @@
 					>
 				</File>
 			</Filter>
+			<Filter
+				Name="TechTimeline"
+				>
+				<File
+					RelativePath="..\Addons\TechTimeline.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\include\TechTimeline.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="UpgradeTimeline"
+				>
+				<File
+					RelativePath="..\Addons\UpgradeTimeline.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\include\UpgradeTimeline.h"
+					>
+				</File>
+			</Filter>
 		</Filter>
 	</Files>
 	<Globals>

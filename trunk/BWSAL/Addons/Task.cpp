@@ -1,33 +1,38 @@
 #include <Task.h>
 using namespace BWAPI;
 
-Task::Task(const BWAPI::UnitType t,    const BWAPI::TilePosition p)
+Task::Task(const BWAPI::UnitType t, const BWAPI::TilePosition p)
 {
   type                        = TaskTypes::Unit;
   id                          = t.getID();
   position                    = p;
+  level                       = -1;
   startTime                   = -1;
   spentResources              = false;
   reservedResourcesThisFrame  = false;
   reservedFinishDataThisFrame = false;
   completed                   = false;
 }
-Task::Task(const BWAPI::TechType t,    const BWAPI::TilePosition p)
+Task::Task(const BWAPI::TechType t, const BWAPI::TilePosition p)
 {
   type                        = TaskTypes::Tech;
   id                          = t.getID();
   position                    = p;
+  level                       = -1;
   startTime                   = -1;
   spentResources              = false;
   reservedResourcesThisFrame  = false;
   reservedFinishDataThisFrame = false;
   completed                   = false;
 }
-Task::Task(const BWAPI::UpgradeType t, const BWAPI::TilePosition p)
+Task::Task(const BWAPI::UpgradeType t, int l, const BWAPI::TilePosition p)
 {
   type                        = TaskTypes::Upgrade;
   id                          = t.getID();
   position                    = p;
+  if (l==-1)
+    l=Broodwar->self()->getUpgradeLevel(t)+1;
+  level                       = l;
   startTime                   = -1;
   spentResources              = false;
   reservedResourcesThisFrame  = false;
@@ -39,6 +44,7 @@ Task& Task::operator=(const Task t)
   type                        = t.type;
   id                          = t.id;
   position                    = t.position;
+  level                       = t.level;
   startTime                   = t.startTime;
   spentResources              = t.spentResources;
   reservedResourcesThisFrame  = t.reservedResourcesThisFrame;
@@ -46,24 +52,38 @@ Task& Task::operator=(const Task t)
   completed                   = t.completed;
   return *this;
 }
-Task& Task::setType(const BWAPI::UnitType t)
+Task& Task::setType(const BWAPI::UnitType t,    const BWAPI::TilePosition p)
 {
   type     = TaskTypes::Unit;
   id       = t.getID();
+  if (p!= BWAPI::TilePositions::None)
+    position = p;
   return *this;
 }
-Task& Task::setType(const BWAPI::TechType t)
+Task& Task::setType(const BWAPI::TechType t,    const BWAPI::TilePosition p)
 {
   type     = TaskTypes::Tech;
   id       = t.getID();
+  if (p!= BWAPI::TilePositions::None)
+    position = p;
   return *this;
 }
-Task& Task::setType(const BWAPI::UpgradeType t)
+Task& Task::setType(const BWAPI::UpgradeType t, int l,    const BWAPI::TilePosition p)
 {
   type     = TaskTypes::Upgrade;
   id       = t.getID();
+  if (l!=-1)
+    level  = l;
+  if (p!= BWAPI::TilePositions::None)
+    position = p;
   return *this;
 }
+Task& Task::setLevel(int l)
+{
+  level = l;
+  return *this;
+}
+
 Task& Task::setTilePosition(const BWAPI::TilePosition p)
 {
   position = p;
@@ -81,6 +101,7 @@ bool Task::operator==(const Task &t) const
   if (type                        != t.type) return false;
   if (id                          != t.id) return false;
   if (position                    != t.position) return false;
+  if (level                       != t.level) return false;
   if (startTime                   != t.startTime) return false;
   if (spentResources              != t.spentResources) return false;
   if (reservedResourcesThisFrame  != t.reservedResourcesThisFrame) return false;
@@ -127,6 +148,10 @@ BWAPI::UpgradeType Task::getUpgrade() const
     return UpgradeType(id);
   return UpgradeTypes::None;
 }
+int Task::getLevel() const
+{
+  return level;
+}
 BWAPI::TilePosition Task::getTilePosition() const
 {
   return position;
@@ -152,38 +177,24 @@ std::map<BWAPI::UnitType, int> Task::getRequiredUnits() const
     r.insert(std::make_pair(UpgradeType(id).whatUpgrades(),1));
   return r;
 }
-Resources Task::getResources(BWAPI::Player* player) const
+Resources Task::getResources() const
 {
   if (type == TaskTypes::Unit)
     return Resources(UnitType(id));
   if (type == TaskTypes::Tech)
     return Resources(TechType(id));
   if (type == TaskTypes::Upgrade)
-  {
-    if (player == NULL) // assume self() if the user doesn't specify a player
-      player = Broodwar->self();
-    int level = player->getUpgradeLevel(UpgradeType(id)) + 1;
-    if (player->isUpgrading(UpgradeType(id)))
-      level++;
     return Resources(UpgradeType(id),level);
-  }
   return Resources();
 }
-int Task::getTime(BWAPI::Player* player) const
+int Task::getTime() const
 {
   if (type == TaskTypes::Unit)
     return UnitType(id).buildTime();
   if (type == TaskTypes::Tech)
     return TechType(id).researchTime();
   if (type == TaskTypes::Upgrade)
-  {
-    if (player == NULL) // assume self() if the user doesn't specify a player
-      player = Broodwar->self();
-    int level = player->getUpgradeLevel(UpgradeType(id)) + 1;
-    if (player->isUpgrading(UpgradeType(id)))
-      level++;
     return UpgradeType(id).upgradeTimeBase()+UpgradeType(id).upgradeTimeFactor()*(level-1);
-  }
   return 0;
 }
 std::string Task::getName() const
