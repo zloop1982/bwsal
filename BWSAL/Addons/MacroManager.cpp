@@ -75,7 +75,7 @@ void MacroManager::update()
   /*
   for(std::map<int, Resources>::iterator i=rtl.resourceEvents.begin();i!=rtl.resourceEvents.end();i++)
   {
-    Broodwar->drawTextScreen(10,y,"%d: (m:%f, g:%f, s:%f)",(*i).first,(*i).second.getMinerals(),(*i).second.getGas(),(*i).second.getSupply());
+    Broodwar->drawTextScreen(10,y,"%d: %s",(*i).first,(*i).second.toString().c_str());
     y+=20;
   }
   */

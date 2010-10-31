@@ -31,6 +31,7 @@ class Resources
     Resources operator+(const Resources &r) const;
     Resources operator-(const Resources &r) const;
     Resources operator/(double value) const;
+    std::string toString() const;
 
   private:
     double minerals;
