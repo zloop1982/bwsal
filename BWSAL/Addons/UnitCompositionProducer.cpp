@@ -5,6 +5,7 @@
 #include <TerminateIfWorkerLost.h>
 #include <TerminateIfEmpty.h>
 #include <BasicWorkerFinder.h>
+#include <MacroManager/UnitReadyTimeCalculator.h>
 using namespace BWAPI;
 using namespace std;
 UnitCompositionProducer::UnitCompositionProducer(BWAPI::UnitType workerType)
@@ -48,7 +49,7 @@ void UnitCompositionProducer::update()
   {
     if (ts->getTask()==NULL)
     {
-      UnitType t=getNextUnitType();
+      UnitType t=getNextUnitType(ts->getWorker());
       ts->setTask(Task(t));
       actualUnitCounts[t]++;
     }
@@ -57,13 +58,13 @@ void UnitCompositionProducer::update()
   {
     if (ts->getNextTask()==NULL)
     {
-      UnitType t=getNextUnitType();
+      UnitType t=getNextUnitType(ts->getWorker());
       ts->setNextTask(Task(t));
       actualUnitCounts[t]++;
     }
   }
 }
-UnitType UnitCompositionProducer::getNextUnitType()
+UnitType UnitCompositionProducer::getNextUnitType(BWAPI::Unit* worker)
 {
   double aTc = 0;
   double cTc = 0;
@@ -77,11 +78,15 @@ UnitType UnitCompositionProducer::getNextUnitType()
   {
     desiredUnitCounts[t.first]=t.second*r;
   }
-  double maxDiff=-1;
+  double maxDiff=-10000;
   UnitType nextType;
+  int time = UnitReadyTimeCalculator::getReadyTime(worker,true);
   for each(std::pair<UnitType, double> t in unitCompositionWeights)
   {
     double d=desiredUnitCounts[t.first]-actualUnitCounts[t.first];
+    UnitReadyTimeStatus::Enum r;
+    int t2=UnitReadyTimeCalculator::getReadyTime(worker,Task(t.first),r,false,true);
+    if (t2<0 || t2>time) continue;
     if (d>maxDiff)
     {
       maxDiff=d;
