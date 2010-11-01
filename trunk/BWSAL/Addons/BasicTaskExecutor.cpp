@@ -11,6 +11,7 @@ BasicTaskExecutor* BasicTaskExecutor::getInstance()
 void BasicTaskExecutor::attached(TaskStream* ts)
 {
   taskStreams[ts].isReady = false;
+  taskStreams[ts].isExecuting = false;
   taskStreams[ts].targetLevel = -1;
 }
 void BasicTaskExecutor::detached(TaskStream* ts)
@@ -33,6 +34,7 @@ void BasicTaskExecutor::update(TaskStream* ts)
   TaskTypes::Enum type = ts->getTask().getType();
   computeBuildUnit(ts);
   computeIsCompleted(ts);
+  Broodwar->drawTextMap(worker->getPosition().x(),worker->getPosition().y()+15,"r: %d, e: %d, c: %d",taskStreams[ts].isReady,taskStreams[ts].isExecuting, ts->getTask().isCompleted());
   if (ts->getTask().isCompleted()) return;
   computeIsExecuting(ts);
   if (taskStreams[ts].isExecuting) return;
@@ -46,11 +48,13 @@ void BasicTaskExecutor::computeBuildUnit(TaskStream* ts)
 {
   Unit* worker = ts->getWorker();
   UnitType ut = ts->getTask().getUnit();
-  TilePosition bl = ts->getTask().getTilePosition();
   if (ts->getTask().getType() != TaskTypes::Unit) return;
 
-  if (worker->getBuildUnit() != NULL && worker->getBuildUnit()->exists() && worker->getBuildUnit()->getType() == ut)
+  if (worker->getBuildUnit() != NULL && worker->getBuildUnit()->exists() && (worker->getBuildUnit()->getType() == ut || worker->getBuildUnit()->getBuildType() == ut))
     ts->setBuildUnit(worker->getBuildUnit());
+
+  if (worker->getAddon() != NULL && worker->getAddon()->exists() && (worker->getAddon()->getType() == ut || worker->getAddon()->getBuildType() == ut))
+    ts->setBuildUnit(worker->getAddon());
 
   //check to see if the worker is the right type
   //Zerg_Nydus_Canal is speciall since Zerg_Nydus_Canal can construct Zerg_Nydus_Canal
@@ -58,11 +62,12 @@ void BasicTaskExecutor::computeBuildUnit(TaskStream* ts)
     ts->setBuildUnit(worker);
 
   //if the building dies, or isn't the right type, set it to null
-  if (ts->getBuildUnit() != NULL && (!ts->getBuildUnit()->exists() || (ts->getBuildUnit()->getType() != ut && ts->getBuildUnit()->getBuildType() != ut)))
+  if (!(ts->getBuildUnit() != NULL && ts->getBuildUnit()->exists() && (ts->getBuildUnit()->getType() == ut || ts->getBuildUnit()->getBuildType() == ut)))
     ts->setBuildUnit(NULL);
 
   if (ts->getBuildUnit()==NULL && ut.isBuilding()) //if we don't have a building yet, look for it
   {
+    TilePosition bl = ts->getTask().getTilePosition();
     //look at the units on the tile to see if it exists yet
     for each(Unit* u in Broodwar->unitsOnTile(bl.x(), bl.y()))
       if (u->getType() == ut && !u->isLifted())
@@ -72,19 +77,30 @@ void BasicTaskExecutor::computeBuildUnit(TaskStream* ts)
         break;
       }
   }
+  if (ts->getBuildUnit()==NULL && ut.isAddon()) //if we don't have a building yet, look for it
+  {
+    TilePosition bl = ts->getTask().getTilePosition();
+    bl.x()+=4;
+    bl.y()++;
+    for each(Unit* u in Broodwar->unitsOnTile(bl.x(), bl.y()))
+      if (u->getType() == ut && !u->isLifted())
+      {
+        //we found the building
+        ts->setBuildUnit(u);
+        break;
+      }
+  }
+
 }
 void BasicTaskExecutor::computeIsExecuting(TaskStream* ts)
 {
-  taskStreams[ts].isExecuting = ts->getTask().hasSpentResources();
-  if (taskStreams[ts].isExecuting) return;
+  taskStreams[ts].isExecuting = false;
   Unit* worker = ts->getWorker();
   TaskTypes::Enum type = ts->getTask().getType();
   if (type == TaskTypes::Unit)
   {
     UnitType ut=ts->getTask().getUnit();
-    if (worker->getBuildType()==ut ||
-       (worker->getTrainingQueue().size()>0 && worker->getTrainingQueue().front()==ut) ||
-       (worker->getBuildUnit()!=NULL && worker->getBuildUnit()->getType()==ut))
+    if (ts->getBuildUnit()!=NULL && ts->getBuildUnit()->exists() && (ts->getBuildUnit()->getType() == ut || ts->getBuildUnit()->getBuildType() == ut))
       taskStreams[ts].isExecuting = true;
   }
   else if (type == TaskTypes::Tech)
@@ -147,9 +163,9 @@ void BasicTaskExecutor::execute(TaskStream* ts)
   if (ts->getTask().isCompleted()) return;
   if (taskStreams[ts].isExecuting) return;
   if (taskStreams[ts].isReady==false) return;
-  if (Broodwar->getFrameCount()<ts->getWorker()->getLastOrderFrame()+5) return;
   Unit* worker = ts->getWorker();
   TaskTypes::Enum type = ts->getTask().getType();
+  if (Broodwar->getFrameCount()<ts->getWorker()->getLastOrderFrame()+5) return;
 
   if (type == TaskTypes::Unit)
   {
@@ -158,10 +174,38 @@ void BasicTaskExecutor::execute(TaskStream* ts)
     {
       if (worker->morph(ut))
       {
-        ts->getTask().setSpentResources(true);
-        TheMacroManager->spentResources+=ts->getTask().getResources();
+        if (ts->getTask().hasSpentResources()==false)
+        {
+          ts->getTask().setSpentResources(true);
+          TheMacroManager->spentResources+=ts->getTask().getResources();
+        }
       }
 
+    }
+    else if (ut.isAddon())
+    {
+      if (worker->isLifted()==false)
+      {
+        if (worker->getTilePosition()!=ts->getTask().getTilePosition())
+        {
+          worker->lift();
+        }
+        else
+        {
+          if (worker->buildAddon(ut))
+          {
+            if (ts->getTask().hasSpentResources()==false)
+            {
+              ts->getTask().setSpentResources(true);
+              TheMacroManager->spentResources+=ts->getTask().getResources();
+            }
+          }
+        }
+      }
+      else
+      {
+        worker->land(ts->getTask().getTilePosition());
+      }
     }
     else if (ut.isBuilding())
     {
@@ -174,8 +218,11 @@ void BasicTaskExecutor::execute(TaskStream* ts)
       {
         if (worker->build(ts->getTask().getTilePosition(),ut))
         {
-          ts->getTask().setSpentResources(true);
-          TheMacroManager->spentResources+=ts->getTask().getResources();
+          if (ts->getTask().hasSpentResources()==false)
+          {
+            ts->getTask().setSpentResources(true);
+            TheMacroManager->spentResources+=ts->getTask().getResources();
+          }
         }
       }
     }
@@ -183,8 +230,11 @@ void BasicTaskExecutor::execute(TaskStream* ts)
     {
       if (worker->train(ut))
       {
-        ts->getTask().setSpentResources(true);
-      TheMacroManager->spentResources+=ts->getTask().getResources();
+        if (ts->getTask().hasSpentResources()==false)
+        {
+          ts->getTask().setSpentResources(true);
+          TheMacroManager->spentResources+=ts->getTask().getResources();
+        }
       }
     }
   }
@@ -192,17 +242,23 @@ void BasicTaskExecutor::execute(TaskStream* ts)
   {
     if (worker->research(ts->getTask().getTech()))
     {
-      ts->getTask().setSpentResources(true);
-      TheMacroManager->spentResources+=ts->getTask().getResources();
+      if (ts->getTask().hasSpentResources()==false)
+      {
+        ts->getTask().setSpentResources(true);
+        TheMacroManager->spentResources+=ts->getTask().getResources();
+      }
     }
   }
   else if (type == TaskTypes::Upgrade)
   {
     if (worker->upgrade(ts->getTask().getUpgrade()))
     {
-      ts->getTask().setSpentResources(true);
-      taskStreams[ts].targetLevel = Broodwar->self()->getUpgradeLevel(ts->getTask().getUpgrade())+1;
-      TheMacroManager->spentResources+=ts->getTask().getResources();
+      if (ts->getTask().hasSpentResources()==false)
+      {
+        ts->getTask().setSpentResources(true);
+        taskStreams[ts].targetLevel = Broodwar->self()->getUpgradeLevel(ts->getTask().getUpgrade())+1;
+        TheMacroManager->spentResources+=ts->getTask().getResources();
+      }
     }
   }
 }

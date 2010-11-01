@@ -38,6 +38,11 @@ void SpiralBuildingPlacer::completedTask(TaskStream* ts, const Task &t)
 void SpiralBuildingPlacer::update(TaskStream* ts)
 {
   if (ts->getTask().getType()!=TaskTypes::Unit) return;
+
+  int width = ts->getTask().getUnit().tileWidth();
+  UnitType type = ts->getTask().getUnit();
+  if (type.isAddon()) type=type.whatBuilds().first;
+
   if (ts->getStatus()==TaskStream::Error_Location_Blocked || ts->getStatus()==TaskStream::Error_Location_Not_Specified)
   {
     if (ts->getTask().getTilePosition().isValid()==false)
@@ -45,18 +50,25 @@ void SpiralBuildingPlacer::update(TaskStream* ts)
     if (taskStreams[ts].isRelocatable)
     {
       TilePosition tp(ts->getTask().getTilePosition());
-      TilePosition newtp(getBuildLocationNear(tp,ts->getTask().getUnit(),taskStreams[ts].buildDistance));
+      TilePosition newtp(getBuildLocationNear(tp,type,taskStreams[ts].buildDistance));
       Broodwar->printf("(%d,%d) -> (%d,%d)",tp.x(),tp.y(),newtp.x(),newtp.y());
       ts->getTask().setTilePosition(newtp);
     }
   }
+  if (type==BWAPI::UnitTypes::Terran_Command_Center ||
+    type==BWAPI::UnitTypes::Terran_Factory || 
+    type==BWAPI::UnitTypes::Terran_Starport ||
+    type==BWAPI::UnitTypes::Terran_Science_Facility)
+  {
+    width+=2;
+  }
 
-  if (taskStreams[ts].reserveWidth    != ts->getTask().getUnit().tileWidth() ||
+  if (taskStreams[ts].reserveWidth    != width ||
       taskStreams[ts].reserveHeight   != ts->getTask().getUnit().tileHeight() ||
       taskStreams[ts].reservePosition != ts->getTask().getTilePosition())
   {
     freeTiles(taskStreams[ts].reservePosition,taskStreams[ts].reserveWidth,taskStreams[ts].reserveHeight);
-    taskStreams[ts].reserveWidth    = ts->getTask().getUnit().tileWidth();
+    taskStreams[ts].reserveWidth    = width;
     taskStreams[ts].reserveHeight   = ts->getTask().getUnit().tileHeight();
     taskStreams[ts].reservePosition = ts->getTask().getTilePosition();
     reserveTiles(taskStreams[ts].reservePosition,taskStreams[ts].reserveWidth,taskStreams[ts].reserveHeight);
@@ -79,6 +91,7 @@ BWAPI::TilePosition SpiralBuildingPlacer::getBuildLocationNear(BWAPI::TilePositi
 {
   //returns a valid build location near the specified tile position.
   //searches outward in a spiral.
+  if (type.isAddon()) type=type.whatBuilds().first;
   int x      = position.x();
   int y      = position.y();
   int length = 1;
@@ -129,6 +142,7 @@ BWAPI::TilePosition SpiralBuildingPlacer::getBuildLocationNear(BWAPI::TilePositi
 
 bool SpiralBuildingPlacer::canBuildHere(BWAPI::TilePosition position, BWAPI::UnitType type) const
 {
+  if (type.isAddon()) type=type.whatBuilds().first;
   //returns true if we can build this type of unit here. Takes into account reserved tiles.
   if (!BWAPI::Broodwar->canBuildHere(NULL, position, type))
     return false;
@@ -141,6 +155,7 @@ bool SpiralBuildingPlacer::canBuildHere(BWAPI::TilePosition position, BWAPI::Uni
 
 bool SpiralBuildingPlacer::canBuildHereWithSpace(BWAPI::TilePosition position, BWAPI::UnitType type, int buildDist) const
 {
+  if (type.isAddon()) type=type.whatBuilds().first;
   //returns true if we can build this type of unit here with the specified amount of space.
   //space value is stored in this->buildDistance.
 

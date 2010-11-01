@@ -57,11 +57,11 @@ int UnitReadyTimeCalculator::getReadyTime(BWAPI::Unit* unit, const Task &task, U
     if (t2==-1 || t2>t)
     {
       ResourceTimeline::ErrorCode res_error = TheMacroManager->rtl.getLastError();
-      if (res_error = ResourceTimeline::Insufficient_Supply)
+      if (res_error == ResourceTimeline::Insufficient_Supply)
         reason = UnitReadyTimeStatus::Waiting_For_Supply;
-      if (res_error = ResourceTimeline::Insufficient_Gas)
+      if (res_error == ResourceTimeline::Insufficient_Gas)
         reason = UnitReadyTimeStatus::Waiting_For_Gas;
-      if (res_error = ResourceTimeline::Insufficient_Minerals)
+      if (res_error == ResourceTimeline::Insufficient_Minerals)
         reason = UnitReadyTimeStatus::Waiting_For_Minerals;
       t=t2;
     }

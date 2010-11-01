@@ -1,5 +1,7 @@
 #include "ResourceTimeline.h"
 #include <BWAPI.h>
+#include <math.h>
+using namespace std;
 using namespace BWAPI;
 ResourceTimeline::ResourceTimeline()
 {
@@ -149,31 +151,37 @@ int ResourceTimeline::getFirstValidTime(const Resources &r)
   if (lastInvalidEventFrame==-1)
     return frame;
   double t=lastInvalidEventFrame;
-  if (invalidRes.getSupply()<-0.1 || 
-     (invalidRes.getGas()<-0.1 && gasGatherRate==0) ||
-     (invalidRes.getMinerals()<-0.1 && mineralGatherRate==0))
+  if (invalidRes.getSupply()<-0.0001 || 
+     (invalidRes.getGas()<-0.0001 && fabs(gasGatherRate)<0.0001) ||
+     (invalidRes.getMinerals()<-0.0001 && fabs(mineralGatherRate)<0.0001))
   {
     if (validEventFrame>lastInvalidEventFrame)
       return validEventFrame;
-    if (invalidRes.getSupply()<-0.1)
+    if (invalidRes.getSupply()<-0.0001)
       lastError = Insufficient_Supply;
-    else if (invalidRes.getGas()<-0.1 && gasGatherRate==0)
+    else if (invalidRes.getGas()<-0.0001 && fabs(gasGatherRate)<0.0001)
       lastError = Insufficient_Gas;
-    else if (invalidRes.getMinerals()<-0.1 && mineralGatherRate==0)
+    else if (invalidRes.getMinerals()<-0.0001 && fabs(mineralGatherRate)<0.0001)
       lastError = Insufficient_Minerals;
     return -1;
   }
-  if (invalidRes.getMinerals()<0)
+  if (invalidRes.getMinerals()<-0.001)
   {
     double t2=lastInvalidEventFrame-(invalidRes.getMinerals())/mineralGatherRate;
     if (t2>t)
+    {
       t=t2;
+      lastError = Insufficient_Minerals;
+    }
   }
-  if (invalidRes.getGas()<0)
+  if (invalidRes.getGas()<-0.001)
   {
     double t2=lastInvalidEventFrame-(invalidRes.getGas())/gasGatherRate;
     if (t2>t)
+    {
       t=t2;
+      lastError = Insufficient_Gas;
+    }
   }
   int ti=(int)t;
   if (t>(int)t) ti++;
