@@ -22,10 +22,14 @@ void BasicWorkerFinder::newStatus(TaskStream* ts)
     std::set<BWAPI::Unit*> units;
     for each(Unit* u in Broodwar->self()->getUnits())
     {
-      if (u->exists() && u->isCompleted() && u->getType()==ts->getTask().getWorkerType())
+      if (u->exists() && u->isCompleted() && u->getRemainingBuildTime()==0 && u->getType()==ts->getTask().getWorkerType() && u->isLoaded()==false)
       {
-        if (TheArbitrator->hasBid(u)==false || TheArbitrator->getHighestBidder(u).second<100.0)
-          units.insert(u);
+        if (ts->getTask().getType()==TaskTypes::Unit && ts->getTask().getUnit().isAddon() && u->getAddon()!=NULL)
+          continue;
+        if (TheArbitrator->hasBid(u) &&TheArbitrator->getHighestBidder(u).second>=100.0)
+          continue;
+
+        units.insert(u);
       }
     }
     Unit* chosenWorker = NULL;
@@ -52,6 +56,11 @@ void BasicWorkerFinder::newStatus(TaskStream* ts)
     if (units.size()>0)
       chosenWorker = (*units.begin());
     ts->setWorker(chosenWorker);
+    if (chosenWorker!=NULL)
+    {
+      if (ts->getTask().getType()==TaskTypes::Unit && ts->getTask().getUnit().isAddon())
+        ts->getTask().setTilePosition(chosenWorker->getTilePosition());
+    }
   }
 }
 std::string BasicWorkerFinder::getName() const

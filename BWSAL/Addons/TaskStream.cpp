@@ -82,7 +82,13 @@ void TaskStream::computeStatus()
         status = Error_Location_Not_Specified;
         return;
       }
-      if (!Broodwar->canBuildHere(worker,task[0].getTilePosition(),ut))
+      TilePosition tp = task[0].getTilePosition();
+      if (ut.isAddon())
+      {
+        tp.x()+=4;
+        tp.y()++;
+      }
+      if (!Broodwar->canBuildHere(worker,tp,ut)) //doesn't work for blocked addons!
       {
         status = Error_Location_Blocked;
         return;
@@ -138,6 +144,10 @@ void TaskStream::computeStatus()
             status = Waiting_For_Worker_To_Be_Ready;
           else if (reason == UnitReadyTimeStatus::Waiting_For_Required_Units)
             status = Waiting_For_Required_Units;
+          else if (reason == UnitReadyTimeStatus::Waiting_For_Required_Tech)
+            status = Waiting_For_Required_Tech;
+          else if (reason == UnitReadyTimeStatus::Waiting_For_Required_Upgrade)
+            status = Waiting_For_Required_Upgrade;
           else if (reason == UnitReadyTimeStatus::Waiting_For_Supply)
             status = Waiting_For_Supply;
           else if (reason == UnitReadyTimeStatus::Waiting_For_Gas)
