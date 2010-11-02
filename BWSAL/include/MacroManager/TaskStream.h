@@ -54,6 +54,7 @@ class TaskStream : public Arbitrator::Controller<BWAPI::Unit*,double>
     BWAPI::Unit* getBuildUnit() const;
     int getStartTime() const;
     int getFinishTime() const;
+    int getFinishTime(BWAPI::UnitType t) const;
 
     void setTaskStarted(bool started);
     void completeTask();
