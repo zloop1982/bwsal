@@ -147,7 +147,9 @@ void TaskStream::computeStatus()
           status = Executing_Task;
         else
         {
-          if (reason == UnitReadyTimeStatus::Waiting_For_Worker_To_Be_Ready)
+          if (reason == UnitReadyTimeStatus::Error_Task_Requires_Addon)
+            status = Error_Task_Requires_Addon;
+          else if (reason == UnitReadyTimeStatus::Waiting_For_Worker_To_Be_Ready)
             status = Waiting_For_Worker_To_Be_Ready;
           else if (reason == UnitReadyTimeStatus::Waiting_For_Required_Units)
             status = Waiting_For_Required_Units;
@@ -440,4 +442,17 @@ int TaskStream::getFinishTime() const
   if (task[1].getFinishTime() == -1)
     return -1;
   return task[1].getFinishTime();
+}
+
+int TaskStream::getFinishTime(BWAPI::UnitType t) const
+{
+  if (task[0].getType()==TaskTypes::Unit && task[0].getUnit()==t)
+  {
+    return task[0].getFinishTime();
+  }
+  if (task[1].getType()==TaskTypes::Unit && task[1].getUnit()==t)
+  {
+    return task[1].getFinishTime();
+  }
+  return -1;
 }

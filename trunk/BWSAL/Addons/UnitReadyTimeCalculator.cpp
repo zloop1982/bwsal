@@ -47,7 +47,6 @@ int UnitReadyTimeCalculator::getReadyTime(BWAPI::Unit* unit, bool considerTasks)
 //returns the frame when the unit will be ready to do the given task
 int UnitReadyTimeCalculator::getReadyTime(BWAPI::Unit* unit, const Task &task, UnitReadyTimeStatus::Enum &reason, bool considerResources, bool considerTasks)
 {
-  //WARNING: does not yet take into account terran addons correctly!
   reason = UnitReadyTimeStatus::Waiting_For_Worker_To_Be_Ready;
   int t = getReadyTime(unit,considerTasks);
   if (t==-1) return -1;
@@ -75,6 +74,29 @@ int UnitReadyTimeCalculator::getReadyTime(BWAPI::Unit* unit, const Task &task, U
     {
       reason = UnitReadyTimeStatus::Waiting_For_Required_Units;
       t=t2;
+    }
+    // if r.first is an add-on type that also gets built by our worker type...
+    if (r.first.isAddon() && r.first.whatBuilds().first==task.getWorkerType())
+    {
+      //and if our worker doesn't have this add-on...
+      if (unit->getAddon()==NULL || unit->getAddon()->getType()!=r.first)
+      {
+        TaskStream* ts = TheMacroManager->getTaskStream(unit);
+        if (ts)
+        {
+          int t3 = ts->getFinishTime(r.first); //then see if/when this add-on is planned to be built
+          if (t3==-1 || t3>t) //update expected time and reason this add-on will delay us
+          {
+            reason = UnitReadyTimeStatus::Waiting_For_Required_Units;
+            t=t3;
+          }
+        }
+        else
+        {
+          reason = UnitReadyTimeStatus::Error_Task_Requires_Addon;
+          t=-1;
+        }
+      }
     }
     if (t==-1) return -1;
   }
