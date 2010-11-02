@@ -26,7 +26,7 @@ void BasicWorkerFinder::newStatus(TaskStream* ts)
       {
         if (ts->getTask().getType()==TaskTypes::Unit && ts->getTask().getUnit().isAddon() && u->getAddon()!=NULL)
           continue;
-        if (TheArbitrator->hasBid(u) &&TheArbitrator->getHighestBidder(u).second>=100.0)
+        if (TheArbitrator->hasBid(u) && TheArbitrator->getHighestBidder(u).second>=100.0)
           continue;
 
         units.insert(u);

@@ -27,11 +27,32 @@ void BasicTaskExecutor::completedTask(TaskStream* ts, const Task &t)
 void BasicTaskExecutor::update(TaskStream* ts)
 {
   if (ts == NULL) return;
-  if (ts->getStatus() != TaskStream::Executing_Task) return;
   if (ts->isWorkerReady()==false) return;
   if (ts->isLocationReady()==false) return;
   Unit* worker = ts->getWorker();
   TaskTypes::Enum type = ts->getTask().getType();
+  if (ts->getStatus() != TaskStream::Executing_Task)
+  {
+    if (ts->getTask().getStartTime()>=0 &&
+        ts->getTask().getType()==TaskTypes::Unit &&
+        ts->getTask().getUnit().isBuilding() &&
+        !ts->getTask().getWorkerType().isBuilding())
+    {
+      UnitType ut = ts->getTask().getUnit();
+      Position targetPosition=Position(ts->getTask().getTilePosition());
+      targetPosition.x()+=ut.tileWidth()*16;
+      targetPosition.y()+=ut.tileHeight()*16;
+      if (ts->getTask().getStartTime()<Broodwar->getFrameCount()+ts->getWorker()->getDistance(targetPosition)/ts->getTask().getWorkerType().topSpeed()*1.4+0.8*30)
+      {
+        if (worker->getDistance(targetPosition)>100)
+        {
+          if (Broodwar->getFrameCount()>=ts->getWorker()->getLastOrderFrame()+5)
+            worker->rightClick(targetPosition);
+        }
+      }
+    }
+    return;
+  }
   computeBuildUnit(ts);
   computeIsCompleted(ts);
   Broodwar->drawTextMap(worker->getPosition().x(),worker->getPosition().y()+15,"r: %d, e: %d, c: %d",taskStreams[ts].isReady,taskStreams[ts].isExecuting, ts->getTask().isCompleted());
@@ -102,6 +123,11 @@ void BasicTaskExecutor::computeIsExecuting(TaskStream* ts)
     UnitType ut=ts->getTask().getUnit();
     if (ts->getBuildUnit()!=NULL && ts->getBuildUnit()->exists() && (ts->getBuildUnit()->getType() == ut || ts->getBuildUnit()->getBuildType() == ut))
       taskStreams[ts].isExecuting = true;
+    if (Broodwar->getFrameCount()>ts->getWorker()->getLastOrderFrame()+5)
+    {
+      if (worker->getType()==UnitTypes::Terran_SCV && worker->isConstructing()==false)
+        worker->rightClick(ts->getBuildUnit());
+    }
   }
   else if (type == TaskTypes::Tech)
   {

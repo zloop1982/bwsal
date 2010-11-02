@@ -55,10 +55,10 @@ void MacroAIModule::onEnd(bool isWinner)
 }
 void MacroAIModule::onFrame()
 {
+  TheArbitrator->update();
   infantryProducer->update();
   TheMacroSupplyManager->update();
   TheMacroManager->update();
-  TheArbitrator->update();
   TheResourceRates->update();
   std::set<Unit*> units=Broodwar->self()->getUnits();
   for(std::set<Unit*>::iterator i=units.begin();i!=units.end();i++)
@@ -167,4 +167,8 @@ void MacroAIModule::onSendText(std::string text)
         Broodwar->printf("You typed '%s'!",text.c_str());
     }
   }
+}
+void MacroAIModule::onUnitDestroy(BWAPI::Unit* unit)
+{
+  TheArbitrator->onRemoveObject(unit);
 }
