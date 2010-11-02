@@ -14,6 +14,7 @@ using namespace BWAPI;
 int drag_index = -1;
 bool lastMouseClick = false;
 UnitCompositionProducer* infantryProducer = NULL;
+UnitCompositionProducer* vehicleProducer = NULL;
 MacroAIModule::MacroAIModule()
 {
 }
@@ -25,6 +26,10 @@ MacroAIModule::~MacroAIModule()
     delete TheMacroSupplyManager;
   if (TheResourceRates != NULL)
     delete TheResourceRates;
+  if (infantryProducer != NULL)
+    delete infantryProducer;
+  if (vehicleProducer != NULL)
+    delete vehicleProducer;
 }
 void MacroAIModule::onStart()
 {
@@ -49,6 +54,9 @@ void MacroAIModule::onStart()
   infantryProducer->setUnitWeight(UnitTypes::Terran_Marine,2.0);
   infantryProducer->setUnitWeight(UnitTypes::Terran_Medic,1.0);
   infantryProducer->setUnitWeight(UnitTypes::Terran_Firebat,0.5);
+  vehicleProducer = new UnitCompositionProducer(UnitTypes::Terran_Factory);
+  vehicleProducer->setUnitWeight(UnitTypes::Terran_Vulture,2.0);
+  vehicleProducer->setUnitWeight(UnitTypes::Terran_Siege_Tank_Tank_Mode,1.0);
 }
 void MacroAIModule::onEnd(bool isWinner)
 {
@@ -57,6 +65,7 @@ void MacroAIModule::onFrame()
 {
   TheArbitrator->update();
   infantryProducer->update();
+  vehicleProducer->update();
   TheMacroSupplyManager->update();
   TheMacroManager->update();
   TheResourceRates->update();
