@@ -52,7 +52,12 @@ void TaskStream::onOffer(std::set<BWAPI::Unit*> units)
 }
 void TaskStream::onRevoke(BWAPI::Unit* unit, double bid)
 {
-  setWorker(NULL);
+  if (worker == unit)
+  {
+    TheArbitrator->removeBid(this,unit);
+    worker = NULL;
+    workerReady = false;
+  }
 }
 void TaskStream::computeStatus()
 {
@@ -98,7 +103,7 @@ void TaskStream::computeStatus()
   if (worker == NULL || !worker->exists())
   {
     status = Error_Worker_Not_Specified;
-    worker = NULL;
+    setWorker(NULL);
     return;
   }
   if (TheArbitrator->hasBid(worker)==false || TheArbitrator->getHighestBidder(worker).first!=this)
@@ -118,6 +123,8 @@ void TaskStream::computeStatus()
       }
     }
   }
+  if (task[0].hasReservedResourcesThisFrame())
+    status = Executing_Task;
   for(int i=0;i<2;i++)
   {
     if (i>0 && task[i-1].getStartTime()==-1) break;
@@ -320,12 +327,14 @@ std::string TaskStream::getStatusString() const
 }
 void TaskStream::setWorker(BWAPI::Unit* w)
 {
-  if (worker!=NULL)
-  {
-    TheArbitrator->removeBid(this,worker);
-    TheMacroManager->unitToTaskStream.erase(worker);
-  }
+  BWAPI::Unit* oldWorker = worker;
   worker = w;
+  if (oldWorker!=NULL)
+  {
+    TheArbitrator->removeBid(this,oldWorker);
+    if (TheMacroManager->unitToTaskStream.find(oldWorker)!=TheMacroManager->unitToTaskStream.end() && TheMacroManager->unitToTaskStream[oldWorker] == this)
+      TheMacroManager->unitToTaskStream.erase(oldWorker);
+  }
   if (worker!=NULL)
   {
     TheArbitrator->setBid(this,worker,100);
@@ -383,9 +392,9 @@ std::string TaskStream::getShortName() const
 }
 void TaskStream::printToScreen(int x, int y)
 {
-  Broodwar->drawTextScreen(x,y,"[ ] %s - %d ",
+  Broodwar->drawTextScreen(x,y,"[ ] %s - %x ",
     getStatusString().c_str(),
-    task[0].isCompleted());
+    getWorker());
   Broodwar->drawTextScreen(x+200,y,"%s %s %d",
     task[0].getVerb().c_str(),
     task[0].getName().c_str(),

@@ -12,6 +12,7 @@ class MacroAIModule : public BWAPI::AIModule
     virtual void onEnd(bool isWinner);
     virtual void onFrame();
     virtual void onSendText(std::string text);
+    virtual void onUnitDestroy(BWAPI::Unit* unit);
   private:
     Arbitrator::Arbitrator<BWAPI::Unit*,double> arbitrator;
 };
