@@ -172,16 +172,14 @@ void BasicTaskExecutor::computeIsReady(TaskStream* ts)
   if (taskStreams[ts].isReady) return;
   Unit* worker = ts->getWorker();
   TaskTypes::Enum type = ts->getTask().getType();
-  taskStreams[ts].isReady = !(worker->isResearching() || worker->isUpgrading() || worker->isLifted() || worker->isTraining() || worker->isConstructing() || worker->isMorphing());
+  taskStreams[ts].isReady = !(worker->isResearching() || worker->isUpgrading() || worker->isTraining() || worker->isConstructing() || worker->isMorphing());
 }
 void BasicTaskExecutor::getReady(TaskStream* ts)
 {
   if (taskStreams[ts].isReady) return;
   Unit* worker = ts->getWorker();
   TaskTypes::Enum type = ts->getTask().getType();
-  if (worker->isLifted())
-    worker->land(worker->getTilePosition());
-  else if (worker->isResearching() || worker->isUpgrading() || worker->isTraining() || worker->isConstructing() || worker->isMorphing())
+  if (worker->isResearching() || worker->isUpgrading() || worker->isTraining() || worker->isConstructing() || worker->isMorphing())
     worker->stop();
 }
 void BasicTaskExecutor::execute(TaskStream* ts)

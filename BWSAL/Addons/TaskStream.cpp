@@ -123,7 +123,7 @@ void TaskStream::computeStatus()
       }
     }
   }
-  if (task[0].hasReservedResourcesThisFrame())
+  if (task[0].hasSpentResources())
     status = Executing_Task;
   for(int i=0;i<2;i++)
   {
