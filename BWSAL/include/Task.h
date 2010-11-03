@@ -25,6 +25,7 @@ class Task
     Task& setTilePosition(const BWAPI::TilePosition p);
 
     bool operator==(void* ptr) const;
+    bool operator!=(void* ptr) const;
     bool operator==(const Task &t) const;
     bool operator==(const BWAPI::UnitType &t) const;
     bool operator==(const BWAPI::TechType &t) const;
@@ -44,6 +45,9 @@ class Task
     int getTime() const;
     std::string getName() const;
     std::string getVerb() const;
+
+    void setEarliestStartTime(int time);
+    int getEarliestStartTime() const;
 
     void setStartTime(int time);
     int getStartTime() const;
@@ -68,6 +72,7 @@ class Task
     int id;
     int level;
     BWAPI::TilePosition position;
+    int earliestStartTime;
     int startTime;
     bool spentResources;
     bool reservedResourcesThisFrame;

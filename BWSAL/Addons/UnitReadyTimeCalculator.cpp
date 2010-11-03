@@ -49,6 +49,11 @@ int UnitReadyTimeCalculator::getReadyTime(BWAPI::Unit* unit, const Task &task, U
 {
   reason = UnitReadyTimeStatus::Waiting_For_Worker_To_Be_Ready;
   int t = getReadyTime(unit,considerTasks);
+
+  int t2 = task.getEarliestStartTime();
+  if (t2==-1 || t2>t)
+    t=t2;
+
   if (t==-1) return -1;
   if (considerResources)
   {

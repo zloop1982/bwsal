@@ -16,11 +16,11 @@ BFSBuildingPlacer::BFSBuildingPlacer()
 }
 void BFSBuildingPlacer::attached(TaskStream* ts)
 {
-  if (ts->getTask().getTilePosition().isValid()==false)
-    ts->getTask().setTilePosition(Broodwar->self()->getStartLocation());
+  if (ts->getTask(0).getTilePosition().isValid()==false)
+    ts->getTask(0).setTilePosition(Broodwar->self()->getStartLocation());
   taskStreams[ts].isRelocatable   = true;
   taskStreams[ts].buildDistance   = 1;
-  taskStreams[ts].reservePosition = ts->getTask().getTilePosition();
+  taskStreams[ts].reservePosition = ts->getTask(0).getTilePosition();
   taskStreams[ts].reserveWidth    = 0;
   taskStreams[ts].reserveHeight   = 0;
 }
@@ -39,22 +39,22 @@ void BFSBuildingPlacer::completedTask(TaskStream* ts, const Task &t)
 }
 void BFSBuildingPlacer::update(TaskStream* ts)
 {
-  if (ts->getTask().getType()!=TaskTypes::Unit) return;
+  if (ts->getTask(0).getType()!=TaskTypes::Unit) return;
 
-  int width = ts->getTask().getUnit().tileWidth();
-  UnitType type = ts->getTask().getUnit();
+  int width = ts->getTask(0).getUnit().tileWidth();
+  UnitType type = ts->getTask(0).getUnit();
   if (type.isAddon()) type=type.whatBuilds().first;
 
   if (ts->getStatus()==TaskStream::Error_Location_Blocked || ts->getStatus()==TaskStream::Error_Location_Not_Specified)
   {
-    if (ts->getTask().getTilePosition().isValid()==false)
-      ts->getTask().setTilePosition(Broodwar->self()->getStartLocation());
+    if (ts->getTask(0).getTilePosition().isValid()==false)
+      ts->getTask(0).setTilePosition(Broodwar->self()->getStartLocation());
     if (taskStreams[ts].isRelocatable)
     {
-      TilePosition tp(ts->getTask().getTilePosition());
+      TilePosition tp(ts->getTask(0).getTilePosition());
       TilePosition newtp(getBuildLocationNear(ts->getWorker(),tp,type,taskStreams[ts].buildDistance));
       Broodwar->printf("(%d,%d) -> (%d,%d)",tp.x(),tp.y(),newtp.x(),newtp.y());
-      ts->getTask().setTilePosition(newtp);
+      ts->getTask(0).setTilePosition(newtp);
     }
   }
   if (type==BWAPI::UnitTypes::Terran_Command_Center ||
@@ -66,19 +66,19 @@ void BFSBuildingPlacer::update(TaskStream* ts)
   }
 
   if (taskStreams[ts].reserveWidth    != width ||
-      taskStreams[ts].reserveHeight   != ts->getTask().getUnit().tileHeight() ||
-      taskStreams[ts].reservePosition != ts->getTask().getTilePosition())
+      taskStreams[ts].reserveHeight   != ts->getTask(0).getUnit().tileHeight() ||
+      taskStreams[ts].reservePosition != ts->getTask(0).getTilePosition())
   {
     freeTiles(taskStreams[ts].reservePosition,taskStreams[ts].reserveWidth,taskStreams[ts].reserveHeight);
     taskStreams[ts].reserveWidth    = width;
-    taskStreams[ts].reserveHeight   = ts->getTask().getUnit().tileHeight();
-    taskStreams[ts].reservePosition = ts->getTask().getTilePosition();
+    taskStreams[ts].reserveHeight   = ts->getTask(0).getUnit().tileHeight();
+    taskStreams[ts].reservePosition = ts->getTask(0).getTilePosition();
     reserveTiles(taskStreams[ts].reservePosition,taskStreams[ts].reserveWidth,taskStreams[ts].reserveHeight);
   }
 }
 void BFSBuildingPlacer::setTilePosition(TaskStream* ts, BWAPI::TilePosition p)
 {
-  ts->getTask().setTilePosition(p);
+  ts->getTask(0).setTilePosition(p);
 }
 void BFSBuildingPlacer::setRelocatable(TaskStream* ts, bool isRelocatable)
 {

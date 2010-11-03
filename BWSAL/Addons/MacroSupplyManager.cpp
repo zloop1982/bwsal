@@ -43,17 +43,13 @@ void MacroSupplyManager::update()
     if (Broodwar->getFrameCount()>lastFrameCheck+25)
     {
       lastFrameCheck=Broodwar->getFrameCount();
-      int productionCapacity       = 0;
       int supplyBuildTime = BWAPI::Broodwar->self()->getRace().getSupplyProvider().buildTime();
-      int time = BWAPI::Broodwar->getFrameCount() + supplyBuildTime;
-      for each(UnitType t in factoryTypes)
+      if (TheMacroManager->rtl.getAvailableResourcesAtTime(Broodwar->getFrameCount()+supplyBuildTime*3).getSupply()<=0)
       {
-        productionCapacity+=TheMacroManager->uctl.getFinalCount(t)*4;
-      }
-
-      if (productionCapacity>=TheMacroManager->rtl.getFinalSupply())
-      {
-        TaskStream* ts = new TaskStream(Task(Broodwar->self()->getRace().getSupplyProvider()));
+        Task s(Broodwar->self()->getRace().getSupplyProvider());
+        int frame = TheMacroManager->rtl.getFirstTimeWhenSupplyIsNoGreaterThan(0);
+        s.setEarliestStartTime(frame-29*10-supplyBuildTime);
+        TaskStream* ts = new TaskStream(s);
         TheMacroManager->taskStreams.push_front(ts);
         ts->attach(new BasicWorkerFinder(),true);
         ts->attach(BasicTaskExecutor::getInstance(),false);

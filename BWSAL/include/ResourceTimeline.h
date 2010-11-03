@@ -11,7 +11,7 @@ class ResourceTimeline
     int getFinalSupply();
     bool reserveResources(int frame, const Resources &r);
     int getFirstValidTime(const Resources &r);
-    
+    int getFirstTimeWhenSupplyIsNoGreaterThan(int supplyAmount);
     enum ErrorCode
     {
       None,

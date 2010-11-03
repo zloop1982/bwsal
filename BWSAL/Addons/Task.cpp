@@ -8,6 +8,7 @@ Task::Task(const BWAPI::UnitType t, const BWAPI::TilePosition p)
   position                    = p;
   level                       = -1;
   startTime                   = -1;
+  earliestStartTime           = 0;
   spentResources              = false;
   reservedResourcesThisFrame  = false;
   reservedFinishDataThisFrame = false;
@@ -20,6 +21,7 @@ Task::Task(const BWAPI::TechType t, const BWAPI::TilePosition p)
   position                    = p;
   level                       = -1;
   startTime                   = -1;
+  earliestStartTime           = 0;
   spentResources              = false;
   reservedResourcesThisFrame  = false;
   reservedFinishDataThisFrame = false;
@@ -34,6 +36,7 @@ Task::Task(const BWAPI::UpgradeType t, int l, const BWAPI::TilePosition p)
     l=Broodwar->self()->getUpgradeLevel(t)+1;
   level                       = l;
   startTime                   = -1;
+  earliestStartTime           = 0;
   spentResources              = false;
   reservedResourcesThisFrame  = false;
   reservedFinishDataThisFrame = false;
@@ -46,6 +49,7 @@ Task& Task::operator=(const Task t)
   position                    = t.position;
   level                       = t.level;
   startTime                   = t.startTime;
+  earliestStartTime           = t.earliestStartTime;
   spentResources              = t.spentResources;
   reservedResourcesThisFrame  = t.reservedResourcesThisFrame;
   reservedFinishDataThisFrame = t.reservedFinishDataThisFrame;
@@ -96,6 +100,10 @@ bool Task::operator==(void* ptr) const
     return true;
   return false;
 }
+bool Task::operator!=(void* ptr) const
+{
+  return !(this==ptr);
+}
 bool Task::operator==(const Task &t) const
 {
   if (type                        != t.type) return false;
@@ -103,6 +111,7 @@ bool Task::operator==(const Task &t) const
   if (position                    != t.position) return false;
   if (level                       != t.level) return false;
   if (startTime                   != t.startTime) return false;
+  if (earliestStartTime           != t.earliestStartTime) return false;
   if (spentResources              != t.spentResources) return false;
   if (reservedResourcesThisFrame  != t.reservedResourcesThisFrame) return false;
   if (reservedFinishDataThisFrame != t.reservedFinishDataThisFrame) return false;
@@ -238,6 +247,14 @@ bool Task::isBeingExecutedBy(const BWAPI::Unit* unit) const
   else if (type == TaskTypes::Upgrade)
     return (unit->isUpgrading() && unit->getUpgrade() == getUpgrade());
   return false;
+}
+void Task::setEarliestStartTime(int time)
+{
+  earliestStartTime = time;
+}
+int Task::getEarliestStartTime() const
+{
+  return earliestStartTime;
 }
 void Task::setStartTime(int time)
 {

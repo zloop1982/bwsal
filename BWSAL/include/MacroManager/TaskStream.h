@@ -8,7 +8,7 @@ class TaskStreamObserver;
 class TaskStream : public Arbitrator::Controller<BWAPI::Unit*,double>
 {
   public:
-    TaskStream(Task t=Task(), Task nt=Task());
+    TaskStream(Task t0=Task(), Task t1=Task(), Task t2=Task(), Task t3=Task());
     ~TaskStream();
     void terminate();
     virtual void onOffer(std::set<BWAPI::Unit*> units);
@@ -62,13 +62,11 @@ class TaskStream : public Arbitrator::Controller<BWAPI::Unit*,double>
     bool isWorkerReady() const;
     bool isLocationReady() const;
 
-    void setTask(Task t);
-    Task& getTask();
+    void setTask(int index, Task t);
+    Task& getTask(int index);
 
     void setUrgent(bool isUrgent);
     bool isUrgent() const;
-    void setNextTask(Task t);
-    Task& getNextTask();
 
     void setName(std::string s);
     void printToScreen(int x, int y);
@@ -78,7 +76,7 @@ class TaskStream : public Arbitrator::Controller<BWAPI::Unit*,double>
     bool urgent;
     bool workerReady;
     bool locationReady;
-    Task task[2];
+    std::vector<Task> task;
     bool plannedAdditionalResources;
     BWAPI::Unit* worker;
     BWAPI::Unit* buildUnit;

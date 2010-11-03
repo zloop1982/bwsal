@@ -41,7 +41,7 @@ void UnitCompositionProducer::update()
   std::set<Unit*> units=Broodwar->self()->getUnits();
   for each(Unit* u in units)
   {
-    if (u->getType()==workerType && u->exists() && u->isCompleted())
+    if (u->getType()==workerType && u->exists())
     {
       TaskStream* ts = TheMacroManager->getTaskStream(u);
       if (ts==NULL)
@@ -63,17 +63,18 @@ void UnitCompositionProducer::update()
   }
   for each(TaskStream* ts in streams)
   {
-    if (ts->getTask()==NULL)
+    for(int i=0;i<4;i++)
     {
-      UnitType t=getNextUnitType(ts->getWorker());
-      ts->setTask(Task(t,ts->getWorker()->getTilePosition()));
-      actualUnitCounts[t]++;
-    }
-    else if (ts->getNextTask()==NULL)
-    {
-      UnitType t=getNextUnitType(ts->getWorker());
-      ts->setNextTask(Task(t,ts->getWorker()->getTilePosition()));
-      actualUnitCounts[t]++;
+      if (ts->getTask(i)==NULL || ts->getTask(i).getUnit()==UnitTypes::None)
+      {
+        UnitType t=getNextUnitType(ts->getWorker());
+        if (t!=UnitTypes::None)
+        {
+          ts->setTask(i,Task(t,ts->getWorker()->getTilePosition()));
+          actualUnitCounts[t]++;
+        }
+        break;
+      }
     }
   }
 }

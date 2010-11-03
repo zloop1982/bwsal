@@ -6,8 +6,7 @@ UnitPump::UnitPump(UnitType t)
 }
 void UnitPump::update(TaskStream* ts)
 {
-  if (ts->getTask()==Task())
-    ts->setTask(Task(type));
-  if (ts->getNextTask()==Task())
-    ts->setNextTask(Task(type));
+  for (int i=0;i<4;i++)
+    if (ts->getTask(i)==Task())
+      ts->setTask(i,Task(type));
 }
