@@ -62,15 +62,18 @@ void MacroSupplyManager::update()
         int supplyBuildTime = BWAPI::Broodwar->self()->getRace().getSupplyProvider().buildTime();
         if (TheMacroManager->rtl.getAvailableResourcesAtTime(Broodwar->getFrameCount()+supplyBuildTime*3).getSupply()<=0)
         {
-          Task s(Broodwar->self()->getRace().getSupplyProvider());
-          int frame = TheMacroManager->rtl.getFirstTimeWhenSupplyIsNoGreaterThan(0);
-          s.setEarliestStartTime(frame-29*10-supplyBuildTime);
-          TaskStream* ts = new TaskStream(s);
-          TheMacroManager->taskStreams.push_front(ts);
-          ts->attach(new BasicWorkerFinder(),true);
-          ts->attach(BasicTaskExecutor::getInstance(),false);
-          ts->attach(new TerminateIfEmpty(),true);
-          ts->attach(BFSBuildingPlacer::getInstance(),false);
+          if (TheMacroManager->rtl.getFinalSupplyTotal()<400)
+          {
+            Task s(Broodwar->self()->getRace().getSupplyProvider());
+            int frame = TheMacroManager->rtl.getFirstTimeWhenSupplyIsNoGreaterThan(0);
+            s.setEarliestStartTime(frame-29*10-supplyBuildTime);
+            TaskStream* ts = new TaskStream(s);
+            TheMacroManager->taskStreams.push_front(ts);
+            ts->attach(new BasicWorkerFinder(),true);
+            ts->attach(BasicTaskExecutor::getInstance(),false);
+            ts->attach(new TerminateIfEmpty(),true);
+            ts->attach(BFSBuildingPlacer::getInstance(),false);
+          }
         }
       }
     }
