@@ -47,6 +47,7 @@ int UnitReadyTimeCalculator::getReadyTime(BWAPI::Unit* unit, bool considerTasks)
 //returns the frame when the unit will be ready to do the given task
 int UnitReadyTimeCalculator::getReadyTime(BWAPI::Unit* unit, const Task &task, UnitReadyTimeStatus::Enum &reason, bool considerResources, bool considerTasks)
 {
+  if (unit==NULL || unit->exists()==false) return -1;
   reason = UnitReadyTimeStatus::Waiting_For_Worker_To_Be_Ready;
   int t = getReadyTime(unit,considerTasks);
 

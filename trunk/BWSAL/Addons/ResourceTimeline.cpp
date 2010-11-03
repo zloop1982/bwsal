@@ -77,6 +77,16 @@ Resources ResourceTimeline::getAvailableResourcesAtTime(int frame)
   }
   return availRes;
 }
+int ResourceTimeline::getSupplyTotalAtTime(int frame)
+{
+  int supplyTotal = currentSupplyTotal;
+  for(std::map<int, int>::iterator i=supplyIncreaseEvents.begin();i!=supplyIncreaseEvents.end();i++)
+  {
+    if (i->first > frame) break;
+    supplyTotal+=i->second;
+  }
+  return supplyTotal;
+}
 int ResourceTimeline::getFinalSupplyAvailable()
 {
   Resources res = currentResources;
@@ -224,6 +234,10 @@ ResourceTimeline::ErrorCode ResourceTimeline::getLastError() const
 bool ResourceTimeline::registerSupplyIncrease(int frame, int supply)
 {
   if (supply<0) return false;
+  int currentTotal=getSupplyTotalAtTime(frame);
+  int newTotal = currentTotal + supply;
+  if (newTotal > 400) newTotal = 400;
+  supply = newTotal-currentTotal;  
   resourceEvents[frame].addSupply(supply);
   supplyIncreaseEvents[frame]+=supply;
   return true;

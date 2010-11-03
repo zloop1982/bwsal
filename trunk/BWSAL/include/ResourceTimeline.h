@@ -8,6 +8,7 @@ class ResourceTimeline
     void reset(const Resources &r, int supplyTotal, double mgr, double ggr);
     Resources getActualResourcesAtTime(int frame);
     Resources getAvailableResourcesAtTime(int frame);
+    int getSupplyTotalAtTime(int frame);
     int getFinalSupplyAvailable();
     int getFinalSupplyTotal();
     bool reserveResources(int frame, const Resources &r);
