@@ -5,10 +5,11 @@ class ResourceTimeline
 {
   public:
     ResourceTimeline();
-    void reset(const Resources &r, double mgr, double ggr);
+    void reset(const Resources &r, int supplyTotal, double mgr, double ggr);
     Resources getActualResourcesAtTime(int frame);
     Resources getAvailableResourcesAtTime(int frame);
-    int getFinalSupply();
+    int getFinalSupplyAvailable();
+    int getFinalSupplyTotal();
     bool reserveResources(int frame, const Resources &r);
     int getFirstValidTime(const Resources &r);
     int getFirstTimeWhenSupplyIsNoGreaterThan(int supplyAmount);
@@ -27,5 +28,7 @@ class ResourceTimeline
     double mineralGatherRate;
     double gasGatherRate;
     Resources currentResources;
+    int currentSupplyTotal;
     std::map<int, Resources > resourceEvents;
+    std::map<int, int > supplyIncreaseEvents;
 };
