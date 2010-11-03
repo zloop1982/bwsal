@@ -187,6 +187,20 @@ int ResourceTimeline::getFirstValidTime(const Resources &r)
   if (t>(int)t) ti++;
   return ti;
 }
+int ResourceTimeline::getFirstTimeWhenSupplyIsNoGreaterThan(int supplyAmount)
+{
+  int frame = Broodwar->getFrameCount();
+  Resources res = currentResources;
+  int supply = (int)(currentResources.getSupply());
+  if (supply<=supplyAmount) return frame;
+  for(std::map<int, Resources>::iterator i=resourceEvents.begin();i!=resourceEvents.end();i++)
+  {
+    frame = i->first;
+    supply+=(int)(i->second.getSupply());
+    if (supply<=supplyAmount) return frame;
+  }
+  return -1;
+}
 ResourceTimeline::ErrorCode ResourceTimeline::getLastError() const
 {
   return lastError;

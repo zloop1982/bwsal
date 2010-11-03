@@ -4,10 +4,13 @@
 #include <math.h>
 using namespace BWAPI;
 using namespace std;
-TaskStream::TaskStream(Task t, Task nt)
+TaskStream::TaskStream(Task t0, Task t1, Task t2, Task t3)
 {
-  task[0]    = t;
-  task[1]    = nt;
+  task.clear();
+  task.push_back(t0);
+  task.push_back(t1);
+  task.push_back(t2);
+  task.push_back(t3);
   worker     = NULL;
   buildUnit  = NULL;
   status     = None;
@@ -125,7 +128,7 @@ void TaskStream::computeStatus()
   }
   if (task[0].hasSpentResources())
     status = Executing_Task;
-  for(int i=0;i<2;i++)
+  for(int i=0;i<(int)(task.size());i++)
   {
     if (i>0 && task[i-1].getStartTime()==-1) break;
     if (!task[i].hasReservedResourcesThisFrame())
@@ -192,6 +195,11 @@ void TaskStream::computeStatus()
       task[i].setReservedFinishDataThisFrame(true);
     }
   }
+  for(int i=1;i<(int)(task.size());i++)
+  {
+    if (task[i-1].getStartTime()==-1)
+      task[i].setStartTime(-1);
+  }
 }
 void TaskStream::update()
 {
@@ -202,8 +210,9 @@ void TaskStream::update()
     {
       notifyCompletedTask();
       status = None;
-      task[0] = task[1];
-      task[1] = Task();
+      for(int i=0;i+1<(int)(task.size());i++)
+        task[i]=task[i+1];
+      task[task.size()-1] = Task();
       buildUnit = NULL;
       Broodwar->printf("Completed Task!");
     }
@@ -221,7 +230,7 @@ void TaskStream::update()
         worker->cancelTrain();
       else if (worker->isMorphing())
         worker->cancelMorph();
-      else if (worker->isConstructing())
+      else if (worker->isConstructing() && worker->isCompleted())
       {
         if (worker->getBuildUnit() && worker->getBuildUnit()->getType().isBuilding())
           worker->getBuildUnit()->cancelConstruction();
@@ -356,13 +365,14 @@ BWAPI::Unit* TaskStream::getBuildUnit() const
 {
   return buildUnit;
 }
-void TaskStream::setTask(Task t)
+void TaskStream::setTask(int index, Task t)
 {
-  task[0] = t;
+  if (index<0 || index>=(int)(task.size())) return;
+  task[index] = t;
 }
-Task& TaskStream::getTask()
+Task& TaskStream::getTask(int index)
 {
-  return task[0];
+  return task[index];
 }
 void TaskStream::setUrgent(bool isUrgent)
 {
@@ -371,14 +381,6 @@ void TaskStream::setUrgent(bool isUrgent)
 bool TaskStream::isUrgent() const
 {
   return urgent;
-}
-void TaskStream::setNextTask(Task t)
-{
-  task[1] = t;
-}
-Task& TaskStream::getNextTask()
-{
-  return task[1];
 }
 void TaskStream::setName(std::string s)
 {
@@ -397,14 +399,18 @@ void TaskStream::printToScreen(int x, int y)
   Broodwar->drawTextScreen(x,y,"[ ] %s - %x ",
     getStatusString().c_str(),
     getWorker());
-  Broodwar->drawTextScreen(x+200,y,"%s %s %d",
-    task[0].getVerb().c_str(),
+  Broodwar->drawTextScreen(x+200,y,"%s %d",
     task[0].getName().c_str(),
     task[0].getStartTime());
-  Broodwar->drawTextScreen(x+400,y,"%s %s %d",
-    task[1].getVerb().c_str(),
+  Broodwar->drawTextScreen(x+300,y,"%s %d",
     task[1].getName().c_str(),
     task[1].getStartTime());
+  Broodwar->drawTextScreen(x+400,y,"%s %d",
+    task[2].getName().c_str(),
+    task[2].getStartTime());
+  Broodwar->drawTextScreen(x+500,y,"%s %d",
+    task[3].getName().c_str(),
+    task[3].getStartTime());
 }
 
 bool TaskStream::isWorkerReady() const
@@ -417,14 +423,13 @@ bool TaskStream::isLocationReady() const
 }
 void TaskStream::clearPlanningData()
 {
-  task[0].setReservedResourcesThisFrame(task[0].hasSpentResources());
-  task[0].setReservedFinishDataThisFrame(task[0].isCompleted());
-  if (!task[0].hasSpentResources())
-    task[0].setStartTime(-1);
-  task[1].setReservedResourcesThisFrame(task[1].hasSpentResources());
-  task[1].setReservedFinishDataThisFrame(task[0].isCompleted());
-  if (!task[1].hasSpentResources())
-    task[1].setStartTime(-1);
+  for(int i=0;i<(int)(task.size());i++)
+  {
+    task[i].setReservedResourcesThisFrame(task[i].hasSpentResources());
+    task[i].setReservedFinishDataThisFrame(task[i].isCompleted());
+    if (!task[i].hasSpentResources())
+      task[i].setStartTime(-1);
+  }
   plannedAdditionalResources = false;
 }
 int TaskStream::getStartTime() const
@@ -435,24 +440,16 @@ int TaskStream::getFinishTime() const
 {
   if (task[0]==NULL)
     return Broodwar->getFrameCount();
-  if (task[0].getFinishTime() == -1)
-    return -1;
-  if (task[1]==NULL)
-    return task[0].getFinishTime();
-  if (task[1].getFinishTime() == -1)
-    return -1;
-  return task[1].getFinishTime();
+  for(int i=0;i<(int)(task.size());i++)
+    if (task[i].getFinishTime() == -1)
+      return -1;
+  return task[task.size()-1].getFinishTime();
 }
 
 int TaskStream::getFinishTime(BWAPI::UnitType t) const
 {
-  if (task[0].getType()==TaskTypes::Unit && task[0].getUnit()==t)
-  {
-    return task[0].getFinishTime();
-  }
-  if (task[1].getType()==TaskTypes::Unit && task[1].getUnit()==t)
-  {
-    return task[1].getFinishTime();
-  }
+  for(int i=0;i<(int)(task.size());i++)
+    if (task[i].getType()==TaskTypes::Unit && task[i].getUnit()==t)
+      return task[i].getFinishTime();
   return -1;
 }

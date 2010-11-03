@@ -16,27 +16,29 @@ void BasicWorkerFinder::newStatus(TaskStream* ts)
 {
   if (ts->isWorkerReady()==false)
   {
-    if (ts->getTask().getType()==TaskTypes::Unit && ts->getTask().getUnit().isBuilding() && (!ts->getTask().getTilePosition().isValid()))
+    if (ts->getTask(0).getType()==TaskTypes::Unit && ts->getTask(0).getUnit().isBuilding() && (!ts->getTask(0).getTilePosition().isValid()))
       return;
 
     std::set<BWAPI::Unit*> units;
     for each(Unit* u in Broodwar->self()->getUnits())
     {
-      if (u->exists() && u->isCompleted() && u->getRemainingBuildTime()==0 && u->getType()==ts->getTask().getWorkerType() && u->isLoaded()==false)
+      if (u->exists() && u->isCompleted() && u->getRemainingBuildTime()==0 && u->getType()==ts->getTask(0).getWorkerType() && u->isLoaded()==false)
       {
-        if (ts->getTask().getType()==TaskTypes::Unit && ts->getTask().getUnit().isAddon() && u->getAddon()!=NULL)
+        if (ts->getTask(0).getType()==TaskTypes::Unit && ts->getTask(0).getUnit().isAddon() && u->getAddon()!=NULL)
           continue;
         if (TheArbitrator->hasBid(u) && TheArbitrator->getHighestBidder(u).second>=100.0)
+          continue;
+        if (TheMacroManager->getTaskStream(u)!=NULL)
           continue;
 
         units.insert(u);
       }
     }
     Unit* chosenWorker = NULL;
-    if (ts->getTask().getTilePosition().isValid())
+    if (ts->getTask(0).getTilePosition().isValid())
     {
       //if the task has a tile position, choose the worker closest to it
-      Position p=Position(ts->getTask().getTilePosition());
+      Position p=Position(ts->getTask(0).getTilePosition());
       double minDist=-1;
       for each(Unit* u in units)
       {
@@ -58,8 +60,8 @@ void BasicWorkerFinder::newStatus(TaskStream* ts)
     ts->setWorker(chosenWorker);
     if (chosenWorker!=NULL)
     {
-      if (ts->getTask().getType()==TaskTypes::Unit && ts->getTask().getUnit().isAddon())
-        ts->getTask().setTilePosition(chosenWorker->getTilePosition());
+      if (ts->getTask(0).getType()==TaskTypes::Unit && ts->getTask(0).getUnit().isAddon())
+        ts->getTask(0).setTilePosition(chosenWorker->getTilePosition());
     }
   }
 }
