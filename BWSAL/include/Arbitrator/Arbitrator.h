@@ -2,7 +2,7 @@
 #include <list>
 #include <set>
 #include <map>
-#include "Heap.h"
+#include <Heap.h>
 #include "Controller.h"
 namespace Arbitrator
 {

@@ -5,6 +5,7 @@
 #include <math.h>
 #include <BasicTaskExecutor.h>
 #include <SpiralBuildingPlacer.h>
+#include <BFSBuildingPlacer.h>
 #include <UnitPump.h>
 #include <TerminateIfWorkerLost.h>
 #include <TerminateIfEmpty.h>
@@ -57,7 +58,7 @@ void MacroSupplyManager::update()
         ts->attach(new BasicWorkerFinder(),true);
         ts->attach(BasicTaskExecutor::getInstance(),false);
         ts->attach(new TerminateIfEmpty(),true);
-        ts->attach(SpiralBuildingPlacer::getInstance(),false);
+        ts->attach(BFSBuildingPlacer::getInstance(),false);
       }
     }
   }

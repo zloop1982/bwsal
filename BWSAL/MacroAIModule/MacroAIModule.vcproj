@@ -265,6 +265,14 @@
 						>
 					</File>
 					<File
+						RelativePath="..\Addons\BFSBuildingPlacer.cpp"
+						>
+					</File>
+					<File
+						RelativePath="..\include\BFSBuildingPlacer.h"
+						>
+					</File>
+					<File
 						RelativePath="..\Addons\SpiralBuildingPlacer.cpp"
 						>
 					</File>
@@ -318,7 +326,7 @@
 					>
 				</File>
 				<File
-					RelativePath="..\include\Arbitrator\Heap.h"
+					RelativePath="..\include\Heap.h"
 					>
 				</File>
 			</Filter>
