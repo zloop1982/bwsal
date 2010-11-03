@@ -4,8 +4,6 @@
 #include <map>
 #include <utility>
 
-namespace Arbitrator
-{
   /**
    * An associated heap class with the ability to read and change the values
    * of arbitrary objects in the heap.
@@ -263,4 +261,3 @@ namespace Arbitrator
     return true;
   }
   //------------------------------------------------------------------------------
-}
