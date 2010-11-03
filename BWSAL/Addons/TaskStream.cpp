@@ -401,7 +401,7 @@ void TaskStream::printToScreen(int x, int y)
     task[0].getVerb().c_str(),
     task[0].getName().c_str(),
     task[0].getStartTime());
-  Broodwar->drawTextScreen(x+350,y,"%s %s %d",
+  Broodwar->drawTextScreen(x+400,y,"%s %s %d",
     task[1].getVerb().c_str(),
     task[1].getName().c_str(),
     task[1].getStartTime());

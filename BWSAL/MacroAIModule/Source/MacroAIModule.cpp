@@ -101,7 +101,7 @@ void MacroAIModule::onFrame()
   }
   if (drag_index>=0)
   {
-    int land_index = (Broodwar->getMouseY()-25)/20;
+    int land_index = (Broodwar->getMouseY()-30)/20;
     if (land_index<0) land_index = 0;
     if (land_index>=(int)TheMacroManager->taskStreams.size())
       land_index=(int)TheMacroManager->taskStreams.size()-1;

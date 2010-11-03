@@ -50,7 +50,7 @@ void SpiralBuildingPlacer::update(TaskStream* ts)
     if (taskStreams[ts].isRelocatable)
     {
       TilePosition tp(ts->getTask().getTilePosition());
-      TilePosition newtp(getBuildLocationNear(tp,type,taskStreams[ts].buildDistance));
+      TilePosition newtp(getBuildLocationNear(ts->getWorker(),tp,type,taskStreams[ts].buildDistance));
       Broodwar->printf("(%d,%d) -> (%d,%d)",tp.x(),tp.y(),newtp.x(),newtp.y());
       ts->getTask().setTilePosition(newtp);
     }
@@ -87,11 +87,11 @@ void SpiralBuildingPlacer::setBuildDistance(TaskStream* ts, int distance)
   taskStreams[ts].buildDistance = distance;
 }
 
-BWAPI::TilePosition SpiralBuildingPlacer::getBuildLocationNear(BWAPI::TilePosition position, BWAPI::UnitType type, int buildDist) const
+BWAPI::TilePosition SpiralBuildingPlacer::getBuildLocationNear(BWAPI::Unit* builder, BWAPI::TilePosition position, BWAPI::UnitType type, int buildDist) const
 {
   //returns a valid build location near the specified tile position.
   //searches outward in a spiral.
-  if (type.isAddon()) type=type.whatBuilds().first;
+  if (type.isAddon()) type = type.whatBuilds().first;
   int x      = position.x();
   int y      = position.y();
   int length = 1;
@@ -99,11 +99,15 @@ BWAPI::TilePosition SpiralBuildingPlacer::getBuildLocationNear(BWAPI::TilePositi
   bool first = true;
   int dx     = 0;
   int dy     = 1;
-  while (length < BWAPI::Broodwar->mapWidth()) //We'll ride the spiral to the end
+  int max    = BWAPI::Broodwar->mapWidth()*2;
+  if (BWAPI::Broodwar->mapHeight()*2 > max)
+    max = BWAPI::Broodwar->mapHeight()*2;
+
+  while (length < max ) //We'll ride the spiral to the end
   {
     //if we can build here, return this tile position
     if (x >= 0 && x < BWAPI::Broodwar->mapWidth() && y >= 0 && y < BWAPI::Broodwar->mapHeight())
-      if (this->canBuildHereWithSpace(BWAPI::TilePosition(x, y), type, buildDist))
+      if (this->canBuildHereWithSpace(builder, BWAPI::TilePosition(x, y), type, buildDist))
         return BWAPI::TilePosition(x, y);
 
     //otherwise, move to another position
@@ -137,14 +141,16 @@ BWAPI::TilePosition SpiralBuildingPlacer::getBuildLocationNear(BWAPI::TilePositi
     }
     //Spiral out. Keep going.
   }
+  if (buildDist>0)
+    return getBuildLocationNear(builder, position, type, buildDist-1);
   return BWAPI::TilePositions::None;
 }
 
-bool SpiralBuildingPlacer::canBuildHere(BWAPI::TilePosition position, BWAPI::UnitType type) const
+bool SpiralBuildingPlacer::canBuildHere(BWAPI::Unit* builder, BWAPI::TilePosition position, BWAPI::UnitType type) const
 {
   if (type.isAddon()) type=type.whatBuilds().first;
   //returns true if we can build this type of unit here. Takes into account reserved tiles.
-  if (!BWAPI::Broodwar->canBuildHere(NULL, position, type))
+  if (!BWAPI::Broodwar->canBuildHere(builder, position, type))
     return false;
   for(int x = position.x(); x < position.x() + type.tileWidth(); x++)
     for(int y = position.y(); y < position.y() + type.tileHeight(); y++)
@@ -153,15 +159,17 @@ bool SpiralBuildingPlacer::canBuildHere(BWAPI::TilePosition position, BWAPI::Uni
   return true;
 }
 
-bool SpiralBuildingPlacer::canBuildHereWithSpace(BWAPI::TilePosition position, BWAPI::UnitType type, int buildDist) const
+bool SpiralBuildingPlacer::canBuildHereWithSpace(BWAPI::Unit* builder, BWAPI::TilePosition position, BWAPI::UnitType type, int buildDist) const
 {
   if (type.isAddon()) type=type.whatBuilds().first;
   //returns true if we can build this type of unit here with the specified amount of space.
   //space value is stored in this->buildDistance.
 
   //if we can't build here, we of course can't build here with space
-  if (!this->canBuildHere(position, type))
+  if (!this->canBuildHere(builder,position, type))
     return false;
+  if (type.isRefinery())
+    return true;
 
   int width=type.tileWidth();
   int height=type.tileHeight();
@@ -183,13 +191,11 @@ bool SpiralBuildingPlacer::canBuildHereWithSpace(BWAPI::TilePosition position, B
   int endy = position.y() + height + buildDist;
   if (endy>BWAPI::Broodwar->mapHeight()) return false;
 
-  if (!type.isRefinery())
-  {
-    for(int x = startx; x < endx; x++)
-      for(int y = starty; y < endy; y++)
-          if (!buildable(x, y) || reserveMap[x][y])
-            return false;
-  }
+  for(int x = startx; x < endx; x++)
+    for(int y = starty; y < endy; y++)
+      if (!buildable(builder, x, y) || reserveMap[x][y])
+        return false;
+
   if (position.x()>3)
   {
     int startx2=startx-2;
@@ -200,7 +206,7 @@ bool SpiralBuildingPlacer::canBuildHereWithSpace(BWAPI::TilePosition position, B
         std::set<BWAPI::Unit*> units = BWAPI::Broodwar->unitsOnTile(x, y);
         for(std::set<BWAPI::Unit*>::iterator i = units.begin(); i != units.end(); i++)
         {
-          if (!(*i)->isLifted())
+          if (!(*i)->isLifted() && *i != builder)
           {
             BWAPI::UnitType type=(*i)->getType();
             if (type==BWAPI::UnitTypes::Terran_Command_Center ||
@@ -217,13 +223,13 @@ bool SpiralBuildingPlacer::canBuildHereWithSpace(BWAPI::TilePosition position, B
   return true;
 }
 
-bool SpiralBuildingPlacer::buildable(int x, int y) const
+bool SpiralBuildingPlacer::buildable(BWAPI::Unit* builder, int x, int y) const
 {
   //returns true if this tile is currently buildable, takes into account units on tile
   if (!BWAPI::Broodwar->isBuildable(x,y)) return false;
   std::set<BWAPI::Unit*> units = BWAPI::Broodwar->unitsOnTile(x, y);
   for(std::set<BWAPI::Unit*>::iterator i = units.begin(); i != units.end(); i++)
-    if ((*i)->getType().isBuilding() && !(*i)->isLifted())
+    if ((*i)->getType().isBuilding() && !(*i)->isLifted() && *i != builder)
       return false;
   return true;
 }
