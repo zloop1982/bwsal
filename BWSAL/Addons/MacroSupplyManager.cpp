@@ -30,6 +30,7 @@ MacroSupplyManager::MacroSupplyManager()
       factoryTypes.insert(t);
     }
   }
+  initialSupplyTotal = Broodwar->self()->supplyTotal();
   lastFrameCheck=0;
 }
 MacroSupplyManager::~MacroSupplyManager()
@@ -43,18 +44,34 @@ void MacroSupplyManager::update()
     if (Broodwar->getFrameCount()>lastFrameCheck+25)
     {
       lastFrameCheck=Broodwar->getFrameCount();
-      int supplyBuildTime = BWAPI::Broodwar->self()->getRace().getSupplyProvider().buildTime();
-      if (TheMacroManager->rtl.getAvailableResourcesAtTime(Broodwar->getFrameCount()+supplyBuildTime*3).getSupply()<=0)
+      if (TheMacroManager->rtl.getFinalSupplyTotal()==initialSupplyTotal)
       {
-        Task s(Broodwar->self()->getRace().getSupplyProvider());
-        int frame = TheMacroManager->rtl.getFirstTimeWhenSupplyIsNoGreaterThan(0);
-        s.setEarliestStartTime(frame-29*10-supplyBuildTime);
-        TaskStream* ts = new TaskStream(s);
-        TheMacroManager->taskStreams.push_front(ts);
-        ts->attach(new BasicWorkerFinder(),true);
-        ts->attach(BasicTaskExecutor::getInstance(),false);
-        ts->attach(new TerminateIfEmpty(),true);
-        ts->attach(BFSBuildingPlacer::getInstance(),false);
+        if (Broodwar->self()->supplyUsed()>=initialSupplyTotal-2)
+        {
+          Task s(Broodwar->self()->getRace().getSupplyProvider());
+          TaskStream* ts = new TaskStream(s);
+          TheMacroManager->taskStreams.push_front(ts);
+          ts->attach(new BasicWorkerFinder(),true);
+          ts->attach(BasicTaskExecutor::getInstance(),false);
+          ts->attach(new TerminateIfEmpty(),true);
+          ts->attach(BFSBuildingPlacer::getInstance(),false);
+        }
+      }
+      else
+      {
+        int supplyBuildTime = BWAPI::Broodwar->self()->getRace().getSupplyProvider().buildTime();
+        if (TheMacroManager->rtl.getAvailableResourcesAtTime(Broodwar->getFrameCount()+supplyBuildTime*3).getSupply()<=0)
+        {
+          Task s(Broodwar->self()->getRace().getSupplyProvider());
+          int frame = TheMacroManager->rtl.getFirstTimeWhenSupplyIsNoGreaterThan(0);
+          s.setEarliestStartTime(frame-29*10-supplyBuildTime);
+          TaskStream* ts = new TaskStream(s);
+          TheMacroManager->taskStreams.push_front(ts);
+          ts->attach(new BasicWorkerFinder(),true);
+          ts->attach(BasicTaskExecutor::getInstance(),false);
+          ts->attach(new TerminateIfEmpty(),true);
+          ts->attach(BFSBuildingPlacer::getInstance(),false);
+        }
       }
     }
   }

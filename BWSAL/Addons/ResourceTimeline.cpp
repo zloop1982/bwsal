@@ -7,14 +7,17 @@ ResourceTimeline::ResourceTimeline()
 {
   currentResources = Resources();
   resourceEvents.clear();
+  supplyIncreaseEvents.clear();
   mineralGatherRate = 0;
   gasGatherRate = 0;
   lastError = None;
 }
-void ResourceTimeline::reset(const Resources &r, double mgr, double ggr)
+void ResourceTimeline::reset(const Resources &r, int supplyTotal, double mgr, double ggr)
 {
   currentResources = r;
+  currentSupplyTotal = supplyTotal;
   resourceEvents.clear();
+  supplyIncreaseEvents.clear();
   mineralGatherRate = mgr;
   gasGatherRate = ggr;
   lastError = None;
@@ -32,6 +35,11 @@ Resources ResourceTimeline::getActualResourcesAtTime(int frame)
     int duration = currentFrame - lastFrame;
     res.addMinerals((int)(duration*mineralGatherRate));
     res.addGas((int)(duration*gasGatherRate));
+    Resources resi=i->second;
+    if (resi.getMinerals()<0) resi.setMinerals(0);
+    if (resi.getGas()<0) resi.setGas(0);
+    if (resi.getSupply()<0) resi.setSupply(0);
+    res+=resi;
     if (currentFrame == frame)
       break;
     lastFrame = currentFrame;
@@ -69,9 +77,8 @@ Resources ResourceTimeline::getAvailableResourcesAtTime(int frame)
   }
   return availRes;
 }
-int ResourceTimeline::getFinalSupply()
+int ResourceTimeline::getFinalSupplyAvailable()
 {
-  int lastFrame = Broodwar->getFrameCount();
   Resources res = currentResources;
   int supply = (int)(currentResources.getSupply());
   for(std::map<int, Resources>::iterator i=resourceEvents.begin();i!=resourceEvents.end();i++)
@@ -79,6 +86,15 @@ int ResourceTimeline::getFinalSupply()
     supply+=(int)(i->second.getSupply());
   }
   return supply;
+}
+int ResourceTimeline::getFinalSupplyTotal()
+{
+  int supplyTotal = currentSupplyTotal;
+  for(std::map<int, int>::iterator i=supplyIncreaseEvents.begin();i!=supplyIncreaseEvents.end();i++)
+  {
+    supplyTotal+=i->second;
+  }
+  return supplyTotal;
 }
 
 bool ResourceTimeline::reserveResources(int frame, const Resources &r)
@@ -209,13 +225,15 @@ bool ResourceTimeline::registerSupplyIncrease(int frame, int supply)
 {
   if (supply<0) return false;
   resourceEvents[frame].addSupply(supply);
+  supplyIncreaseEvents[frame]+=supply;
   return true;
 }
 bool ResourceTimeline::unregisterSupplyIncrease(int frame, int supply)
 {
   if (supply<0) return false;
-  if (resourceEvents[frame].getSupply()<supply)
+  if (supplyIncreaseEvents[frame]<supply)
     return false;
   resourceEvents[frame].addSupply(-supply);
+  supplyIncreaseEvents[frame]-=supply;
   return true;
 }

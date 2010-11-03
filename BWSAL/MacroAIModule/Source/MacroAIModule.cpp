@@ -98,7 +98,7 @@ void MacroAIModule::onFrame()
       if (drag_index<0) drag_index = 0;
     }
     if (drag_index>=(int)TheMacroManager->taskStreams.size())
-      drag_index=(int)TheMacroManager->taskStreams.size()-1;
+      drag_index=-1;
   }
   if (drag_index>=0)
   {

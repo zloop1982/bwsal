@@ -28,7 +28,7 @@ void MacroManager::update()
 {
   spentResources.setSupply(0);//don't keep track of spent supply
   Resources r = CumulativeResources(Broodwar->self())-spentResources;
-  rtl.reset(r,TheResourceRates->getGatherRate().getMinerals(),TheResourceRates->getGatherRate().getGas());
+  rtl.reset(r,Broodwar->self()->supplyTotal(),TheResourceRates->getGatherRate().getMinerals(),TheResourceRates->getGatherRate().getGas());
   uctl.reset();
   ttl.reset();
   utl.reset();
