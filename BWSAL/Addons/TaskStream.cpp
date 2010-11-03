@@ -154,6 +154,8 @@ void TaskStream::computeStatus()
             status = Error_Task_Requires_Addon;
           else if (reason == UnitReadyTimeStatus::Waiting_For_Worker_To_Be_Ready)
             status = Waiting_For_Worker_To_Be_Ready;
+          else if (reason == UnitReadyTimeStatus::Waiting_For_Earliest_Start_Time)
+            status = Waiting_For_Earliest_Start_Time;
           else if (reason == UnitReadyTimeStatus::Waiting_For_Required_Units)
             status = Waiting_For_Required_Units;
           else if (reason == UnitReadyTimeStatus::Waiting_For_Required_Tech)
@@ -309,6 +311,9 @@ std::string TaskStream::getStatusString() const
     break;
     case Waiting_For_Worker_To_Be_Ready:
       return "Waiting_For_Worker_To_Be_Ready";
+    break;
+    case Waiting_For_Earliest_Start_Time:
+      return "Waiting_For_Earliest_Start_Time";
     break;
     case Waiting_For_Required_Units:
       return "Waiting_For_Required_Units";

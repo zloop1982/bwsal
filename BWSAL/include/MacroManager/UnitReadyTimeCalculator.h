@@ -7,6 +7,7 @@ namespace UnitReadyTimeStatus
   enum Enum
   {
     Error_Task_Requires_Addon,
+    Waiting_For_Earliest_Start_Time,
     Waiting_For_Worker_To_Be_Ready,
     Waiting_For_Required_Units,
     Waiting_For_Required_Tech,

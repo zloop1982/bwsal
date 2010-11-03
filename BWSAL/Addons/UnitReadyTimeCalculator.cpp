@@ -50,12 +50,16 @@ int UnitReadyTimeCalculator::getReadyTime(BWAPI::Unit* unit, const Task &task, U
   if (unit==NULL || unit->exists()==false) return -1;
   reason = UnitReadyTimeStatus::Waiting_For_Worker_To_Be_Ready;
   int t = getReadyTime(unit,considerTasks);
+  if (t==-1) return -1;
 
   int t2 = task.getEarliestStartTime();
   if (t2==-1 || t2>t)
+  {
+    reason = UnitReadyTimeStatus::Waiting_For_Earliest_Start_Time;
     t=t2;
-
+  }
   if (t==-1) return -1;
+
   if (considerResources)
   {
     int t2=TheMacroManager->rtl.getFirstValidTime(task.getResources());
