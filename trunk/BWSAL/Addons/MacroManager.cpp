@@ -49,7 +49,7 @@ void MacroManager::update()
   Broodwar->drawTextScreen(452,16,"\x07%d",(int)(TheResourceRates->getGatherRate().getMinerals()*23*60));
   Broodwar->drawTextScreen(520,16,"\x07%d",(int)(TheResourceRates->getGatherRate().getGas()*23*60));
   killSet.clear();
-  int y=25;
+  int y=30;
   Broodwar->drawTextScreen(10,5,"Frame: %d",Broodwar->getFrameCount());
   bool plannedAdditionalResources = true;
   while(plannedAdditionalResources)
