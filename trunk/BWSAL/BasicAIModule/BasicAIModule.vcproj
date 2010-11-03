@@ -251,7 +251,7 @@
 					>
 				</File>
 				<File
-					RelativePath="..\include\Arbitrator\Heap.h"
+					RelativePath="..\include\Heap.h"
 					>
 				</File>
 			</Filter>
