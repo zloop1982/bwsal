@@ -90,6 +90,13 @@ Resources& Resources::operator-=(const Resources &r)
   supply   -= r.supply;
   return *this;
 }
+Resources& Resources::operator*=(double value)
+{
+  minerals *= value;
+  gas      *= value;
+  supply   *= value;
+  return *this;
+}
 Resources& Resources::operator/=(double value)
 {
   minerals /= value;
@@ -129,7 +136,10 @@ Resources Resources::operator-(const Resources &r) const
 {
   return Resources(minerals-r.minerals,gas-r.gas,supply-r.supply);
 }
-
+Resources Resources::operator*(double value) const
+{
+  return Resources(minerals*value,gas*value,supply*value);
+}
 Resources Resources::operator/(double value) const
 {
   return Resources(minerals/value,gas/value,supply/value);

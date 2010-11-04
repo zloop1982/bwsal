@@ -6,6 +6,7 @@ using namespace BWAPI;
 using namespace std;
 MacroManager* TheMacroManager = NULL;
 Arbitrator::Arbitrator<BWAPI::Unit*,double>* TheArbitrator = NULL;
+    int v=0;
 
 MacroManager* MacroManager::create(Arbitrator::Arbitrator<BWAPI::Unit*,double>* arbitrator)
 {
@@ -17,6 +18,7 @@ MacroManager::MacroManager(Arbitrator::Arbitrator<BWAPI::Unit*,double>* arbitrat
 {
   TheArbitrator = arbitrator;
   TheMacroManager = this;
+  taskstream_list_visible = true;
 }
 MacroManager::~MacroManager()
 {
@@ -32,6 +34,7 @@ void MacroManager::update()
   uctl.reset();
   ttl.reset();
   utl.reset();
+  plan.clear();
   for each(TaskStream* ts in killSet)
   {
     for(std::list<TaskStream*>::iterator i=taskStreams.begin();i!=taskStreams.end();i++)
@@ -67,17 +70,72 @@ void MacroManager::update()
   for each(TaskStream* ts in taskStreams)
     ts->update();
 
-  for each(TaskStream* ts in taskStreams)
+  if (taskstream_list_visible)
   {
-    ts->printToScreen(10,y);
-    y+=20;
+    for each(TaskStream* ts in taskStreams)
+    {
+      ts->printToScreen(10,y);
+      y+=20;
+    }
+  }
+  {
+    int currentFrameCount = Broodwar->getFrameCount();
+    double ymax = 200;
+    double y=ymax;
+    double hscale = 0.3;
+    double vscale = 0.3;
+    if (v==0)
+    {
+      y+=r.getMinerals()*vscale;
+      for each(std::pair<int, std::list< std::pair<TaskStream*, Task> > > tl in plan)
+      {
+        int frame = tl.first;
+        for each(std::pair<TaskStream*, Task> tp in tl.second)
+        {
+          Task t=tp.second;
+          if (t.getName()=="None") continue;
+          double x=(frame - currentFrameCount)*hscale;
+          double res=t.getResources().getMinerals()*vscale;
+          y-=res;
+          double duration=t.getTime()*hscale;
+          Broodwar->drawBoxScreen((int)(x),(int)(y),(int)(x+duration),(int)(y+res),Colors::White);
+          Broodwar->drawTextScreen((int)(x),(int)(y),"%s",t.getName().c_str());
+        }
+      }
+      y=ymax;
+      int y2=(int)(y-TheResourceRates->getGatherRate().getMinerals()*(640/hscale)*vscale);
+      if (y2>-1000 && y2<=y)
+        Broodwar->drawLineScreen(0,(int)(y),640,y2,Colors::Cyan);
+    }
+    else if (v==1)
+    {
+      y+=r.getGas()*vscale;
+      for each(std::pair<int, std::list< std::pair<TaskStream*, Task> > > tl in plan)
+      {
+        int frame = tl.first;
+        for each(std::pair<TaskStream*, Task> tp in tl.second)
+        {
+          Task t=tp.second;
+          double x=(frame - currentFrameCount)*hscale;
+          double res=t.getResources().getGas()*vscale;
+          y-=res;
+          double duration=t.getTime()*hscale;
+          Broodwar->drawBoxScreen((int)(x),(int)(y),(int)(x+duration),(int)(y+res),Colors::White);
+          Broodwar->drawTextScreen((int)(x),(int)(y),"%s",t.getName().c_str());
+        }
+      }
+      y=ymax;
+      int y2=(int)(y-TheResourceRates->getGatherRate().getGas()*(640/hscale)*vscale);
+      if (y2>-1000 && y2<=y)
+        Broodwar->drawLineScreen(0,(int)(y),640,y2,Colors::Cyan);
+    }
   }
   /*
-  for(std::map<int, Resources>::iterator i=rtl.resourceEvents.begin();i!=rtl.resourceEvents.end();i++)
-  {
-    Broodwar->drawTextScreen(10,y,"%d: %s",(*i).first,(*i).second.toString().c_str());
-    y+=20;
-  }
+    for(std::map<int, Resources>::iterator i=rtl.resourceEvents.begin();i!=rtl.resourceEvents.end();i++)
+    {
+      Broodwar->drawTextScreen(10,y,"%d: %s",(*i).first,(*i).second.toString().c_str());
+      y+=20;
+    }
   */
 }
 TaskStream* MacroManager::getTaskStream(BWAPI::Unit* unit) const

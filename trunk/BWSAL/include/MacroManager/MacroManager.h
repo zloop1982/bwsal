@@ -5,6 +5,7 @@
 #include <UnitCountTimeline.h>
 #include <TechTimeline.h>
 #include <UpgradeTimeline.h>
+#include <Task.h>
 class TaskStream;
 class MacroManager
 {
@@ -22,6 +23,8 @@ class MacroManager
     UpgradeTimeline utl;
     Resources spentResources;
     std::map< BWAPI::Unit*, TaskStream* > unitToTaskStream;
+    std::map< int, std::list< std::pair<TaskStream*, Task > > > plan;
+    bool taskstream_list_visible;
 };
 extern MacroManager* TheMacroManager;
 extern Arbitrator::Arbitrator<BWAPI::Unit*,double>* TheArbitrator;

@@ -5,6 +5,7 @@
 #include <TerminateIfWorkerLost.h>
 #include <TerminateIfEmpty.h>
 #include <BasicWorkerFinder.h>
+#include <MacroManager.h>
 #include <MacroManager/UnitReadyTimeCalculator.h>
 using namespace BWAPI;
 using namespace std;
@@ -103,7 +104,8 @@ UnitType UnitCompositionProducer::getNextUnitType(BWAPI::Unit* worker)
     int t2=UnitReadyTimeCalculator::getReadyTime(worker,Task(typ),r,false,true);
     if (t2<0 || t2>time)
     {
-      if (t2<0 && requiresAddon.find(typ)!=requiresAddon.end())
+      TaskStream* ts = TheMacroManager->getTaskStream(worker);
+      if (t2<0 && requiresAddon.find(typ)!=requiresAddon.end() && (ts==NULL || ts->getFinishTime(typ)==-1))
       {
         typ = getRequiredAddon[typ];
       }
