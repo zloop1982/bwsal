@@ -173,6 +173,7 @@ void TaskStream::computeStatus()
 
       if (first_valid_frame==-1) break;
       TheMacroManager->rtl.reserveResources(first_valid_frame,task[i].getResources());
+      TheMacroManager->plan[first_valid_frame].push_back(std::make_pair(this,task[i]));
       if (task[i].getType()==TaskTypes::Tech)
         TheMacroManager->ttl.registerTechStart(first_valid_frame,task[i].getTech());
       task[i].setReservedResourcesThisFrame(true);

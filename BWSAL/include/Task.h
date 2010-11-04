@@ -27,6 +27,7 @@ class Task
     bool operator==(void* ptr) const;
     bool operator!=(void* ptr) const;
     bool operator==(const Task &t) const;
+    bool operator<(const Task &t) const;
     bool operator==(const BWAPI::UnitType &t) const;
     bool operator==(const BWAPI::TechType &t) const;
     bool operator==(const BWAPI::UpgradeType &t) const;

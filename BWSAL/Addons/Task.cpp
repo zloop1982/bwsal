@@ -118,6 +118,30 @@ bool Task::operator==(const Task &t) const
   if (completed                   != t.completed) return false;
   return true;
 }
+bool Task::operator<(const Task &t) const
+{
+  if (type<t.type) return true;
+  if (type>t.type) return false;
+  if (id<t.id) return true;
+  if (id>t.id) return false;
+  if (position<t.position) return true;
+  if (t.position<position) return false;
+  if (level<t.level) return true;
+  if (level>t.level) return false;
+  if (startTime<t.startTime) return true;
+  if (startTime>t.startTime) return false;
+  if (earliestStartTime<t.earliestStartTime) return true;
+  if (earliestStartTime>t.earliestStartTime) return false;
+  if (spentResources<t.spentResources) return true;
+  if (spentResources>t.spentResources) return false;
+  if (reservedResourcesThisFrame<t.reservedResourcesThisFrame) return true;
+  if (reservedResourcesThisFrame>t.reservedResourcesThisFrame) return false;
+  if (reservedFinishDataThisFrame<t.reservedFinishDataThisFrame) return true;
+  if (reservedFinishDataThisFrame>t.reservedFinishDataThisFrame) return false;
+  if (completed<t.completed) return true;
+  if (completed>t.completed) return false;
+  return false;
+}
 bool Task::operator==(const BWAPI::UnitType &t) const
 {
   return (type == TaskTypes::Unit && id == t.getID());

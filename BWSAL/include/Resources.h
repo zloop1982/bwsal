@@ -18,6 +18,7 @@ class Resources
     Resources& addSupply(double s);
     Resources& operator+=(const Resources &r);
     Resources& operator-=(const Resources &r);
+    Resources& operator*=(double value);
     Resources& operator/=(double value);
 
     double getMinerals() const;
@@ -30,6 +31,7 @@ class Resources
 
     Resources operator+(const Resources &r) const;
     Resources operator-(const Resources &r) const;
+    Resources operator*(double value) const;
     Resources operator/(double value) const;
     std::string toString() const;
 

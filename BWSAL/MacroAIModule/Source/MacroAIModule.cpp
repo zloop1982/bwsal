@@ -138,7 +138,14 @@ void MacroAIModule::onFrame()
 void MacroAIModule::onSendText(std::string text)
 {
   Broodwar->sendText(text.c_str());
-  
+  if (text=="hide")
+  {
+    TheMacroManager->taskstream_list_visible = false;
+  }
+  if (text=="show")
+  {
+    TheMacroManager->taskstream_list_visible = true;
+  }
   UnitType type=UnitTypes::getUnitType(text);
   if (type!=UnitTypes::Unknown)
   {
