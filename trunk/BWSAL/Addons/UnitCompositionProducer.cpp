@@ -105,7 +105,7 @@ UnitType UnitCompositionProducer::getNextUnitType(BWAPI::Unit* worker)
     if (t2<0 || t2>time)
     {
       TaskStream* ts = TheMacroManager->getTaskStream(worker);
-      if (t2<0 && requiresAddon.find(typ)!=requiresAddon.end() && (ts==NULL || ts->getFinishTime(typ)==-1))
+      if (t2<0 && requiresAddon.find(typ)!=requiresAddon.end() && worker->getAddon()==NULL && (ts==NULL || ts->getFinishTime(typ)==-1))
       {
         typ = getRequiredAddon[typ];
       }

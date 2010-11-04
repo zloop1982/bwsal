@@ -89,7 +89,7 @@ int UnitReadyTimeCalculator::getReadyTime(BWAPI::Unit* unit, const Task &task, U
     if (r.first.isAddon() && r.first.whatBuilds().first==task.getWorkerType())
     {
       //and if our worker doesn't have this add-on...
-      if (unit->getAddon()==NULL || unit->getAddon()->getType()!=r.first)
+      if (unit->getAddon()==NULL && (unit->getBuildUnit()==NULL || unit->getBuildUnit()->getType().isAddon()==false))
       {
         TaskStream* ts = TheMacroManager->getTaskStream(unit);
         if (ts)
