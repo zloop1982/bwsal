@@ -1,10 +1,31 @@
 #include <Task.h>
 using namespace BWAPI;
 
+Task::Task()
+{
+  type                        = TaskTypes::None;
+  id                          = -1;
+  position                    = TilePositions::None;
+  level                       = -1;
+  startTime                   = -1;
+  earliestStartTime           = 0;
+  spentResources              = false;
+  reservedResourcesThisFrame  = false;
+  reservedFinishDataThisFrame = false;
+  completed                   = false;
+}
 Task::Task(const BWAPI::UnitType t, const BWAPI::TilePosition p)
 {
-  type                        = TaskTypes::Unit;
-  id                          = t.getID();
+  if (t==UnitTypes::None || t==UnitTypes::Unknown)
+  {
+    type     = TaskTypes::None;
+    id       = -1;
+  }
+  else
+  {
+    type     = TaskTypes::Unit;
+    id       = t.getID();
+  }
   position                    = p;
   level                       = -1;
   startTime                   = -1;
@@ -16,8 +37,16 @@ Task::Task(const BWAPI::UnitType t, const BWAPI::TilePosition p)
 }
 Task::Task(const BWAPI::TechType t, const BWAPI::TilePosition p)
 {
-  type                        = TaskTypes::Tech;
-  id                          = t.getID();
+  if (t==TechTypes::None || t==TechTypes::Unknown)
+  {
+    type     = TaskTypes::None;
+    id       = -1;
+  }
+  else
+  {
+    type     = TaskTypes::Tech;
+    id       = t.getID();
+  }
   position                    = p;
   level                       = -1;
   startTime                   = -1;
@@ -29,8 +58,16 @@ Task::Task(const BWAPI::TechType t, const BWAPI::TilePosition p)
 }
 Task::Task(const BWAPI::UpgradeType t, int l, const BWAPI::TilePosition p)
 {
-  type                        = TaskTypes::Upgrade;
-  id                          = t.getID();
+  if (t==UpgradeTypes::None || t==UpgradeTypes::Unknown)
+  {
+    type     = TaskTypes::None;
+    id       = -1;
+  }
+  else
+  {
+    type     = TaskTypes::Upgrade;
+    id       = t.getID();
+  }
   position                    = p;
   if (l==-1)
     l=Broodwar->self()->getUpgradeLevel(t)+1;
@@ -58,24 +95,48 @@ Task& Task::operator=(const Task t)
 }
 Task& Task::setType(const BWAPI::UnitType t,    const BWAPI::TilePosition p)
 {
-  type     = TaskTypes::Unit;
-  id       = t.getID();
+  if (t==UnitTypes::None || t==UnitTypes::Unknown)
+  {
+    type     = TaskTypes::None;
+    id       = -1;
+  }
+  else
+  {
+    type     = TaskTypes::Unit;
+    id       = t.getID();
+  }
   if (p!= BWAPI::TilePositions::None)
     position = p;
   return *this;
 }
 Task& Task::setType(const BWAPI::TechType t,    const BWAPI::TilePosition p)
 {
-  type     = TaskTypes::Tech;
-  id       = t.getID();
+  if (t==TechTypes::None || t==TechTypes::Unknown)
+  {
+    type     = TaskTypes::None;
+    id       = -1;
+  }
+  else
+  {
+    type     = TaskTypes::Tech;
+    id       = t.getID();
+  }
   if (p!= BWAPI::TilePositions::None)
     position = p;
   return *this;
 }
 Task& Task::setType(const BWAPI::UpgradeType t, int l,    const BWAPI::TilePosition p)
 {
-  type     = TaskTypes::Upgrade;
-  id       = t.getID();
+  if (t==UpgradeTypes::None || t==UpgradeTypes::Unknown)
+  {
+    type     = TaskTypes::None;
+    id       = -1;
+  }
+  else
+  {
+    type     = TaskTypes::Upgrade;
+    id       = t.getID();
+  }
   if (l!=-1)
     level  = l;
   if (p!= BWAPI::TilePositions::None)

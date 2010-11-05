@@ -8,6 +8,10 @@ UnitCountTimeline::UnitCountTimeline()
 void UnitCountTimeline::reset()
 {
   unitEvents.clear();
+  for each(UnitType t in UnitTypes::allUnitTypes())
+  {
+    unitFinalCounts[t] = Broodwar->self()->completedUnitCount(t);
+  }
 }
 int UnitCountTimeline::getFirstTime(BWAPI::UnitType t, int count)
 {
@@ -15,6 +19,8 @@ int UnitCountTimeline::getFirstTime(BWAPI::UnitType t, int count)
   int frame = Broodwar->getFrameCount();
   if (c >= count)
     return frame;
+  if (unitFinalCounts[t] < count)
+    return -1;
   if (unitEvents.find(t)==unitEvents.end())
     return -1;
   std::map<int, int>* events = &(unitEvents.find(t)->second);
@@ -30,14 +36,9 @@ int UnitCountTimeline::getFirstTime(BWAPI::UnitType t, int count)
 void UnitCountTimeline::registerUnitCountChange(int frame, BWAPI::UnitType t, int count)
 {
   unitEvents[t][frame]+=count;
+  unitFinalCounts[t]  +=count;
 }
 int UnitCountTimeline::getFinalCount(BWAPI::UnitType t)
 {
-  int c = Broodwar->self()->completedUnitCount(t);
-  if (unitEvents.find(t)==unitEvents.end())
-    return c;
-  std::map<int, int>* events = &(unitEvents.find(t)->second);
-  for(std::map<int, int>::iterator i=events->begin();i!=events->end();i++)
-    c+=(*i).second;
-  return c;
+  return unitFinalCounts[t];
 }

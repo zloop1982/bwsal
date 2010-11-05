@@ -10,6 +10,7 @@
 #include <MacroManager.h>
 #include <ResourceRates.h>
 #include <MacroSupplyManager.h>
+#include <MacroDependencyResolver.h>
 
 using namespace BWAPI;
 int drag_index = -1;
@@ -25,6 +26,8 @@ MacroAIModule::~MacroAIModule()
     delete TheMacroManager;
   if (TheMacroSupplyManager != NULL)
     delete TheMacroSupplyManager;
+  if (TheMacroDependencyResolver != NULL)
+    delete TheMacroDependencyResolver;
   if (TheResourceRates != NULL)
     delete TheResourceRates;
   if (infantryProducer != NULL)
@@ -37,6 +40,7 @@ void MacroAIModule::onStart()
   Broodwar->enableFlag(Flag::UserInput);
   MacroManager::create(&arbitrator);
   MacroSupplyManager::create();
+  MacroDependencyResolver::create();
   ResourceRates::create();
 
   TaskStream* ts = new TaskStream();
@@ -68,6 +72,7 @@ void MacroAIModule::onFrame()
   infantryProducer->update();
   vehicleProducer->update();
   TheMacroSupplyManager->update();
+  TheMacroDependencyResolver->update();
   TheMacroManager->update();
   TheResourceRates->update();
   std::set<Unit*> units=Broodwar->self()->getUnits();

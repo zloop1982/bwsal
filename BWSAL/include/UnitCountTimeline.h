@@ -10,4 +10,5 @@ class UnitCountTimeline
     int getFinalCount(BWAPI::UnitType t);
     void registerUnitCountChange(int frame, BWAPI::UnitType t, int count);
     std::map< BWAPI::UnitType, std::map< int, int > > unitEvents;
+    std::map< BWAPI::UnitType, int > unitFinalCounts;
 };

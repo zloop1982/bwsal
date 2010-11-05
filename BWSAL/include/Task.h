@@ -5,6 +5,7 @@ namespace TaskTypes
 {
   enum Enum
   {
+    None,
     Unit,
     Tech,
     Upgrade
@@ -13,7 +14,8 @@ namespace TaskTypes
 class Task
 {
   public:
-    Task(const BWAPI::UnitType t = BWAPI::UnitTypes::None,    const BWAPI::TilePosition p = BWAPI::TilePositions::None);
+    Task();
+    Task(const BWAPI::UnitType t,                             const BWAPI::TilePosition p = BWAPI::TilePositions::None);
     Task(const BWAPI::TechType t,                             const BWAPI::TilePosition p = BWAPI::TilePositions::None);
     Task(const BWAPI::UpgradeType t, int l = -1,              const BWAPI::TilePosition p = BWAPI::TilePositions::None);
 
