@@ -138,6 +138,56 @@ void MacroManager::update()
     }
   */
 }
+bool MacroManager::insertTaskStreamAbove(TaskStream* newTS, TaskStream* existingTS)
+{
+  if (newTS==NULL || existingTS==NULL) return false;
+  std::list<TaskStream*>::iterator e_iter = taskStreams.end();
+  for(std::list<TaskStream*>::iterator i=taskStreams.begin();i!=taskStreams.end();i++)
+  {
+    if (*i==existingTS)
+    {
+      e_iter = i;
+      break;
+    }
+  }
+  if (e_iter == taskStreams.end()) return false;
+  taskStreams.insert(e_iter,newTS);
+  return true;
+}
+bool MacroManager::insertTaskStreamBelow(TaskStream* newTS, TaskStream* existingTS)
+{
+  if (newTS==NULL || existingTS==NULL) return false;
+  std::list<TaskStream*>::iterator e_iter = taskStreams.end();
+  for(std::list<TaskStream*>::iterator i=taskStreams.begin();i!=taskStreams.end();i++)
+  {
+    if (*i==existingTS)
+    {
+      e_iter = i;
+      break;
+    }
+  }
+  if (e_iter == taskStreams.end()) return false;
+  e_iter++;
+  taskStreams.insert(e_iter,newTS);
+  return true;
+}
+bool MacroManager::swapTaskStreams(TaskStream* a, TaskStream* b)
+{
+  if (a==NULL || b==NULL) return false;
+  std::list<TaskStream*>::iterator a_iter = taskStreams.end();
+  std::list<TaskStream*>::iterator b_iter = taskStreams.end();
+  for(std::list<TaskStream*>::iterator i=taskStreams.begin();i!=taskStreams.end();i++)
+  {
+    if (*i==a)
+      a_iter = i;
+    if (*i==b)
+      b_iter = i;
+  }
+  if (a_iter == taskStreams.end() || b_iter == taskStreams.end()) return false;
+  *a_iter = b;
+  *b_iter = a;
+  return true;
+}
 TaskStream* MacroManager::getTaskStream(BWAPI::Unit* unit) const
 {
   std::map<BWAPI::Unit*, TaskStream*>::const_iterator i=unitToTaskStream.find(unit);

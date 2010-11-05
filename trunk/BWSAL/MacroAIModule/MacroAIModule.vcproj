@@ -410,6 +410,18 @@
 					>
 				</File>
 			</Filter>
+			<Filter
+				Name="MacroDependencyResolver"
+				>
+				<File
+					RelativePath="..\Addons\MacroDependencyResolver.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\include\MacroDependencyResolver.h"
+					>
+				</File>
+			</Filter>
 		</Filter>
 	</Files>
 	<Globals>
