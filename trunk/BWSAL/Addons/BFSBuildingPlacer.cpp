@@ -44,6 +44,7 @@ void BFSBuildingPlacer::update(TaskStream* ts)
   int width = ts->getTask(0).getUnit().tileWidth();
   UnitType type = ts->getTask(0).getUnit();
   if (type.isAddon()) type=type.whatBuilds().first;
+  if (Broodwar->getFrameCount()%10!=0) return;
 
   if (ts->getStatus()==TaskStream::Error_Location_Blocked || ts->getStatus()==TaskStream::Error_Location_Not_Specified)
   {

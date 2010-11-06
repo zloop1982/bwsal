@@ -13,6 +13,7 @@ Task::Task()
   reservedResourcesThisFrame  = false;
   reservedFinishDataThisFrame = false;
   completed                   = false;
+  executing                   = false;
 }
 Task::Task(const BWAPI::UnitType t, const BWAPI::TilePosition p)
 {
@@ -34,6 +35,7 @@ Task::Task(const BWAPI::UnitType t, const BWAPI::TilePosition p)
   reservedResourcesThisFrame  = false;
   reservedFinishDataThisFrame = false;
   completed                   = false;
+  executing                   = false;
 }
 Task::Task(const BWAPI::TechType t, const BWAPI::TilePosition p)
 {
@@ -55,6 +57,7 @@ Task::Task(const BWAPI::TechType t, const BWAPI::TilePosition p)
   reservedResourcesThisFrame  = false;
   reservedFinishDataThisFrame = false;
   completed                   = false;
+  executing                   = false;
 }
 Task::Task(const BWAPI::UpgradeType t, int l, const BWAPI::TilePosition p)
 {
@@ -78,6 +81,7 @@ Task::Task(const BWAPI::UpgradeType t, int l, const BWAPI::TilePosition p)
   reservedResourcesThisFrame  = false;
   reservedFinishDataThisFrame = false;
   completed                   = false;
+  executing                   = false;
 }
 Task& Task::operator=(const Task t)
 {
@@ -91,6 +95,7 @@ Task& Task::operator=(const Task t)
   reservedResourcesThisFrame  = t.reservedResourcesThisFrame;
   reservedFinishDataThisFrame = t.reservedFinishDataThisFrame;
   completed                   = t.completed;
+  executing                   = t.executing;
   return *this;
 }
 Task& Task::setType(const BWAPI::UnitType t,    const BWAPI::TilePosition p)
@@ -177,6 +182,7 @@ bool Task::operator==(const Task &t) const
   if (reservedResourcesThisFrame  != t.reservedResourcesThisFrame) return false;
   if (reservedFinishDataThisFrame != t.reservedFinishDataThisFrame) return false;
   if (completed                   != t.completed) return false;
+  if (executing                   != t.executing) return false;
   return true;
 }
 bool Task::operator<(const Task &t) const
@@ -201,6 +207,8 @@ bool Task::operator<(const Task &t) const
   if (reservedFinishDataThisFrame>t.reservedFinishDataThisFrame) return false;
   if (completed<t.completed) return true;
   if (completed>t.completed) return false;
+  if (executing<t.executing) return true;
+  if (executing>t.executing) return false;
   return false;
 }
 bool Task::operator==(const BWAPI::UnitType &t) const
@@ -260,6 +268,11 @@ BWAPI::UnitType Task::getWorkerType() const
     return UpgradeType(id).whatUpgrades();
   return UnitTypes::None;
 }
+BWAPI::Race Task::getRace() const
+{
+  return getWorkerType().getRace();
+}
+
 std::map<BWAPI::UnitType, int> Task::getRequiredUnits() const
 {
   std::map<BWAPI::UnitType, int> r;
@@ -373,6 +386,14 @@ void Task::setSpentResources(bool spent)
 bool Task::hasSpentResources() const
 {
   return spentResources;
+}
+void Task::setExecuting(bool exec)
+{
+  executing = exec;
+}
+bool Task::isExecuting() const
+{
+  return executing;
 }
 void Task::setReservedResourcesThisFrame(bool reserved)
 {

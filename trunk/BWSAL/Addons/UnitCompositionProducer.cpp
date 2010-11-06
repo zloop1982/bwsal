@@ -66,7 +66,7 @@ void UnitCompositionProducer::update()
   {
     for(int i=0;i<4;i++)
     {
-      if (ts->getTask(i)==NULL || ts->getTask(i).getUnit()==UnitTypes::None)
+      if (ts->getTask(i)==NULL || ts->getTask(i).getType() == TaskTypes::None)
       {
         UnitType t=getNextUnitType(ts->getWorker());
         if (t!=UnitTypes::None)

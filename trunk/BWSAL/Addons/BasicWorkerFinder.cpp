@@ -18,6 +18,8 @@ void BasicWorkerFinder::newStatus(TaskStream* ts)
   {
     if (ts->getTask(0).getType()==TaskTypes::Unit && ts->getTask(0).getUnit().isBuilding() && (!ts->getTask(0).getTilePosition().isValid()))
       return;
+    if (ts->getBuildUnit()!=NULL && ts->getBuildUnit()->exists() && ts->getBuildUnit()->getType().isBuilding() && ts->getBuildUnit()->getType().getRace()==Races::Protoss)
+      return;
 
     std::set<BWAPI::Unit*> units;
     for each(Unit* u in Broodwar->self()->getUnits())
@@ -53,7 +55,8 @@ void BasicWorkerFinder::newStatus(TaskStream* ts)
     else
     {
       //otherwise just choose the first worker we find
-      chosenWorker = (*units.begin());
+      if (units.empty()==false)
+        chosenWorker = (*units.begin());
     }
     if (units.size()>0)
       chosenWorker = (*units.begin());

@@ -11,7 +11,6 @@ BasicTaskExecutor* BasicTaskExecutor::getInstance()
 void BasicTaskExecutor::attached(TaskStream* ts)
 {
   taskStreams[ts].isReady = false;
-  taskStreams[ts].isExecuting = false;
   taskStreams[ts].targetLevel = -1;
 }
 void BasicTaskExecutor::detached(TaskStream* ts)
@@ -27,12 +26,21 @@ void BasicTaskExecutor::completedTask(TaskStream* ts, const Task &t)
 void BasicTaskExecutor::update(TaskStream* ts)
 {
   if (ts == NULL) return;
-  if (ts->isWorkerReady()==false) return;
   if (ts->isLocationReady()==false) return;
-  Unit* worker = ts->getWorker();
   TaskTypes::Enum type = ts->getTask(0).getType();
-  if (ts->getStatus() != TaskStream::Executing_Task)
+  if (ts->getBuildUnit()!=NULL && ts->getBuildUnit()->exists())
   {
+    Unit* unit = ts->getBuildUnit();
+    Broodwar->drawTextMap(unit->getPosition().x(),unit->getPosition().y()+15,"r: %d, e: %d, c: %d",taskStreams[ts].isReady,ts->getTask(0).isExecuting(), ts->getTask(0).isCompleted());
+  }
+  else if (ts->isWorkerReady())
+  {
+    Unit* unit = ts->getWorker();
+    Broodwar->drawTextMap(unit->getPosition().x(),unit->getPosition().y()+15,"r: %d, e: %d, c: %d",taskStreams[ts].isReady,ts->getTask(0).isExecuting(), ts->getTask(0).isCompleted());
+  }
+  if (ts->getStatus() != TaskStream::Executing_Task && ts->isWorkerReady())
+  {
+    Unit* worker = ts->getWorker();
     if (ts->getTask(0).getStartTime()>=0 &&
         ts->getTask(0).getType()==TaskTypes::Unit &&
         ts->getTask(0).getUnit().isBuilding() &&
@@ -55,10 +63,9 @@ void BasicTaskExecutor::update(TaskStream* ts)
   }
   computeBuildUnit(ts);
   computeIsCompleted(ts);
-  Broodwar->drawTextMap(worker->getPosition().x(),worker->getPosition().y()+15,"r: %d, e: %d, c: %d",taskStreams[ts].isReady,taskStreams[ts].isExecuting, ts->getTask(0).isCompleted());
   if (ts->getTask(0).isCompleted()) return;
   computeIsExecuting(ts);
-  if (taskStreams[ts].isExecuting) return;
+  if (ts->getTask(0).isExecuting()) return;
   computeIsReady(ts);
   if (!taskStreams[ts].isReady)
     getReady(ts);
@@ -67,20 +74,8 @@ void BasicTaskExecutor::update(TaskStream* ts)
 }
 void BasicTaskExecutor::computeBuildUnit(TaskStream* ts)
 {
-  Unit* worker = ts->getWorker();
   UnitType ut = ts->getTask(0).getUnit();
   if (ts->getTask(0).getType() != TaskTypes::Unit) return;
-
-  if (worker->getBuildUnit() != NULL && worker->getBuildUnit()->exists() && (worker->getBuildUnit()->getType() == ut || worker->getBuildUnit()->getBuildType() == ut))
-    ts->setBuildUnit(worker->getBuildUnit());
-
-  if (worker->getAddon() != NULL && worker->getAddon()->exists() && (worker->getAddon()->getType() == ut || worker->getAddon()->getBuildType() == ut))
-    ts->setBuildUnit(worker->getAddon());
-
-  //check to see if the worker is the right type
-  //Zerg_Nydus_Canal is speciall since Zerg_Nydus_Canal can construct Zerg_Nydus_Canal
-  if ((worker->getType() == ut || worker->getBuildType() == ut) && worker->getType()!=UnitTypes::Zerg_Nydus_Canal)
-    ts->setBuildUnit(worker);
 
   //if the building dies, or isn't the right type, set it to null
   if (!(ts->getBuildUnit() != NULL && ts->getBuildUnit()->exists() && (ts->getBuildUnit()->getType() == ut || ts->getBuildUnit()->getBuildType() == ut)))
@@ -112,39 +107,57 @@ void BasicTaskExecutor::computeBuildUnit(TaskStream* ts)
       }
   }
 
+  if (ts->isWorkerReady()==false) return;
+
+  Unit* worker = ts->getWorker();
+
+  if (worker->getBuildUnit() != NULL && worker->getBuildUnit()->exists() && (worker->getBuildUnit()->getType() == ut || worker->getBuildUnit()->getBuildType() == ut))
+    ts->setBuildUnit(worker->getBuildUnit());
+
+  if (worker->getAddon() != NULL && worker->getAddon()->exists() && (worker->getAddon()->getType() == ut || worker->getAddon()->getBuildType() == ut))
+    ts->setBuildUnit(worker->getAddon());
+
+  //check to see if the worker is the right type
+  //Zerg_Nydus_Canal is speciall since Zerg_Nydus_Canal can construct Zerg_Nydus_Canal
+  if ((worker->getType() == ut || worker->getBuildType() == ut) && worker->getType()!=UnitTypes::Zerg_Nydus_Canal)
+    ts->setBuildUnit(worker);
+
 }
 void BasicTaskExecutor::computeIsExecuting(TaskStream* ts)
 {
-  taskStreams[ts].isExecuting = false;
-  Unit* worker = ts->getWorker();
+  ts->getTask(0).setExecuting(false);
   TaskTypes::Enum type = ts->getTask(0).getType();
   if (type == TaskTypes::Unit)
   {
     UnitType ut=ts->getTask(0).getUnit();
-    if (ts->getBuildUnit()!=NULL && ts->getBuildUnit()->exists() && (ts->getBuildUnit()->getType() == ut || ts->getBuildUnit()->getBuildType() == ut))
-      taskStreams[ts].isExecuting = true;
-    if (Broodwar->getFrameCount()>ts->getWorker()->getLastOrderFrame()+5)
+    if (ts->getBuildUnit()!=NULL && ts->getBuildUnit()->exists() && (ts->getBuildUnit()->getType() == ut || ts->getBuildUnit()->getBuildType() == ut) &&
+      (ts->getTask(0).getRace()==Races::Protoss || ts->isWorkerReady()))
+      ts->getTask(0).setExecuting(true);
+    if (ts->isWorkerReady())
     {
-      if (worker->getType()==UnitTypes::Terran_SCV && worker->isConstructing()==false)
-        worker->rightClick(ts->getBuildUnit());
+      Unit* worker = ts->getWorker();
+      if (Broodwar->getFrameCount()>worker->getLastOrderFrame()+5)
+      {
+        if (worker->getType()==UnitTypes::Terran_SCV && worker->isConstructing()==false)
+          worker->rightClick(ts->getBuildUnit());
+      }
     }
   }
   else if (type == TaskTypes::Tech)
   {
-    if (worker->isResearching() && worker->getTech()==ts->getTask(0).getTech())
-      taskStreams[ts].isExecuting = true;
+    if (ts->getWorker()!=NULL && ts->getWorker()->isResearching() && ts->getWorker()->getTech()==ts->getTask(0).getTech())
+      ts->getTask(0).setExecuting(true);
   }
   else if (type == TaskTypes::Upgrade)
   {
-    if (worker->isUpgrading() && worker->getUpgrade()==ts->getTask(0).getUpgrade())
-      taskStreams[ts].isExecuting = true;
+    if (ts->getWorker()!=NULL && ts->getWorker()->isUpgrading() && ts->getWorker()->getUpgrade()==ts->getTask(0).getUpgrade())
+      ts->getTask(0).setExecuting(true);
   }
-  if (taskStreams[ts].isExecuting) ts->getTask(0).setSpentResources(true);
+  if (ts->getTask(0).isExecuting()) ts->getTask(0).setSpentResources(true);
 }
 void BasicTaskExecutor::computeIsCompleted(TaskStream* ts)
 {
   if (ts->getTask(0).isCompleted()) return;
-  Unit* worker = ts->getWorker();
   TaskTypes::Enum type = ts->getTask(0).getType();
   if (type == TaskTypes::Unit)
   {
@@ -170,13 +183,19 @@ void BasicTaskExecutor::computeIsCompleted(TaskStream* ts)
 void BasicTaskExecutor::computeIsReady(TaskStream* ts)
 {
   if (taskStreams[ts].isReady) return;
-  Unit* worker = ts->getWorker();
   TaskTypes::Enum type = ts->getTask(0).getType();
-  taskStreams[ts].isReady = !(worker->isResearching() || worker->isUpgrading() || worker->isTraining() || worker->isConstructing() || worker->isMorphing());
+  if (ts->isWorkerReady()==false)
+    taskStreams[ts].isReady=false;
+  else
+  {
+    Unit* worker = ts->getWorker();
+    taskStreams[ts].isReady = !(worker->isResearching() || worker->isUpgrading() || worker->isTraining() || worker->isConstructing() || worker->isMorphing());
+  }
 }
 void BasicTaskExecutor::getReady(TaskStream* ts)
 {
   if (taskStreams[ts].isReady) return;
+  if (ts->isWorkerReady()==false) return;
   Unit* worker = ts->getWorker();
   TaskTypes::Enum type = ts->getTask(0).getType();
   if (worker->isResearching() || worker->isUpgrading() || worker->isTraining() || worker->isConstructing() || worker->isMorphing())
@@ -185,8 +204,9 @@ void BasicTaskExecutor::getReady(TaskStream* ts)
 void BasicTaskExecutor::execute(TaskStream* ts)
 {
   if (ts->getTask(0).isCompleted()) return;
-  if (taskStreams[ts].isExecuting) return;
+  if (ts->getTask(0).isExecuting()) return;
   if (taskStreams[ts].isReady==false) return;
+  if (ts->isWorkerReady()==false) return;
   Unit* worker = ts->getWorker();
   TaskTypes::Enum type = ts->getTask(0).getType();
   if (Broodwar->getFrameCount()<ts->getWorker()->getLastOrderFrame()+5) return;

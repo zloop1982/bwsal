@@ -61,6 +61,7 @@ void MacroDependencyResolver::update()
             if (r.first == UnitTypes::Zerg_Larva) continue;
             if (r.first.mineralPrice()>0 && TheResourceRates->getGatherRate().getMinerals() == 0) continue;
             if (r.first.gasPrice()>0 && TheResourceRates->getGatherRate().getGas() == 0) continue;
+            if (r.first.isAddon()) continue;
             if (finalCounts[r.first]==0)
             {
               finalCounts[r.first]=1;
