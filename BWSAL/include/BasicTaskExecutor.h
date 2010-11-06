@@ -19,7 +19,6 @@ class BasicTaskExecutor : public TaskStreamObserver
   private:
     struct data
     {
-      bool isExecuting;
       bool isReady;
       int targetLevel;
     };

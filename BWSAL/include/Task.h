@@ -43,6 +43,7 @@ class Task
     int getLevel() const;
     BWAPI::TilePosition getTilePosition() const;
     BWAPI::UnitType getWorkerType() const;
+    BWAPI::Race getRace() const;
     std::map<BWAPI::UnitType, int> getRequiredUnits() const;
     Resources getResources() const;
     int getTime() const;
@@ -60,6 +61,9 @@ class Task
 
     void setSpentResources(bool spent);
     bool hasSpentResources() const;
+
+    void setExecuting(bool exec);
+    bool isExecuting() const;
 
     void setReservedResourcesThisFrame(bool reserved);
     bool hasReservedResourcesThisFrame() const;
@@ -81,5 +85,6 @@ class Task
     bool reservedResourcesThisFrame;
     bool reservedFinishDataThisFrame;
     bool completed;
+    bool executing;
 };
 

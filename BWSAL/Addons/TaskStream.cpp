@@ -80,54 +80,61 @@ void TaskStream::computeStatus()
     status = Error_Task_Not_Specified;
     return;
   }
-  if (task[0].getType()==TaskTypes::Unit)
-  {
-    UnitType ut = task[0].getUnit();
-    if (ut.isBuilding() && !ut.whatBuilds().first.isBuilding() && buildUnit == NULL)
-    {
-      if (task[0].getTilePosition().isValid()==false)
-      {
-        status = Error_Location_Not_Specified;
-        return;
-      }
-      TilePosition tp = task[0].getTilePosition();
-      if (ut.isAddon())
-      {
-        tp.x()+=4;
-        tp.y()++;
-      }
-      if (!Broodwar->canBuildHere(worker,tp,ut)) //doesn't work for blocked addons!
-      {
-        status = Error_Location_Blocked;
-        return;
-      }
-    }
-  }
-  if (worker == NULL || !worker->exists())
-  {
-    status = Error_Worker_Not_Specified;
-    setWorker(NULL);
-    return;
-  }
-  if (TheArbitrator->hasBid(worker)==false || TheArbitrator->getHighestBidder(worker).first!=this)
-  {
-    status = Error_Worker_Not_Owned;
-    return;
-  }
-  if (task[0].getType()==TaskTypes::Unit)
-  {
-    UnitType ut = task[0].getUnit();
-    for each(std::pair<UnitType, int> t in ut.requiredUnits())
-    {
-      if (t.first.isAddon() && t.first.whatBuilds().first == worker->getType() && worker->getAddon() == NULL)
-      {
-        status = Error_Task_Requires_Addon;
-        return;
-      }
-    }
-  }
-  if (task[0].hasSpentResources())
+  if (task[0].isExecuting())
     status = Executing_Task;
+  else
+  {
+    if (task[0].getType()==TaskTypes::Unit)
+    {
+      UnitType ut = task[0].getUnit();
+      if (ut.isBuilding() && !ut.whatBuilds().first.isBuilding() && buildUnit == NULL)
+      {
+        if (task[0].getTilePosition().isValid()==false)
+        {
+          status = Error_Location_Not_Specified;
+          return;
+        }
+        TilePosition tp = task[0].getTilePosition();
+        if (ut.isAddon())
+        {
+          tp.x()+=4;
+          tp.y()++;
+        }
+        if (!Broodwar->canBuildHere(worker,tp,ut)) //doesn't work for blocked addons!
+        {
+          status = Error_Location_Blocked;
+          return;
+        }
+        if (status == Error_Location_Not_Specified || status == Error_Location_Blocked)
+        {
+          status = None;
+        }
+      }
+    }
+    if (worker == NULL || !worker->exists())
+    {
+      status = Error_Worker_Not_Specified;
+      setWorker(NULL);
+      return;
+    }
+    if (TheArbitrator->hasBid(worker)==false || TheArbitrator->getHighestBidder(worker).first!=this)
+    {
+      status = Error_Worker_Not_Owned;
+      return;
+    }
+    if (task[0].getType()==TaskTypes::Unit)
+    {
+      UnitType ut = task[0].getUnit();
+      for each(std::pair<UnitType, int> t in ut.requiredUnits())
+      {
+        if (t.first.isAddon() && t.first.whatBuilds().first == worker->getType() && worker->getAddon() == NULL)
+        {
+          status = Error_Task_Requires_Addon;
+          return;
+        }
+      }
+    }
+  }
   for(int i=0;i<(int)(task.size());i++)
   {
     if (i>0 && task[i-1].getStartTime()==-1) break;
@@ -219,7 +226,14 @@ void TaskStream::update()
       buildUnit = NULL;
       Broodwar->printf("Completed Task!");
     }
-    Broodwar->drawTextMap(worker->getPosition().x(),worker->getPosition().y(),"Task: %s",task[0].getName().c_str());
+    if (task[0].isExecuting() && buildUnit!=NULL && task[0].getType()==TaskTypes::Unit && task[0].getUnit().isBuilding() && task[0].getUnit().getRace()==Races::Protoss)
+    {
+      setWorker(NULL);
+    }
+    if (workerReady)
+    {
+      Broodwar->drawTextMap(worker->getPosition().x(),worker->getPosition().y(),"Task: %s",task[0].getName().c_str());
+    }
   }
   else
   {
@@ -402,9 +416,10 @@ std::string TaskStream::getShortName() const
 }
 void TaskStream::printToScreen(int x, int y)
 {
-  Broodwar->drawTextScreen(x,y,"[ ] %s - %x ",
+  Broodwar->drawTextScreen(x,y,"[ ] %s - w=%x bu=%x",
     getStatusString().c_str(),
-    getWorker());
+    getWorker(),
+    getBuildUnit());
   Broodwar->drawTextScreen(x+200,y,"%s %d",
     task[0].getName().c_str(),
     task[0].getStartTime());
