@@ -57,8 +57,11 @@ namespace BWAPI
      * Barracks, or order a Hydralisk to lay a spider mine. */
     extern const Error Incompatible_UnitType;
 
-    /** Returned if when trying to use a tech type with the wrong Unit::useTech method. */
+    /** Returned when trying to use a tech type with the wrong Unit::useTech method. */
     extern const Error Incompatible_TechType;
+
+    /** Returned if you to do something like try to cancel an upgrade when the unit isn't upgrading. */
+    extern const Error Incompatible_State;
 
     /** Returned if you try to research something that is already researched. */
     extern const Error Already_Researched;
@@ -93,14 +96,18 @@ namespace BWAPI
      * Same thing with Reavers and Scarabs. */
     extern const Error Insufficient_Ammo;
 
-    /** Returned if you try to build something on unbuildable terrain (either from the buildability map data
-     * or if a unit is in the way). For build tiles that are not visible, we could just use the buildability
-     * map data and assume that no units are blocking it (to prevent cheating). */
+    /** Returned if you try to train more Interceptors than the Carrier can hold, try to train more Scarabs
+      * than a Reaver can hold, or try to load more units into a transport than there is space. */
     extern const Error Insufficient_Space;
 
-    /** Returned if you order an immovable unit, like a Protoss Photon Cannon, to attack a unit that is out
-     * of range. */
+    /** Returned if you try to build a barracks at TilePositions::None or something similar */
+    extern const Error Invalid_Tile_Position;
+
+    /** Returned if you try to construct a building on an unbuildable location */
     extern const Error Unbuildable_Location;
+
+    /** Returned if you try to construct a building where the worker cannot reach based on static map data. */
+    extern const Error Unreachable_Location;
 
     /** Returned if you order an immovable unit, like a Protoss Photon Cannon, to attack a unit that is out of
      * range.*/

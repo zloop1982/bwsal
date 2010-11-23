@@ -18,6 +18,7 @@ namespace BWAPI
     int shields;
     int energy;
     int resources;
+    int resourceGroup;
 
     int killCount;
     int scarabCount;
@@ -60,6 +61,7 @@ namespace BWAPI
     int rallyUnit;
     int addon;
     int nydusExit;
+    int powerUp;
 
     int transport;
     int carrier;
@@ -81,12 +83,14 @@ namespace BWAPI
     bool isGathering;
     bool isHallucination;
     bool isIdle;
+    bool isInterruptible;
     bool isLifted;
     bool isMorphing;
     bool isMoving;
     bool isParasited;
     bool isSelected;
     bool isStartingAttack;
+    bool isStuck;
     bool isTraining;
     bool isUnderStorm;
     bool isUnpowered;

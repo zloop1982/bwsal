@@ -81,11 +81,23 @@ namespace BWAPI
        * (can also be called on a refinery/assimilator/extractor). */
       virtual int getResources() const = 0;
 
+      /** Retrieves the group ID of a resource. Can be used to identify which resources belong to an expansion. */
+      virtual int getResourceGroup() const = 0;
+
       /** Returns the edge-to-edge distance between the current unit and the target unit. */
       virtual double getDistance(Unit* target) const = 0;
 
       /** Returns the distance from the edge of the current unit to the target position. */
       virtual double getDistance(Position target) const = 0;
+
+      /** Returns true if the unit is able to move to the target unit */
+      virtual bool hasPath(Unit* target) const = 0;
+
+      /** Returns true if the unit is able to move to the target position */
+      virtual bool hasPath(Position target) const = 0;
+
+      /** Retrieves the frame of the last successful order. Frame is comparable to Game::getFrameCount(). */
+      virtual int getLastOrderFrame() const = 0;
 
       /** Returns the player's current upgrade level for the given upgrade, if the unit is affected by this
        * upgrade.*/
@@ -230,12 +242,12 @@ namespace BWAPI
 
       /** Returns the position the building is rallied to. If the building does not produce units,
        * Positions::None is returned.
-       * \see Unit::setRallyPosition, Unit::setRallyUnit, Unit::getRallyUnit. */
+       * \see Unit::setRallyPoint, Unit::getRallyUnit. */
       virtual Position getRallyPosition() const = 0;
 
       /** Returns the unit the building is rallied to. If the building is not rallied to any unit, NULL is
        * returned.
-       * \see Unit::setRallyPosition, Unit::setRallyUnit, Unit::getRallyPosition. */
+       * \see Unit::setRallyPoint, Unit::getRallyPosition. */
       virtual Unit* getRallyUnit() const = 0;
 
       /** Returns the add-on of this unit, or NULL if the unit doesn't have an add-on. */
@@ -244,6 +256,9 @@ namespace BWAPI
       /** Returns the corresponding connected nydus canal of this unit, or NULL if the unit does not have a
        * connected nydus canal. */
       virtual Unit* getNydusExit() const = 0;
+
+      /** Returns the power up the unit is holding, or NULL if the unit is not holding a power up */
+      virtual Unit* getPowerUp() const = 0;
 
       /** Returns the dropship, shuttle, overlord, or bunker that is this unit is loaded in to. */
       virtual Unit* getTransport() const = 0;
@@ -368,6 +383,9 @@ namespace BWAPI
        * \see Unit::stop. */
       virtual bool isIdle() const = 0;
 
+      /** Returns true if the unit can be interrupted. */
+      virtual bool isInterruptible() const = 0;
+
       /** Returns true if the unit is being irradiated by a Terran Science Vessel.
        * \see Unit::getIrradiateTimer. */
       virtual bool isIrradiated() const = 0;
@@ -437,6 +455,9 @@ namespace BWAPI
        * \see Unit::getStimTimer. */
       virtual bool isStimmed() const = 0;
 
+      /** Returns true if the unit is being pushed off of another unit */
+      virtual bool isStuck() const = 0;
+
       /** Returns true if the unit is training units (i.e. a Barracks training Marines).
        * \see Unit::train, Unit::getTrainingQueue, Unit::cancelTrain, Unit::getRemainingTrainTime. */
       virtual bool isTraining() const = 0;
@@ -458,7 +479,10 @@ namespace BWAPI
       virtual bool isVisible() const = 0;
       virtual bool isVisible(Player* player) const = 0;
 
-      /** Takes any unit command and calls the corresponding order that will execute it */
+      /** Returns true if the unit is able to execute the given command, or false if there is an error */
+      virtual bool canIssueCommand(UnitCommand command) const = 0;
+
+      /** Issues the give unit command, or returns false if there is an error */
       virtual bool issueCommand(UnitCommand command) = 0;
 
       /** Orders the unit to attack move to the specified location. */
@@ -495,12 +519,12 @@ namespace BWAPI
       virtual bool upgrade(UpgradeType upgrade) = 0;
 
       /** Orders the unit to set its rally position to the specified position.
-       * \see Unit::setRallyUnit, Unit::getRallyPosition, Unit::getRallyUnit. */
-      virtual bool setRallyPosition(Position target) = 0;
+       * \see Unit::getRallyPosition, Unit::getRallyUnit. */
+      virtual bool setRallyPoint(Position target) = 0;
 
       /** Orders the unit to set its rally unit to the specified unit.
        * \see Unit::setRallyPosition, Unit::getRallyPosition, Unit::getRallyUnit. */
-      virtual bool setRallyUnit(Unit* target) = 0;
+      virtual bool setRallyPoint(Unit* target) = 0;
 
       /** Orders the unit to move from its current position to the specified position.
        * \see Unit::isMoving.  */
@@ -605,13 +629,9 @@ namespace BWAPI
       /** Orders the unit to stop making the addon. */
       virtual bool cancelAddon() = 0;
 
-      /** Orders the unit to remove the last unit from its training queue.
-       * \see Unit::train, Unit::cancelTrain, Unit::isTraining, Unit::getTrainingQueue. */
-      virtual bool cancelTrain() = 0;
-
       /** Orders the unit to remove the specified unit from its training queue.
        * \see Unit::train, Unit::cancelTrain, Unit::isTraining, Unit::getTrainingQueue. */
-      virtual bool cancelTrain(int slot) = 0;
+      virtual bool cancelTrain(int slot = -2) = 0;
 
       /** Orders the unit to stop morphing.
        * \see Unit::morph, Unit::isMorphing. */
@@ -637,20 +657,10 @@ namespace BWAPI
        * tech.*/
       virtual bool useTech(TechType tech, Unit* target) = 0;
 
-      /** Checks to verify that the unit is capable of moving to the target location */
-      virtual bool hasPath(Position target) = 0;
-      virtual bool hasPath(Unit *target) = 0;
-
-      /** Retrieves the frame of the last successful order. Frame is comparable to Game::getFrameCount(). */
-      virtual int  getLastOrderFrame() = 0;
-
       /** Sets the unit's custom client info. The client is responsible for deallocation. */
       virtual void setClientInfo(void* clientinfo) = 0;
 
       /** Returns the unit's custom client info. The client is responsible for deallocation. */
       virtual void* getClientInfo() const = 0;
-
-      /** Retrieves the group ID of a resource. Can be used to identify which resources belong to an expansion. */
-      virtual int getResourceGroup() = 0;
   };
 }

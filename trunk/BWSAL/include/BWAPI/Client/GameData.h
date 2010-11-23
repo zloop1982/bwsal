@@ -8,12 +8,22 @@
 #include "Event.h"
 #include "Command.h"
 #include "Shape.h"
-
+namespace BWAPIC
+{
+  struct Position
+  {
+    Position() {x=0;y=0;}
+    int x;
+    int y;
+  };
+}
 namespace BWAPI
 {
   struct GameData
   {
-    GameData();
+    GameData() {}
+    int instanceID;
+
     //forces
     int forceCount;
     ForceData forces[5];
@@ -31,6 +41,10 @@ namespace BWAPI
 
     //bullets
     BulletData bullets[100];
+
+    // nuke dots
+    int nukeDotCount;
+    BWAPIC::Position nukeDots[200];
 
     int gameType;
     int latency;
@@ -72,10 +86,15 @@ namespace BWAPI
     bool isExplored[256][256];
     bool hasCreep[256][256];
 
+    unsigned short mapTileRegionId[256][256];
+    unsigned short mapSplitTilesMiniTileMask[5000];
+    unsigned short mapSplitTilesRegion1[5000];
+    unsigned short mapSplitTilesRegion2[5000];
+    unsigned short regionGroupIndex[5000];
+
     // start locations
     int startLocationCount;
-    int startLocationsX[8];
-    int startLocationsY[8];
+    BWAPIC::Position startLocations[8];
 
     // match mode
     bool isInGame;

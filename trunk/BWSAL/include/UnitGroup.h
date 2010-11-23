@@ -358,8 +358,8 @@ class UnitGroup : public std::set<BWAPI::Unit*>
     bool holdPosition() const;
     bool patrol(BWAPI::Position position) const;
     bool follow(BWAPI::Unit* target) const;
-    bool setRallyPosition(BWAPI::Position target) const;
-    bool setRallyUnit(BWAPI::Unit* target) const;
+    bool setRallyPoint(BWAPI::Position target) const;
+    bool setRallyPoint(BWAPI::Unit* target) const;
     bool repair(BWAPI::Unit* target) const;
     bool morph(BWAPI::UnitType type) const;
     bool burrow() const;

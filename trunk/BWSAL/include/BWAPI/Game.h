@@ -65,8 +65,11 @@ namespace BWAPI
 
       /** Returns all visible bullets. If Flag::CompleteMapInformation is enabled, the set of all bullets is
        * returned, not just visible ones. */
-
       virtual std::set< Bullet* >& getBullets() = 0;
+
+     /** Returns all visible nuke dots. If Flag::CompleteMapInformation is enabled, the set of all nuke dots
+       * is returned, not just visible ones. */
+      virtual std::set< Position >& getNukeDots() = 0;
 
       /** Returns the list of events */
       virtual std::list< Event >& getEvents() = 0;
@@ -99,14 +102,6 @@ namespace BWAPI
       virtual int getFPS() = 0;
       virtual double getAverageFPS() = 0;
 
-      /** Returns the horizontal coordinate of the mouse on the screen. Returns 0 if Flag::UserInput? is
-       * disabled. */
-      virtual int getMouseX() = 0;
-
-      /** Returns the vertical coordinate of the mouse on the screen. Returns 0 if Flag::UserInput? is
-       * disabled. */
-      virtual int getMouseY() = 0;
-
       /** Returns the position of the mouse on the screen. Returns Positions::Unknown if Flag::UserInput is
        * disabled. */
       virtual BWAPI::Position getMousePosition() = 0;
@@ -127,12 +122,6 @@ namespace BWAPI
 
       /** \copydoc getKeyState(Key) */
       virtual bool getKeyState(int key) = 0;
-
-      /** Returns the horizontal coordinate of the screen on the map. Returns 0 if Flag::UserInput is disabled. */
-      virtual int getScreenX() = 0;
-
-      /** Returns the vertical coordinate of the screen on the map. Returns 0 if Flag::UserInput is disabled. */
-      virtual int getScreenY() = 0;
 
       /** Returns the position of the top left corner of the screen on the map. Returns Positions::Unknown if
        * Flag::UserInput is disabled. */
@@ -161,11 +150,14 @@ namespace BWAPI
 
       /** Returns the set of units that are on the given build tile. Only returns accessible units on
        * accessible tiles. */
-      virtual std::set<Unit*>& unitsOnTile(int x, int y) = 0;
+      virtual std::set<Unit*>& unitsOnTile(int tileX, int tileY) = 0;
 
       /** Returns the last error that was set. If you try to order enemy units around, or morph bunkers into
        * lurkers, BWAPI will set error codes, which can be retrieved using this function. */
       virtual Error getLastError() const = 0;
+
+      /** Sets the last error code. */
+      virtual bool setLastError(BWAPI::Error e) = 0;
 
       /** Returns the width of the current map, in build tile units. To get the width of the current map in
        * walk tile units, multiply by 4. To get the width of the current map in Position units, multiply by
@@ -193,61 +185,61 @@ namespace BWAPI
        * coordinates (different from build tile coordinates). Note that this just uses the static map data.
        * You will also need to make sure no ground units are on the coresponding build tile to see if its
        * currently walkable. To do this, see unitsOnTile. */
-      virtual bool isWalkable(int x, int y) = 0;
+      virtual bool isWalkable(int walkX, int walkY) = 0;
 
       /** Returns the ground height of the given build tile. 0 = normal, 1 = high ground.  2 = very high ground. */
-      virtual int  getGroundHeight(int x, int y) = 0;
+      virtual int  getGroundHeight(int tileX, int tileY) = 0;
       /** Returns the ground height of the given build tile. 0 = normal, 1 = high ground. 2 = very high ground. */
       virtual int  getGroundHeight(TilePosition position) = 0;
 
       /** Returns true if the specified build tile is buildable. Note that this just uses the static map data.
        * You will also need to make sure no ground units on the tile to see if its currently buildable. To do
        * this, see unitsOnTile. */
-      virtual bool isBuildable(int x, int y) = 0;
+      virtual bool isBuildable(int tileX, int tileY) = 0;
       /** \copydoc isBuildable(int, int) */
       virtual bool isBuildable(TilePosition position) = 0;
 
       /** Returns true if the specified build tile is visible. If the tile is concealed by fog of war, the
        * function will return false. */
-      virtual bool isVisible(int x, int y) = 0;
+      virtual bool isVisible(int tileX, int tileY) = 0;
       /** \copydoc isVisible(int, int) */
       virtual bool isVisible(TilePosition position) = 0;
 
       /** Returns true if the specified build tile has been explored (i.e. was visible at some point in the
        * match). */
-      virtual bool isExplored(int x, int y) = 0;
+      virtual bool isExplored(int tileX, int tileY) = 0;
       /** \copydoc isExplored(int, int) */
       virtual bool isExplored(TilePosition position) = 0;
 
       /** Returns true if the specified build tile has zerg creep on it. If the tile is concealed by fog of
        * war, the function will return false. */
-      virtual bool hasCreep(int x, int y) = 0;
+      virtual bool hasCreep(int tileX, int tileY) = 0;
       /** \copydoc hasCreep(int, int) */
       virtual bool hasCreep(TilePosition position) = 0;
 
       /** Returns true if the given build location is powered by a nearby friendly pylon. */
-      virtual bool hasPower(int x, int y, int tileWidth, int tileHeight) = 0;
+      virtual bool hasPower(int tileX, int tileY, int tileWidth, int tileHeight) = 0;
       /** \copydoc hasPower(int, int, int, int) */
       virtual bool hasPower(TilePosition position, int tileWidth, int tileHeight) = 0;
 
       /** Returns true if the given unit type can be built at the given build tile position. Note the tile
        * position specifies the top left tile of the building. If builder is not null, the unit will be
        * discarded when determining whether or not any ground units are blocking the build location. */
-      virtual bool canBuildHere(Unit *builder, TilePosition position, UnitType type) = 0;
+      virtual bool canBuildHere(const Unit *builder, TilePosition position, UnitType type, bool checkExplored = false) = 0;
 
       /** Returns true if the AI player has enough resources, supply, tech, and required units in order to
        * make the given unit type. If builder is not null, canMake will return true only if the builder unit
        * can build the given unit type. */
-      virtual bool canMake(Unit *builder, UnitType type) = 0;
+      virtual bool canMake(const Unit *builder, UnitType type) = 0;
 
       /** Returns true if the AI player has enough resources required to research the given tech type. If unit
        * is not null, canResearch will return true only if the given unit can research the given tech type. */
-      virtual bool canResearch(Unit *unit, TechType type) = 0;
+      virtual bool canResearch(const Unit *unit, TechType type) = 0;
 
       /** Returns true if the AI player has enough resources required to upgrade the given upgrade type. If
        * unit is not null, canUpgrade will return true only if the given unit can upgrade the given upgrade
        * type. */
-      virtual bool canUpgrade(Unit *unit, UpgradeType type) = 0;
+      virtual bool canUpgrade(const Unit *unit, UpgradeType type) = 0;
 
       /** Returns the set of starting locations for the given map. To determine the starting location for the
        * players in the current match, see Player::getStartLocation. */
@@ -306,6 +298,9 @@ namespace BWAPI
        * StarCraft can handle (which is about as fast as the fastest speed you can view a replay at). Any
        * negative value will reset the speed to the StarCraft default. */
       virtual void setLocalSpeed(int speed = -1) = 0;
+
+      /** Issues a command to a group of units */
+      virtual bool issueCommand(const std::set<BWAPI::Unit*>& units, UnitCommand command) = 0;
 
       /** Returns the set of units currently selected by the user in the GUI. If Flag?::UserInput? was not
        * enabled during the AIModule::onStart callback, this function will always return an empty set. */
@@ -393,6 +388,9 @@ namespace BWAPI
 
       /** Sets the rendering state of the Starcraft GUI */
       virtual void setGUI(bool enabled = true) = 0;
+
+      /** Retrieves the instance number recorded by BWAPI to identify which instance an AI module belongs to */
+      virtual int  getInstanceNumber() = 0;
   };
   extern Game* Broodwar;
 }

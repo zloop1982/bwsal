@@ -45,6 +45,7 @@ namespace BWAPI
       std::set<Unit*> staticGeysers;
       std::set<Unit*> staticNeutralUnits;
       std::set<Bullet*> bullets;
+      std::set<Position> nukeDots;
       std::set<Unit*> selectedUnits;
       std::set<Unit*> pylons;
       std::set<Unit*> unitsOnTileData[256][256];
@@ -64,7 +65,7 @@ namespace BWAPI
       void onMatchStart();
       void onMatchEnd();
       void onMatchFrame();
-      std::set<Unit*>& getPlayerUnits(const Player* player);
+      const GameData* getGameData() const;
 
       virtual std::set< Force* >& getForces();
       virtual std::set< Player* >& getPlayers();
@@ -78,6 +79,7 @@ namespace BWAPI
       virtual std::set< Unit* >& getStaticNeutralUnits();
 
       virtual std::set< Bullet* >& getBullets();
+      virtual std::set< Position >& getNukeDots();
       virtual std::list< Event>& getEvents();
 
       virtual Force* getForce(int forceID);
@@ -90,15 +92,11 @@ namespace BWAPI
       virtual int getFrameCount();
       virtual int getFPS();
       virtual double getAverageFPS();
-      virtual int getMouseX();
-      virtual int getMouseY();
       virtual BWAPI::Position getMousePosition();
       virtual bool getMouseState(MouseButton button);
       virtual bool getMouseState(int button);
       virtual bool getKeyState(Key key);
       virtual bool getKeyState(int key);
-      virtual int getScreenX();
-      virtual int getScreenY();
       virtual BWAPI::Position getScreenPosition();
       virtual void setScreenPosition(int x, int y);
       virtual void setScreenPosition(BWAPI::Position p);
@@ -108,7 +106,8 @@ namespace BWAPI
       virtual bool  isFlagEnabled(int flag);
       virtual void  enableFlag(int flag);
       virtual std::set<Unit*>& unitsOnTile(int x, int y);
-      virtual Error  getLastError() const;
+      virtual Error getLastError() const;
+      virtual bool  setLastError(BWAPI::Error e);
 
       virtual int         mapWidth();
       virtual int         mapHeight();
@@ -131,10 +130,10 @@ namespace BWAPI
       virtual bool hasPower(int x, int y, int tileWidth, int tileHeight);
       virtual bool hasPower(TilePosition position, int tileWidth, int tileHeight);
 
-      virtual bool canBuildHere(Unit* builder, TilePosition position, UnitType type);
-      virtual bool canMake(Unit* builder, UnitType type);
-      virtual bool canResearch(Unit* unit, TechType type);
-      virtual bool canUpgrade(Unit* unit, UpgradeType type);
+      virtual bool canBuildHere(const Unit* builder, TilePosition position, UnitType type, bool checkExplored = false);
+      virtual bool canMake(const Unit* builder, UnitType type);
+      virtual bool canResearch(const Unit* unit, TechType type);
+      virtual bool canUpgrade(const Unit* unit, UpgradeType type);
       virtual std::set< TilePosition >& getStartLocations();
 
       virtual void printf(const char* text, ...);
@@ -154,6 +153,7 @@ namespace BWAPI
       virtual void  leaveGame();
       virtual void  restartGame();
       virtual void  setLocalSpeed(int speed = -1);
+      virtual bool issueCommand(const std::set<BWAPI::Unit*>& units, UnitCommand command);
       virtual std::set<BWAPI::Unit*>& getSelectedUnits();
       virtual Player*  self();
       virtual Player*  enemy();
@@ -205,5 +205,6 @@ namespace BWAPI
       virtual void setLatCom(bool isEnabled);
       virtual int  getReplayFrameCount();
       virtual void setGUI(bool enabled = true);
+      virtual int  getInstanceNumber();
   };
 }
