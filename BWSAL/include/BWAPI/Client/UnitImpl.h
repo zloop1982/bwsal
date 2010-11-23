@@ -37,12 +37,13 @@ namespace BWAPI
       virtual int          getShields() const;
       virtual int          getEnergy() const;
       virtual int          getResources() const;
+      virtual int          getResourceGroup() const;
 
       virtual double getDistance(Unit* target) const;
       virtual double getDistance(Position target) const;
-      virtual bool   hasPath(Position target);
-      virtual bool   hasPath(Unit *target);
-      virtual int    getLastOrderFrame();
+      virtual bool   hasPath(Unit* target) const;
+      virtual bool   hasPath(Position target) const;
+      virtual int    getLastOrderFrame() const;
       virtual int    getUpgradeLevel(UpgradeType upgrade) const;
 
       virtual UnitType     getInitialType() const;
@@ -90,6 +91,7 @@ namespace BWAPI
       virtual Unit*    getRallyUnit() const;
       virtual Unit*    getAddon() const;
       virtual Unit*    getNydusExit() const;
+      virtual Unit*    getPowerUp() const;
 
       virtual Unit*           getTransport() const;
       virtual std::set<Unit*> getLoadedUnits() const;
@@ -122,6 +124,7 @@ namespace BWAPI
       virtual bool isHallucination() const;
       virtual bool isHoldingPosition() const;
       virtual bool isIdle() const;
+      virtual bool isInterruptible() const;
       virtual bool isIrradiated() const;
       virtual bool isLifted() const;
       virtual bool isLoaded() const;
@@ -139,6 +142,7 @@ namespace BWAPI
       virtual bool isStartingAttack() const;
       virtual bool isStasised() const;
       virtual bool isStimmed() const;
+      virtual bool isStuck() const;
       virtual bool isTraining() const;
       virtual bool isUnderStorm() const;
       virtual bool isUnpowered() const;
@@ -146,6 +150,7 @@ namespace BWAPI
       virtual bool isVisible() const;
       virtual bool isVisible(Player* player) const;
 
+      virtual bool canIssueCommand(UnitCommand command) const;
       virtual bool issueCommand(UnitCommand command);
 
       virtual bool attackMove(Position target);
@@ -156,8 +161,8 @@ namespace BWAPI
       virtual bool morph(UnitType type);
       virtual bool research(TechType tech);
       virtual bool upgrade(UpgradeType upgrade);
-      virtual bool setRallyPosition(Position target);
-      virtual bool setRallyUnit(Unit* target);
+      virtual bool setRallyPoint(Position target);
+      virtual bool setRallyPoint(Unit* target);
       virtual bool move(Position target);
       virtual bool patrol(Position target);
       virtual bool holdPosition();
@@ -183,8 +188,7 @@ namespace BWAPI
       virtual bool haltConstruction();
       virtual bool cancelConstruction();
       virtual bool cancelAddon();
-      virtual bool cancelTrain();
-      virtual bool cancelTrain(int slot);
+      virtual bool cancelTrain(int slot = -2);
       virtual bool cancelMorph();
       virtual bool cancelResearch();
       virtual bool cancelUpgrade();
@@ -194,6 +198,5 @@ namespace BWAPI
 
       virtual void setClientInfo(void* clientinfo);
       virtual void* getClientInfo() const;
-      virtual int getResourceGroup();
   };
 }

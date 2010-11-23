@@ -30,9 +30,6 @@ namespace BWAPI
       /** Returns the name of the unit. */
       std::string getName() const;
 
-      /** Returns the rank/sublabel of the unit, i.e. Private, Captain, Major, etc. */
-      std::string getSubLabel() const;
-
       /** Returns the race that the unit belongs to. For example UnitTypes::Terran_SCV.getRace() will return
        * Races::Terran. */
       Race getRace() const;
@@ -54,6 +51,10 @@ namespace BWAPI
       /** Included in the API for completeness, since the only units that actually needs tech to be trained
        * are the Zerg_Lurker and Zerg_Lurker_Egg. The tech type needed is TechTypes::Lurker_Aspect. */
       TechType requiredTech() const;
+
+      /** Returns the tech used to cloak the unit, or TechTypes::None if the unit cannot cloak or is
+          permanently cloaked */
+      TechType cloakingTech() const;
 
       /** Returns the set of tech types this unit can use, provided the tech types have been researched and
        * the unit has enough energy. */
@@ -256,6 +257,24 @@ namespace BWAPI
       /** Returns true if the unit is neutral, such as a critter or mineral field. */
       bool isNeutral() const;
 
+      /** Returns true if the unit is a Hero unit. */
+      bool isHero() const;
+
+      /** Returns true if the unit is a Powerup unit. */
+      bool isPowerup() const;
+
+      /** Returns true if the unit is a regular Beacon. */
+      bool isBeacon() const;
+
+      /** Returns true if the unit is a flag Beacon. */
+      bool isFlagBeacon() const;
+
+      /** Returns true if the unit is a special building. */
+      bool isSpecialBuilding() const;
+
+      /** Returns true if the unit is a spell unit. */
+      bool isSpell() const;
+
       /** Returns true if the unit produces larva. */
       bool producesLarva() const;
 
@@ -273,52 +292,91 @@ namespace BWAPI
     std::set<UnitType>& allUnitTypes();
     void init();
     extern const UnitType Terran_Marine;
+    extern const UnitType Hero_Jim_Raynor_Marine;
     extern const UnitType Terran_Ghost;
+    extern const UnitType Hero_Sarah_Kerrigan;
+    extern const UnitType Hero_Samir_Duran;
+    extern const UnitType Hero_Infested_Duran;
+    extern const UnitType Hero_Alexei_Stukov;
     extern const UnitType Terran_Vulture;
+    extern const UnitType Hero_Jim_Raynor_Vulture;
     extern const UnitType Terran_Goliath;
+    extern const UnitType Hero_Alan_Schezar;
     extern const UnitType Terran_Siege_Tank_Tank_Mode;
+    extern const UnitType Hero_Edmund_Duke_Tank_Mode;
     extern const UnitType Terran_SCV;
     extern const UnitType Terran_Wraith;
+    extern const UnitType Hero_Tom_Kazansky;
     extern const UnitType Terran_Science_Vessel;
+    extern const UnitType Hero_Magellan;
     extern const UnitType Terran_Dropship;
     extern const UnitType Terran_Battlecruiser;
+    extern const UnitType Hero_Arcturus_Mengsk;
+    extern const UnitType Hero_Hyperion;
+    extern const UnitType Hero_Norad_II;
+    extern const UnitType Hero_Gerard_DuGalle;
     extern const UnitType Terran_Vulture_Spider_Mine;
     extern const UnitType Terran_Nuclear_Missile;
     extern const UnitType Terran_Siege_Tank_Siege_Mode;
+    extern const UnitType Hero_Edmund_Duke_Siege_Mode;
     extern const UnitType Terran_Firebat;
+    extern const UnitType Hero_Gui_Montag;
     extern const UnitType Spell_Scanner_Sweep;
     extern const UnitType Terran_Medic;
+    extern const UnitType Terran_Civilian;
     extern const UnitType Zerg_Larva;
     extern const UnitType Zerg_Egg;
     extern const UnitType Zerg_Zergling;
+    extern const UnitType Hero_Devouring_One;
+    extern const UnitType Hero_Infested_Kerrigan;
     extern const UnitType Zerg_Hydralisk;
+    extern const UnitType Hero_Hunter_Killer;
     extern const UnitType Zerg_Ultralisk;
+    extern const UnitType Hero_Torrasque;
     extern const UnitType Zerg_Broodling;
     extern const UnitType Zerg_Drone;
     extern const UnitType Zerg_Overlord;
+    extern const UnitType Hero_Yggdrasill;
     extern const UnitType Zerg_Mutalisk;
+    extern const UnitType Hero_Kukulza_Mutalisk;
     extern const UnitType Zerg_Guardian;
+    extern const UnitType Hero_Kukulza_Guardian;
     extern const UnitType Zerg_Queen;
+    extern const UnitType Hero_Matriarch;
     extern const UnitType Zerg_Defiler;
+    extern const UnitType Hero_Unclean_One;
     extern const UnitType Zerg_Scourge;
     extern const UnitType Zerg_Infested_Terran;
     extern const UnitType Terran_Valkyrie;
     extern const UnitType Zerg_Cocoon;
     extern const UnitType Protoss_Corsair;
+    extern const UnitType Hero_Raszagal;
     extern const UnitType Protoss_Dark_Templar;
+    extern const UnitType Hero_Dark_Templar;
+    extern const UnitType Hero_Zeratul;
     extern const UnitType Zerg_Devourer;
     extern const UnitType Protoss_Dark_Archon;
     extern const UnitType Protoss_Probe;
     extern const UnitType Protoss_Zealot;
+    extern const UnitType Hero_Fenix_Zealot;
     extern const UnitType Protoss_Dragoon;
+    extern const UnitType Hero_Fenix_Dragoon;
     extern const UnitType Protoss_High_Templar;
+    extern const UnitType Hero_Tassadar;
+    extern const UnitType Hero_Aldaris;
     extern const UnitType Protoss_Archon;
+    extern const UnitType Hero_Tassadar_Zeratul_Archon;
     extern const UnitType Protoss_Shuttle;
     extern const UnitType Protoss_Scout;
+    extern const UnitType Hero_Mojo;
+    extern const UnitType Hero_Artanis;
     extern const UnitType Protoss_Arbiter;
+    extern const UnitType Hero_Danimoth;
     extern const UnitType Protoss_Carrier;
+    extern const UnitType Hero_Gantrithor;
     extern const UnitType Protoss_Interceptor;
     extern const UnitType Protoss_Reaver;
+    extern const UnitType Hero_Warbringer;
     extern const UnitType Protoss_Observer;
     extern const UnitType Protoss_Scarab;
     extern const UnitType Critter_Rhynadon;
@@ -398,7 +456,20 @@ namespace BWAPI
     extern const UnitType Special_Psi_Disrupter;
     extern const UnitType Special_Power_Generator;
     extern const UnitType Special_Overmind_Cocoon;
+    extern const UnitType Special_Zerg_Beacon;
+    extern const UnitType Special_Terran_Beacon;
+    extern const UnitType Special_Protoss_Beacon;
+    extern const UnitType Special_Zerg_Flag_Beacon;
+    extern const UnitType Special_Terran_Flag_Beacon;
+    extern const UnitType Special_Protoss_Flag_Beacon;
     extern const UnitType Spell_Dark_Swarm;
+    extern const UnitType Powerup_Uraj_Crystal;
+    extern const UnitType Powerup_Khalis_Crystal;
+    extern const UnitType Powerup_Flag;
+    extern const UnitType Powerup_Young_Chrysalis;
+    extern const UnitType Powerup_Psi_Emitter;
+    extern const UnitType Powerup_Data_Disk;
+    extern const UnitType Powerup_Khaydarin_Crystal;
     extern const UnitType None;
     extern const UnitType Unknown;
 
