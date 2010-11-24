@@ -15,6 +15,9 @@ bool passesFlag(Unit* u, int f)
     case isAccelerating:
       if (u->isAccelerating()) return true;
     break;
+    case isAttacking:
+      if (u->isAttacking()) return true;
+    break;
     case isBeingConstructed:
       if (u->isBeingConstructed()) return true;
     break;
@@ -51,6 +54,9 @@ bool passesFlag(Unit* u, int f)
     case isDefenseMatrixed:
       if (u->isDefenseMatrixed()) return true;
     break;
+    case isDetected:
+      if (u->isDetected()) return true;
+    break;
     case isEnsnared:
       if (u->isEnsnared()) return true;
     break;
@@ -66,8 +72,14 @@ bool passesFlag(Unit* u, int f)
     case isHallucination:
       if (u->isHallucination()) return true;
     break;
+    case isHoldingPosition:
+      if (u->isHoldingPosition()) return true;
+    break;
     case isIdle:
       if (u->isIdle()) return true;
+    break;
+    case isInterruptible:
+      if (u->isInterruptible()) return true;
     break;
     case isIrradiated:
       if (u->isIrradiated()) return true;
@@ -119,6 +131,9 @@ bool passesFlag(Unit* u, int f)
     break;
     case isStimmed:
       if (u->isStimmed()) return true;
+    break;
+    case isStuck:
+      if (u->isStuck()) return true;
     break;
     case isTraining:
       if (u->isTraining()) return true;
