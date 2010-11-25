@@ -34,7 +34,6 @@ void BasicAIModule::onStart()
   this->workerManager->setBaseManager(this->baseManager);
   this->workerManager->setBuildOrderManager(this->buildOrderManager);
   this->baseManager->setBuildOrderManager(this->buildOrderManager);
-  this->borderManager->setInformationManager(this->informationManager);
   this->baseManager->setBorderManager(this->borderManager);
   this->defenseManager->setBorderManager(this->borderManager);
   

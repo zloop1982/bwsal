@@ -11,6 +11,9 @@
 #include <ResourceRates.h>
 #include <MacroSupplyManager.h>
 #include <MacroDependencyResolver.h>
+#include <InformationManager.h>
+#include <BorderManager.h>
+#include <MacroBaseManager.h>
 
 using namespace BWAPI;
 int drag_index = -1;
@@ -30,6 +33,12 @@ MacroAIModule::~MacroAIModule()
     delete TheMacroDependencyResolver;
   if (TheResourceRates != NULL)
     delete TheResourceRates;
+  if (TheInformationManager != NULL)
+    delete TheInformationManager;
+  if (TheBorderManager != NULL)
+    delete TheBorderManager;
+  if (TheMacroBaseManager != NULL)
+    delete TheMacroBaseManager;
   if (infantryProducer != NULL)
     delete infantryProducer;
   if (vehicleProducer != NULL)
@@ -38,10 +47,15 @@ MacroAIModule::~MacroAIModule()
 void MacroAIModule::onStart()
 {
   Broodwar->enableFlag(Flag::UserInput);
+  BWTA::readMap();
+  BWTA::analyze();
   MacroManager::create(&arbitrator);
   MacroSupplyManager::create();
   MacroDependencyResolver::create();
   ResourceRates::create();
+  InformationManager::create();
+  BorderManager::create();
+  MacroBaseManager::create();
 
   TaskStream* ts = new TaskStream();
   TheMacroManager->taskStreams.push_back(ts);
@@ -88,6 +102,8 @@ void MacroAIModule::onFrame()
   TheMacroDependencyResolver->update();
   TheMacroManager->update();
   TheResourceRates->update();
+  TheBorderManager->update();
+  TheMacroBaseManager->update();
   std::set<Unit*> units=Broodwar->self()->getUnits();
   for(std::set<Unit*>::iterator i=units.begin();i!=units.end();i++)
   {
@@ -203,7 +219,18 @@ void MacroAIModule::onSendText(std::string text)
     }
   }
 }
+void MacroAIModule::onUnitDiscover(BWAPI::Unit* unit)
+{
+  TheInformationManager->onUnitDiscover(unit);
+}
+void MacroAIModule::onUnitEvade(BWAPI::Unit* unit)
+{
+  TheInformationManager->onUnitEvade(unit);
+}
+
 void MacroAIModule::onUnitDestroy(BWAPI::Unit* unit)
 {
   TheArbitrator->onRemoveObject(unit);
+  TheInformationManager->onUnitDestroy(unit);
+  TheMacroBaseManager->onUnitDestroy(unit);
 }

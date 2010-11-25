@@ -2,6 +2,7 @@
 #include <BaseManager.h>
 #include <RectangleArray.h>
 #include <BuildOrderManager.h>
+#include <UnitGroupManager.h>
 #include <algorithm>
 #include "Util.h"
 using namespace BWAPI;
@@ -214,14 +215,9 @@ void WorkerManager::rebalanceWorkers()
 void WorkerManager::update()
 {
   //bid a constant value of 10 on all completed workers
-  set<Unit*> myPlayerUnits=Broodwar->self()->getUnits();
-  for(set<Unit*>::iterator u = myPlayerUnits.begin(); u != myPlayerUnits.end(); u++)
-  {
-    if ((*u)->isCompleted() && (*u)->getType().isWorker())
-    {
-      arbitrator->setBid(this, *u, 10);
-    }
-  }
+  set<Unit*> w = SelectAll()(isCompleted)(isWorker);
+  for each(Unit* u in w)
+    arbitrator->setBid(this, u, 10);
 
   //rebalance workers when necessary
   set<Base*> bases = this->baseManager->getActiveBases();

@@ -2,8 +2,17 @@
 #include "Util.h"
 using namespace std;
 using namespace BWAPI;
+
+InformationManager* TheInformationManager = NULL;
+
+InformationManager* InformationManager::create()
+{
+  if (TheInformationManager) return TheInformationManager;
+  return new InformationManager();
+}
 InformationManager::InformationManager()
 {
+  TheInformationManager = this;
   buildTime[Broodwar->enemy()->getRace().getCenter()]=0;
   buildTime[Broodwar->enemy()->getRace().getWorker()]=0;
   if (Broodwar->enemy()->getRace()==Races::Zerg)
@@ -19,6 +28,10 @@ InformationManager::InformationManager()
     enemyBases.insert(*startLocationCouldContainEnemy.begin());
     scoutedAnEnemyBase = true;
   }
+}
+InformationManager::~InformationManager()
+{
+  TheInformationManager = NULL;
 }
 void InformationManager::onUnitDiscover(Unit* unit)
 {

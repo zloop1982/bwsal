@@ -411,6 +411,26 @@
 				</File>
 			</Filter>
 			<Filter
+				Name="MacroBaseManager"
+				>
+				<File
+					RelativePath="..\Addons\MacroBase.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\include\MacroBaseManager\MacroBase.h"
+					>
+				</File>
+				<File
+					RelativePath="..\Addons\MacroBaseManager.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\include\MacroBaseManager\MacroBaseManager.h"
+					>
+				</File>
+			</Filter>
+			<Filter
 				Name="MacroDependencyResolver"
 				>
 				<File
@@ -419,6 +439,30 @@
 				</File>
 				<File
 					RelativePath="..\include\MacroDependencyResolver.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="BorderManager"
+				>
+				<File
+					RelativePath="..\Addons\BorderManager.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\include\BorderManager.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="InformationManager"
+				>
+				<File
+					RelativePath="..\Addons\InformationManager.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\include\InformationManager.h"
 					>
 				</File>
 			</Filter>

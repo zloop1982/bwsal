@@ -5,7 +5,9 @@
 class InformationManager
 {
   public:
+    static InformationManager* create();
     InformationManager();
+    ~InformationManager();
     void onUnitDiscover(BWAPI::Unit* unit);
     void onUnitEvade(BWAPI::Unit* unit);
     void onUnitDestroy(BWAPI::Unit* unit);
@@ -37,3 +39,4 @@ class InformationManager
     std::set<BWTA::BaseLocation*> startLocationCouldContainEnemy;
     bool scoutedAnEnemyBase;
 };
+extern InformationManager* TheInformationManager;
