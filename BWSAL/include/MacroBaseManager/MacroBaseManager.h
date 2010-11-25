@@ -21,6 +21,7 @@ class MacroBaseManager
   MacroBase* expandWhenPossible(BWTA::BaseLocation* location = NULL, bool getGas = true);
   MacroBase* expandAtFrame(int frame, BWTA::BaseLocation* location = NULL, bool getGas = true);
 
+  const std::set<MacroBase*>& getActiveBases() const;
   const std::set<MacroBase*>& getReadyBases() const;
   const std::set<MacroBase*>& getAllBases() const;
   const std::set<MacroBase*>& getDestroyedBases() const;
@@ -31,6 +32,7 @@ class MacroBaseManager
   private:
   BorderManager* borderManager;
   std::map<BWTA::BaseLocation*,MacroBase*> location2base;
+  std::set<MacroBase*> activeBases;
   std::set<MacroBase*> readyBases;
   std::set<MacroBase*> allBases;
   std::set<MacroBase*> destroyedBases;
