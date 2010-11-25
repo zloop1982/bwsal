@@ -228,7 +228,7 @@ void MacroWorkerManager::update()
     TheArbitrator->setBid(this, u, 10);
 
   //rebalance workers when necessary
-  set<MacroBase*> bases = TheMacroBaseManager->getAllBases();
+  set<MacroBase*> bases = TheMacroBaseManager->getActiveBases();
   if (Broodwar->getFrameCount() > lastSCVBalance + 5*24 || bases != this->basesCache || lastSCVBalance == 0)
   {
     this->basesCache = bases;
@@ -267,7 +267,7 @@ void MacroWorkerManager::update()
       if (i->getOrder() == Orders::ReturnGas || i->getOrder() == Orders::ReturnMinerals ||  (i->getOrder() == Orders::PlayerGuard && BWAPI::Broodwar->getFrameCount()>u->second.lastFrameSpam+BWAPI::Broodwar->getLatency()*2))
       {
         u->second.lastFrameSpam=BWAPI::Broodwar->getFrameCount();
-        MacroBase* b=TheMacroBaseManager->getBase(BWTA::getNearestBaseLocation(i->getTilePosition()));
+        MacroBase* b=TheMacroBaseManager->getBase(BWTA::getNearestBaseLocation(i->getPosition()));
         if (b!=NULL)
         {
           Unit* center = b->getResourceDepot();

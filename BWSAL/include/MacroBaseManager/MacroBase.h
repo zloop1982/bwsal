@@ -20,7 +20,10 @@ class MacroBase : public TaskStreamObserver
   TaskStream* getTaskStream() const;
   TaskStream* getRefineryTaskStream() const;
   void completedTask(TaskStream* ts, const Task &t);
+  void setPaused(bool paused);
+  bool isPaused() const;
   bool isReady() const;
+  bool isActive() const;
   void update();
   void onUnitDestroy(BWAPI::Unit* u);
 
@@ -30,6 +33,7 @@ private:
   BWAPI::Unit* resourceDepot;
   BWAPI::Unit* refinery;
   bool ready;
+  bool paused;
   TaskStream* depot_ts;
   TaskStream* refinery_ts;
 };

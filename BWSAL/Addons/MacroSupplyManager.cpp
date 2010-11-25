@@ -44,7 +44,7 @@ void MacroSupplyManager::update()
     if (Broodwar->getFrameCount()>lastFrameCheck+25)
     {
       lastFrameCheck=Broodwar->getFrameCount();
-      if (TheMacroManager->rtl.getFinalSupplyTotal()==initialSupplyTotal)
+      if (TheMacroManager->uctl.getFinalCount(BWAPI::Broodwar->self()->getRace().getSupplyProvider())==0)
       {
         if (Broodwar->self()->supplyUsed()>=initialSupplyTotal-2)
         {
