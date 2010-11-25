@@ -118,8 +118,8 @@ void BasicTaskExecutor::computeBuildUnit(TaskStream* ts)
     ts->setBuildUnit(worker->getAddon());
 
   //check to see if the worker is the right type
-  //Zerg_Nydus_Canal is speciall since Zerg_Nydus_Canal can construct Zerg_Nydus_Canal
-  if ((worker->getType() == ut || worker->getBuildType() == ut) && worker->getType()!=UnitTypes::Zerg_Nydus_Canal)
+  //Zerg_Nydus_Canal is special since Zerg_Nydus_Canal can construct Zerg_Nydus_Canal
+  if ((worker->getType() == ut || (worker->isMorphing() && worker->getBuildType() == ut)) && worker->getType()!=UnitTypes::Zerg_Nydus_Canal)
     ts->setBuildUnit(worker);
 
 }
@@ -209,7 +209,7 @@ void BasicTaskExecutor::execute(TaskStream* ts)
   if (ts->isWorkerReady()==false) return;
   Unit* worker = ts->getWorker();
   TaskTypes::Enum type = ts->getTask(0).getType();
-  if (Broodwar->getFrameCount()<ts->getWorker()->getLastOrderFrame()+5) return;
+  if (Broodwar->getFrameCount()%5!=0) return;
 
   if (type == TaskTypes::Unit)
   {

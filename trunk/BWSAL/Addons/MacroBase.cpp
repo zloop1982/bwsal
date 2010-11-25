@@ -16,7 +16,8 @@ MacroBase* MacroBase::CreateBaseNow(BWTA::BaseLocation* b, bool getGas)
   mb->depot_ts->attach(new BasicWorkerFinder(),true);
   mb->depot_ts->attach(BasicTaskExecutor::getInstance(),false);
   mb->depot_ts->attach(new TerminateIfEmpty(),true);
-  mb->depot_ts->attach(BFSBuildingPlacer::getInstance(),false);
+  mb->depot_ts->attach(BFSBuildingPlacer::getInstance(),false); 
+  mb->depot_ts->attach(mb,false);
   BFSBuildingPlacer::getInstance()->setRelocatable(mb->depot_ts,false);
   return mb;
 }
@@ -30,6 +31,7 @@ MacroBase* MacroBase::CreateBaseWhenPossible(BWTA::BaseLocation* b, bool getGas)
   mb->depot_ts->attach(BasicTaskExecutor::getInstance(),false);
   mb->depot_ts->attach(new TerminateIfEmpty(),true);
   mb->depot_ts->attach(BFSBuildingPlacer::getInstance(),false);
+  mb->depot_ts->attach(mb,false);
   BFSBuildingPlacer::getInstance()->setRelocatable(mb->depot_ts,false);
   return mb;
 }
@@ -44,6 +46,7 @@ MacroBase* MacroBase::CreateBaseAtFrame(BWTA::BaseLocation* b, int frame, bool g
   mb->depot_ts->attach(BasicTaskExecutor::getInstance(),false);
   mb->depot_ts->attach(new TerminateIfEmpty(),true);
   mb->depot_ts->attach(BFSBuildingPlacer::getInstance(),false);
+  mb->depot_ts->attach(mb,false);
   BFSBuildingPlacer::getInstance()->setRelocatable(mb->depot_ts,false);
   return mb;
 }
@@ -113,10 +116,23 @@ void MacroBase::completedTask(TaskStream* ts, const Task &t)
   }
 }
 
+void MacroBase::setPaused(bool paused)
+{
+  this->paused = paused;
+}
+bool MacroBase::isPaused() const
+{
+  return paused;
+}
 bool MacroBase::isReady() const
 {
   return ready;
 }
+bool MacroBase::isActive() const
+{
+  return !paused && ready;
+}
+
 void MacroBase::update()
 {
   if (resourceDepot == NULL)
@@ -129,10 +145,7 @@ void MacroBase::update()
     if (refinery_ts!=NULL)
       refinery = refinery_ts->getBuildUnit();
   }
-  if (resourceDepot && (resourceDepot->isCompleted() || resourceDepot->getRemainingBuildTime()<200))
-    ready = true;
-  else
-    ready = false;
+  ready = (resourceDepot && resourceDepot->exists() && (resourceDepot->isCompleted() || resourceDepot->getRemainingBuildTime()<300));
 }
 void MacroBase::onUnitDestroy(BWAPI::Unit* u)
 {
@@ -149,4 +162,5 @@ MacroBase::MacroBase(BWTA::BaseLocation* b)
   ready            = false;
   depot_ts         = NULL;
   refinery_ts      = NULL;
+  paused           = false;
 }

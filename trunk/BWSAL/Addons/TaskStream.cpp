@@ -69,7 +69,7 @@ void TaskStream::computeStatus()
   if (task[0].getType()==TaskTypes::Unit)
   {
     UnitType ut = task[0].getUnit();
-    if (ut.isBuilding() && !ut.whatBuilds().first.isBuilding() && buildUnit == NULL)
+    if (ut.isBuilding() && !ut.whatBuilds().first.isBuilding() && buildUnit == NULL && (worker==NULL || worker->getBuildUnit()==NULL))
     {
       if (task[0].getTilePosition().isValid()==false || !Broodwar->canBuildHere(worker,task[0].getTilePosition(),ut))
         locationReady = false;
@@ -80,7 +80,7 @@ void TaskStream::computeStatus()
     status = Error_Task_Not_Specified;
     return;
   }
-  if (task[0].isExecuting())
+  if (task[0].isExecuting() || task[0].isCompleted() || buildUnit || (worker && worker->getBuildUnit()))
     status = Executing_Task;
   else
   {
@@ -220,11 +220,11 @@ void TaskStream::update()
     {
       notifyCompletedTask();
       status = None;
+      Broodwar->printf("Completed Task %s!",task[0].getName().c_str());
       for(int i=0;i+1<(int)(task.size());i++)
         task[i]=task[i+1];
       task[task.size()-1] = Task();
       buildUnit = NULL;
-      Broodwar->printf("Completed Task!");
     }
     if (task[0].isExecuting() && buildUnit!=NULL && task[0].getType()==TaskTypes::Unit && task[0].getUnit().isBuilding() && task[0].getUnit().getRace()==Races::Protoss)
     {
@@ -249,6 +249,7 @@ void TaskStream::update()
         worker->cancelMorph();
       else if (worker->isConstructing() && worker->isCompleted())
       {
+        Broodwar->printf("CancelConstruction %s",getStatusString().c_str());
         if (worker->getBuildUnit() && worker->getBuildUnit()->getType().isBuilding())
           worker->getBuildUnit()->cancelConstruction();
         worker->cancelConstruction();

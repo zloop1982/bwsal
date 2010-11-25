@@ -34,8 +34,18 @@ void MacroBaseManager::update()
         }
     }
   }
-
-
+  for each(MacroBase* mb in allBases)
+  {
+    mb->update();
+    if (mb->isActive())
+      activeBases.insert(mb);
+    else
+      activeBases.erase(mb);
+    if (mb->isReady())
+      readyBases.insert(mb);
+    else
+      readyBases.erase(mb);
+  }
 }
 
 MacroBase* MacroBaseManager::getBase(BWTA::BaseLocation* location)

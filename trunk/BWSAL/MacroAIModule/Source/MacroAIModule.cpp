@@ -95,6 +95,7 @@ void MacroAIModule::onStart()
     infantryProducer->setUnitWeight(UnitTypes::Protoss_Dragoon,2.0);
     infantryProducer->setUnitWeight(UnitTypes::Protoss_Zealot,1.0);
   }
+  TheMacroBaseManager->expandWhenPossible();
 }
 void MacroAIModule::onEnd(bool isWinner)
 {
@@ -244,6 +245,7 @@ void MacroAIModule::onUnitDestroy(BWAPI::Unit* unit)
   TheArbitrator->onRemoveObject(unit);
   TheInformationManager->onUnitDestroy(unit);
   TheMacroBaseManager->onUnitDestroy(unit);
+  TheMacroWorkerManager->onRemoveUnit(unit);
 }
 void MacroAIModule::onUnitMorph(BWAPI::Unit* unit)
 {
