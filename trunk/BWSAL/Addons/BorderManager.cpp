@@ -1,8 +1,19 @@
 #include <BorderManager.h>
 #include <InformationManager.h>
-void BorderManager::setInformationManager(InformationManager* informationManager)
+BorderManager* TheBorderManager = NULL;
+
+BorderManager* BorderManager::create()
 {
-  this->informationManager=informationManager;
+  if (TheBorderManager) return TheBorderManager;
+  return new BorderManager();
+}
+BorderManager::BorderManager()
+{
+  TheBorderManager = this;
+}
+BorderManager::~BorderManager()
+{
+  TheBorderManager = NULL;
 }
 void BorderManager::addMyBase(BWTA::BaseLocation* location)
 {
@@ -24,9 +35,9 @@ const std::set<BWTA::Chokepoint*>& BorderManager::getEnemyBorder() const
 }
 void BorderManager::update()
 {
-  if (informationManager->getEnemyBases()!=this->enemyBases)
+  if (TheInformationManager->getEnemyBases()!=this->enemyBases)
   {
-    this->enemyBases=informationManager->getEnemyBases();
+    this->enemyBases=TheInformationManager->getEnemyBases();
     recalculateBorders();
   }
   for(std::set<BWTA::Chokepoint*>::const_iterator c=myBorder.begin();c!=myBorder.end();c++)

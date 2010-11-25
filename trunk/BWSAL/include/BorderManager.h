@@ -1,11 +1,12 @@
 #pragma once
 #include <BWAPI.h>
 #include <BWTA.h>
-class InformationManager;
 class BorderManager
 {
   public:
-    void setInformationManager(InformationManager* informationManager);
+    static BorderManager* create();
+    BorderManager();
+    ~BorderManager();
     void addMyBase(BWTA::BaseLocation* location);
     void removeMyBase(BWTA::BaseLocation* location);
     const std::set<BWTA::Chokepoint*>& getMyBorder() const;
@@ -15,7 +16,6 @@ class BorderManager
     void update();
   private:
     void recalculateBorders();
-    InformationManager* informationManager;
     std::set<BWTA::BaseLocation*> myBases;
     std::set<BWTA::BaseLocation*> enemyBases;
     std::set<BWTA::Region*> myRegions;
@@ -23,3 +23,5 @@ class BorderManager
     std::set<BWTA::Chokepoint*> myBorder;
     std::set<BWTA::Chokepoint*> enemyBorder;
 };
+
+extern BorderManager* TheBorderManager;
