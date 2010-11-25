@@ -20,6 +20,8 @@ void BasicWorkerFinder::newStatus(TaskStream* ts)
       return;
     if (ts->getBuildUnit()!=NULL && ts->getBuildUnit()->exists() && ts->getBuildUnit()->getType().isBuilding() && ts->getBuildUnit()->getType().getRace()==Races::Protoss)
       return;
+    if (ts->getStartTime()<0 || ts->getStartTime()>Broodwar->getFrameCount()+20*24)
+      return;
 
     std::set<BWAPI::Unit*> units;
     for each(Unit* u in Broodwar->self()->getUnits())

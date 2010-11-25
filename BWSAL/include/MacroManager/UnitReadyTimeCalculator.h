@@ -14,7 +14,9 @@ namespace UnitReadyTimeStatus
     Waiting_For_Required_Upgrade,
     Waiting_For_Supply,
     Waiting_For_Gas,
-    Waiting_For_Minerals
+    Waiting_For_Minerals,
+    Error_Worker_Not_Specified,
+    Error_Worker_Not_Owned
   };
 };
 class UnitReadyTimeCalculator

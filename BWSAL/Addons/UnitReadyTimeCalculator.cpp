@@ -24,7 +24,7 @@ void UnitReadyTimeCalculator::init()
 //returns the frame when the unit will be ready to do another task
 int UnitReadyTimeCalculator::getReadyTime(BWAPI::Unit* unit, bool considerTasks)
 {
-  if (unit==NULL || unit->exists()==false) return -1;
+  if (unit==NULL || unit->exists()==false) return Broodwar->getFrameCount();
   int t=Broodwar->getFrameCount();
   t=max(t,t+unit->getRemainingResearchTime());
   t=max(t,t+unit->getRemainingUpgradeTime());
@@ -47,7 +47,6 @@ int UnitReadyTimeCalculator::getReadyTime(BWAPI::Unit* unit, bool considerTasks)
 //returns the frame when the unit will be ready to do the given task
 int UnitReadyTimeCalculator::getReadyTime(BWAPI::Unit* unit, const Task &task, UnitReadyTimeStatus::Enum &reason, bool considerResources, bool considerTasks)
 {
-  if (unit==NULL || unit->exists()==false) return -1;
   reason = UnitReadyTimeStatus::Waiting_For_Worker_To_Be_Ready;
   int t = getReadyTime(unit,considerTasks);
   if (t==-1) return -1;
@@ -89,7 +88,7 @@ int UnitReadyTimeCalculator::getReadyTime(BWAPI::Unit* unit, const Task &task, U
     if (r.first.isAddon() && r.first.whatBuilds().first==task.getWorkerType())
     {
       //and if our worker doesn't have this add-on...
-      if (unit->getAddon()==NULL && (unit->getBuildUnit()==NULL || unit->getBuildUnit()->getType().isAddon()==false))
+      if (unit && unit->exists() && unit->getAddon()==NULL && (unit->getBuildUnit()==NULL || unit->getBuildUnit()->getType().isAddon()==false))
       {
         TaskStream* ts = TheMacroManager->getTaskStream(unit);
         if (ts)
