@@ -22,6 +22,8 @@ int drag_index = -1;
 bool lastMouseClick = false;
 UnitCompositionProducer* infantryProducer = NULL;
 UnitCompositionProducer* vehicleProducer = NULL;
+bool expanded1 = false;
+bool expanded2 = false;
 MacroAIModule::MacroAIModule()
 {
 }
@@ -95,13 +97,36 @@ void MacroAIModule::onStart()
     infantryProducer->setUnitWeight(UnitTypes::Protoss_Dragoon,2.0);
     infantryProducer->setUnitWeight(UnitTypes::Protoss_Zealot,1.0);
   }
-  TheMacroBaseManager->expandWhenPossible();
+  onSendText("Terran Barracks");
+  onSendText("Terran Refinery");
+  onSendText("Terran Academy");
+  onSendText("Terran Barracks");
 }
 void MacroAIModule::onEnd(bool isWinner)
 {
 }
 void MacroAIModule::onFrame()
 {
+
+  if (expanded1 == false && Broodwar->self()->completedUnitCount(UnitTypes::Terran_Marine)>1)
+  {
+    expanded1 = true;
+    TheMacroBaseManager->expandWhenPossible();
+    onSendText("Terran Barracks");
+    onSendText("Terran Barracks");
+    onSendText("Terran Barracks");
+  }
+  if (expanded1 && expanded2 == false && Broodwar->self()->completedUnitCount(UnitTypes::Terran_Command_Center)>1)
+  {
+    expanded2 = true;
+    TheMacroBaseManager->expandWhenPossible();
+    onSendText("Terran Barracks");
+    onSendText("Terran Barracks");
+    onSendText("Terran Barracks");
+    onSendText("Terran Barracks");
+  }
+
+
   if (infantryProducer)
     infantryProducer->update();
   if (vehicleProducer)

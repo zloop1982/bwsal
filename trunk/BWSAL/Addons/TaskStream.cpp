@@ -111,18 +111,7 @@ void TaskStream::computeStatus()
         }
       }
     }
-    if (worker == NULL || !worker->exists())
-    {
-      status = Error_Worker_Not_Specified;
-      setWorker(NULL);
-      return;
-    }
-    if (TheArbitrator->hasBid(worker)==false || TheArbitrator->getHighestBidder(worker).first!=this)
-    {
-      status = Error_Worker_Not_Owned;
-      return;
-    }
-    if (task[0].getType()==TaskTypes::Unit)
+    if (task[0].getType()==TaskTypes::Unit && workerReady)
     {
       UnitType ut = task[0].getUnit();
       for each(std::pair<UnitType, int> t in ut.requiredUnits())
@@ -148,12 +137,19 @@ void TaskStream::computeStatus()
           first_valid_frame=task[i-1].getFinishTime();
         reason = UnitReadyTimeStatus::Waiting_For_Worker_To_Be_Ready;
       }
-
+      if (first_valid_frame==Broodwar->getFrameCount() && !workerReady)
+      {
+        first_valid_frame = Broodwar->getFrameCount()+10;
+        if (worker==NULL || worker->exists() == false)
+          reason = UnitReadyTimeStatus::Error_Worker_Not_Specified;
+        else
+          reason = UnitReadyTimeStatus::Error_Worker_Not_Owned;
+      }
       task[i].setStartTime(first_valid_frame);
       //if we need to wait to start the first task, compute the correct status
       if ( i==0 ) //compute task stream status based on status of first unit
       {
-        if (task[0].getStartTime()!=-1 && task[0].getStartTime()<=Broodwar->getFrameCount())
+        if (task[0].getStartTime()!=-1 && task[0].getStartTime()<=Broodwar->getFrameCount() && workerReady)
           status = Executing_Task;
         else
         {
@@ -173,8 +169,12 @@ void TaskStream::computeStatus()
             status = Waiting_For_Supply;
           else if (reason == UnitReadyTimeStatus::Waiting_For_Gas)
             status = Waiting_For_Gas;
-          else
+          else if (reason == UnitReadyTimeStatus::Waiting_For_Minerals)
             status = Waiting_For_Minerals;
+          else if (reason == UnitReadyTimeStatus::Error_Worker_Not_Specified)
+            status = Error_Worker_Not_Specified;
+          else
+            status = Error_Worker_Not_Owned;
         }
       }
 
