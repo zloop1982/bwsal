@@ -15,6 +15,8 @@ class MacroAIModule : public BWAPI::AIModule
     virtual void onUnitDiscover(BWAPI::Unit* unit);
     virtual void onUnitEvade(BWAPI::Unit* unit);
     virtual void onUnitDestroy(BWAPI::Unit* unit);
+    virtual void onUnitMorph(BWAPI::Unit* unit);
+    virtual void onUnitRenegade(BWAPI::Unit* unit);
   private:
     Arbitrator::Arbitrator<BWAPI::Unit*,double> arbitrator;
 };

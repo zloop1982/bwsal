@@ -14,6 +14,8 @@
 #include <InformationManager.h>
 #include <BorderManager.h>
 #include <MacroBaseManager.h>
+#include <UnitGroupManager.h>
+#include <MacroWorkerManager.h>
 
 using namespace BWAPI;
 int drag_index = -1;
@@ -39,6 +41,10 @@ MacroAIModule::~MacroAIModule()
     delete TheBorderManager;
   if (TheMacroBaseManager != NULL)
     delete TheMacroBaseManager;
+  if (TheUnitGroupManager != NULL)
+    delete TheUnitGroupManager;
+  if (TheMacroWorkerManager != NULL)
+    delete TheMacroWorkerManager;
   if (infantryProducer != NULL)
     delete infantryProducer;
   if (vehicleProducer != NULL)
@@ -56,6 +62,8 @@ void MacroAIModule::onStart()
   InformationManager::create();
   BorderManager::create();
   MacroBaseManager::create();
+  UnitGroupManager::create();
+  MacroWorkerManager::create();
 
   TaskStream* ts = new TaskStream();
   TheMacroManager->taskStreams.push_back(ts);
@@ -93,7 +101,6 @@ void MacroAIModule::onEnd(bool isWinner)
 }
 void MacroAIModule::onFrame()
 {
-  TheArbitrator->update();
   if (infantryProducer)
     infantryProducer->update();
   if (vehicleProducer)
@@ -104,6 +111,8 @@ void MacroAIModule::onFrame()
   TheResourceRates->update();
   TheBorderManager->update();
   TheMacroBaseManager->update();
+  TheMacroWorkerManager->update();
+  TheArbitrator->update();
   std::set<Unit*> units=Broodwar->self()->getUnits();
   for(std::set<Unit*>::iterator i=units.begin();i!=units.end();i++)
   {
@@ -222,10 +231,12 @@ void MacroAIModule::onSendText(std::string text)
 void MacroAIModule::onUnitDiscover(BWAPI::Unit* unit)
 {
   TheInformationManager->onUnitDiscover(unit);
+  TheUnitGroupManager->onUnitDiscover(unit);
 }
 void MacroAIModule::onUnitEvade(BWAPI::Unit* unit)
 {
   TheInformationManager->onUnitEvade(unit);
+  TheUnitGroupManager->onUnitEvade(unit);
 }
 
 void MacroAIModule::onUnitDestroy(BWAPI::Unit* unit)
@@ -233,4 +244,12 @@ void MacroAIModule::onUnitDestroy(BWAPI::Unit* unit)
   TheArbitrator->onRemoveObject(unit);
   TheInformationManager->onUnitDestroy(unit);
   TheMacroBaseManager->onUnitDestroy(unit);
+}
+void MacroAIModule::onUnitMorph(BWAPI::Unit* unit)
+{
+  TheUnitGroupManager->onUnitMorph(unit);
+}
+void MacroAIModule::onUnitRenegade(BWAPI::Unit* unit)
+{
+  TheUnitGroupManager->onUnitRenegade(unit);
 }

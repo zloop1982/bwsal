@@ -6,7 +6,6 @@ using namespace BWAPI;
 using namespace std;
 MacroManager* TheMacroManager = NULL;
 Arbitrator::Arbitrator<BWAPI::Unit*,double>* TheArbitrator = NULL;
-    int v=0;
 
 MacroManager* MacroManager::create(Arbitrator::Arbitrator<BWAPI::Unit*,double>* arbitrator)
 {
@@ -84,6 +83,7 @@ void MacroManager::update()
     double y=ymax;
     double hscale = 0.3;
     double vscale = 0.3;
+    int v=0;
     if (v==0)
     {
       y+=r.getMinerals()*vscale;

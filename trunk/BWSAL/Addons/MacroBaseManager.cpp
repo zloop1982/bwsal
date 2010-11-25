@@ -123,6 +123,10 @@ MacroBase* MacroBaseManager::expandAtFrame(int frame, BWTA::BaseLocation* locati
   TheBorderManager->addMyBase(location);
   return mb;
 }
+const std::set<MacroBase*>& MacroBaseManager::getActiveBases() const
+{
+  return activeBases;
+}
 const std::set<MacroBase*>& MacroBaseManager::getReadyBases() const
 {
   return readyBases;
