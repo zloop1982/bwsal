@@ -1,6 +1,8 @@
 #pragma once
 #include <BWAPI.h>
 #include <map>
+
+//Timeline of when TechTypes will be started and finished.
 class TechTimeline
 {
   public:

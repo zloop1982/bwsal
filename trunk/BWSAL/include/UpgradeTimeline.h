@@ -1,6 +1,8 @@
 #pragma once
 #include <BWAPI.h>
 #include <map>
+
+//Timeline of when the levels of UpgradeTypes will be increased.
 class UpgradeTimeline
 {
   public:

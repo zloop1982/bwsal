@@ -1,6 +1,8 @@
 #pragma once
 #include "Resources.h"
 #include <map>
+
+//Timeline of resources. Enables queries on when resources will be available
 class ResourceTimeline
 {
   public:

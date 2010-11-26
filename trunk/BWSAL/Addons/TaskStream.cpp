@@ -42,12 +42,14 @@ void TaskStream::onOffer(std::set<BWAPI::Unit*> units)
   {
     if (u == worker)
     {
+      //The Arbitrator has offered us our desired worker, accept it and set workerReady = true
       TheArbitrator->accept(this,u);
       TheArbitrator->setBid(this,u,100);
       workerReady = true;
     }
     else
     {
+      //The Arbitrator has offered us a worker we don't want, decline it and remove the bid
       TheArbitrator->decline(this,u,0);
       TheArbitrator->removeBid(this,u);
     }
@@ -274,17 +276,22 @@ bool TaskStream::updateStatus()
 }
 void TaskStream::attach(TaskStreamObserver* obs, bool owned)
 {
+  //add observer to our observers set
   observers.insert(std::make_pair(obs, owned));
+  //let the observer know they have been attached to us
   obs->attached(this);
 }
 void TaskStream::detach(TaskStreamObserver* obs)
 {
+  //remove observer from our observers set
   observers.erase(obs);
+  //let the observer know they have been detached from us
   obs->detached(this);
 }
 
 void TaskStream::notifyNewStatus()
 {
+  //notify all observers of our new status
   for each(std::pair<TaskStreamObserver*, bool> obs in observers)
   {
     obs.first->newStatus(this);
@@ -292,6 +299,7 @@ void TaskStream::notifyNewStatus()
 }
 void TaskStream::notifyCompletedTask()
 {
+  //notify all observers that we have completed a task
   for each(std::pair<TaskStreamObserver*, bool> obs in observers)
   {
     obs.first->completedTask(this,task[0]);
@@ -303,6 +311,7 @@ TaskStream::Status TaskStream::getStatus() const
 }
 std::string TaskStream::getStatusString() const
 {
+  //turn the status into a string
   switch (status)
   {
     case None:
@@ -364,15 +373,23 @@ void TaskStream::setWorker(BWAPI::Unit* w)
   worker = w;
   if (oldWorker!=NULL)
   {
+    //tell the arbitrator we're no longer interested in the old worker
     TheArbitrator->removeBid(this,oldWorker);
+
+    //tell the macro manager the old worker no longer belongs to us
     if (TheMacroManager->unitToTaskStream.find(oldWorker)!=TheMacroManager->unitToTaskStream.end() && TheMacroManager->unitToTaskStream[oldWorker] == this)
       TheMacroManager->unitToTaskStream.erase(oldWorker);
   }
   if (worker!=NULL)
   {
+    //tell the arbitrator we are interested in the new worker
     TheArbitrator->setBid(this,worker,100);
+
+    //tell the macro manager the new worker now belongs to us
     TheMacroManager->unitToTaskStream[worker] = this;
   }
+
+  //workerReady is false until we own the new worker
   workerReady = false;
 }
 BWAPI::Unit* TaskStream::getWorker() const
@@ -446,6 +463,7 @@ bool TaskStream::isLocationReady() const
 }
 void TaskStream::clearPlanningData()
 {
+  //clear reserved resources and reserved finish data
   for(int i=0;i<(int)(task.size());i++)
   {
     task[i].setReservedResourcesThisFrame(task[i].hasSpentResources());
@@ -457,22 +475,26 @@ void TaskStream::clearPlanningData()
 }
 int TaskStream::getStartTime() const
 {
+  //start time of task stream is start time of first task in stream
   return task[0].getStartTime();
 }
 int TaskStream::getFinishTime() const
 {
+  //finish time of task stream is finish time of last task in stream
   if (task[0]==NULL)
     return Broodwar->getFrameCount();
   for(int i=0;i<(int)(task.size());i++)
     if (task[i].getFinishTime() == -1)
-      return -1;
+      return -1; //just to be safe, return never if any of the tasks will never finish
   return task[task.size()-1].getFinishTime();
 }
 
 int TaskStream::getFinishTime(BWAPI::UnitType t) const
 {
+  //returns the first time that a task of the given unit type will finish
   for(int i=0;i<(int)(task.size());i++)
     if (task[i].getType()==TaskTypes::Unit && task[i].getUnit()==t)
       return task[i].getFinishTime();
+  //or returns never if the task stream will never finish a task of the given unit type
   return -1;
 }
