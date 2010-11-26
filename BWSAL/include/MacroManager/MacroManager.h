@@ -14,10 +14,19 @@ class MacroManager
     MacroManager(Arbitrator::Arbitrator<BWAPI::Unit*,double>* arbitrator);
     ~MacroManager();
     void update();
+
+    /** Inserts the given task stream right above the given one */
     bool insertTaskStreamAbove(TaskStream* newTS, TaskStream* existingTS);
+
+    /** Inserts the given task stream right below the given one */
     bool insertTaskStreamBelow(TaskStream* newTS, TaskStream* existingTS);
+
+    /** Swaps the position of the two given task streams */
     bool swapTaskStreams(TaskStream* a, TaskStream* b);
+
+    /** Gets the task stream of which this unit is a worker */
     TaskStream* getTaskStream(BWAPI::Unit* unit) const;
+
     std::list< TaskStream* > taskStreams;
     std::set< TaskStream* > killSet;
     ResourceTimeline rtl;

@@ -22,10 +22,6 @@ class TaskStream : public Arbitrator::Controller<BWAPI::Unit*,double>
     void attach(TaskStreamObserver* obs, bool owned);
     void detach(TaskStreamObserver* obs);
 
-    void notifyNewStatus();
-    void notifyCompletedTask();
-
-
     enum Status
     {
       None,
@@ -53,6 +49,7 @@ class TaskStream : public Arbitrator::Controller<BWAPI::Unit*,double>
 
     void setBuildUnit(BWAPI::Unit* b);
     BWAPI::Unit* getBuildUnit() const;
+
     int getStartTime() const;
     int getFinishTime() const;
     int getFinishTime(BWAPI::UnitType t) const;
@@ -72,6 +69,8 @@ class TaskStream : public Arbitrator::Controller<BWAPI::Unit*,double>
     void setName(std::string s);
     void printToScreen(int x, int y);
   private:
+    void notifyNewStatus();
+    void notifyCompletedTask();
     void computeStatus();
     bool killSwitch;
     bool urgent;

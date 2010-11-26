@@ -1,6 +1,8 @@
 #pragma once
 #include <BWAPI.h>
 #include <map>
+
+//Timeline of the planned amount of each UnitType
 class UnitCountTimeline
 {
   public:

@@ -368,7 +368,7 @@ int Task::getFinishTime() const
   return startTime+getTime();
 }
 
-int Task::getRemainingTime(BWAPI::Player* player) const
+int Task::getRemainingTime() const
 {
   if (startTime<0) return -1;
   int t=0;
