@@ -113,8 +113,8 @@ void MacroAIModule::onFrame()
     expanded1 = true;
     TheMacroBaseManager->expandWhenPossible();
     onSendText("Terran Barracks");
-    onSendText("Terran Barracks");
-    onSendText("Terran Barracks");
+    onSendText("Terran Factory");
+
   }
   if (expanded1 && expanded2 == false && Broodwar->self()->completedUnitCount(UnitTypes::Terran_Command_Center)>1)
   {
@@ -124,6 +124,11 @@ void MacroAIModule::onFrame()
     onSendText("Terran Barracks");
     onSendText("Terran Barracks");
     onSendText("Terran Barracks");
+    onSendText("Terran Barracks");
+    onSendText("Terran Barracks");
+    onSendText("Terran Barracks");
+    onSendText("Terran Factory");
+    onSendText("Terran Factory");
   }
 
 
@@ -159,47 +164,58 @@ void MacroAIModule::onFrame()
       }
     }
   }
-  if (drag_index<0)
+  if (TheMacroManager->taskstream_list_visible)
+  {
+    if (drag_index<0)
+    {
+      if (Broodwar->getMouseState(M_LEFT) && !lastMouseClick)
+      {
+        drag_index = (Broodwar->getMousePosition().y()-25)/20;
+        if (drag_index<0) drag_index = 0;
+      }
+      if (drag_index>=(int)TheMacroManager->taskStreams.size())
+        drag_index=-1;
+    }
+    if (drag_index>=0)
+    {
+      int land_index = (Broodwar->getMousePosition().y()-30)/20;
+      if (land_index<0) land_index = 0;
+      if (land_index>=(int)TheMacroManager->taskStreams.size())
+        land_index=(int)TheMacroManager->taskStreams.size()-1;
+      if (land_index!=drag_index)
+      {
+        std::list<TaskStream*>::iterator td=TheMacroManager->taskStreams.end();
+        std::list<TaskStream*>::iterator tl=TheMacroManager->taskStreams.end();
+        TaskStream* tm=NULL;
+        int j=0;
+        for(std::list<TaskStream*>::iterator i=TheMacroManager->taskStreams.begin();i!=TheMacroManager->taskStreams.end();i++)
+        {
+          if (j==drag_index)
+            td=i;
+          if (j==land_index)
+            tl=i;
+          j++;
+        }
+        if (td!=TheMacroManager->taskStreams.end() && tl!=TheMacroManager->taskStreams.end())
+        {
+          tm=*td;
+          *td=*tl;
+          *tl=tm;
+        }
+        drag_index = land_index;
+      }
+      if (!Broodwar->getMouseState(M_LEFT) && lastMouseClick)
+      {
+        drag_index=-1;
+      }
+    }
+  }
+  else
   {
     if (Broodwar->getMouseState(M_LEFT) && !lastMouseClick)
     {
-      drag_index = (Broodwar->getMousePosition().y()-25)/20;
-      if (drag_index<0) drag_index = 0;
-    }
-    if (drag_index>=(int)TheMacroManager->taskStreams.size())
-      drag_index=-1;
-  }
-  if (drag_index>=0)
-  {
-    int land_index = (Broodwar->getMousePosition().y()-30)/20;
-    if (land_index<0) land_index = 0;
-    if (land_index>=(int)TheMacroManager->taskStreams.size())
-      land_index=(int)TheMacroManager->taskStreams.size()-1;
-    if (land_index!=drag_index)
-    {
-      std::list<TaskStream*>::iterator td=TheMacroManager->taskStreams.end();
-      std::list<TaskStream*>::iterator tl=TheMacroManager->taskStreams.end();
-      TaskStream* tm=NULL;
-      int j=0;
-      for(std::list<TaskStream*>::iterator i=TheMacroManager->taskStreams.begin();i!=TheMacroManager->taskStreams.end();i++)
-      {
-        if (j==drag_index)
-          td=i;
-        if (j==land_index)
-          tl=i;
-        j++;
-      }
-      if (td!=TheMacroManager->taskStreams.end() && tl!=TheMacroManager->taskStreams.end())
-      {
-        tm=*td;
-        *td=*tl;
-        *tl=tm;
-      }
-      drag_index = land_index;
-    }
-    if (!Broodwar->getMouseState(M_LEFT) && lastMouseClick)
-    {
-      drag_index=-1;
+      SelectAll()(Marine,Medic,Firebat,Vulture,Siege_Tank).attackMove(Broodwar->getMousePosition()+Broodwar->getScreenPosition());
+      SelectAll()(Barracks,Factory).setRallyPoint(Broodwar->getMousePosition()+Broodwar->getScreenPosition());
     }
   }
   lastMouseClick = Broodwar->getMouseState(M_LEFT);

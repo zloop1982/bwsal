@@ -107,7 +107,8 @@ void TaskStream::computeStatus()
         }
         if (status == Error_Location_Not_Specified || status == Error_Location_Blocked)
         {
-          status = None;
+          Broodwar->printf("Error Tile Position (%d,%d)",tp.x(),tp.y());
+          status = Error_Location_Blocked;
         }
       }
     }
