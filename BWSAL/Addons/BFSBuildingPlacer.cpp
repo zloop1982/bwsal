@@ -54,7 +54,6 @@ void BFSBuildingPlacer::update(TaskStream* ts)
     {
       TilePosition tp(ts->getTask(0).getTilePosition());
       TilePosition newtp(getBuildLocationNear(ts->getWorker(),tp,type,taskStreams[ts].buildDistance));
-      Broodwar->printf("(%d,%d) -> (%d,%d)",tp.x(),tp.y(),newtp.x(),newtp.y());
       ts->getTask(0).setTilePosition(newtp);
     }
   }
