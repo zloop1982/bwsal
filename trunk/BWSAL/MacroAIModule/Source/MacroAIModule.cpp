@@ -24,6 +24,8 @@ UnitCompositionProducer* infantryProducer = NULL;
 UnitCompositionProducer* vehicleProducer = NULL;
 bool expanded1 = false;
 bool expanded2 = false;
+bool expanded3 = false;
+bool expanded4 = false;
 MacroAIModule::MacroAIModule()
 {
 }
@@ -120,10 +122,20 @@ void MacroAIModule::onFrame()
   {
     expanded2 = true;
     TheMacroBaseManager->expandWhenPossible();
+    onSendText("Terran Factory");
+    onSendText("Terran Factory");
+  }
+  if (expanded2 && expanded3 == false && Broodwar->self()->completedUnitCount(UnitTypes::Terran_Command_Center)>2)
+  {
+    expanded3 = true;
+    TheMacroBaseManager->expandWhenPossible();
     onSendText("Terran Barracks");
     onSendText("Terran Barracks");
-    onSendText("Terran Barracks");
-    onSendText("Terran Barracks");
+  }
+  if (expanded3 && expanded4 == false && Broodwar->self()->completedUnitCount(UnitTypes::Terran_Command_Center)>3)
+  {
+    expanded4 = true;
+    TheMacroBaseManager->expandWhenPossible();
     onSendText("Terran Barracks");
     onSendText("Terran Barracks");
     onSendText("Terran Barracks");

@@ -52,7 +52,7 @@ void BasicTaskExecutor::update(TaskStream* ts)
       targetPosition.y()+=ut.tileHeight()*16;
       if (ts->getTask(0).getStartTime()<Broodwar->getFrameCount()+ts->getWorker()->getDistance(targetPosition)/ts->getTask(0).getWorkerType().topSpeed()*1.4+0.8*30)
       {
-        if (worker->getDistance(targetPosition)>100)
+        if (worker->getDistance(targetPosition)>100 || (ut.isRefinery()==false && worker->getDistance(targetPosition)>32))
         {
           if (Broodwar->getFrameCount()>=ts->getWorker()->getLastOrderFrame()+5)
             worker->rightClick(targetPosition);

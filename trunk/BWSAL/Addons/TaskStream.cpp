@@ -73,16 +73,41 @@ void TaskStream::computeStatus()
     UnitType ut = task[0].getUnit();
     if (ut.isBuilding() && !ut.whatBuilds().first.isBuilding() && buildUnit == NULL && (worker==NULL || worker->getBuildUnit()==NULL))
     {
-      if (task[0].getTilePosition().isValid()==false || !Broodwar->canBuildHere(worker,task[0].getTilePosition(),ut))
+      TilePosition tp = task[0].getTilePosition();
+      if (ut.isAddon())
+      {
+        tp.x()+=4;
+        tp.y()++;
+      }
+      bool canBuildHere = Broodwar->canBuildHere(NULL,tp,ut);
+      if (workerReady)
+        canBuildHere = Broodwar->canBuildHere(worker,tp,ut);
+      if (task[0].getTilePosition().isValid()==false || !canBuildHere)
         locationReady = false;
     }
+  }
+  if (task[0].getType()==TaskTypes::Unit && task[0].getTilePosition().isValid() && task[0].getUnit().isBuilding())
+  {
+    UnitType ut = task[0].getUnit();
+    TilePosition tp = task[0].getTilePosition();
+    if (ut.isAddon())
+    {
+      tp.x()+=4;
+      tp.y()++;
+    }
+    if (locationReady)
+      Broodwar->drawBoxMap(tp.x()*32,tp.y()*32,tp.x()*32+ut.tileWidth()*32,tp.y()*32+ut.tileHeight()*32,Colors::Green);
+    else
+      Broodwar->drawBoxMap(tp.x()*32,tp.y()*32,tp.x()*32+ut.tileWidth()*32,tp.y()*32+ut.tileHeight()*32,Colors::Red);
+    Broodwar->drawTextMap(tp.x()*32,tp.y()*32,"%s",ut.getName().c_str());
   }
   if (task[0] == NULL)
   {
     status = Error_Task_Not_Specified;
     return;
   }
-  if (task[0].isExecuting() || task[0].isCompleted() || buildUnit || (worker && worker->getBuildUnit()))
+  if (task[0].isExecuting() || task[0].isCompleted() || buildUnit || (worker && worker->getBuildUnit()) ||
+    (task[0].hasSpentResources() && workerReady && locationReady))
     status = Executing_Task;
   else
   {
@@ -102,15 +127,13 @@ void TaskStream::computeStatus()
           tp.x()+=4;
           tp.y()++;
         }
-        if (!Broodwar->canBuildHere(worker,tp,ut)) //doesn't work for blocked addons!
+        bool canBuildHere = Broodwar->canBuildHere(NULL,tp,ut);
+        if (workerReady)
+          canBuildHere = Broodwar->canBuildHere(worker,tp,ut);
+        if (!canBuildHere) //doesn't work for blocked addons!
         {
           status = Error_Location_Blocked;
           return;
-        }
-        if (status == Error_Location_Not_Specified || status == Error_Location_Blocked)
-        {
-          Broodwar->printf("Error Tile Position (%d,%d)",tp.x(),tp.y());
-          status = Error_Location_Blocked;
         }
       }
     }
