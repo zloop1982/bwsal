@@ -5,6 +5,7 @@
 #include <UnitCountTimeline.h>
 #include <TechTimeline.h>
 #include <UpgradeTimeline.h>
+#include <MacroManager/WorkerTaskTimeline.h>
 #include <Task.h>
 class TaskStream;
 class MacroManager
@@ -34,6 +35,7 @@ class MacroManager
     TechTimeline ttl;
     UpgradeTimeline utl;
     Resources spentResources;
+    WorkerTaskTimeline wttl;
     std::map< BWAPI::Unit*, TaskStream* > unitToTaskStream;
     std::map< int, std::list< std::pair<TaskStream*, Task > > > plan;
     bool taskstream_list_visible;

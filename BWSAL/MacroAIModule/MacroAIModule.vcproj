@@ -257,6 +257,14 @@
 					RelativePath="..\include\MacroManager\UnitReadyTimeCalculator.h"
 					>
 				</File>
+				<File
+					RelativePath="..\Addons\WorkerTaskTimeline.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\include\MacroManager\WorkerTaskTimeline.h"
+					>
+				</File>
 				<Filter
 					Name="TaskStreamObservers"
 					>

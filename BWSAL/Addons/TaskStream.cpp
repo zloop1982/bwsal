@@ -160,8 +160,19 @@ void TaskStream::computeStatus()
       if (i>0 && first_valid_frame!=-1)
       {
         if (first_valid_frame<task[i-1].getFinishTime())
-          first_valid_frame=task[i-1].getFinishTime();
-        reason = UnitReadyTimeStatus::Waiting_For_Worker_To_Be_Ready;
+        {
+          first_valid_frame = task[i-1].getFinishTime();
+          reason = UnitReadyTimeStatus::Waiting_For_Worker_To_Be_Ready;
+        }
+      }
+      if (first_valid_frame!=-1 && workerReady)
+      {
+        int first_available_frame = TheMacroManager->wttl.getFirstFreeInterval(worker,&task[i],first_valid_frame).first;
+        if (first_valid_frame<first_available_frame)
+        {
+          first_valid_frame = first_available_frame;
+          reason = UnitReadyTimeStatus::Waiting_For_Worker_To_Be_Ready;
+        }
       }
       if (first_valid_frame==Broodwar->getFrameCount() && !workerReady)
       {
@@ -206,6 +217,8 @@ void TaskStream::computeStatus()
 
       if (first_valid_frame==-1) break;
       TheMacroManager->rtl.reserveResources(first_valid_frame,task[i].getResources());
+      if (workerReady)
+        TheMacroManager->wttl.reserveTime(worker,first_valid_frame,&task[i]);
       TheMacroManager->plan[first_valid_frame].push_back(std::make_pair(this,task[i]));
       if (task[i].getType()==TaskTypes::Tech)
         TheMacroManager->ttl.registerTechStart(first_valid_frame,task[i].getTech());
