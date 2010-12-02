@@ -269,7 +269,7 @@ enum FilterFlag
   Powerup_Young_Chrysalis,
 
   None,
-  Unknown
+  Unknown_Unit
 };
 enum FliterAttributeScalar
 {

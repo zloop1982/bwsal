@@ -779,7 +779,7 @@ bool passesFlag(Unit* u, int f)
     case None:
       if(u->getType()==UnitTypes::None) return true;
     break;
-    case Unknown:
+    case Unknown_Unit:
       if(u->getType()==UnitTypes::Unknown) return true;
     break;
   }
