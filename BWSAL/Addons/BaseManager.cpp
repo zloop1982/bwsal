@@ -164,7 +164,7 @@ Base* BaseManager::getBase(BWTA::BaseLocation* location)
 }
 
 
-void BaseManager::expand(int priority)
+BWTA::BaseLocation* BaseManager::expand(int priority)
 {
   BWTA::BaseLocation* location=NULL;
   double minDist=-1;
@@ -181,12 +181,12 @@ void BaseManager::expand(int priority)
       }
     }
   }
-  expand(location,priority);
+  return expand(location,priority);
 }
-void BaseManager::expand(BWTA::BaseLocation* location, int priority)
+BWTA::BaseLocation* BaseManager::expand(BWTA::BaseLocation* location, int priority)
 {
   if (location==NULL)
-    return;
+    return NULL;
   addBase(location);
   this->builder->buildAdditional(1,BWAPI::Broodwar->self()->getRace().getCenter(),priority,location->getTilePosition());
 
@@ -197,6 +197,7 @@ void BaseManager::expand(BWTA::BaseLocation* location, int priority)
     if (!(this->hasRefinery(location)))
       this->builder->buildAdditional(1,BWAPI::Broodwar->self()->getRace().getRefinery(),priority,location->getTilePosition());
   }
+  return location;
 }
 
 
