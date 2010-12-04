@@ -187,7 +187,7 @@ void TaskStream::computeStatus()
         TheMacroManager->ttl.registerTechStart(first_valid_frame,task[i].getTech());
       task[i].setReservedResourcesThisFrame(true);
     }
-    if (task[i].hasReservedResourcesThisFrame() && !task[0].hasReservedFinishDataThisFrame())
+    if (task[i].hasReservedResourcesThisFrame() && !task[i].hasReservedFinishDataThisFrame())
     {
       if (task[i].getType()==TaskTypes::Unit)
       {
@@ -426,10 +426,25 @@ void TaskStream::clearPlanningData()
   //clear reserved resources and reserved finish data
   for(int i=0;i<(int)(task.size());i++)
   {
-    task[i].setReservedResourcesThisFrame(task[i].hasSpentResources());
     task[i].setReservedFinishDataThisFrame(task[i].isCompleted());
-    if (!task[i].hasSpentResources())
-      task[i].setStartTime(-1);
+    task[i].setReservedResourcesThisFrame(task[i].hasSpentResources());
+    if (task[i].hasReservedResourcesThisFrame() && !task[i].hasReservedFinishDataThisFrame())
+    {
+      if (task[i].getType()==TaskTypes::Unit)
+      {
+        if (task[i].getUnit().supplyProvided()>0)
+          TheMacroManager->rtl.registerSupplyIncrease(task[i].getFinishTime(), task[i].getUnit().supplyProvided());
+        int count = 1;
+        if (task[i].getUnit().isTwoUnitsInOneEgg())
+          count = 2;
+        TheMacroManager->uctl.registerUnitCountChange(task[i].getFinishTime(), task[i].getUnit(), count);
+        if (task[i].getType()==TaskTypes::Tech)
+          TheMacroManager->ttl.registerTechFinish(task[i].getFinishTime(),task[i].getTech());
+        if (task[i].getType()==TaskTypes::Upgrade)
+          TheMacroManager->utl.registerUpgradeLevelIncrease(task[i].getFinishTime(),task[i].getUpgrade());
+      }
+      task[i].setReservedFinishDataThisFrame(true);
+    }
   }
   plannedAdditionalResources = false;
 }

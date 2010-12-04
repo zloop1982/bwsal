@@ -150,7 +150,7 @@ void MacroAIModule::onFrame()
   if (vehicleProducer)
     vehicleProducer->update();
   TheMacroSupplyManager->update();
-  TheMacroDependencyResolver->update();
+  //TheMacroDependencyResolver->update();
   TheMacroManager->update();
   TheResourceRates->update();
   TheBorderManager->update();
