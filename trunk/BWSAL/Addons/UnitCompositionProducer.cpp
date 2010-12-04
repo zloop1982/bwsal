@@ -44,10 +44,9 @@ void UnitCompositionProducer::update()
   {
     if (u->getType()==workerType && u->exists())
     {
-      TaskStream* ts = TheMacroManager->getTaskStream(u);
-      if (ts==NULL)
+      if (TheMacroManager->getTaskStreams(u).empty())
       {
-        ts = new TaskStream();
+        TaskStream* ts = new TaskStream();
         TheMacroManager->taskStreams.push_back(ts);
         ts->setWorker(u);
         ts->attach(BasicTaskExecutor::getInstance(),false);
@@ -79,8 +78,19 @@ void UnitCompositionProducer::update()
     }
   }
 }
-UnitType UnitCompositionProducer::getNextUnitType(BWAPI::Unit* worker)
+UnitType UnitCompositionProducer::getNextUnitType(Unit* worker)
 {
+  /*
+
+  int time = UnitReadyTimeCalculator::getReadyTime(worker,true);
+  if (time == -1) return UnitTypes::None;
+
+  int t2   = ts->getFinishTime();
+  if (t2 == -1) return UnitTypes::None;
+
+  time = max(time,t2);
+  */
+
   double aTc = 0;
   double cTc = 0;
   for each(std::pair<UnitType, double> t in unitCompositionWeights)
@@ -93,27 +103,38 @@ UnitType UnitCompositionProducer::getNextUnitType(BWAPI::Unit* worker)
   {
     desiredUnitCounts[t.first]=t.second*r;
   }
-  double maxDiff=-10000;
-  UnitType nextType;
-  int time = UnitReadyTimeCalculator::getReadyTime(worker,true);
+  int earliestFrame = -1;
+  std::set<UnitType> choseFrom;
   for each(std::pair<UnitType, double> t in unitCompositionWeights)
   {
     UnitType typ = t.first;
-    double d=desiredUnitCounts[t.first]-actualUnitCounts[typ];
     UnitReadyTimeStatus::Enum r;
-    int t2=UnitReadyTimeCalculator::getReadyTime(worker,Task(typ),r,false,true);
-    if (t2<0 || t2>time)
+    int t = UnitReadyTimeCalculator::getFirstFreeTime(worker,Task(typ),r,true,true);
+    if (t==-1 && requiresAddon.find(typ)!=requiresAddon.end() && worker->getAddon()==NULL)
     {
-      TaskStream* ts = TheMacroManager->getTaskStream(worker);
-      if (t2<0 && requiresAddon.find(typ)!=requiresAddon.end() && worker->getAddon()==NULL && (ts==NULL || ts->getFinishTime(typ)==-1))
+      int addonFinishTime = -1;
+      for each(TaskStream* ts in TheMacroManager->getTaskStreams(worker))
+        if (addonFinishTime==-1)
+          addonFinishTime = ts->getFinishTime(typ);
+      if (addonFinishTime==-1)
       {
         typ = getRequiredAddon[typ];
-      }
-      else
-      {
-        continue;
+        t = UnitReadyTimeCalculator::getFirstFreeTime(worker,Task(typ),r,true,true);
       }
     }
+    if (earliestFrame == -1 || (t<earliestFrame && t!=-1))
+    {
+      choseFrom.clear();
+      earliestFrame = t;
+    }
+    if (earliestFrame == t)
+      choseFrom.insert(typ);
+  }
+  double maxDiff = -10000;
+  UnitType nextType = UnitTypes::None;
+  for each(UnitType typ in choseFrom)
+  {
+    double d = desiredUnitCounts[typ]-actualUnitCounts[typ];
     if (d>maxDiff)
     {
       maxDiff  = d;

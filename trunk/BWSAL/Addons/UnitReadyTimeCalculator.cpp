@@ -39,28 +39,40 @@ int UnitReadyTimeCalculator::getReadyTime(BWAPI::Unit* unit, bool considerTasks)
   t=max(t,t+unit->getRemainingTrainTime());
   if (considerTasks)
   {
-    //if we need to consider tasks, find the task stream this unit is in
-    TaskStream* ts = TheMacroManager->getTaskStream(unit);
-    if (ts)
-    {
-      //get the finish time of this task stream
-      int t2=ts->getFinishTime();
-
-      //if this task stream will never finish, our unit will never be ready
-      if (t2==-1) return -1;
-
-      t=max(t,t2);
-    }
+    int t2=TheMacroManager->wttl.getFirstFreeInterval(unit,1,t).first;
+    if (t2==-1)
+      return -1;
+    t = max(t,t2);
   }
+  return t;
+}
+//computes when a unit will be ready to do any task
+int UnitReadyTimeCalculator::getReadyTime(BWAPI::Unit* unit, int duration)
+{
+  //if we don't have a unit, assume its ready now
+  if (unit==NULL) return Broodwar->getFrameCount();
+
+  //a dead unit will never be ready
+  if (!unit->exists()) return -1;
+
+  //take into account remaining times
+  int t=Broodwar->getFrameCount();
+  t=max(t,t+unit->getRemainingResearchTime());
+  t=max(t,t+unit->getRemainingUpgradeTime());
+  t=max(t,t+unit->getRemainingBuildTime());
+  t=max(t,t+unit->getRemainingTrainTime());
+  int t2=TheMacroManager->wttl.getFirstFreeInterval(unit,duration,t).first;
+  if (t2==-1)
+    return -1;
+  t = max(t,t2);
   return t;
 }
 
 //returns the frame when the unit will be ready to do the given task
-int UnitReadyTimeCalculator::getReadyTime(BWAPI::Unit* unit, const Task &task, UnitReadyTimeStatus::Enum &reason, bool considerResources, bool considerTasks)
+int UnitReadyTimeCalculator::getFirstFreeTime(BWAPI::Unit* unit, const Task &task, UnitReadyTimeStatus::Enum &reason, bool considerResources, bool considerTasks)
 {
   reason = UnitReadyTimeStatus::Waiting_For_Worker_To_Be_Ready;
   int t = getReadyTime(unit,considerTasks);
-
   if (t==-1) return -1; //frame -1 is never
 
   int t2 = task.getEarliestStartTime();
@@ -107,21 +119,27 @@ int UnitReadyTimeCalculator::getReadyTime(BWAPI::Unit* unit, const Task &task, U
       //and if our worker doesn't have this add-on...
       if (unit && unit->exists() && unit->getAddon()==NULL && (unit->getBuildUnit()==NULL || unit->getBuildUnit()->getType().isAddon()==false))
       {
-        TaskStream* ts = TheMacroManager->getTaskStream(unit);
-        if (ts)
-        {
-          int t3 = ts->getFinishTime(r.first); //then see if/when this add-on is planned to be built
-          if (t3==-1 || t3>t) //update expected time and reason this add-on will delay us
-          {
-            reason = UnitReadyTimeStatus::Waiting_For_Required_Units;
-            t=t3;
-          }
-        }
-        else
+        if (TheMacroManager->getTaskStreams(unit).empty())
         {
           reason = UnitReadyTimeStatus::Error_Task_Requires_Addon;
           //since there is no plan to make this add-on, the unit will never be ready for this task
           t=-1;
+        }
+        else
+        {
+          int firstFoundT = -1;
+          for each(TaskStream* ts in TheMacroManager->getTaskStreams(unit))
+          {
+            int t3 = ts->getFinishTime(r.first); //then see if/when this add-on is planned to be built
+            if (t3==-1) continue;
+            if (t3<firstFoundT || firstFoundT==-1)
+              firstFoundT = t3;
+          }
+          if (firstFoundT==-1 || firstFoundT>t) //update expected time and reason this add-on will delay us
+          {
+            reason = UnitReadyTimeStatus::Waiting_For_Required_Units;
+            t=firstFoundT;
+          }
         }
       }
     }
@@ -139,7 +157,6 @@ int UnitReadyTimeCalculator::getReadyTime(BWAPI::Unit* unit, const Task &task, U
     }
     if (t==-1) return -1; //return never
   }
-
   //Upgrading Attack Level 3 requires that Attack Level 2 is completed...
   if (task.getType()==TaskTypes::Upgrade)
   {
@@ -152,23 +169,15 @@ int UnitReadyTimeCalculator::getReadyTime(BWAPI::Unit* unit, const Task &task, U
     }
     if (t==-1) return -1; //return never
   }
-  return t;
-}
-std::set<BWAPI::UnitType> UnitReadyTimeCalculator::getPossibleUnitTypes(BWAPI::Unit* unit, int time, bool considerResources, bool considerTasks)
-{
-  set<UnitType> unitTypes;
-  int t = getReadyTime(unit,considerTasks);
-  if (t==-1 || t>time) return unitTypes;
-  UnitType workerType = unit->getType();
-  if (unit->isMorphing())
-    workerType=unit->getBuildType();
-  UnitReadyTimeStatus::Enum r;
-  for each(UnitType type in makes[workerType])
+  if (considerTasks && unit && unit->exists())
   {
-    if (getReadyTime(unit,Task(type),r,considerResources,considerTasks)<time)
+    int t2 = TheMacroManager->wttl.getFirstFreeInterval(unit,&task,t).first;
+    if (t2==-1 || t2>t)
     {
-      unitTypes.insert(type);
+      reason = UnitReadyTimeStatus::Waiting_For_Worker_To_Be_Ready;
+      t=t2;
     }
+    if (t==-1) return -1; //return never
   }
-  return unitTypes;
+  return t;
 }

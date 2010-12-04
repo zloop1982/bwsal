@@ -23,12 +23,10 @@ class UnitReadyTimeCalculator
 {
   public:
     static void init();
-    /* Computes when a unit will be ready to do any task */
+    /* Computes when a unit will be ready to start any task */
     static int getReadyTime(BWAPI::Unit* unit, bool considerTasks = false);
-    /* computes when a unit will be ready to do a specific task */
-    static int getReadyTime(BWAPI::Unit* unit, const Task &task, UnitReadyTimeStatus::Enum &reason, bool considerResources = true, bool considerTasks = false);
-    /* Determines the set of possible unit types a given unit can make at a given time */
-    static std::set<BWAPI::UnitType> getPossibleUnitTypes(BWAPI::Unit* unit, int time = BWAPI::Broodwar->getFrameCount(), bool considerResources = true, bool considerTasks = false);
-//    static std::set<BWAPI::UpgradeType> getPossibleUpgradeTypes(BWAPI::Unit* unit, int time = BWAPI::Broodwar->getFrameCount());
-//    static std::set<BWAPI::TechType> getPossibleTechTypes(BWAPI::Unit* unit, int time = BWAPI::Broodwar->getFrameCount());
+    /* Computes when a unit will be ready to start any task of a given duration */
+    static int getReadyTime(BWAPI::Unit* unit, int duration);
+    /* computes when a unit will be free to start a specific task */
+    static int getFirstFreeTime(BWAPI::Unit* unit, const Task &task, UnitReadyTimeStatus::Enum &reason, bool considerResources = true, bool considerTasks = false);
 };
