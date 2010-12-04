@@ -83,7 +83,7 @@ void TaskStream::computeStatus()
     status = Error_Task_Not_Specified;
     return;
   }
-  if (task[0].isExecuting() || task[0].isCompleted() || buildUnit || (worker && worker->getBuildUnit()) ||
+  if (task[0].isExecuting() || task[0].isCompleted() || buildUnit || (worker && worker->exists() && worker->isCompleted() && task[0].getType()==TaskTypes::Unit && task[0].getUnit().isBuilding() && worker->getBuildUnit()) ||
     (task[0].hasSpentResources() && workerReady && locationReady))
     status = Executing_Task;
   else
@@ -235,27 +235,6 @@ void TaskStream::update()
     if (workerReady)
     {
       Broodwar->drawTextMap(worker->getPosition().x(),worker->getPosition().y(),"Task: %s",task[0].getName().c_str());
-    }
-  }
-  else
-  {
-    if (workerReady)
-    {
-      if (worker->isResearching())
-        worker->cancelResearch();
-      else if (worker->isUpgrading())
-        worker->cancelUpgrade();
-      else if (worker->isTraining())
-        worker->cancelTrain();
-      else if (worker->isMorphing())
-        worker->cancelMorph();
-      else if (worker->isConstructing() && worker->isCompleted())
-      {
-        Broodwar->printf("CancelConstruction %s",getStatusString().c_str());
-        if (worker->getBuildUnit() && worker->getBuildUnit()->getType().isBuilding())
-          worker->getBuildUnit()->cancelConstruction();
-        worker->cancelConstruction();
-      }
     }
   }
   for each(std::pair<TaskStreamObserver*, bool> obs in observers)
