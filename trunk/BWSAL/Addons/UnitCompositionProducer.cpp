@@ -46,12 +46,33 @@ void UnitCompositionProducer::update()
     {
       if (TheMacroManager->getTaskStreams(u).empty())
       {
+        if (u->getType()==UnitTypes::Terran_Barracks)
+        {
+          {
+            TaskStream* ts = new TaskStream();
+            TheMacroManager->taskStreams.push_back(ts);
+            ts->setWorker(u);
+            ts->attach(BasicTaskExecutor::getInstance(),false);
+            ts->attach(new TerminateIfWorkerLost(),true);
+            ts->attach(new UnitPump(UnitTypes::Terran_Medic),true);
+          }
+          {
+            TaskStream* ts = new TaskStream();
+            TheMacroManager->taskStreams.push_back(ts);
+            ts->setWorker(u);
+            ts->attach(BasicTaskExecutor::getInstance(),false);
+            ts->attach(new TerminateIfWorkerLost(),true);
+            ts->attach(new UnitPump(UnitTypes::Terran_Marine),true);
+          }
+        }
+        /*
         TaskStream* ts = new TaskStream();
         TheMacroManager->taskStreams.push_back(ts);
         ts->setWorker(u);
         ts->attach(BasicTaskExecutor::getInstance(),false);
         ts->attach(this,false);
         ts->attach(new TerminateIfWorkerLost(),true);
+        */
       }
     }
   }

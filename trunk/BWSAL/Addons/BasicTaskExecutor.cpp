@@ -108,10 +108,10 @@ void BasicTaskExecutor::computeBuildUnit(TaskStream* ts)
   }
 
   if (ts->isWorkerReady()==false) return;
-
   Unit* worker = ts->getWorker();
+  if (!worker->exists() || !worker->isCompleted()) return;
 
-  if (worker->getBuildUnit() != NULL && worker->getBuildUnit()->exists() && (worker->getBuildUnit()->getType() == ut || worker->getBuildUnit()->getBuildType() == ut))
+  if (worker->exists() && worker->isCompleted() && worker->getBuildUnit() != NULL && worker->getBuildUnit()->exists() && (worker->getBuildUnit()->getType() == ut || worker->getBuildUnit()->getBuildType() == ut))
     ts->setBuildUnit(worker->getBuildUnit());
 
   if (worker->getAddon() != NULL && worker->getAddon()->exists() && (worker->getAddon()->getType() == ut || worker->getAddon()->getBuildType() == ut))
