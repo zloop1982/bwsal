@@ -6,6 +6,7 @@ using namespace BWAPI;
 using namespace std;
 MacroManager* TheMacroManager = NULL;
 Arbitrator::Arbitrator<BWAPI::Unit*,double>* TheArbitrator = NULL;
+std::set<TaskStream*> emptyTSSet;
 
 MacroManager* MacroManager::create(Arbitrator::Arbitrator<BWAPI::Unit*,double>* arbitrator)
 {
@@ -25,8 +26,56 @@ MacroManager::~MacroManager()
   for(std::list<TaskStream*>::iterator i=taskStreams.begin();i!=taskStreams.end();i++)
     delete *i;
 }
+void MacroManager::onOffer(std::set<BWAPI::Unit*> units)
+{
+  for each(Unit* u in units)
+  {
+    if (unitToTaskStreams.find(u)!=unitToTaskStreams.end() && !unitToTaskStreams[u].empty())
+    {
+      //The Arbitrator has offered us a worker our task streams want to use, so accept it
+      TheArbitrator->accept(this,u);
+      TheArbitrator->setBid(this,u,100);
+      ownedUnits.insert(u);
+    }
+    else
+    {
+      //The Arbitrator has offered us a worker we don't want, decline it and remove the bid
+      TheArbitrator->decline(this,u,0);
+      TheArbitrator->removeBid(this,u);
+    }
+  }
+}
+void MacroManager::onRevoke(BWAPI::Unit* unit, double bid)
+{
+  ownedUnits.erase(unit);
+  if (unitToTaskStreams.find(unit)!=unitToTaskStreams.end())
+  {
+    //tell all task streams that were using this worker that it is no longer available.
+    for each(TaskStream* ts in unitToTaskStreams[unit])
+    {
+      ts->onRevoke(unit);
+    }
+  }
+  unitToTaskStreams.erase(unit);
+}
 void MacroManager::update()
 {
+  bool done= false;
+  while (!done)
+  {
+    done=true;
+    for(std::map<BWAPI::Unit*, std::set<TaskStream*> >::iterator i=unitToTaskStreams.begin();i!=unitToTaskStreams.end();i++)
+    {
+      if (i->second.empty())
+      {
+        TheArbitrator->removeBid(this,i->first);
+        unitToTaskStreams.erase(i);
+        done = false;
+        break;
+      }
+    }
+  }
+
   spentResources.setSupply(0);//don't keep track of spent supply
   Resources r = CumulativeResources(Broodwar->self())-spentResources;
   rtl.reset(r,Broodwar->self()->supplyTotal(),TheResourceRates->getGatherRate().getMinerals(),TheResourceRates->getGatherRate().getGas());
@@ -37,6 +86,14 @@ void MacroManager::update()
   plan.clear();
   for each(TaskStream* ts in killSet)
   {
+    Unit* worker = ts->getWorker();
+    if (worker!=NULL)
+    {
+      //remove the task stream from the worker's set in unitToTaskStreams
+      unitToTaskStreams[worker].erase(ts);
+    }
+
+    //find and remove the task stream from the taskStreams list
     for(std::list<TaskStream*>::iterator i=taskStreams.begin();i!=taskStreams.end();i++)
     {
       if (*i == ts)
@@ -45,8 +102,10 @@ void MacroManager::update()
         break;
       }
     }
+    //finally, delete the task stream
     delete ts;
   }
+  //clear the planning data of each task stream
   for each(TaskStream* ts in taskStreams)
     ts->clearPlanningData();
   Broodwar->drawTextScreen(452,16,"\x07%d",(int)(TheResourceRates->getGatherRate().getMinerals()*23*60));
@@ -138,7 +197,30 @@ void MacroManager::update()
       y+=20;
     }
   */
+  //bid on all the workers our task streams want to use
+  for(std::map<BWAPI::Unit*, std::set<TaskStream*> >::iterator i=unitToTaskStreams.begin();i!=unitToTaskStreams.end();i++)
+  {
+    if (!i->second.empty())
+      TheArbitrator->setBid(this,i->first,100);
+  }
+  for each(Unit* u in ownedUnits)
+  {
+    std::map<BWAPI::Unit*, std::set<TaskStream*> >::iterator i=unitToTaskStreams.find(u);
+    if (i==unitToTaskStreams.end() || i->second.empty())
+      TheArbitrator->setBid(this,u,0);
+    if (i==unitToTaskStreams.end())
+      unitToTaskStreams.erase(u);
+  }
 }
+std::string MacroManager::getName() const
+{
+  return "Macro Manager";
+}
+std::string MacroManager::getShortName() const
+{
+  return "Macro";
+}
+
 bool MacroManager::insertTaskStreamAbove(TaskStream* newTS, TaskStream* existingTS)
 {
   if (newTS==NULL || existingTS==NULL) return false;
@@ -189,10 +271,14 @@ bool MacroManager::swapTaskStreams(TaskStream* a, TaskStream* b)
   *b_iter = a;
   return true;
 }
-TaskStream* MacroManager::getTaskStream(BWAPI::Unit* unit) const
+const std::set<TaskStream*>& MacroManager::getTaskStreams(BWAPI::Unit* unit) const
 {
-  std::map<BWAPI::Unit*, TaskStream*>::const_iterator i=unitToTaskStream.find(unit);
-  if (i==unitToTaskStream.end())
-    return NULL;
+  //returns the set of task streams that are using this worker
+  std::map<BWAPI::Unit*, std::set<TaskStream*> >::const_iterator i=unitToTaskStreams.find(unit);
+
+  if (i==unitToTaskStreams.end()) //nothing is using this worker, so return an empty set
+    return emptyTSSet;
+
+  //return the set of tsak streams
   return i->second;
 }

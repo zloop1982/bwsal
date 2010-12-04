@@ -5,19 +5,16 @@
 #include <MacroManager.h>
 
 class TaskStreamObserver;
-class TaskStream : public Arbitrator::Controller<BWAPI::Unit*,double>
+class TaskStream
 {
   public:
     TaskStream(Task t0=Task(), Task t1=Task(), Task t2=Task(), Task t3=Task());
     ~TaskStream();
     void terminate();
-    virtual void onOffer(std::set<BWAPI::Unit*> units);
-    virtual void onRevoke(BWAPI::Unit* unit, double bid);
-    virtual void update();
+    virtual void onRevoke(BWAPI::Unit* unit);
+    void update();
     void clearPlanningData();
     bool updateStatus(); //returns true if planned additional resources (units, supply)
-    virtual std::string getName() const;
-    virtual std::string getShortName() const;
 
     void attach(TaskStreamObserver* obs, bool owned);
     void detach(TaskStreamObserver* obs);
@@ -66,7 +63,6 @@ class TaskStream : public Arbitrator::Controller<BWAPI::Unit*,double>
     void setUrgent(bool isUrgent);
     bool isUrgent() const;
 
-    void setName(std::string s);
     void printToScreen(int x, int y);
   private:
     void notifyNewStatus();
@@ -81,6 +77,5 @@ class TaskStream : public Arbitrator::Controller<BWAPI::Unit*,double>
     BWAPI::Unit* worker;
     BWAPI::Unit* buildUnit;
     Status status;
-    std::string name;
     std::map<TaskStreamObserver*, bool > observers;
 };

@@ -109,7 +109,7 @@ void MacroAIModule::onEnd(bool isWinner)
 }
 void MacroAIModule::onFrame()
 {
-
+  /*
   if (expanded1 == false && Broodwar->self()->completedUnitCount(UnitTypes::Terran_Marine)>1)
   {
     expanded1 = true;
@@ -142,6 +142,7 @@ void MacroAIModule::onFrame()
     onSendText("Terran Factory");
     onSendText("Terran Factory");
   }
+  */
 
 
   if (infantryProducer)

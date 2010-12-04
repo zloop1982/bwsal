@@ -8,13 +8,17 @@
 #include <MacroManager/WorkerTaskTimeline.h>
 #include <Task.h>
 class TaskStream;
-class MacroManager
+class MacroManager : public Arbitrator::Controller<BWAPI::Unit*,double>
 {
   public:
     static MacroManager* create(Arbitrator::Arbitrator<BWAPI::Unit*,double>* arbitrator);
     MacroManager(Arbitrator::Arbitrator<BWAPI::Unit*,double>* arbitrator);
     ~MacroManager();
-    void update();
+    virtual void onOffer(std::set<BWAPI::Unit*> units);
+    virtual void onRevoke(BWAPI::Unit* unit, double bid);
+    virtual void update();
+    std::string getName() const;
+    std::string getShortName() const;
 
     /** Inserts the given task stream right above the given one */
     bool insertTaskStreamAbove(TaskStream* newTS, TaskStream* existingTS);
@@ -25,8 +29,8 @@ class MacroManager
     /** Swaps the position of the two given task streams */
     bool swapTaskStreams(TaskStream* a, TaskStream* b);
 
-    /** Gets the task stream of which this unit is a worker */
-    TaskStream* getTaskStream(BWAPI::Unit* unit) const;
+    /** Gets the task streams of which this unit is a worker */
+    const std::set<TaskStream*>& getTaskStreams(BWAPI::Unit* unit) const;
 
     std::list< TaskStream* > taskStreams;
     std::set< TaskStream* > killSet;
@@ -36,7 +40,8 @@ class MacroManager
     UpgradeTimeline utl;
     Resources spentResources;
     WorkerTaskTimeline wttl;
-    std::map< BWAPI::Unit*, TaskStream* > unitToTaskStream;
+    std::map< BWAPI::Unit*, std::set<TaskStream*> > unitToTaskStreams;
+    std::set< BWAPI::Unit*> ownedUnits;
     std::map< int, std::list< std::pair<TaskStream*, Task > > > plan;
     bool taskstream_list_visible;
 };

@@ -32,7 +32,7 @@ void BasicWorkerFinder::newStatus(TaskStream* ts)
           continue;
         if (TheArbitrator->hasBid(u) && TheArbitrator->getHighestBidder(u).second>=100.0)
           continue;
-        if (TheMacroManager->getTaskStream(u)!=NULL)
+        if (TheMacroManager->getTaskStreams(u).empty()==false)
           continue;
 
         units.insert(u);

@@ -15,7 +15,6 @@ TaskStream::TaskStream(Task t0, Task t1, Task t2, Task t3)
   buildUnit  = NULL;
   status     = None;
   killSwitch = false;
-  name       = "Task Stream";
   plannedAdditionalResources = false;
 }
 TaskStream::~TaskStream()
@@ -28,38 +27,16 @@ TaskStream::~TaskStream()
       delete obs.first;
   }
   observers.clear();
-  TheArbitrator->removeAllBids(this);
 }
 void TaskStream::terminate()
 {
   TheMacroManager->killSet.insert(this);
-  TheArbitrator->removeAllBids(this);
   killSwitch = true;
 }
-void TaskStream::onOffer(std::set<BWAPI::Unit*> units)
-{
-  for each(Unit* u in units)
-  {
-    if (u == worker)
-    {
-      //The Arbitrator has offered us our desired worker, accept it and set workerReady = true
-      TheArbitrator->accept(this,u);
-      TheArbitrator->setBid(this,u,100);
-      workerReady = true;
-    }
-    else
-    {
-      //The Arbitrator has offered us a worker we don't want, decline it and remove the bid
-      TheArbitrator->decline(this,u,0);
-      TheArbitrator->removeBid(this,u);
-    }
-  }
-}
-void TaskStream::onRevoke(BWAPI::Unit* unit, double bid)
+void TaskStream::onRevoke(BWAPI::Unit* unit)
 {
   if (worker == unit)
   {
-    TheArbitrator->removeBid(this,unit);
     worker = NULL;
     workerReady = false;
   }
@@ -67,7 +44,7 @@ void TaskStream::onRevoke(BWAPI::Unit* unit, double bid)
 void TaskStream::computeStatus()
 {
   locationReady = true;
-  workerReady = (worker != NULL) && worker->exists() && TheArbitrator->hasBid(worker) && TheArbitrator->getHighestBidder(worker).first==this;
+  workerReady = (worker != NULL) && worker->exists() && TheArbitrator->hasBid(worker) && TheArbitrator->getHighestBidder(worker).first==TheMacroManager;
   if (task[0].getType()==TaskTypes::Unit)
   {
     UnitType ut = task[0].getUnit();
@@ -153,27 +130,11 @@ void TaskStream::computeStatus()
   for(int i=0;i<(int)(task.size());i++)
   {
     if (i>0 && task[i-1].getStartTime()==-1) break;
+    if (task[i].getType()==TaskTypes::None) break;
     if (!task[i].hasReservedResourcesThisFrame())
     {
       UnitReadyTimeStatus::Enum reason;
-      int first_valid_frame = UnitReadyTimeCalculator::getReadyTime(worker, task[i], reason, true, false);
-      if (i>0 && first_valid_frame!=-1)
-      {
-        if (first_valid_frame<task[i-1].getFinishTime())
-        {
-          first_valid_frame = task[i-1].getFinishTime();
-          reason = UnitReadyTimeStatus::Waiting_For_Worker_To_Be_Ready;
-        }
-      }
-      if (first_valid_frame!=-1 && workerReady)
-      {
-        int first_available_frame = TheMacroManager->wttl.getFirstFreeInterval(worker,&task[i],first_valid_frame).first;
-        if (first_valid_frame<first_available_frame)
-        {
-          first_valid_frame = first_available_frame;
-          reason = UnitReadyTimeStatus::Waiting_For_Worker_To_Be_Ready;
-        }
-      }
+      int first_valid_frame = UnitReadyTimeCalculator::getFirstFreeTime(worker, task[i], reason,true,true);
       if (first_valid_frame==Broodwar->getFrameCount() && !workerReady)
       {
         first_valid_frame = Broodwar->getFrameCount()+10;
@@ -216,9 +177,11 @@ void TaskStream::computeStatus()
       }
 
       if (first_valid_frame==-1) break;
-      TheMacroManager->rtl.reserveResources(first_valid_frame,task[i].getResources());
+      if (!TheMacroManager->rtl.reserveResources(first_valid_frame,task[i].getResources()))
+        Broodwar->printf("Error: Unable to reserve resources for %s",task[i].getName().c_str());
       if (workerReady)
-        TheMacroManager->wttl.reserveTime(worker,first_valid_frame,&task[i]);
+        if (!TheMacroManager->wttl.reserveTime(worker,first_valid_frame,&task[i]))
+          Broodwar->printf("Error: Unable to reserve time for %s",task[i].getName().c_str());
       TheMacroManager->plan[first_valid_frame].push_back(std::make_pair(this,task[i]));
       if (task[i].getType()==TaskTypes::Tech)
         TheMacroManager->ttl.registerTechStart(first_valid_frame,task[i].getTech());
@@ -409,20 +372,14 @@ void TaskStream::setWorker(BWAPI::Unit* w)
   worker = w;
   if (oldWorker!=NULL)
   {
-    //tell the arbitrator we're no longer interested in the old worker
-    TheArbitrator->removeBid(this,oldWorker);
-
     //tell the macro manager the old worker no longer belongs to us
-    if (TheMacroManager->unitToTaskStream.find(oldWorker)!=TheMacroManager->unitToTaskStream.end() && TheMacroManager->unitToTaskStream[oldWorker] == this)
-      TheMacroManager->unitToTaskStream.erase(oldWorker);
+    if (TheMacroManager->unitToTaskStreams.find(oldWorker)!=TheMacroManager->unitToTaskStreams.end())
+      TheMacroManager->unitToTaskStreams[oldWorker].erase(this);
   }
   if (worker!=NULL)
   {
-    //tell the arbitrator we are interested in the new worker
-    TheArbitrator->setBid(this,worker,100);
-
     //tell the macro manager the new worker now belongs to us
-    TheMacroManager->unitToTaskStream[worker] = this;
+    TheMacroManager->unitToTaskStreams[worker].insert(this);
   }
 
   //workerReady is false until we own the new worker
@@ -456,18 +413,6 @@ void TaskStream::setUrgent(bool isUrgent)
 bool TaskStream::isUrgent() const
 {
   return urgent;
-}
-void TaskStream::setName(std::string s)
-{
-  name = s;
-}
-std::string TaskStream::getName() const
-{
-  return name;
-}
-std::string TaskStream::getShortName() const
-{
-  return "Macro";
 }
 void TaskStream::printToScreen(int x, int y)
 {

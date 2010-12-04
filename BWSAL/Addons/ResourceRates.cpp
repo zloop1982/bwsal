@@ -20,6 +20,7 @@ ResourceRates::~ResourceRates()
 }
 void ResourceRates::update()
 {
+  if (Broodwar->isPaused()) return;
   if (Broodwar->getFrameCount()%gatherRateStepSize==0)
   {
     resourceHistory.push_back(CumulativeResources(Broodwar->self()));

@@ -130,8 +130,8 @@ bool ResourceTimeline::reserveResources(int frame, const Resources &r)
     int duration = currentFrame - lastFrame;
 
     //add minerals and gas based on gather rates
-    res.addMinerals((int)(duration*mineralGatherRate));
-    res.addGas((int)(duration*gasGatherRate));
+    res.addMinerals(duration*mineralGatherRate);
+    res.addGas(duration*gasGatherRate);
 
     //add resources in this event
     res+=i->second;
@@ -195,8 +195,8 @@ int ResourceTimeline::getFirstValidTime(const Resources &r)
     int duration = currentFrame - lastFrame;
 
     //add minerals and gas based on gather rates
-    res.addMinerals((int)(duration*mineralGatherRate));
-    res.addGas((int)(duration*gasGatherRate));
+    res.addMinerals(duration*mineralGatherRate);
+    res.addGas(duration*gasGatherRate);
 
     //add resources in this event
     res+=i->second;
@@ -249,7 +249,7 @@ int ResourceTimeline::getFirstValidTime(const Resources &r)
   //if our minerals are invalid, compute when they will become valid based on mineral gather rate
   if (invalidRes.getMinerals()<-0.001)
   {
-    double t2=lastInvalidEventFrame-(invalidRes.getMinerals())/mineralGatherRate;
+    double t2=lastInvalidEventFrame-(invalidRes.getMinerals()-1)/mineralGatherRate;
     if (t2>t)
     {
       t=t2;
@@ -259,7 +259,7 @@ int ResourceTimeline::getFirstValidTime(const Resources &r)
   //if our gass is invalid, compute when it will become valid based on gas gather rate
   if (invalidRes.getGas()<-0.001)
   {
-    double t2=lastInvalidEventFrame-(invalidRes.getGas())/gasGatherRate;
+    double t2=lastInvalidEventFrame-(invalidRes.getGas()-1)/gasGatherRate;
     if (t2>t)
     {
       t=t2;
@@ -268,7 +268,7 @@ int ResourceTimeline::getFirstValidTime(const Resources &r)
   }
   //compute ceiling of double value
   int ti=(int)t;
-  if (t>(int)t) ti++;
+  if (t>ti) ti++;
   return ti;
 }
 int ResourceTimeline::getFirstTimeWhenSupplyIsNoGreaterThan(int supplyAmount)
