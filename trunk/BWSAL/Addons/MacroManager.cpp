@@ -83,6 +83,7 @@ void MacroManager::update()
   ttl.reset();
   utl.reset();
   wttl.reset();
+  ltl.reset();
   plan.clear();
   for each(TaskStream* ts in killSet)
   {

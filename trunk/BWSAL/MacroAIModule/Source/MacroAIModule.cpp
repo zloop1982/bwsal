@@ -77,12 +77,10 @@ void MacroAIModule::onStart()
     if (u->getType().isResourceDepot())
       worker = u;
   }
-  /*
   ts->setWorker(worker);
   ts->attach(BasicTaskExecutor::getInstance(),false);
   ts->attach(new UnitPump(Broodwar->self()->getRace().getWorker()),true);
   ts->attach(new TerminateIfWorkerLost(),true);
-  */
 
   if (Broodwar->self()->getRace()==Races::Terran)
   {
@@ -103,8 +101,6 @@ void MacroAIModule::onStart()
   }
   else if (Broodwar->self()->getRace()==Races::Zerg)
   {
-    infantryProducer = new UnitCompositionProducer(UnitTypes::Zerg_Larva);
-    infantryProducer->setUnitWeight(UnitTypes::Zerg_Drone,2.0);
   }
   /*
   onSendText("Terran Barracks");
