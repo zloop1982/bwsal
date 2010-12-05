@@ -10,7 +10,6 @@ class LarvaTimeline
     LarvaTimeline();
     void reset();
     std::pair<int,int> getFirstFreeInterval(BWAPI::Unit* worker, int earliestStartTime = -1);
-    std::pair<int,int> getFirstFreeInterval(BWAPI::Unit* worker, const Task* task, int earliestStartTime = -1);
     bool reserveLarva(BWAPI::Unit* worker, int startFrame, Task* task);
     int getPlannedLarvaCount(BWAPI::Unit* worker, int frame);
   private:
