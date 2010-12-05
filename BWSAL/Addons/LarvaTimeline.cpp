@@ -10,7 +10,8 @@ LarvaTimeline::LarvaTimeline()
 
 void LarvaTimeline::reset()
 {
-  larvaEventTimes.clear();
+  larvaSpawnTimes.clear();
+  larvaUseTimes.clear();
   for each(Unit* u in Broodwar->self()->getUnits())
   {
     if (u->getType().producesLarva())
@@ -19,119 +20,175 @@ void LarvaTimeline::reset()
       {
         if (u->getLarva().size()<3)
         {
-          larvaEventTimes[u].insert(std::make_pair(Broodwar->getFrameCount()+u->getRemainingTrainTime(),1));
+          larvaSpawnTimes[u].push_back(Broodwar->getFrameCount()+u->getRemainingTrainTime());
           if (u->getLarva().size()<2)
-            larvaEventTimes[u].insert(std::make_pair(Broodwar->getFrameCount()+u->getRemainingTrainTime()+334,1));
+            larvaSpawnTimes[u].push_back(Broodwar->getFrameCount()+u->getRemainingTrainTime()+334);
           if (u->getLarva().size()<1)
-            larvaEventTimes[u].insert(std::make_pair(Broodwar->getFrameCount()+u->getRemainingTrainTime()+334+334,1));
+            larvaSpawnTimes[u].push_back(Broodwar->getFrameCount()+u->getRemainingTrainTime()+334+334);
         }
       }
       else
       {
-        larvaEventTimes[u].insert(std::make_pair(Broodwar->getFrameCount()+u->getRemainingBuildTime(),1));
-        larvaEventTimes[u].insert(std::make_pair(Broodwar->getFrameCount()+u->getRemainingBuildTime()+334,1));
-        larvaEventTimes[u].insert(std::make_pair(Broodwar->getFrameCount()+u->getRemainingBuildTime()+334+334,1));
+        larvaSpawnTimes[u].push_back(Broodwar->getFrameCount()+u->getRemainingBuildTime());
+        larvaSpawnTimes[u].push_back(Broodwar->getFrameCount()+u->getRemainingBuildTime()+334);
+        larvaSpawnTimes[u].push_back(Broodwar->getFrameCount()+u->getRemainingBuildTime()+334+334);
       }
     }
   }
 }
-pair<int,int> LarvaTimeline::getFirstFreeInterval(BWAPI::Unit* worker, int earliestStartTime)
+int LarvaTimeline::getFirstFreeTime(BWAPI::Unit* worker, int earliestStartTime)
 {
-  if (!worker || !worker->exists()) return std::make_pair(-1,-1);
-  int larva = worker->getLarva().size();
-  if (larvaEventTimes.find(worker)==larvaEventTimes.end())
+  if (!worker || !worker->exists()) return -1;
+  if (canReserveLarva(worker,earliestStartTime))
+    return earliestStartTime;
+
+  std::list<int>& testNewLarvaUseTimes = larvaUseTimes[worker];
+  std::list<int>& testNewLarvaSpawnTimes = larvaSpawnTimes[worker];
+  std::list<int>::iterator i_u = testNewLarvaUseTimes.begin();
+  std::list<int>::iterator i_s = testNewLarvaSpawnTimes.begin();
+  int larvaCount = worker->getLarva().size();
+  bool waitingForZero = false;
+  for(;i_s!=testNewLarvaUseTimes.end() && i_u!=testNewLarvaUseTimes.end();)
   {
-    if (larva>0)
-      return make_pair(earliestStartTime,-1);
-    return make_pair(-1,-1);
-  }
-
-  if (earliestStartTime==-1)
-    earliestStartTime = Broodwar->getFrameCount();
-
-  map<int,int>* eventTimes = &(larvaEventTimes.find(worker)->second);
-  int currentFrame = Broodwar->getFrameCount();
-  int startFrame   = -1;
-  int first3Frame  = -1;
-
-  for(map<int,int>::iterator i=eventTimes->begin();i!=eventTimes->end();i++)
-  {
-    currentFrame = i->first;
-    larva += i->second;
-    if (currentFrame<earliestStartTime)
-      continue;
-
-    if (larva>=1 && startFrame == -1)
-      startFrame = currentFrame;
-    if (startFrame != -1)
+    if (*i_s<=*i_u)
     {
-      if (larva == 3 && first3Frame == -1)
-        first3Frame = currentFrame;
-      if (larva==0)
+      larvaCount++;
+      if (*i_s>earliestStartTime && !waitingForZero)
       {
-        if (first3Frame != -1 && currentFrame>first3Frame+334)
-          return make_pair(startFrame,currentFrame-334);
+        if (canReserveLarva(worker,earliestStartTime))
+          return *i_s;
         else
-        {
-          startFrame = -1;
-          first3Frame = -1;
-        }
+          waitingForZero = true;
       }
+      i_s++;
+    }
+    else
+    {
+      larvaCount--;
+      if (larvaCount == 0)
+        waitingForZero = false;
+      i_u++;
     }
   }
-  return make_pair(startFrame,-1);
+  //should never get here
+  return -1;
 }
-bool LarvaTimeline::reserveLarva(BWAPI::Unit* worker, int startFrame, Task* task)
+bool LarvaTimeline::canReserveLarva(BWAPI::Unit* worker, int frame)
 {
-  larvaEventTimes[worker][startFrame]--;
-  std::map<int,int>* eventTimes = &(larvaEventTimes.find(worker)->second);
-  int larva = worker->getLarva().size();
-  int endFrame = -1;
-  bool isValid = true;
-  bool checking = false;
-  for(std::map<int,int>::iterator i=eventTimes->begin();i!=eventTimes->end();i++)
+  std::list<int>& testNewLarvaUseTimes = larvaUseTimes[worker];
+  std::list<int> testNewLarvaSpawnTimes = larvaSpawnTimes[worker];
+
+  std::list<int>::iterator addedLarvaUse = addLarvaUseAt(testNewLarvaUseTimes,frame);
+  addLarvaSpawnAtOrAfter(testNewLarvaSpawnTimes,frame+334);
+
+  std::list<int>::iterator i_u = testNewLarvaUseTimes.begin();
+  std::list<int>::iterator i_s = testNewLarvaSpawnTimes.begin();
+  int larvaCount = worker->getLarva().size();
+  for(;i_s!=testNewLarvaUseTimes.end() && i_u!=testNewLarvaUseTimes.end();)
   {
-    int currentFrame = i->first;
-    larva += i->second;
-    if (currentFrame < startFrame) continue;
-
-    if (currentFrame == startFrame)
-      checking=true;
-
-    if (checking)
+    if (*i_s<=*i_u)
     {
-      if (larva<0)
-      {
-        isValid = false;
-        break;
-      }
-      if (larva<2) endFrame = -1;
-      if (larva>=2) endFrame = currentFrame+334;
+      larvaCount++;
+      i_s++;
     }
-    if (currentFrame>=endFrame && endFrame != -1)
+    else
     {
-      isValid = true;
-      checking = false;
+      larvaCount--;
+      i_u++;
+    }
+    if (larvaCount<0)
+    {
+      testNewLarvaUseTimes.erase(addedLarvaUse);
+      return false;
+    }
+  }
+  testNewLarvaUseTimes.erase(addedLarvaUse);
+  return true;
+}
+bool LarvaTimeline::reserveLarva(BWAPI::Unit* worker, int frame)
+{
+  std::list<int>& testNewLarvaUseTimes = larvaUseTimes[worker];
+  std::list<int> testNewLarvaSpawnTimes = larvaSpawnTimes[worker];
+
+  std::list<int>::iterator addedLarvaUse = addLarvaUseAt(testNewLarvaUseTimes,frame);
+  addLarvaSpawnAtOrAfter(testNewLarvaSpawnTimes,frame+334);
+
+  std::list<int>::iterator i_u = testNewLarvaUseTimes.begin();
+  std::list<int>::iterator i_s = testNewLarvaSpawnTimes.begin();
+  int larvaCount = worker->getLarva().size();
+  for(;i_s!=testNewLarvaUseTimes.end() && i_u!=testNewLarvaUseTimes.end();)
+  {
+    if (*i_s<=*i_u)
+    {
+      larvaCount++;
+      i_s++;
+    }
+    else
+    {
+      larvaCount--;
+      i_u++;
+    }
+    if (larvaCount<0)
+    {
+      testNewLarvaUseTimes.erase(addedLarvaUse);
+      return false;
+    }
+  }
+  //copy over new spawn times
+  larvaSpawnTimes[worker]=testNewLarvaSpawnTimes;
+  return true;
+}
+std::list<int>::iterator LarvaTimeline::addLarvaUseAt(std::list<int>& l, int frame)
+{
+  for(list<int>::iterator i=l.begin();i!=l.end();i++)
+  {
+    if (*i>=frame)
+    {
+      return l.insert(i,frame);
+    }
+  }
+}
+void LarvaTimeline::addLarvaSpawnAtOrAfter(std::list<int>& l, int frame)
+{
+  int previousSpawnFrame=-1000;
+  //add larva spawn
+  for(list<int>::iterator i=l.begin();i!=l.end();i++)
+  {
+    if (*i>=frame)
+    {
+      l.insert(i,frame);
       break;
     }
   }
-  if (isValid)
-    larvaEventTimes[worker][endFrame]++;
-  else
-    larvaEventTimes[worker][startFrame]--;
-  return isValid;
-
+  //correct spawn timeline
+  for(list<int>::iterator i=l.begin();i!=l.end();i++)
+  {
+    if ((*i)<previousSpawnFrame+334)
+      *i=previousSpawnFrame+334;
+    previousSpawnFrame = *i;
+  }
 }
 int LarvaTimeline::getPlannedLarvaCount(BWAPI::Unit* worker, int frame)
 {
+  std::list<int>& testNewLarvaUseTimes = larvaUseTimes[worker];
+  std::list<int>& testNewLarvaSpawnTimes = larvaSpawnTimes[worker];
+  std::list<int>::iterator i_u = testNewLarvaUseTimes.begin();
+  std::list<int>::iterator i_s = testNewLarvaSpawnTimes.begin();
   int larvaCount = worker->getLarva().size();
-  if (larvaEventTimes.find(worker)==larvaEventTimes.end())
-    return larvaCount;
-  std::map<int,int>* eventTimes = &(larvaEventTimes.find(worker)->second);
-  for(std::map<int,int>::iterator i=eventTimes->begin();i!=eventTimes->end();i++)
+  for(;i_s!=testNewLarvaUseTimes.end() && i_u!=testNewLarvaUseTimes.end();)
   {
-    if ((*i).first > frame) break;
-    larvaCount+=(*i).second;
+    if (*i_s<=*i_u)
+    {
+      larvaCount++;
+      if (*i_s>frame)
+        return larvaCount;
+    }
+    else
+    {
+      larvaCount--;
+      if (*i_u>frame)
+        return larvaCount;
+    }
   }
   return larvaCount;
 }
