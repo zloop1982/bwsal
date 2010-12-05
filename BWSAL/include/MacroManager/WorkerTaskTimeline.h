@@ -3,7 +3,7 @@
 #include <map>
 #include <Task.h>
 
-//Timeline of the planned amount of each UnitType
+
 class WorkerTaskTimeline
 {
   public:

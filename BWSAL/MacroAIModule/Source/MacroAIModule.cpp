@@ -77,10 +77,12 @@ void MacroAIModule::onStart()
     if (u->getType().isResourceDepot())
       worker = u;
   }
+  /*
   ts->setWorker(worker);
   ts->attach(BasicTaskExecutor::getInstance(),false);
   ts->attach(new UnitPump(Broodwar->self()->getRace().getWorker()),true);
   ts->attach(new TerminateIfWorkerLost(),true);
+  */
 
   if (Broodwar->self()->getRace()==Races::Terran)
   {
@@ -93,23 +95,29 @@ void MacroAIModule::onStart()
     vehicleProducer->setUnitWeight(UnitTypes::Terran_Vulture,2.0);
     vehicleProducer->setUnitWeight(UnitTypes::Terran_Siege_Tank_Tank_Mode,1.0);
   }
-  if (Broodwar->self()->getRace()==Races::Protoss)
+  else if (Broodwar->self()->getRace()==Races::Protoss)
   {
     infantryProducer = new UnitCompositionProducer(UnitTypes::Protoss_Gateway);
     infantryProducer->setUnitWeight(UnitTypes::Protoss_Dragoon,2.0);
     infantryProducer->setUnitWeight(UnitTypes::Protoss_Zealot,1.0);
   }
+  else if (Broodwar->self()->getRace()==Races::Zerg)
+  {
+    infantryProducer = new UnitCompositionProducer(UnitTypes::Zerg_Larva);
+    infantryProducer->setUnitWeight(UnitTypes::Zerg_Drone,2.0);
+  }
+  /*
   onSendText("Terran Barracks");
   onSendText("Terran Refinery");
-  onSendText("Terran Academy");
   onSendText("Terran Barracks");
+  onSendText("Terran Academy");
+  */
 }
 void MacroAIModule::onEnd(bool isWinner)
 {
 }
 void MacroAIModule::onFrame()
 {
-  /*
   if (expanded1 == false && Broodwar->self()->completedUnitCount(UnitTypes::Terran_Marine)>1)
   {
     expanded1 = true;
@@ -142,7 +150,6 @@ void MacroAIModule::onFrame()
     onSendText("Terran Factory");
     onSendText("Terran Factory");
   }
-  */
 
 
   if (infantryProducer)
