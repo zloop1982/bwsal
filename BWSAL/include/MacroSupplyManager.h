@@ -11,5 +11,6 @@ class MacroSupplyManager
     void update();
     int lastFrameCheck;
     int initialSupplyTotal;
+    int initialSupplyProviderCount;
 };
 extern MacroSupplyManager* TheMacroSupplyManager;

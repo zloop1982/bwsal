@@ -64,9 +64,11 @@ class TaskStream
     bool isUrgent() const;
 
     void printToScreen(int x, int y);
+    TaskStream* forkCurrentTask();
   private:
     void notifyNewStatus();
     void notifyCompletedTask();
+    void notifyForkedTask(TaskStream* newTS);
     void computeStatus();
     bool killSwitch;
     bool urgent;

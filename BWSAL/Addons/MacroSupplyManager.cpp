@@ -31,6 +31,7 @@ MacroSupplyManager::MacroSupplyManager()
     }
   }
   initialSupplyTotal = Broodwar->self()->supplyTotal();
+  initialSupplyProviderCount = Broodwar->self()->completedUnitCount(BWAPI::Broodwar->self()->getRace().getSupplyProvider());
   lastFrameCheck=0;
 }
 MacroSupplyManager::~MacroSupplyManager()
@@ -44,7 +45,7 @@ void MacroSupplyManager::update()
     if (Broodwar->getFrameCount()>lastFrameCheck+25)
     {
       lastFrameCheck=Broodwar->getFrameCount();
-      if (TheMacroManager->uctl.getFinalCount(BWAPI::Broodwar->self()->getRace().getSupplyProvider())==0)
+      if (TheMacroManager->uctl.getFinalCount(BWAPI::Broodwar->self()->getRace().getSupplyProvider())==initialSupplyProviderCount)
       {
         if (Broodwar->self()->supplyUsed()>=initialSupplyTotal-2)
         {
