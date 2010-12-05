@@ -47,7 +47,7 @@ void MacroSupplyManager::update()
       lastFrameCheck=Broodwar->getFrameCount();
       if (TheMacroManager->uctl.getFinalCount(BWAPI::Broodwar->self()->getRace().getSupplyProvider())==initialSupplyProviderCount)
       {
-        if (Broodwar->self()->supplyUsed()>=initialSupplyTotal-2)
+        if (Broodwar->self()->supplyUsed()>=initialSupplyTotal-2*(1-initialSupplyProviderCount))
         {
           Task s(Broodwar->self()->getRace().getSupplyProvider());
           TaskStream* ts = new TaskStream(s);

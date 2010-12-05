@@ -13,7 +13,7 @@ class LarvaTimeline
     bool reserveLarva(BWAPI::Unit* worker, int frame);
     bool canReserveLarva(BWAPI::Unit* worker, int frame);
     int getPlannedLarvaCount(BWAPI::Unit* worker, int frame);
-  private:
+//  private:
     std::list<int>::iterator addLarvaUseAt(std::list<int>& l, int frame);
     void addLarvaSpawnAtOrAfter(std::list<int>& l, int frame);
     std::map<BWAPI::Unit*, std::list<int> > larvaUseTimes;

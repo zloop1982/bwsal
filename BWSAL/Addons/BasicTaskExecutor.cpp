@@ -216,7 +216,7 @@ void BasicTaskExecutor::execute(TaskStream* ts)
     UnitType ut=ts->getTask(0).getUnit();
     if (ut.getRace()==Races::Zerg && ut.isBuilding()==ut.whatBuilds().first.isBuilding())
     {
-      if (ut.whatBuilds().first == UnitTypes::Zerg_Larva)
+      if (ut.whatBuilds().first == UnitTypes::Zerg_Larva && worker->getType().producesLarva())
       {
         Unit* larva = NULL;
         if (!worker->getLarva().empty())

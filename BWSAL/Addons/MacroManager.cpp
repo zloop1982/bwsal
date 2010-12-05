@@ -190,6 +190,44 @@ void MacroManager::update()
       if (y2>-1000 && y2<=y)
         Broodwar->drawLineScreen(0,(int)(y),640,y2,Colors::Cyan);
     }
+    Unit* worker = NULL;
+    for each(Unit* u in Broodwar->self()->getUnits())
+      if (u->getType().producesLarva()) worker = u;
+    ltl.reset();
+    std::list<int>& testNewLarvaUseTimes = ltl.larvaUseTimes[worker];
+    std::list<int>& testNewLarvaSpawnTimes = ltl.larvaSpawnTimes[worker];
+    std::list<int>::iterator i_u = testNewLarvaUseTimes.begin();
+    std::list<int>::iterator i_s = testNewLarvaSpawnTimes.begin();
+    int larvaCount = worker->getLarva().size();
+    int curFrame=Broodwar->getFrameCount();
+    int prvFrame=curFrame;
+    for(;i_u!=testNewLarvaUseTimes.end() || i_s!=testNewLarvaSpawnTimes.end();)
+    {
+      if (i_u==testNewLarvaUseTimes.end() || (i_s!=testNewLarvaSpawnTimes.end() && *i_s<=*i_u))
+      {
+        curFrame = *i_s;
+        double x1=(prvFrame - currentFrameCount)*hscale;
+        double x2=(curFrame - currentFrameCount)*hscale;
+        Broodwar->drawLineScreen(x1,280-larvaCount*20,x2,280-larvaCount*20,Colors::Green);
+        Broodwar->drawLineScreen(x2,280-larvaCount*20,x2,280-(larvaCount+1)*20,Colors::Green);
+        larvaCount++;
+        i_s++;
+      }
+      else
+      {
+        curFrame = *i_u;
+        double x1=(prvFrame - currentFrameCount)*hscale;
+        double x2=(curFrame - currentFrameCount)*hscale;
+        Broodwar->drawLineScreen(x1,280-larvaCount*20,x2,280-larvaCount*20,Colors::Green);
+        Broodwar->drawLineScreen(x2,280-larvaCount*20,x2,280-(larvaCount-1)*20,Colors::Green);
+        larvaCount--;
+        i_u++;
+      }
+      prvFrame = curFrame;
+    }
+    double x1=(prvFrame - currentFrameCount)*hscale;
+    Broodwar->drawLineScreen(x1,280-larvaCount*20,640,280-larvaCount*20,Colors::Green);
+    Broodwar->drawLineScreen(0,280-0*20,640,280-0*20,Colors::Red);
   }
   /*
     for(std::map<int, Resources>::iterator i=rtl.resourceEvents.begin();i!=rtl.resourceEvents.end();i++)
@@ -208,7 +246,7 @@ void MacroManager::update()
   {
     std::map<BWAPI::Unit*, std::set<TaskStream*> >::iterator i=unitToTaskStreams.find(u);
     if (i==unitToTaskStreams.end() || i->second.empty())
-      TheArbitrator->setBid(this,u,0);
+      TheArbitrator->removeBid(this,u);
     if (i==unitToTaskStreams.end())
       unitToTaskStreams.erase(u);
   }

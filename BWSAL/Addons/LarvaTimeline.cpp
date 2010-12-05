@@ -48,7 +48,7 @@ int LarvaTimeline::getFirstFreeTime(BWAPI::Unit* worker, int earliestStartTime)
   std::list<int>::iterator i_s = testNewLarvaSpawnTimes.begin();
   int larvaCount = worker->getLarva().size();
   bool waitingForZero = false;
-  for(;i_s!=testNewLarvaSpawnTimes.end() && i_u!=testNewLarvaUseTimes.end();)
+  for(;i_u!=testNewLarvaUseTimes.end() || i_s!=testNewLarvaSpawnTimes.end();)
   {
     if (i_u==testNewLarvaUseTimes.end() || (i_s!=testNewLarvaSpawnTimes.end() && *i_s<=*i_u))
     {
@@ -70,6 +70,7 @@ int LarvaTimeline::getFirstFreeTime(BWAPI::Unit* worker, int earliestStartTime)
       i_u++;
     }
   }
+  Broodwar->printf("Error: Timeline absurd!\n");
   //should never get here
   return -1;
 }
@@ -84,7 +85,7 @@ bool LarvaTimeline::canReserveLarva(BWAPI::Unit* worker, int frame)
   std::list<int>::iterator i_u = testNewLarvaUseTimes.begin();
   std::list<int>::iterator i_s = testNewLarvaSpawnTimes.begin();
   int larvaCount = worker->getLarva().size();
-  for(;i_s!=testNewLarvaSpawnTimes.end() && i_u!=testNewLarvaUseTimes.end();)
+  for(;i_u!=testNewLarvaUseTimes.end() || i_s!=testNewLarvaSpawnTimes.end();)
   {
     if (i_u==testNewLarvaUseTimes.end() || (i_s!=testNewLarvaSpawnTimes.end() && *i_s<=*i_u))
     {
@@ -116,7 +117,7 @@ bool LarvaTimeline::reserveLarva(BWAPI::Unit* worker, int frame)
   std::list<int>::iterator i_u = testNewLarvaUseTimes.begin();
   std::list<int>::iterator i_s = testNewLarvaSpawnTimes.begin();
   int larvaCount = worker->getLarva().size();
-  for(;i_s!=testNewLarvaSpawnTimes.end() && i_u!=testNewLarvaUseTimes.end();)
+  for(;i_u!=testNewLarvaUseTimes.end() || i_s!=testNewLarvaSpawnTimes.end();)
   {
     if (i_u==testNewLarvaUseTimes.end() || (i_s!=testNewLarvaSpawnTimes.end() && *i_s<=*i_u))
     {
@@ -164,7 +165,7 @@ void LarvaTimeline::addLarvaSpawnAtOrAfter(std::list<int>& l, int frame)
   //correct spawn timeline
   for(list<int>::iterator i=l.begin();i!=l.end();i++)
   {
-    if ((*i)<previousSpawnFrame+334)
+    if (*i<previousSpawnFrame+334)
       *i=previousSpawnFrame+334;
     previousSpawnFrame = *i;
   }
