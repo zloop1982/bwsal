@@ -9,9 +9,13 @@ class LarvaTimeline
   public:
     LarvaTimeline();
     void reset();
-    std::pair<int,int> getFirstFreeInterval(BWAPI::Unit* worker, int earliestStartTime = -1);
-    bool reserveLarva(BWAPI::Unit* worker, int startFrame, Task* task);
+    int getFirstFreeTime(BWAPI::Unit* worker, int earliestStartTime = -1);
+    bool reserveLarva(BWAPI::Unit* worker, int frame);
+    bool canReserveLarva(BWAPI::Unit* worker, int frame);
     int getPlannedLarvaCount(BWAPI::Unit* worker, int frame);
   private:
-    std::map<BWAPI::Unit*, std::map<int, int> > larvaEventTimes;
+    std::list<int>::iterator addLarvaUseAt(std::list<int>& l, int frame);
+    void addLarvaSpawnAtOrAfter(std::list<int>& l, int frame);
+    std::map<BWAPI::Unit*, std::list<int> > larvaUseTimes;
+    std::map<BWAPI::Unit*, std::list<int> > larvaSpawnTimes;
 };
