@@ -12,14 +12,6 @@ void WorkerTaskTimeline::reset()
 {
   taskStartTimes.clear();
 }
-
-pair<int,int> WorkerTaskTimeline::getFirstFreeInterval(Unit* worker, const Task* task, int earliestStartTime)
-{
-  if (!task)
-    return make_pair(-1,-1);
-  return getFirstFreeInterval(worker,task->getTime(),earliestStartTime);
-}
-
 pair<int,int> WorkerTaskTimeline::getFirstFreeInterval(Unit* worker, int duration, int earliestStartTime)
 {
   if (earliestStartTime==-1)
@@ -45,6 +37,13 @@ pair<int,int> WorkerTaskTimeline::getFirstFreeInterval(Unit* worker, int duratio
     }
   }
   return make_pair(-1,-1);
+}
+
+pair<int,int> WorkerTaskTimeline::getFirstFreeInterval(Unit* worker, const Task* task, int earliestStartTime)
+{
+  if (!task)
+    return make_pair(-1,-1);
+  return getFirstFreeInterval(worker,task->getTime(),earliestStartTime);
 }
 
 bool WorkerTaskTimeline::reserveTime(Unit* worker, int startFrame, Task* task)
