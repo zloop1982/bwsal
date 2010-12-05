@@ -515,7 +515,7 @@ TaskStream* TaskStream::forkCurrentTask()
     task[i]=task[i+1];
   task[task.size()-1] = Task();
   buildUnit = NULL;
-  computeStatus();
+  status = None;
   notifyForkedTask(ts);
   return ts;
 }
