@@ -72,8 +72,12 @@ int UnitReadyTimeCalculator::getReadyTime(BWAPI::Unit* unit, int duration)
 int UnitReadyTimeCalculator::getFirstFreeTime(BWAPI::Unit* unit, const Task &task, UnitReadyTimeStatus::Enum &reason, bool considerResources, bool considerTasks)
 {
   reason = UnitReadyTimeStatus::Waiting_For_Worker_To_Be_Ready;
-  int t = getReadyTime(unit,considerTasks);
-  if (t==-1) return -1; //frame -1 is never
+  int t = Broodwar->getFrameCount();
+  if (!(task.getType()!=TaskTypes::Unit && task.getUnit().whatBuilds().first == UnitTypes::Zerg_Larva))
+  {
+    t = getReadyTime(unit,considerTasks);
+    if (t==-1) return -1; //frame -1 is never
+  }
 
   int t2 = task.getEarliestStartTime();
   if (t2==-1 || t2>t)
@@ -171,7 +175,11 @@ int UnitReadyTimeCalculator::getFirstFreeTime(BWAPI::Unit* unit, const Task &tas
   }
   if (considerTasks && unit && unit->exists())
   {
-    int t2 = TheMacroManager->wttl.getFirstFreeInterval(unit,&task,t).first;
+    int t2 = Broodwar->getFrameCount();
+    if (task.getType()==TaskTypes::Unit && task.getUnit().whatBuilds().first == UnitTypes::Zerg_Larva)
+      t2 = TheMacroManager->ltl.getFirstFreeTime(unit,t);
+    else
+      t2 = TheMacroManager->wttl.getFirstFreeInterval(unit,&task,t).first;
     if (t2==-1 || t2>t)
     {
       reason = UnitReadyTimeStatus::Waiting_For_Worker_To_Be_Ready;

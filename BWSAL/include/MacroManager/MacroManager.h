@@ -6,6 +6,7 @@
 #include <TechTimeline.h>
 #include <UpgradeTimeline.h>
 #include <MacroManager/WorkerTaskTimeline.h>
+#include <MacroManager/LarvaTimeline.h>
 #include <Task.h>
 class TaskStream;
 class MacroManager : public Arbitrator::Controller<BWAPI::Unit*,double>
@@ -40,6 +41,7 @@ class MacroManager : public Arbitrator::Controller<BWAPI::Unit*,double>
     UpgradeTimeline utl;
     Resources spentResources;
     WorkerTaskTimeline wttl;
+    LarvaTimeline ltl;
     std::map< BWAPI::Unit*, std::set<TaskStream*> > unitToTaskStreams;
     std::set< BWAPI::Unit*> ownedUnits;
     std::map< int, std::list< std::pair<TaskStream*, Task > > > plan;

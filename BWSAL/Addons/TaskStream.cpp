@@ -179,9 +179,20 @@ void TaskStream::computeStatus()
       if (first_valid_frame==-1) break;
       if (!TheMacroManager->rtl.reserveResources(first_valid_frame,task[i].getResources()))
         Broodwar->printf("Error: Unable to reserve resources for %s",task[i].getName().c_str());
+
       if (workerReady)
-        if (!TheMacroManager->wttl.reserveTime(worker,first_valid_frame,&task[i]))
-          Broodwar->printf("Error: Unable to reserve time for %s",task[i].getName().c_str());
+      {
+        if (task[i].getType() == TaskTypes::Unit && task[i].getUnit().whatBuilds().first == UnitTypes::Zerg_Larva)
+        {
+          if (!TheMacroManager->ltl.reserveLarva(worker,first_valid_frame))
+            Broodwar->printf("Error: Unable to reserve larva for %s",task[i].getName().c_str());
+        }
+        else
+        {
+          if (!TheMacroManager->wttl.reserveTime(worker,first_valid_frame,&task[i]))
+            Broodwar->printf("Error: Unable to reserve time for %s",task[i].getName().c_str());
+        }
+      }
       TheMacroManager->plan[first_valid_frame].push_back(std::make_pair(this,task[i]));
       if (task[i].getType()==TaskTypes::Tech)
         TheMacroManager->ttl.registerTechStart(first_valid_frame,task[i].getTech());

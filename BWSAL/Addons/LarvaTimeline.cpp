@@ -48,9 +48,9 @@ int LarvaTimeline::getFirstFreeTime(BWAPI::Unit* worker, int earliestStartTime)
   std::list<int>::iterator i_s = testNewLarvaSpawnTimes.begin();
   int larvaCount = worker->getLarva().size();
   bool waitingForZero = false;
-  for(;i_s!=testNewLarvaUseTimes.end() && i_u!=testNewLarvaUseTimes.end();)
+  for(;i_s!=testNewLarvaSpawnTimes.end() && i_u!=testNewLarvaUseTimes.end();)
   {
-    if (*i_s<=*i_u)
+    if (i_u==testNewLarvaUseTimes.end() || (i_s!=testNewLarvaSpawnTimes.end() && *i_s<=*i_u))
     {
       larvaCount++;
       if (*i_s>earliestStartTime && !waitingForZero)
@@ -84,9 +84,9 @@ bool LarvaTimeline::canReserveLarva(BWAPI::Unit* worker, int frame)
   std::list<int>::iterator i_u = testNewLarvaUseTimes.begin();
   std::list<int>::iterator i_s = testNewLarvaSpawnTimes.begin();
   int larvaCount = worker->getLarva().size();
-  for(;i_s!=testNewLarvaUseTimes.end() && i_u!=testNewLarvaUseTimes.end();)
+  for(;i_s!=testNewLarvaSpawnTimes.end() && i_u!=testNewLarvaUseTimes.end();)
   {
-    if (*i_s<=*i_u)
+    if (i_u==testNewLarvaUseTimes.end() || (i_s!=testNewLarvaSpawnTimes.end() && *i_s<=*i_u))
     {
       larvaCount++;
       i_s++;
@@ -116,9 +116,9 @@ bool LarvaTimeline::reserveLarva(BWAPI::Unit* worker, int frame)
   std::list<int>::iterator i_u = testNewLarvaUseTimes.begin();
   std::list<int>::iterator i_s = testNewLarvaSpawnTimes.begin();
   int larvaCount = worker->getLarva().size();
-  for(;i_s!=testNewLarvaUseTimes.end() && i_u!=testNewLarvaUseTimes.end();)
+  for(;i_s!=testNewLarvaSpawnTimes.end() && i_u!=testNewLarvaUseTimes.end();)
   {
-    if (*i_s<=*i_u)
+    if (i_u==testNewLarvaUseTimes.end() || (i_s!=testNewLarvaSpawnTimes.end() && *i_s<=*i_u))
     {
       larvaCount++;
       i_s++;
@@ -147,6 +147,7 @@ std::list<int>::iterator LarvaTimeline::addLarvaUseAt(std::list<int>& l, int fra
       return l.insert(i,frame);
     }
   }
+  return l.insert(l.end(),frame);
 }
 void LarvaTimeline::addLarvaSpawnAtOrAfter(std::list<int>& l, int frame)
 {
