@@ -26,17 +26,49 @@ void BasicWorkerFinder::newStatus(TaskStream* ts)
     std::set<BWAPI::Unit*> units;
     for each(Unit* u in Broodwar->self()->getUnits())
     {
-      if (u->exists() && u->isCompleted() && u->getRemainingBuildTime()==0 && u->getType()==ts->getTask(0).getWorkerType() && u->isLoaded()==false)
+      if (u->exists() && u->isCompleted() && u->isLoaded()==false)
       {
-        if (ts->getTask(0).getType()==TaskTypes::Unit && ts->getTask(0).getUnit().isAddon() && u->getAddon()!=NULL)
-          continue;
-        if (TheArbitrator->hasBid(u) && TheArbitrator->getHighestBidder(u).second>=100.0)
-          continue;
-        if (TheMacroManager->getTaskStreams(u).empty()==false)
-          continue;
+        bool isCorrectType = false;
+        if (ts->getTask(0).getWorkerType()==UnitTypes::Zerg_Larva)
+          isCorrectType = u->getType().producesLarva();
+        else
+          isCorrectType = (u->getType()==ts->getTask(0).getWorkerType());
+        if (isCorrectType)
+        {
+          if (ts->getTask(0).getType()==TaskTypes::Unit && ts->getTask(0).getUnit().isAddon() && u->getAddon()!=NULL)
+            continue;
+            if (TheArbitrator->hasBid(u) && TheArbitrator->getHighestBidder(u).second>=100.0 && TheArbitrator->getHighestBidder(u).first!=TheMacroManager)
+            continue;
+          if (TheMacroManager->getTaskStreams(u).empty()==false)
+            continue;
 
-        units.insert(u);
+          units.insert(u);
+        }
       }
+    }
+    if (units.empty())
+    {
+      for each(Unit* u in Broodwar->self()->getUnits())
+      {
+        if (u->exists() && u->isCompleted() && u->isLoaded()==false)
+        {
+          bool isCorrectType = false;
+          if (ts->getTask(0).getWorkerType()==UnitTypes::Zerg_Larva)
+            isCorrectType = u->getType().producesLarva();
+          else
+            isCorrectType = (u->getType()==ts->getTask(0).getWorkerType());
+          if (isCorrectType)
+          {
+            if (ts->getTask(0).getType()==TaskTypes::Unit && ts->getTask(0).getUnit().isAddon() && u->getAddon()!=NULL)
+              continue;
+            if (TheArbitrator->hasBid(u) && TheArbitrator->getHighestBidder(u).second>=100.0 && TheArbitrator->getHighestBidder(u).first!=TheMacroManager)
+              continue;
+
+            units.insert(u);
+          }
+        }
+      }
+
     }
     Unit* chosenWorker = NULL;
     if (ts->getTask(0).getTilePosition().isValid())

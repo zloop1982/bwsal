@@ -1,6 +1,10 @@
 #include <MacroManager/TaskStream.h>
 #include <MacroManager/TaskStreamObserver.h>
 #include <MacroManager/UnitReadyTimeCalculator.h>
+#include <TerminateIfWorkerLost.h>
+#include <TerminateIfEmpty.h>
+#include <BasicTaskExecutor.h>
+#include <BFSBuildingPlacer.h>
 #include <math.h>
 using namespace BWAPI;
 using namespace std;
@@ -294,6 +298,14 @@ void TaskStream::notifyCompletedTask()
     obs.first->completedTask(this,task[0]);
   }
 }
+void TaskStream::notifyForkedTask(TaskStream* newTS)
+{
+  //notify all observers that we have forked a task
+  for each(std::pair<TaskStreamObserver*, bool> obs in observers)
+  {
+    obs.first->forkedTask(this,newTS->task[0],newTS);
+  }
+}
 TaskStream::Status TaskStream::getStatus() const
 {
   return status;
@@ -483,4 +495,22 @@ int TaskStream::getFinishTime(BWAPI::UnitType t) const
       return task[i].getFinishTime();
   //or returns never if the task stream will never finish a task of the given unit type
   return -1;
+}
+
+TaskStream* TaskStream::forkCurrentTask()
+{
+  TaskStream* ts = new TaskStream(task[0]);
+  ts->attach(BasicTaskExecutor::getInstance(),false);
+  ts->attach(new TerminateIfEmpty(),true);
+  ts->attach(BFSBuildingPlacer::getInstance(),false);
+  ts->attach(new TerminateIfWorkerLost(),true);
+  ts->buildUnit = buildUnit;
+  Broodwar->printf("Forked Task %s!",task[0].getName().c_str());
+  for(int i=0;i+1<(int)(task.size());i++)
+    task[i]=task[i+1];
+  task[task.size()-1] = Task();
+  buildUnit = NULL;
+  computeStatus();
+  notifyForkedTask(ts);
+  return ts;
 }

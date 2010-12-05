@@ -216,15 +216,34 @@ void BasicTaskExecutor::execute(TaskStream* ts)
     UnitType ut=ts->getTask(0).getUnit();
     if (ut.getRace()==Races::Zerg && ut.isBuilding()==ut.whatBuilds().first.isBuilding())
     {
-      if (worker->morph(ut))
+      if (ut.whatBuilds().first == UnitTypes::Zerg_Larva)
       {
-        if (ts->getTask(0).hasSpentResources()==false)
+        Unit* larva = NULL;
+        if (!worker->getLarva().empty())
+          larva = *worker->getLarva().begin();
+        if (larva!=NULL && larva->exists() && larva->morph(ut))
         {
-          ts->getTask(0).setSpentResources(true);
-          TheMacroManager->spentResources+=ts->getTask(0).getResources();
+          if (ts->getTask(0).hasSpentResources()==false)
+          {
+            ts->getTask(0).setSpentResources(true);
+            TheMacroManager->spentResources+=ts->getTask(0).getResources();
+          }
+          TaskStream* newTS = ts->forkCurrentTask();
+          TheMacroManager->taskStreams.push_back(newTS);
+          newTS->setWorker(larva);
         }
       }
-
+      else
+      {
+        if (worker->morph(ut))
+        {
+          if (ts->getTask(0).hasSpentResources()==false)
+          {
+            ts->getTask(0).setSpentResources(true);
+            TheMacroManager->spentResources+=ts->getTask(0).getResources();
+          }
+        }
+      }
     }
     else if (ut.isAddon())
     {
