@@ -84,6 +84,10 @@ void MacroAIModule::onStart()
 
   if (Broodwar->self()->getRace()==Races::Terran)
   {
+    onSendText("Terran Barracks");
+    onSendText("Terran Refinery");
+    onSendText("Terran Barracks");
+    onSendText("Terran Academy");
     infantryProducer = new UnitCompositionProducer(UnitTypes::Terran_Barracks);
     infantryProducer->setUnitWeight(UnitTypes::Terran_Marine,2.0);
     infantryProducer->setUnitWeight(UnitTypes::Terran_Medic,1.0);
@@ -101,13 +105,20 @@ void MacroAIModule::onStart()
   }
   else if (Broodwar->self()->getRace()==Races::Zerg)
   {
+    onSendText("Zerg Spawning Pool");
+    TaskStream* ts = new TaskStream();
+    TheMacroManager->taskStreams.push_front(ts);
+    Unit* worker = NULL;
+    for each(Unit* u in Broodwar->self()->getUnits())
+    {
+      if (u->getType().isResourceDepot())
+        worker = u;
+    }
+    ts->setWorker(worker);
+    ts->attach(BasicTaskExecutor::getInstance(),false);
+    ts->attach(new UnitPump(UnitTypes::Zerg_Zergling),true);
+    ts->attach(new TerminateIfWorkerLost(),true);
   }
-  /*
-  onSendText("Terran Barracks");
-  onSendText("Terran Refinery");
-  onSendText("Terran Barracks");
-  onSendText("Terran Academy");
-  */
 }
 void MacroAIModule::onEnd(bool isWinner)
 {
