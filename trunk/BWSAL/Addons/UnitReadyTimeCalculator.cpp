@@ -73,7 +73,7 @@ int UnitReadyTimeCalculator::getFirstFreeTime(BWAPI::Unit* unit, const Task &tas
 {
   reason = UnitReadyTimeStatus::Waiting_For_Worker_To_Be_Ready;
   int t = Broodwar->getFrameCount();
-  if (!(task.getType()!=TaskTypes::Unit && task.getUnit().whatBuilds().first == UnitTypes::Zerg_Larva))
+  if (!(task.getType()==TaskTypes::Unit && task.getUnit().whatBuilds().first == UnitTypes::Zerg_Larva && unit && unit->exists() && unit->getType().producesLarva()))
   {
     t = getReadyTime(unit,considerTasks);
     if (t==-1) return -1; //frame -1 is never
@@ -108,6 +108,7 @@ int UnitReadyTimeCalculator::getFirstFreeTime(BWAPI::Unit* unit, const Task &tas
 
   //next we consider the required units for this task
   std::map<UnitType, int> req_units = task.getRequiredUnits();
+  req_units.erase(UnitTypes::Zerg_Larva);
   for each(std::pair<UnitType, int> r in req_units) //iterate over every required unit
   {
     //ask the unit count time line when we will have the given amount of units
@@ -176,13 +177,13 @@ int UnitReadyTimeCalculator::getFirstFreeTime(BWAPI::Unit* unit, const Task &tas
   if (considerTasks && unit && unit->exists())
   {
     int t2 = Broodwar->getFrameCount();
-    if (task.getType()==TaskTypes::Unit && task.getUnit().whatBuilds().first == UnitTypes::Zerg_Larva)
+    if (task.getType()==TaskTypes::Unit && task.getUnit().whatBuilds().first == UnitTypes::Zerg_Larva && unit->getType().producesLarva())
       t2 = TheMacroManager->ltl.getFirstFreeTime(unit,t);
     else
       t2 = TheMacroManager->wttl.getFirstFreeInterval(unit,&task,t).first;
     if (t2==-1 || t2>t)
     {
-      reason = UnitReadyTimeStatus::Waiting_For_Worker_To_Be_Ready;
+      reason = UnitReadyTimeStatus::Waiting_For_Free_Time;
       t=t2;
     }
     if (t==-1) return -1; //return never

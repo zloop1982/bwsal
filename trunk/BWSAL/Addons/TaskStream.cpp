@@ -159,6 +159,8 @@ void TaskStream::computeStatus()
             status = Error_Task_Requires_Addon;
           else if (reason == UnitReadyTimeStatus::Waiting_For_Worker_To_Be_Ready)
             status = Waiting_For_Worker_To_Be_Ready;
+          else if (reason == UnitReadyTimeStatus::Waiting_For_Free_Time)
+            status = Waiting_For_Free_Time;
           else if (reason == UnitReadyTimeStatus::Waiting_For_Earliest_Start_Time)
             status = Waiting_For_Earliest_Start_Time;
           else if (reason == UnitReadyTimeStatus::Waiting_For_Required_Units)
@@ -186,7 +188,7 @@ void TaskStream::computeStatus()
 
       if (workerReady)
       {
-        if (task[i].getType() == TaskTypes::Unit && task[i].getUnit().whatBuilds().first == UnitTypes::Zerg_Larva)
+        if (task[i].getType() == TaskTypes::Unit && task[i].getUnit().whatBuilds().first == UnitTypes::Zerg_Larva && worker->getType().producesLarva())
         {
           if (!TheMacroManager->ltl.reserveLarva(worker,first_valid_frame))
             Broodwar->printf("Error: Unable to reserve larva for %s",task[i].getName().c_str());
@@ -338,6 +340,9 @@ std::string TaskStream::getStatusString() const
     break;
     case Waiting_For_Worker_To_Be_Ready:
       return "Waiting_For_Worker_To_Be_Ready";
+    break;
+    case Waiting_For_Free_Time:
+      return "Waiting_For_Free_Time";
     break;
     case Waiting_For_Earliest_Start_Time:
       return "Waiting_For_Earliest_Start_Time";
