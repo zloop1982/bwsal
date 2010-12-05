@@ -53,12 +53,10 @@ int LarvaTimeline::getFirstFreeTime(BWAPI::Unit* worker, int earliestStartTime)
     if (i_u==testNewLarvaUseTimes.end() || (i_s!=testNewLarvaSpawnTimes.end() && *i_s<=*i_u))
     {
       larvaCount++;
-      if (*i_s>earliestStartTime && !waitingForZero)
+      if (*i_s>=earliestStartTime && !waitingForZero)
       {
         if (canReserveLarva(worker,earliestStartTime))
           return *i_s;
-        else
-          waitingForZero = true;
       }
       i_s++;
     }
@@ -70,7 +68,6 @@ int LarvaTimeline::getFirstFreeTime(BWAPI::Unit* worker, int earliestStartTime)
       i_u++;
     }
   }
-  Broodwar->printf("Error: Timeline absurd!\n");
   //should never get here
   return -1;
 }
@@ -154,14 +151,18 @@ void LarvaTimeline::addLarvaSpawnAtOrAfter(std::list<int>& l, int frame)
 {
   int previousSpawnFrame=-1000;
   //add larva spawn
+  bool added = false;
   for(list<int>::iterator i=l.begin();i!=l.end();i++)
   {
     if (*i>=frame)
     {
+      added = true;
       l.insert(i,frame);
       break;
     }
   }
+  if (!added)
+    l.push_back(frame);
   //correct spawn timeline
   for(list<int>::iterator i=l.begin();i!=l.end();i++)
   {

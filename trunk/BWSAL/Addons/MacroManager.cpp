@@ -193,7 +193,6 @@ void MacroManager::update()
     Unit* worker = NULL;
     for each(Unit* u in Broodwar->self()->getUnits())
       if (u->getType().producesLarva()) worker = u;
-    ltl.reset();
     std::list<int>& testNewLarvaUseTimes = ltl.larvaUseTimes[worker];
     std::list<int>& testNewLarvaSpawnTimes = ltl.larvaSpawnTimes[worker];
     std::list<int>::iterator i_u = testNewLarvaUseTimes.begin();
