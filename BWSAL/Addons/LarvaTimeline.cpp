@@ -55,7 +55,7 @@ int LarvaTimeline::getFirstFreeTime(BWAPI::Unit* worker, int earliestStartTime)
       larvaCount++;
       if (*i_s>=earliestStartTime && !waitingForZero)
       {
-        if (canReserveLarva(worker,earliestStartTime))
+        if (canReserveLarva(worker,*i_s))
           return *i_s;
       }
       i_s++;
