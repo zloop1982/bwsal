@@ -1,7 +1,7 @@
 #include <MacroManager/TaskStream.h>
 #include <MacroManager/TaskStreamObserver.h>
 #include <MacroManager/UnitReadyTimeCalculator.h>
-#include <TerminateIfWorkerLost.h>
+#include <BasicWorkerFinder.h>
 #include <TerminateIfEmpty.h>
 #include <BasicTaskExecutor.h>
 #include <BFSBuildingPlacer.h>
@@ -45,10 +45,66 @@ void TaskStream::onRevoke(BWAPI::Unit* unit)
     workerReady = false;
   }
 }
+void TaskStream::computeBuildUnit()
+{
+  if (task[0].getType()!=TaskTypes::Unit)
+  {
+    buildUnit = NULL;
+    return;
+  }
+  UnitType ut = task[0].getUnit();
+
+  //if the building dies, or isn't the right type, set it to null
+  if (!(buildUnit != NULL && buildUnit->exists() && (buildUnit->getType() == ut || buildUnit->getBuildType() == ut)))
+    buildUnit = NULL;
+
+  if (locationReady)
+  {
+    if (buildUnit==NULL && ut.isBuilding()) //if we don't have a building yet, look for it
+    {
+      TilePosition bl = task[0].getTilePosition();
+      //look at the units on the tile to see if it exists yet
+      for each(Unit* u in Broodwar->unitsOnTile(bl.x(), bl.y()))
+        if (u->getType() == ut && !u->isLifted())
+        {
+          //we found the building
+          buildUnit = u;
+          break;
+        }
+    }
+    if (buildUnit == NULL && ut.isAddon()) //if we don't have a building yet, look for it
+    {
+      TilePosition bl = task[0].getTilePosition();
+      bl.x()+=4;
+      bl.y()++;
+      for each(Unit* u in Broodwar->unitsOnTile(bl.x(), bl.y()))
+        if (u->getType() == ut && !u->isLifted())
+        {
+          //we found the building
+          buildUnit = u;
+          break;
+        }
+    }
+  }
+  if (workerReady==false) return;
+  if (!worker->exists() || !worker->isCompleted()) return;
+
+  if (worker->exists() && worker->isCompleted() && worker->getBuildUnit() != NULL && worker->getBuildUnit()->exists() && (worker->getBuildUnit()->getType() == ut || worker->getBuildUnit()->getBuildType() == ut))
+    buildUnit = worker->getBuildUnit();
+
+  if (worker->getAddon() != NULL && worker->getAddon()->exists() && (worker->getAddon()->getType() == ut || worker->getAddon()->getBuildType() == ut))
+    buildUnit = worker->getAddon();
+
+  //check to see if the worker is the right type
+  //Zerg_Nydus_Canal is special since Zerg_Nydus_Canal can construct Zerg_Nydus_Canal
+  if ((worker->getType() == ut || (worker->isMorphing() && worker->getBuildType() == ut)) && worker->getType()!=UnitTypes::Zerg_Nydus_Canal)
+    buildUnit = worker;
+}
 void TaskStream::computeStatus()
 {
   locationReady = true;
   workerReady = (worker != NULL) && worker->exists() && TheArbitrator->hasBid(worker) && TheArbitrator->getHighestBidder(worker).first==TheMacroManager;
+  computeBuildUnit();
   if (task[0].getType()==TaskTypes::Unit)
   {
     UnitType ut = task[0].getUnit();
@@ -87,7 +143,7 @@ void TaskStream::computeStatus()
     status = Error_Task_Not_Specified;
     return;
   }
-  if (task[0].isExecuting() || task[0].isCompleted() || buildUnit || (worker && worker->exists() && worker->isCompleted() && task[0].getType()==TaskTypes::Unit && task[0].getUnit().isBuilding() && worker->getBuildUnit()) ||
+  if (task[0].isExecuting() || task[0].isCompleted() || buildUnit ||
     (task[0].hasSpentResources() && workerReady && locationReady))
     status = Executing_Task;
   else
@@ -244,10 +300,6 @@ void TaskStream::update()
         task[i]=task[i+1];
       task[task.size()-1] = Task();
       buildUnit = NULL;
-    }
-    if (task[0].isExecuting() && buildUnit!=NULL && task[0].getType()==TaskTypes::Unit && task[0].getUnit().isBuilding() && task[0].getUnit().getRace()==Races::Protoss)
-    {
-      setWorker(NULL);
     }
     if (workerReady)
     {
@@ -508,7 +560,7 @@ TaskStream* TaskStream::forkCurrentTask()
   ts->attach(BasicTaskExecutor::getInstance(),false);
   ts->attach(new TerminateIfEmpty(),true);
   ts->attach(BFSBuildingPlacer::getInstance(),false);
-  ts->attach(new TerminateIfWorkerLost(),true);
+  ts->attach(new BasicWorkerFinder(),true);
   ts->buildUnit = buildUnit;
   Broodwar->printf("Forked Task %s!",task[0].getName().c_str());
   for(int i=0;i+1<(int)(task.size());i++)

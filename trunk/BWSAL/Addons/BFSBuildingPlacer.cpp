@@ -44,6 +44,8 @@ void BFSBuildingPlacer::update(TaskStream* ts)
   int width = ts->getTask(0).getUnit().tileWidth();
   UnitType type = ts->getTask(0).getUnit();
   if (type.isAddon()) type=type.whatBuilds().first;
+  //don't look for a build location if this building requires power and we have no pylons
+  if (type.requiresPsi() && Broodwar->self()->completedUnitCount(UnitTypes::Protoss_Pylon)==0) return;
   if (Broodwar->getFrameCount()%10!=0) return;
 
   if (ts->getStatus()==TaskStream::Error_Location_Blocked || ts->getStatus()==TaskStream::Error_Location_Not_Specified)
@@ -53,7 +55,14 @@ void BFSBuildingPlacer::update(TaskStream* ts)
     if (taskStreams[ts].isRelocatable)
     {
       TilePosition tp(ts->getTask(0).getTilePosition());
-      TilePosition newtp(getBuildLocationNear(ts->getWorker(),tp,type,taskStreams[ts].buildDistance));
+      
+      TilePosition newtp = TilePositions::None;
+      int bd = taskStreams[ts].buildDistance;
+      while ( newtp == TilePositions::None)
+      {
+        newtp = getBuildLocationNear(ts->getWorker(),tp,type,bd);
+        bd--;
+      }
       ts->getTask(0).setTilePosition(newtp);
     }
   }

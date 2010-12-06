@@ -61,7 +61,19 @@ void BasicTaskExecutor::update(TaskStream* ts)
     }
     return;
   }
-  computeBuildUnit(ts);
+  if (ts->getTask(0).getType()==TaskTypes::Unit && ts->getTask(0).getUnit().isBuilding() &&
+      ts->getBuildUnit()!=NULL && ts->getTask(0).getRace()==Races::Protoss)
+  {
+    if (ts->getTask(1).getType()!=TaskTypes::None)
+    {
+      TaskStream* newTS = ts->forkCurrentTask();
+      TheMacroManager->taskStreams.push_back(newTS);
+    }
+    else
+    {
+      ts->setWorker(NULL);
+    }
+  }
   computeIsCompleted(ts);
   if (ts->getTask(0).isCompleted()) return;
   computeIsExecuting(ts);
@@ -71,57 +83,6 @@ void BasicTaskExecutor::update(TaskStream* ts)
     getReady(ts);
   else
     execute(ts);
-}
-void BasicTaskExecutor::computeBuildUnit(TaskStream* ts)
-{
-  UnitType ut = ts->getTask(0).getUnit();
-  if (ts->getTask(0).getType() != TaskTypes::Unit) return;
-
-  //if the building dies, or isn't the right type, set it to null
-  if (!(ts->getBuildUnit() != NULL && ts->getBuildUnit()->exists() && (ts->getBuildUnit()->getType() == ut || ts->getBuildUnit()->getBuildType() == ut)))
-    ts->setBuildUnit(NULL);
-
-  if (ts->getBuildUnit()==NULL && ut.isBuilding()) //if we don't have a building yet, look for it
-  {
-    TilePosition bl = ts->getTask(0).getTilePosition();
-    //look at the units on the tile to see if it exists yet
-    for each(Unit* u in Broodwar->unitsOnTile(bl.x(), bl.y()))
-      if (u->getType() == ut && !u->isLifted())
-      {
-        //we found the building
-        ts->setBuildUnit(u);
-        break;
-      }
-  }
-  if (ts->getBuildUnit()==NULL && ut.isAddon()) //if we don't have a building yet, look for it
-  {
-    TilePosition bl = ts->getTask(0).getTilePosition();
-    bl.x()+=4;
-    bl.y()++;
-    for each(Unit* u in Broodwar->unitsOnTile(bl.x(), bl.y()))
-      if (u->getType() == ut && !u->isLifted())
-      {
-        //we found the building
-        ts->setBuildUnit(u);
-        break;
-      }
-  }
-
-  if (ts->isWorkerReady()==false) return;
-  Unit* worker = ts->getWorker();
-  if (!worker->exists() || !worker->isCompleted()) return;
-
-  if (worker->exists() && worker->isCompleted() && worker->getBuildUnit() != NULL && worker->getBuildUnit()->exists() && (worker->getBuildUnit()->getType() == ut || worker->getBuildUnit()->getBuildType() == ut))
-    ts->setBuildUnit(worker->getBuildUnit());
-
-  if (worker->getAddon() != NULL && worker->getAddon()->exists() && (worker->getAddon()->getType() == ut || worker->getAddon()->getBuildType() == ut))
-    ts->setBuildUnit(worker->getAddon());
-
-  //check to see if the worker is the right type
-  //Zerg_Nydus_Canal is special since Zerg_Nydus_Canal can construct Zerg_Nydus_Canal
-  if ((worker->getType() == ut || (worker->isMorphing() && worker->getBuildType() == ut)) && worker->getType()!=UnitTypes::Zerg_Nydus_Canal)
-    ts->setBuildUnit(worker);
-
 }
 void BasicTaskExecutor::computeIsExecuting(TaskStream* ts)
 {

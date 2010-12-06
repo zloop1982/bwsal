@@ -71,6 +71,7 @@ class TaskStream
     void notifyCompletedTask();
     void notifyForkedTask(TaskStream* newTS);
     void computeStatus();
+    void computeBuildUnit();
     bool killSwitch;
     bool urgent;
     bool workerReady;
