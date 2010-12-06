@@ -244,15 +244,19 @@ void TaskStream::computeStatus()
 
       if (workerReady)
       {
-        if (task[i].getType() == TaskTypes::Unit && task[i].getUnit().whatBuilds().first == UnitTypes::Zerg_Larva && worker->getType().producesLarva())
+        //protoss buildings don't take up worker time.
+        if (!(task[i].getType()==TaskTypes::Unit && task[i].getUnit().isBuilding() && task[i].getRace()==Races::Protoss))
         {
-          if (!TheMacroManager->ltl.reserveLarva(worker,first_valid_frame))
-            Broodwar->printf("Error: Unable to reserve larva for %s",task[i].getName().c_str());
-        }
-        else
-        {
-          if (!TheMacroManager->wttl.reserveTime(worker,first_valid_frame,&task[i]))
-            Broodwar->printf("Error: Unable to reserve time for %s",task[i].getName().c_str());
+          if (task[i].getType() == TaskTypes::Unit && task[i].getUnit().whatBuilds().first == UnitTypes::Zerg_Larva && worker->getType().producesLarva())
+          {
+            if (!TheMacroManager->ltl.reserveLarva(worker,first_valid_frame))
+              Broodwar->printf("Error: Unable to reserve larva for %s",task[i].getName().c_str());
+          }
+          else
+          {
+            if (!TheMacroManager->wttl.reserveTime(worker,first_valid_frame,&task[i]))
+              Broodwar->printf("Error: Unable to reserve time for %s",task[i].getName().c_str());
+          }
         }
       }
       TheMacroManager->plan[first_valid_frame].push_back(std::make_pair(this,task[i]));

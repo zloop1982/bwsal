@@ -177,14 +177,18 @@ int UnitReadyTimeCalculator::getFirstFreeTime(BWAPI::Unit* unit, const Task &tas
   if (considerTasks && unit && unit->exists())
   {
     int t2 = Broodwar->getFrameCount();
-    if (task.getType()==TaskTypes::Unit && task.getUnit().whatBuilds().first == UnitTypes::Zerg_Larva && unit->getType().producesLarva())
-      t2 = TheMacroManager->ltl.getFirstFreeTime(unit,t);
-    else
-      t2 = TheMacroManager->wttl.getFirstFreeInterval(unit,&task,t).first;
-    if (t2==-1 || t2>t)
+    //Protoss buildings don't take up worker time.
+    if (!(task.getType()==TaskTypes::Unit && task.getUnit().isBuilding() && task.getRace()==Races::Protoss))
     {
-      reason = UnitReadyTimeStatus::Waiting_For_Free_Time;
-      t=t2;
+      if (task.getType()==TaskTypes::Unit && task.getUnit().whatBuilds().first == UnitTypes::Zerg_Larva && unit->getType().producesLarva())
+        t2 = TheMacroManager->ltl.getFirstFreeTime(unit,t);
+      else
+        t2 = TheMacroManager->wttl.getFirstFreeInterval(unit,&task,t).first;
+      if (t2==-1 || t2>t)
+      {
+        reason = UnitReadyTimeStatus::Waiting_For_Free_Time;
+        t=t2;
+      }
     }
     if (t==-1) return -1; //return never
   }
