@@ -16,8 +16,10 @@ void BasicWorkerFinder::newStatus(TaskStream* ts)
 {
   if (ts->isWorkerReady()==false)
   {
+    //don't look for a worker unless we have a build location (if needed)
     if (ts->getTask(0).getType()==TaskTypes::Unit && ts->getTask(0).getUnit().isBuilding() && (!ts->getTask(0).getTilePosition().isValid()))
       return;
+    //don't look for a worker if we have a build unit as protoss
     if (ts->getBuildUnit()!=NULL && ts->getBuildUnit()->exists() && ts->getBuildUnit()->getType().isBuilding() && ts->getBuildUnit()->getType().getRace()==Races::Protoss)
       return;
     if (ts->getStartTime()<0 || ts->getStartTime()>Broodwar->getFrameCount()+20*24)

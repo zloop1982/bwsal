@@ -99,6 +99,10 @@ void MacroAIModule::onStart()
   }
   else if (Broodwar->self()->getRace()==Races::Protoss)
   {
+    onSendText("Protoss Gateway");
+    onSendText("Protoss Cybernetics Core");
+    onSendText("Protoss Assimilator");
+    onSendText("Protoss Gateway");
     infantryProducer = new UnitCompositionProducer(UnitTypes::Protoss_Gateway);
     infantryProducer->setUnitWeight(UnitTypes::Protoss_Dragoon,2.0);
     infantryProducer->setUnitWeight(UnitTypes::Protoss_Zealot,1.0);

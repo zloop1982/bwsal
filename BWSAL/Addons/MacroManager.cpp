@@ -190,9 +190,12 @@ void MacroManager::update()
       if (y2>-1000 && y2<=y)
         Broodwar->drawLineScreen(0,(int)(y),640,y2,Colors::Cyan);
     }
+    
     Unit* worker = NULL;
     for each(Unit* u in Broodwar->self()->getUnits())
       if (u->getType().producesLarva()) worker = u;
+    if (worker)
+    {
     std::list<int>& testNewLarvaUseTimes = ltl.larvaUseTimes[worker];
     std::list<int>& testNewLarvaSpawnTimes = ltl.larvaSpawnTimes[worker];
     std::list<int>::iterator i_u = testNewLarvaUseTimes.begin();
@@ -228,6 +231,8 @@ void MacroManager::update()
     Broodwar->drawLineScreen(x1,280-larvaCount*20,640,280-larvaCount*20,Colors::Green);
     Broodwar->drawLineScreen(0,280-0*20,640,280-0*20,Colors::Red);
   }
+  }
+
   /*
     for(std::map<int, Resources>::iterator i=rtl.resourceEvents.begin();i!=rtl.resourceEvents.end();i++)
     {

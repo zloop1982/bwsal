@@ -56,6 +56,9 @@ void MacroSupplyManager::update()
           ts->attach(BasicTaskExecutor::getInstance(),false);
           ts->attach(new TerminateIfEmpty(),true);
           ts->attach(BFSBuildingPlacer::getInstance(),false);
+          if (Broodwar->self()->getRace()==Races::Protoss)
+            BFSBuildingPlacer::getInstance()->setBuildDistance(ts,2);
+
         }
       }
       else
@@ -67,13 +70,15 @@ void MacroSupplyManager::update()
           {
             Task s(Broodwar->self()->getRace().getSupplyProvider());
             int frame = TheMacroManager->rtl.getFirstTimeWhenSupplyIsNoGreaterThan(0);
-            s.setEarliestStartTime(frame-29*10-supplyBuildTime);
+            s.setEarliestStartTime(frame-334-supplyBuildTime);
             TaskStream* ts = new TaskStream(s);
             TheMacroManager->taskStreams.push_front(ts);
             ts->attach(new BasicWorkerFinder(),true);
             ts->attach(BasicTaskExecutor::getInstance(),false);
             ts->attach(new TerminateIfEmpty(),true);
             ts->attach(BFSBuildingPlacer::getInstance(),false);
+            if (Broodwar->self()->getRace()==Races::Protoss)
+              BFSBuildingPlacer::getInstance()->setBuildDistance(ts,2);
           }
         }
       }
