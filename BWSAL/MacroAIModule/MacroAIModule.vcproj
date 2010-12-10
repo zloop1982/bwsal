@@ -309,6 +309,14 @@
 						>
 					</File>
 					<File
+						RelativePath="..\Addons\PylonBuildingPlacer.cpp"
+						>
+					</File>
+					<File
+						RelativePath="..\include\PylonBuildingPlacer.h"
+						>
+					</File>
+					<File
 						RelativePath="..\Addons\SpiralBuildingPlacer.cpp"
 						>
 					</File>

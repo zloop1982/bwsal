@@ -70,7 +70,7 @@ void SpiralBuildingPlacer::update(TaskStream* ts)
     taskStreams[ts].reserveWidth    = width;
     taskStreams[ts].reserveHeight   = ts->getTask(0).getUnit().tileHeight();
     taskStreams[ts].reservePosition = ts->getTask(0).getTilePosition();
-    TheReservedMap->reserveTiles(taskStreams[ts].reservePosition,taskStreams[ts].reserveWidth,taskStreams[ts].reserveHeight);
+    TheReservedMap->reserveTiles(taskStreams[ts].reservePosition,type,taskStreams[ts].reserveWidth,taskStreams[ts].reserveHeight);
   }
 }
 void SpiralBuildingPlacer::setTilePosition(TaskStream* ts, BWAPI::TilePosition p)
@@ -228,7 +228,7 @@ bool SpiralBuildingPlacer::buildable(BWAPI::Unit* builder, int x, int y) const
   if (!BWAPI::Broodwar->isBuildable(x,y)) return false;
   std::set<BWAPI::Unit*> units = BWAPI::Broodwar->unitsOnTile(x, y);
   for(std::set<BWAPI::Unit*>::iterator i = units.begin(); i != units.end(); i++)
-    if ((*i)->getType().isBuilding() && !(*i)->isLifted() && *i != builder)
+    if ((*i)->getType().isBuilding() && !(*i)->isLifted() && !(*i)->getType().isFlyer() && *i != builder)
       return false;
   return true;
 }

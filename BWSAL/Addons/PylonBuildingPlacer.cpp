@@ -1,19 +1,20 @@
-#include <BFSBuildingPlacer.h>
+#include <PylonBuildingPlacer.h>
 #include <ReservedMap.h>
 #include <Heap.h>
 using namespace std;
 using namespace BWAPI;
-BFSBuildingPlacer* instance = NULL;
-BFSBuildingPlacer* BFSBuildingPlacer::getInstance()
+PylonBuildingPlacer* instance = NULL;
+PylonBuildingPlacer* PylonBuildingPlacer::getInstance()
 {
   if (instance==NULL)
-    instance = new BFSBuildingPlacer();
+    instance = new PylonBuildingPlacer();
   return instance;
 }
-BFSBuildingPlacer::BFSBuildingPlacer()
+PylonBuildingPlacer::PylonBuildingPlacer()
 {
+  pylonDistance = 3;
 }
-void BFSBuildingPlacer::attached(TaskStream* ts)
+void PylonBuildingPlacer::attached(TaskStream* ts)
 {
   if (ts->getTask(0).getTilePosition().isValid()==false)
     ts->getTask(0).setTilePosition(Broodwar->self()->getStartLocation());
@@ -23,20 +24,20 @@ void BFSBuildingPlacer::attached(TaskStream* ts)
   taskStreams[ts].reserveWidth    = 0;
   taskStreams[ts].reserveHeight   = 0;
 }
-void BFSBuildingPlacer::detached(TaskStream* ts)
+void PylonBuildingPlacer::detached(TaskStream* ts)
 {
   taskStreams.erase(ts);
 }
-void BFSBuildingPlacer::newStatus(TaskStream* ts)
+void PylonBuildingPlacer::newStatus(TaskStream* ts)
 {
 }
-void BFSBuildingPlacer::completedTask(TaskStream* ts, const Task &t)
+void PylonBuildingPlacer::completedTask(TaskStream* ts, const Task &t)
 {
   TheReservedMap->freeTiles(taskStreams[ts].reservePosition,taskStreams[ts].reserveWidth,taskStreams[ts].reserveHeight);
   taskStreams[ts].reserveWidth  = 0;
   taskStreams[ts].reserveHeight = 0;
 }
-void BFSBuildingPlacer::update(TaskStream* ts)
+void PylonBuildingPlacer::update(TaskStream* ts)
 {
   if (ts->getTask(0).getType()!=TaskTypes::Unit) return;
 
@@ -65,14 +66,6 @@ void BFSBuildingPlacer::update(TaskStream* ts)
       ts->getTask(0).setTilePosition(newtp);
     }
   }
-  if (type==BWAPI::UnitTypes::Terran_Command_Center ||
-    type==BWAPI::UnitTypes::Terran_Factory || 
-    type==BWAPI::UnitTypes::Terran_Starport ||
-    type==BWAPI::UnitTypes::Terran_Science_Facility)
-  {
-    width+=2;
-  }
-
   if (taskStreams[ts].reserveWidth    != width ||
       taskStreams[ts].reserveHeight   != ts->getTask(0).getUnit().tileHeight() ||
       taskStreams[ts].reservePosition != ts->getTask(0).getTilePosition())
@@ -84,20 +77,24 @@ void BFSBuildingPlacer::update(TaskStream* ts)
     TheReservedMap->reserveTiles(taskStreams[ts].reservePosition,type,taskStreams[ts].reserveWidth,taskStreams[ts].reserveHeight);
   }
 }
-void BFSBuildingPlacer::setTilePosition(TaskStream* ts, BWAPI::TilePosition p)
+void PylonBuildingPlacer::setTilePosition(TaskStream* ts, BWAPI::TilePosition p)
 {
   ts->getTask(0).setTilePosition(p);
 }
-void BFSBuildingPlacer::setRelocatable(TaskStream* ts, bool isRelocatable)
+void PylonBuildingPlacer::setRelocatable(TaskStream* ts, bool isRelocatable)
 {
   taskStreams[ts].isRelocatable = isRelocatable;
 }
-void BFSBuildingPlacer::setBuildDistance(TaskStream* ts, int distance)
+void PylonBuildingPlacer::setBuildDistance(TaskStream* ts, int distance)
 {
   taskStreams[ts].buildDistance = distance;
 }
+void PylonBuildingPlacer::setPylonDistance(int pylonDistance)
+{
+  this->pylonDistance = pylonDistance;
+}
 
-BWAPI::TilePosition BFSBuildingPlacer::getBuildLocationNear(BWAPI::Unit* builder, BWAPI::TilePosition position, BWAPI::UnitType type, int buildDist) const
+BWAPI::TilePosition PylonBuildingPlacer::getBuildLocationNear(BWAPI::Unit* builder, BWAPI::TilePosition position, BWAPI::UnitType type, int buildDist) const
 {
   //returns a valid build location near the specified tile position.
   //searches outward in a spiral.
@@ -123,7 +120,10 @@ BWAPI::TilePosition BFSBuildingPlacer::getBuildLocationNear(BWAPI::Unit* builder
     {
       for(int y=miny;y<=maxy;y++)
       {
-        if (!Broodwar->isWalkable(x*4+2,y*4+2)) continue;
+        if (!Broodwar->isWalkable(x*4,y*4)) continue;
+        if (!Broodwar->isWalkable(x*4+3,y*4+3)) continue;
+        if (!Broodwar->isWalkable(x*4+3,y*4)) continue;
+        if (!Broodwar->isWalkable(x*4,y*4+3)) continue;
         TilePosition t2(x,y);
         if (closed.find(t2)==closed.end())
         {
@@ -139,20 +139,30 @@ BWAPI::TilePosition BFSBuildingPlacer::getBuildLocationNear(BWAPI::Unit* builder
   return BWAPI::TilePositions::None;
 }
 
-bool BFSBuildingPlacer::canBuildHere(BWAPI::Unit* builder, BWAPI::TilePosition position, BWAPI::UnitType type) const
+bool PylonBuildingPlacer::canBuildHere(BWAPI::Unit* builder, BWAPI::TilePosition position, BWAPI::UnitType type) const
 {
   if (type.isAddon()) type=type.whatBuilds().first;
   //returns true if we can build this type of unit here. Takes into account reserved tiles.
   if (!BWAPI::Broodwar->canBuildHere(builder, position, type))
     return false;
-  for(int x = position.x(); x < position.x() + type.tileWidth(); x++)
-    for(int y = position.y(); y < position.y() + type.tileHeight(); y++)
-      if (TheReservedMap->isReserved(x,y))
+  
+  int minx = position.x() - pylonDistance; if (minx<0) minx=0;
+  int maxx = position.x() + 2 + pylonDistance; if (maxx>=BWAPI::Broodwar->mapWidth()) maxx=BWAPI::Broodwar->mapWidth()-1;
+  int miny = position.y() - pylonDistance; if (miny<0) miny=0;
+  int maxy = position.y() + 2 + pylonDistance; if (maxy>=BWAPI::Broodwar->mapHeight()) maxy=BWAPI::Broodwar->mapHeight()-1;
+  for(int x=minx;x<=maxx;x++)
+    for(int y=miny;y<=maxy;y++)
+    {
+      if (TheReservedMap->getReservedType(x,y)==UnitTypes::Protoss_Pylon)
         return false;
+      for each(Unit* u in Broodwar->unitsOnTile(x,y))
+        if (u->getPlayer()==Broodwar->self() && u->getType()==UnitTypes::Protoss_Pylon)
+          return false;
+    }
   return true;
 }
 
-bool BFSBuildingPlacer::canBuildHereWithSpace(BWAPI::Unit* builder, BWAPI::TilePosition position, BWAPI::UnitType type, int buildDist) const
+bool PylonBuildingPlacer::canBuildHereWithSpace(BWAPI::Unit* builder, BWAPI::TilePosition position, BWAPI::UnitType type, int buildDist) const
 {
   if (type.isAddon()) type=type.whatBuilds().first;
   //returns true if we can build this type of unit here with the specified amount of space.
@@ -166,15 +176,6 @@ bool BFSBuildingPlacer::canBuildHereWithSpace(BWAPI::Unit* builder, BWAPI::TileP
 
   int width=type.tileWidth();
   int height=type.tileHeight();
-
-  //make sure we leave space for add-ons. These types of units can have addons:
-  if (type==BWAPI::UnitTypes::Terran_Command_Center ||
-    type==BWAPI::UnitTypes::Terran_Factory || 
-    type==BWAPI::UnitTypes::Terran_Starport ||
-    type==BWAPI::UnitTypes::Terran_Science_Facility)
-  {
-    width+=2;
-  }
   int startx = position.x() - buildDist;
   if (startx<0) return false;
   int starty = position.y() - buildDist;
@@ -188,35 +189,10 @@ bool BFSBuildingPlacer::canBuildHereWithSpace(BWAPI::Unit* builder, BWAPI::TileP
     for(int y = starty; y < endy; y++)
       if (!buildable(builder, x, y) || TheReservedMap->isReserved(x,y))
         return false;
-
-  if (position.x()>3)
-  {
-    int startx2=startx-2;
-    if (startx2<0) startx2=0;
-    for(int x = startx2; x < startx; x++)
-      for(int y = starty; y < endy; y++)
-      {
-        std::set<BWAPI::Unit*> units = BWAPI::Broodwar->unitsOnTile(x, y);
-        for(std::set<BWAPI::Unit*>::iterator i = units.begin(); i != units.end(); i++)
-        {
-          if (!(*i)->isLifted() && *i != builder)
-          {
-            BWAPI::UnitType type=(*i)->getType();
-            if (type==BWAPI::UnitTypes::Terran_Command_Center ||
-              type==BWAPI::UnitTypes::Terran_Factory || 
-              type==BWAPI::UnitTypes::Terran_Starport ||
-              type==BWAPI::UnitTypes::Terran_Science_Facility)
-            {
-              return false;
-            }
-          }
-        }
-      }
-  }
   return true;
 }
 
-bool BFSBuildingPlacer::buildable(BWAPI::Unit* builder, int x, int y) const
+bool PylonBuildingPlacer::buildable(BWAPI::Unit* builder, int x, int y) const
 {
   //returns true if this tile is currently buildable, takes into account units on tile
   if (!BWAPI::Broodwar->isBuildable(x,y)) return false;

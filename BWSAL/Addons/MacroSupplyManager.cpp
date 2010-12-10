@@ -6,6 +6,7 @@
 #include <BasicTaskExecutor.h>
 #include <SpiralBuildingPlacer.h>
 #include <BFSBuildingPlacer.h>
+#include <PylonBuildingPlacer.h>
 #include <UnitPump.h>
 #include <TerminateIfWorkerLost.h>
 #include <TerminateIfEmpty.h>
@@ -60,9 +61,13 @@ void MacroSupplyManager::update()
           ts->attach(new BasicWorkerFinder(),true);
           ts->attach(BasicTaskExecutor::getInstance(),false);
           ts->attach(new TerminateIfEmpty(),true);
-          ts->attach(BFSBuildingPlacer::getInstance(),false);
           if (Broodwar->self()->getRace()==Races::Protoss)
-            BFSBuildingPlacer::getInstance()->setBuildDistance(ts,2);
+          {
+            ts->attach(PylonBuildingPlacer::getInstance(),false);
+            PylonBuildingPlacer::getInstance()->setBuildDistance(ts,4);
+          }
+          else
+            ts->attach(BFSBuildingPlacer::getInstance(),false);
 
         }
       }
@@ -81,9 +86,10 @@ void MacroSupplyManager::update()
             ts->attach(new BasicWorkerFinder(),true);
             ts->attach(BasicTaskExecutor::getInstance(),false);
             ts->attach(new TerminateIfEmpty(),true);
-            ts->attach(BFSBuildingPlacer::getInstance(),false);
             if (Broodwar->self()->getRace()==Races::Protoss)
-              BFSBuildingPlacer::getInstance()->setBuildDistance(ts,2);
+              ts->attach(PylonBuildingPlacer::getInstance(),false);
+            else
+              ts->attach(BFSBuildingPlacer::getInstance(),false);
           }
         }
       }
