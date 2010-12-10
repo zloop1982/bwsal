@@ -1,5 +1,6 @@
 #pragma once
 #include <BWAPI.h>
+#include <BWSAL.h>
 #include <Arbitrator.h>
 #include <ResourceTimeline.h>
 #include <UnitCountTimeline.h>
@@ -12,8 +13,9 @@ class TaskStream;
 class MacroManager : public Arbitrator::Controller<BWAPI::Unit*,double>
 {
   public:
-    static MacroManager* create(Arbitrator::Arbitrator<BWAPI::Unit*,double>* arbitrator);
-    MacroManager(Arbitrator::Arbitrator<BWAPI::Unit*,double>* arbitrator);
+    static MacroManager* create();
+    static void destroy();
+    MacroManager();
     ~MacroManager();
     virtual void onOffer(std::set<BWAPI::Unit*> units);
     virtual void onRevoke(BWAPI::Unit* unit, double bid);
@@ -48,4 +50,3 @@ class MacroManager : public Arbitrator::Controller<BWAPI::Unit*,double>
     bool taskstream_list_visible;
 };
 extern MacroManager* TheMacroManager;
-extern Arbitrator::Arbitrator<BWAPI::Unit*,double>* TheArbitrator;

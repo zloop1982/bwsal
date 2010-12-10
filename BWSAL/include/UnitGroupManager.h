@@ -5,12 +5,14 @@ class UnitGroupManager
 {
   public:
     static UnitGroupManager* create();
-    UnitGroupManager();
-    ~UnitGroupManager();
+    static void destroy();
     void onUnitDiscover(BWAPI::Unit* unit);
     void onUnitEvade(BWAPI::Unit* unit);
     void onUnitMorph(BWAPI::Unit* unit);
     void onUnitRenegade(BWAPI::Unit* unit);
+  private:
+    UnitGroupManager();
+    ~UnitGroupManager();
 };
 extern UnitGroupManager* TheUnitGroupManager;
 UnitGroup AllUnits();

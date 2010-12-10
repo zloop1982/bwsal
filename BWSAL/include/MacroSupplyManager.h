@@ -6,11 +6,13 @@ class MacroSupplyManager
 {
   public:
     static MacroSupplyManager* create();
-    MacroSupplyManager();
-    ~MacroSupplyManager();
+    static void destroy();
     void update();
     int lastFrameCheck;
     int initialSupplyTotal;
     int initialSupplyProviderCount;
+  private:
+    MacroSupplyManager();
+    ~MacroSupplyManager();
 };
 extern MacroSupplyManager* TheMacroSupplyManager;

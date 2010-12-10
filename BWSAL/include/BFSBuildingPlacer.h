@@ -20,8 +20,6 @@ class BFSBuildingPlacer : public TaskStreamObserver
     bool canBuildHere(BWAPI::Unit* builder, BWAPI::TilePosition position, BWAPI::UnitType type) const;
     bool canBuildHereWithSpace(BWAPI::Unit* builder, BWAPI::TilePosition position, BWAPI::UnitType type, int buildDist) const;
     bool buildable(BWAPI::Unit* builder, int x, int y) const;
-    void reserveTiles(BWAPI::TilePosition position, int width, int height);
-    void freeTiles(BWAPI::TilePosition position, int width, int height);
     struct data
     {
       bool isRelocatable;
@@ -31,6 +29,5 @@ class BFSBuildingPlacer : public TaskStreamObserver
       int reserveHeight;
     };
     std::map< TaskStream*, data > taskStreams;
-    Util::RectangleArray<bool> reserveMap;
 
 };

@@ -5,11 +5,12 @@ class ResourceRates
 {
   public:
     static ResourceRates* create();
-    ResourceRates();
-    ~ResourceRates();
+    static void destroy();
     Resources getGatherRate() const;
     void update();
   private:
+    ResourceRates();
+    ~ResourceRates();
     Resources gatherRate;
     int gatherRateStepSize;
     std::list<Resources> resourceHistory;

@@ -8,6 +8,11 @@ MacroBaseManager* MacroBaseManager::create()
   if (TheMacroBaseManager) return TheMacroBaseManager;
   return new MacroBaseManager();
 }
+void MacroBaseManager::destroy()
+{
+  if (TheMacroBaseManager)
+    delete TheMacroBaseManager;
+}
 MacroBaseManager::MacroBaseManager()
 {
   TheMacroBaseManager=this;

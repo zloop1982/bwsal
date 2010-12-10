@@ -16,6 +16,11 @@ MacroWorkerManager* MacroWorkerManager::create()
   if (TheMacroWorkerManager) return TheMacroWorkerManager;
   return new MacroWorkerManager();
 }
+void MacroWorkerManager::destroy()
+{
+  if (TheMacroWorkerManager)
+    delete TheMacroWorkerManager;
+}
 
 
 MacroWorkerManager::MacroWorkerManager()
@@ -31,7 +36,7 @@ MacroWorkerManager::MacroWorkerManager()
 
 MacroWorkerManager::~MacroWorkerManager()
 {
-  TheMacroWorkerManager   = NULL;
+  TheMacroWorkerManager = NULL;
 }
 
 void MacroWorkerManager::onOffer(set<Unit*> units)

@@ -10,6 +10,11 @@ InformationManager* InformationManager::create()
   if (TheInformationManager) return TheInformationManager;
   return new InformationManager();
 }
+void InformationManager::destroy()
+{
+  if (TheInformationManager)
+    delete TheInformationManager;
+}
 InformationManager::InformationManager()
 {
   TheInformationManager = this;

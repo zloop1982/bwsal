@@ -5,18 +5,20 @@
 using namespace BWAPI;
 using namespace std;
 MacroManager* TheMacroManager = NULL;
-Arbitrator::Arbitrator<BWAPI::Unit*,double>* TheArbitrator = NULL;
 std::set<TaskStream*> emptyTSSet;
 
-MacroManager* MacroManager::create(Arbitrator::Arbitrator<BWAPI::Unit*,double>* arbitrator)
+MacroManager* MacroManager::create()
 {
   if (TheMacroManager) return TheMacroManager;
-  return new MacroManager(arbitrator);
+  return new MacroManager();
 }
-
-MacroManager::MacroManager(Arbitrator::Arbitrator<BWAPI::Unit*,double>* arbitrator)
+void MacroManager::destroy()
 {
-  TheArbitrator = arbitrator;
+  if (TheMacroManager)
+    delete TheMacroManager;
+}
+MacroManager::MacroManager()
+{
   TheMacroManager = this;
   taskstream_list_visible = true;
 }

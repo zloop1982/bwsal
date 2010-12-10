@@ -19,6 +19,11 @@ MacroDependencyResolver* MacroDependencyResolver::create()
   if (TheMacroDependencyResolver) return TheMacroDependencyResolver;
   return new MacroDependencyResolver();
 }
+void MacroDependencyResolver::destroy()
+{
+  if (TheMacroDependencyResolver)
+    delete TheMacroDependencyResolver;
+}
 MacroDependencyResolver::MacroDependencyResolver()
 {
   TheMacroDependencyResolver=this;

@@ -22,9 +22,9 @@ void BasicAIModule::onStart()
   this->baseManager        = new BaseManager();
   this->buildOrderManager  = new BuildOrderManager(this->buildManager,this->techManager,this->upgradeManager,this->workerManager,this->supplyManager);
   this->defenseManager     = new DefenseManager(&this->arbitrator);
-  this->informationManager = new InformationManager();
-  this->borderManager      = new BorderManager();
-  this->unitGroupManager   = new UnitGroupManager();
+  this->informationManager = InformationManager::create();
+  this->borderManager      = BorderManager::create();
+  this->unitGroupManager   = UnitGroupManager::create();
   this->enhancedUI         = new EnhancedUI();
 
   this->supplyManager->setBuildManager(this->buildManager);
@@ -147,9 +147,9 @@ BasicAIModule::~BasicAIModule()
   delete this->buildOrderManager;
   delete this->baseManager;
   delete this->defenseManager;
-  delete this->informationManager;
-  delete this->borderManager;
-  delete this->unitGroupManager;
+  InformationManager::destroy();
+  BorderManager::destroy();
+  UnitGroupManager::destroy();
   delete this->enhancedUI;
 }
 void BasicAIModule::onEnd(bool isWinner)

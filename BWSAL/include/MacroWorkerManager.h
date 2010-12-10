@@ -16,8 +16,7 @@ class MacroWorkerManager : public Arbitrator::Controller<BWAPI::Unit*,double>
         int lastFrameSpam;
     };
     static MacroWorkerManager* create();
-    MacroWorkerManager();
-    ~MacroWorkerManager();
+    static void destroy();
     virtual void onOffer(std::set<BWAPI::Unit*> units);
     virtual void onRevoke(BWAPI::Unit* unit, double bid);
     virtual void update();
@@ -33,7 +32,8 @@ class MacroWorkerManager : public Arbitrator::Controller<BWAPI::Unit*,double>
     void disableAutoBuild();
     void setAutoBuildPriority(int priority);
   private:
-
+    MacroWorkerManager();
+    ~MacroWorkerManager();
     std::map<BWAPI::Unit*,WorkerData> workers;
     std::map<BWAPI::Unit*, std::set<BWAPI::Unit*> > currentWorkers;
     std::map<BWAPI::Unit*, MacroBase*> resourceBase;

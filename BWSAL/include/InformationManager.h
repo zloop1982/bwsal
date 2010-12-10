@@ -6,8 +6,7 @@ class InformationManager
 {
   public:
     static InformationManager* create();
-    InformationManager();
-    ~InformationManager();
+    static void destroy();
     void onUnitDiscover(BWAPI::Unit* unit);
     void onUnitEvade(BWAPI::Unit* unit);
     void onUnitDestroy(BWAPI::Unit* unit);
@@ -21,6 +20,8 @@ class InformationManager
     const std::set<BWTA::BaseLocation*>& getEnemyBases() const;
     void setBaseEmpty(BWTA::BaseLocation* base);
   private:
+    InformationManager();
+    ~InformationManager();
     class UnitData
     {
       public:

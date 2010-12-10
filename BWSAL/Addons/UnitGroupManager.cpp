@@ -13,7 +13,11 @@ UnitGroupManager* UnitGroupManager::create()
   if (TheUnitGroupManager) return TheUnitGroupManager;
   return new UnitGroupManager();
 }
-
+void UnitGroupManager::destroy()
+{
+  if (TheUnitGroupManager)
+    delete TheUnitGroupManager;
+}
 UnitGroupManager::UnitGroupManager()
 {
   TheUnitGroupManager = this;

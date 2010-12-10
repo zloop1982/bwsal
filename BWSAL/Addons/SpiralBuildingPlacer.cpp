@@ -1,4 +1,5 @@
 #include <SpiralBuildingPlacer.h>
+#include <ReservedMap.h>
 using namespace BWAPI;
 SpiralBuildingPlacer* instance = NULL;
 SpiralBuildingPlacer* SpiralBuildingPlacer::getInstance()
@@ -9,8 +10,6 @@ SpiralBuildingPlacer* SpiralBuildingPlacer::getInstance()
 }
 SpiralBuildingPlacer::SpiralBuildingPlacer()
 {
-  reserveMap.resize(BWAPI::Broodwar->mapWidth(), BWAPI::Broodwar->mapHeight());
-  reserveMap.setTo(false);
 }
 void SpiralBuildingPlacer::attached(TaskStream* ts)
 {
@@ -31,7 +30,7 @@ void SpiralBuildingPlacer::newStatus(TaskStream* ts)
 }
 void SpiralBuildingPlacer::completedTask(TaskStream* ts, const Task &t)
 {
-  freeTiles(taskStreams[ts].reservePosition,taskStreams[ts].reserveWidth,taskStreams[ts].reserveHeight);
+  TheReservedMap->freeTiles(taskStreams[ts].reservePosition,taskStreams[ts].reserveWidth,taskStreams[ts].reserveHeight);
   taskStreams[ts].reserveWidth  = 0;
   taskStreams[ts].reserveHeight = 0;
 }
@@ -67,11 +66,11 @@ void SpiralBuildingPlacer::update(TaskStream* ts)
       taskStreams[ts].reserveHeight   != ts->getTask(0).getUnit().tileHeight() ||
       taskStreams[ts].reservePosition != ts->getTask(0).getTilePosition())
   {
-    freeTiles(taskStreams[ts].reservePosition,taskStreams[ts].reserveWidth,taskStreams[ts].reserveHeight);
+    TheReservedMap->freeTiles(taskStreams[ts].reservePosition,taskStreams[ts].reserveWidth,taskStreams[ts].reserveHeight);
     taskStreams[ts].reserveWidth    = width;
     taskStreams[ts].reserveHeight   = ts->getTask(0).getUnit().tileHeight();
     taskStreams[ts].reservePosition = ts->getTask(0).getTilePosition();
-    reserveTiles(taskStreams[ts].reservePosition,taskStreams[ts].reserveWidth,taskStreams[ts].reserveHeight);
+    TheReservedMap->reserveTiles(taskStreams[ts].reservePosition,taskStreams[ts].reserveWidth,taskStreams[ts].reserveHeight);
   }
 }
 void SpiralBuildingPlacer::setTilePosition(TaskStream* ts, BWAPI::TilePosition p)
@@ -154,7 +153,7 @@ bool SpiralBuildingPlacer::canBuildHere(BWAPI::Unit* builder, BWAPI::TilePositio
     return false;
   for(int x = position.x(); x < position.x() + type.tileWidth(); x++)
     for(int y = position.y(); y < position.y() + type.tileHeight(); y++)
-      if (reserveMap[x][y])
+      if (TheReservedMap->isReserved(x,y))
         return false;
   return true;
 }
@@ -193,7 +192,7 @@ bool SpiralBuildingPlacer::canBuildHereWithSpace(BWAPI::Unit* builder, BWAPI::Ti
 
   for(int x = startx; x < endx; x++)
     for(int y = starty; y < endy; y++)
-      if (!buildable(builder, x, y) || reserveMap[x][y])
+      if (!buildable(builder, x, y) || TheReservedMap->isReserved(x,y))
         return false;
 
   if (position.x()>3)
@@ -232,18 +231,4 @@ bool SpiralBuildingPlacer::buildable(BWAPI::Unit* builder, int x, int y) const
     if ((*i)->getType().isBuilding() && !(*i)->isLifted() && *i != builder)
       return false;
   return true;
-}
-
-void SpiralBuildingPlacer::reserveTiles(BWAPI::TilePosition position, int width, int height)
-{
-  for(int x = position.x(); x < position.x() + width && x < (int)reserveMap.getWidth(); x++)
-    for(int y = position.y(); y < position.y() + height && y < (int)reserveMap.getHeight(); y++)
-      reserveMap[x][y] = true;
-}
-
-void SpiralBuildingPlacer::freeTiles(BWAPI::TilePosition position, int width, int height)
-{
-  for(int x = position.x(); x < position.x() + width && x < (int)reserveMap.getWidth(); x++)
-    for(int y = position.y(); y < position.y() + height && y < (int)reserveMap.getHeight(); y++)
-      reserveMap[x][y] = false;
 }

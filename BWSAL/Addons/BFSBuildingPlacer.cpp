@@ -1,4 +1,5 @@
 #include <BFSBuildingPlacer.h>
+#include <ReservedMap.h>
 #include <Heap.h>
 using namespace std;
 using namespace BWAPI;
@@ -11,8 +12,6 @@ BFSBuildingPlacer* BFSBuildingPlacer::getInstance()
 }
 BFSBuildingPlacer::BFSBuildingPlacer()
 {
-  reserveMap.resize(BWAPI::Broodwar->mapWidth(), BWAPI::Broodwar->mapHeight());
-  reserveMap.setTo(false);
 }
 void BFSBuildingPlacer::attached(TaskStream* ts)
 {
@@ -33,7 +32,7 @@ void BFSBuildingPlacer::newStatus(TaskStream* ts)
 }
 void BFSBuildingPlacer::completedTask(TaskStream* ts, const Task &t)
 {
-  freeTiles(taskStreams[ts].reservePosition,taskStreams[ts].reserveWidth,taskStreams[ts].reserveHeight);
+  TheReservedMap->freeTiles(taskStreams[ts].reservePosition,taskStreams[ts].reserveWidth,taskStreams[ts].reserveHeight);
   taskStreams[ts].reserveWidth  = 0;
   taskStreams[ts].reserveHeight = 0;
 }
@@ -78,11 +77,11 @@ void BFSBuildingPlacer::update(TaskStream* ts)
       taskStreams[ts].reserveHeight   != ts->getTask(0).getUnit().tileHeight() ||
       taskStreams[ts].reservePosition != ts->getTask(0).getTilePosition())
   {
-    freeTiles(taskStreams[ts].reservePosition,taskStreams[ts].reserveWidth,taskStreams[ts].reserveHeight);
+    TheReservedMap->freeTiles(taskStreams[ts].reservePosition,taskStreams[ts].reserveWidth,taskStreams[ts].reserveHeight);
     taskStreams[ts].reserveWidth    = width;
     taskStreams[ts].reserveHeight   = ts->getTask(0).getUnit().tileHeight();
     taskStreams[ts].reservePosition = ts->getTask(0).getTilePosition();
-    reserveTiles(taskStreams[ts].reservePosition,taskStreams[ts].reserveWidth,taskStreams[ts].reserveHeight);
+    TheReservedMap->reserveTiles(taskStreams[ts].reservePosition,taskStreams[ts].reserveWidth,taskStreams[ts].reserveHeight);
   }
 }
 void BFSBuildingPlacer::setTilePosition(TaskStream* ts, BWAPI::TilePosition p)
@@ -148,7 +147,7 @@ bool BFSBuildingPlacer::canBuildHere(BWAPI::Unit* builder, BWAPI::TilePosition p
     return false;
   for(int x = position.x(); x < position.x() + type.tileWidth(); x++)
     for(int y = position.y(); y < position.y() + type.tileHeight(); y++)
-      if (reserveMap[x][y])
+      if (TheReservedMap->isReserved(x,y))
         return false;
   return true;
 }
@@ -187,7 +186,7 @@ bool BFSBuildingPlacer::canBuildHereWithSpace(BWAPI::Unit* builder, BWAPI::TileP
 
   for(int x = startx; x < endx; x++)
     for(int y = starty; y < endy; y++)
-      if (!buildable(builder, x, y) || reserveMap[x][y])
+      if (!buildable(builder, x, y) || TheReservedMap->isReserved(x,y))
         return false;
 
   if (position.x()>3)
@@ -226,18 +225,4 @@ bool BFSBuildingPlacer::buildable(BWAPI::Unit* builder, int x, int y) const
     if ((*i)->getType().isBuilding() && !(*i)->isLifted() && *i != builder)
       return false;
   return true;
-}
-
-void BFSBuildingPlacer::reserveTiles(BWAPI::TilePosition position, int width, int height)
-{
-  for(int x = position.x(); x < position.x() + width && x < (int)reserveMap.getWidth(); x++)
-    for(int y = position.y(); y < position.y() + height && y < (int)reserveMap.getHeight(); y++)
-      reserveMap[x][y] = true;
-}
-
-void BFSBuildingPlacer::freeTiles(BWAPI::TilePosition position, int width, int height)
-{
-  for(int x = position.x(); x < position.x() + width && x < (int)reserveMap.getWidth(); x++)
-    for(int y = position.y(); y < position.y() + height && y < (int)reserveMap.getHeight(); y++)
-      reserveMap[x][y] = false;
 }

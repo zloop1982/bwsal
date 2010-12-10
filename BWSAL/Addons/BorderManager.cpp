@@ -7,6 +7,11 @@ BorderManager* BorderManager::create()
   if (TheBorderManager) return TheBorderManager;
   return new BorderManager();
 }
+void BorderManager::destroy()
+{
+  if (TheBorderManager)
+    delete TheBorderManager;
+}
 BorderManager::BorderManager()
 {
   TheBorderManager = this;
