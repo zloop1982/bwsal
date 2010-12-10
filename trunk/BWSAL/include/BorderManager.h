@@ -5,8 +5,7 @@ class BorderManager
 {
   public:
     static BorderManager* create();
-    BorderManager();
-    ~BorderManager();
+    static void destroy();
     void addMyBase(BWTA::BaseLocation* location);
     void removeMyBase(BWTA::BaseLocation* location);
     const std::set<BWTA::Chokepoint*>& getMyBorder() const;
@@ -15,6 +14,8 @@ class BorderManager
     const std::set<BWTA::Chokepoint*>& getEnemyRegions() const;
     void update();
   private:
+    BorderManager();
+    ~BorderManager();
     void recalculateBorders();
     std::set<BWTA::BaseLocation*> myBases;
     std::set<BWTA::BaseLocation*> enemyBases;

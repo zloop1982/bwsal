@@ -16,6 +16,7 @@
 #include <MacroBaseManager.h>
 #include <UnitGroupManager.h>
 #include <MacroWorkerManager.h>
+#include <ReservedMap.h>
 
 using namespace BWAPI;
 int drag_index = -1;
@@ -31,24 +32,16 @@ MacroAIModule::MacroAIModule()
 }
 MacroAIModule::~MacroAIModule()
 {
-  if (TheMacroManager != NULL)
-    delete TheMacroManager;
-  if (TheMacroSupplyManager != NULL)
-    delete TheMacroSupplyManager;
-  if (TheMacroDependencyResolver != NULL)
-    delete TheMacroDependencyResolver;
-  if (TheResourceRates != NULL)
-    delete TheResourceRates;
-  if (TheInformationManager != NULL)
-    delete TheInformationManager;
-  if (TheBorderManager != NULL)
-    delete TheBorderManager;
-  if (TheMacroBaseManager != NULL)
-    delete TheMacroBaseManager;
-  if (TheUnitGroupManager != NULL)
-    delete TheUnitGroupManager;
-  if (TheMacroWorkerManager != NULL)
-    delete TheMacroWorkerManager;
+  MacroManager::destroy();
+  MacroSupplyManager::destroy();
+  MacroDependencyResolver::destroy();
+  ResourceRates::destroy();
+  InformationManager::destroy();
+  BorderManager::destroy();
+  MacroBaseManager::destroy();
+  UnitGroupManager::destroy();
+  MacroWorkerManager::destroy();
+  ReservedMap::destroy();
   if (infantryProducer != NULL)
     delete infantryProducer;
   if (vehicleProducer != NULL)
@@ -59,7 +52,8 @@ void MacroAIModule::onStart()
   Broodwar->enableFlag(Flag::UserInput);
   BWTA::readMap();
   BWTA::analyze();
-  MacroManager::create(&arbitrator);
+  TheArbitrator = &arbitrator;
+  MacroManager::create();
   MacroSupplyManager::create();
   MacroDependencyResolver::create();
   ResourceRates::create();
@@ -68,6 +62,7 @@ void MacroAIModule::onStart()
   MacroBaseManager::create();
   UnitGroupManager::create();
   MacroWorkerManager::create();
+  ReservedMap::create();
 
   TaskStream* ts = new TaskStream();
   TheMacroManager->taskStreams.push_back(ts);

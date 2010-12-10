@@ -175,6 +175,10 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
+				RelativePath="..\Addons\BWSAL.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\Source\Dll.cpp"
 				>
 			</File>
@@ -192,6 +196,10 @@
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
+			<File
+				RelativePath="..\include\BWSAL.h"
+				>
+			</File>
 			<File
 				RelativePath=".\Source\MacroAIModule.h"
 				>
@@ -523,6 +531,18 @@
 				</File>
 				<File
 					RelativePath="..\include\MacroWorkerManager.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="ReservedMap"
+				>
+				<File
+					RelativePath="..\Addons\ReservedMap.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\include\ReservedMap.h"
 					>
 				</File>
 			</Filter>

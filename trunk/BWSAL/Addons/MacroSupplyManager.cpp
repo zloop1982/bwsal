@@ -20,6 +20,11 @@ MacroSupplyManager* MacroSupplyManager::create()
   if (TheMacroSupplyManager) return TheMacroSupplyManager;
   return new MacroSupplyManager();
 }
+void MacroSupplyManager::destroy()
+{
+  if (TheMacroSupplyManager)
+    delete TheMacroSupplyManager;
+}
 MacroSupplyManager::MacroSupplyManager()
 {
   TheMacroSupplyManager=this;

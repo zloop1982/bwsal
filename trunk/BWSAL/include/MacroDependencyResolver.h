@@ -6,9 +6,11 @@ class MacroDependencyResolver
 {
   public:
     static MacroDependencyResolver* create();
-    MacroDependencyResolver();
-    ~MacroDependencyResolver();
+    static void destroy();
     void update();
     int lastFrameCheck;
+  private:
+    MacroDependencyResolver();
+    ~MacroDependencyResolver();
 };
 extern MacroDependencyResolver* TheMacroDependencyResolver;

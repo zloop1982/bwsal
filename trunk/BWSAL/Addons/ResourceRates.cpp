@@ -9,6 +9,11 @@ ResourceRates* ResourceRates::create()
   if (TheResourceRates) return TheResourceRates;
   return new ResourceRates();
 }
+void ResourceRates::destroy()
+{
+  if (TheResourceRates)
+    delete TheResourceRates;
+}
 ResourceRates::ResourceRates()
 {
   TheResourceRates = this;
