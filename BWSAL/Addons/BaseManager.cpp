@@ -99,7 +99,7 @@ void BaseManager::update()
     }
   }
 
-  if(BWAPI::Broodwar->getFrameCount() % 500 == 0 && BWAPI::Broodwar->getFrameCount() >= 3000)
+  if(BWAPI::Broodwar->getFrameCount() % 500 == 0 && BWAPI::Broodwar->getFrameCount() >= 3000 && refineryBuildPriority > 0)
     updateRefineries();
 
 }
