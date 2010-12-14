@@ -314,7 +314,7 @@ void ConstructionManager::update()
             if (!u->isConstructing()) //if the worker isn't constructing
             {
               double distance = u->getPosition().getDistance(b->position);
-              if (distance > 100) //if its too far away, tell it to go to the build site
+              if (distance > 100 && u->getLastOrderFrame() + 4 < BWAPI::Broodwar->getFrameCount() && u->getOrder() != BWAPI::Orders::Move ) //if its too far away, tell it to go to the build site
                 u->rightClick(b->position);
               else //if its close enough, tell it to build
                 if (BWAPI::Broodwar->canBuildHere(u, b->tilePosition, b->type)) //if we can build here, tell the worker to build
@@ -353,12 +353,10 @@ void ConstructionManager::update()
               //we have a worker, so lets rightClick it on the incomplete building so it can resume construction
               if (BWAPI::Broodwar->getFrameCount()%(4*BWAPI::Broodwar->getLatency())==0)
               {
-                if (!u->isConstructing() || !s->isBeingConstructed())
+                if ( !u->isConstructing() || !s->isBeingConstructed() )
                 {
                   //right click builder on building
                   u->rightClick(s);
-                  //also right click building on builder for good luck! :D
-                  s->rightClick(u);
                 }
               }
             }
