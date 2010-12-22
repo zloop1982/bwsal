@@ -13,8 +13,8 @@ namespace BWAPI
   class UnitCommand
   {
     public:
-      UnitCommand() : target(NULL), x(0), y(0), extra(0) { type = UnitCommandTypes::None; }
-      UnitCommand(Unit* source, UnitCommandType _type, Unit* _target, int _x, int _y, int _extra) : unit(source), type(_type), target(_target), x(_x), y(_y), extra(_extra) {}
+      UnitCommand();
+      UnitCommand(Unit* _unit, UnitCommandType _type, Unit* _target, int _x, int _y, int _extra);
 
       static UnitCommand attackMove(Unit* unit, Position target);
       static UnitCommand attackUnit(Unit* unit, Unit* target);
@@ -24,8 +24,8 @@ namespace BWAPI
       static UnitCommand morph(Unit* unit, UnitType type);
       static UnitCommand research(Unit* unit, TechType tech);
       static UnitCommand upgrade(Unit* unit, UpgradeType upgrade);
-      static UnitCommand setRallyPosition(Unit* unit, Position target);
-      static UnitCommand setRallyUnit(Unit* unit, Unit* target);
+      static UnitCommand setRallyPoint(Unit* unit, Position target);
+      static UnitCommand setRallyPoint(Unit* unit, Unit* target);
       static UnitCommand move(Unit* unit, Position target);
       static UnitCommand patrol(Unit* unit, Position target);
       static UnitCommand holdPosition(Unit* unit);
@@ -58,6 +58,22 @@ namespace BWAPI
       static UnitCommand useTech(Unit* unit,TechType tech);
       static UnitCommand useTech(Unit* unit,TechType tech, Position target);
       static UnitCommand useTech(Unit* unit,TechType tech, Unit* target);
+      static UnitCommand placeCOP(Unit* unit, TilePosition target);
+
+      UnitCommandType getType() const;
+      Unit* getUnit() const;
+      Unit* getTarget() const;
+      Position getTargetPosition() const;
+      TilePosition getTargetTilePosition() const;
+      UnitType getUnitType() const;
+      TechType getTechType() const;
+      UpgradeType getUpgradeType() const;
+      int getSlot() const;
+      bool operator==(const UnitCommand& other) const;
+      bool operator!=(const UnitCommand& other) const;
+      bool operator<(const UnitCommand& other) const;
+      bool operator>(const UnitCommand& other) const;
+
       Unit* unit;
       UnitCommandType type;
       Unit* target;

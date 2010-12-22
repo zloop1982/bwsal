@@ -15,7 +15,8 @@ namespace BWAPI
       int initialResources;
       int initialHitPoints;
       Position initialPosition;
-      int lastOrderFrame;
+      int lastCommandFrame;
+      UnitCommand lastCommand;
       void* clientInfo;
     public:
       UnitData* self;
@@ -39,12 +40,13 @@ namespace BWAPI
       virtual int          getResources() const;
       virtual int          getResourceGroup() const;
 
-      virtual double getDistance(Unit* target) const;
-      virtual double getDistance(Position target) const;
-      virtual bool   hasPath(Unit* target) const;
-      virtual bool   hasPath(Position target) const;
-      virtual int    getLastOrderFrame() const;
-      virtual int    getUpgradeLevel(UpgradeType upgrade) const;
+      virtual double       getDistance(Unit* target) const;
+      virtual double       getDistance(Position target) const;
+      virtual bool         hasPath(Unit* target) const;
+      virtual bool         hasPath(Position target) const;
+      virtual int          getLastCommandFrame() const;
+      virtual UnitCommand  getLastCommand() const;
+      virtual int          getUpgradeLevel(UpgradeType upgrade) const;
 
       virtual UnitType     getInitialType() const;
       virtual Position     getInitialPosition() const;
@@ -53,6 +55,7 @@ namespace BWAPI
       virtual int          getInitialResources() const;
 
       virtual int getKillCount() const;
+      virtual int getAcidSporeCount() const;
       virtual int getInterceptorCount() const;
       virtual int getScarabCount() const;
       virtual int getSpiderMineCount() const;
@@ -104,6 +107,7 @@ namespace BWAPI
       virtual bool hasNuke() const;
       virtual bool isAccelerating() const;
       virtual bool isAttacking() const;
+      virtual bool isAttackFrame() const;
       virtual bool isBeingConstructed() const;
       virtual bool isBeingGathered() const;
       virtual bool isBeingHealed() const;
@@ -125,6 +129,8 @@ namespace BWAPI
       virtual bool isHoldingPosition() const;
       virtual bool isIdle() const;
       virtual bool isInterruptible() const;
+      virtual bool isInvincible() const;
+      virtual bool isInWeaponRange(Unit *target) const;
       virtual bool isIrradiated() const;
       virtual bool isLifted() const;
       virtual bool isLoaded() const;
@@ -198,5 +204,7 @@ namespace BWAPI
 
       virtual void setClientInfo(void* clientinfo);
       virtual void* getClientInfo() const;
+
+      virtual bool placeCOP(TilePosition target);
   };
 }

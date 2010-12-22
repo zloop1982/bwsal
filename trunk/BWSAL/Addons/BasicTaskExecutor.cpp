@@ -54,7 +54,7 @@ void BasicTaskExecutor::update(TaskStream* ts)
       {
         if (worker->getDistance(targetPosition)>100 || (ut.isRefinery()==false && worker->getDistance(targetPosition)>32))
         {
-          if (Broodwar->getFrameCount()>=ts->getWorker()->getLastOrderFrame()+5)
+          if (Broodwar->getFrameCount()>=ts->getWorker()->getLastCommandFrame()+5)
             worker->rightClick(targetPosition);
         }
       }
@@ -97,7 +97,7 @@ void BasicTaskExecutor::computeIsExecuting(TaskStream* ts)
     if (ts->isWorkerReady())
     {
       Unit* worker = ts->getWorker();
-      if (Broodwar->getFrameCount()>worker->getLastOrderFrame()+5)
+      if (Broodwar->getFrameCount()>worker->getLastCommandFrame()+5)
       {
         if (worker->getType()==UnitTypes::Terran_SCV && worker->isConstructing()==false)
           worker->rightClick(ts->getBuildUnit());

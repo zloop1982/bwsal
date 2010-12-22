@@ -55,6 +55,9 @@ namespace BWAPI
       bool flagEnabled[2];
       Player* thePlayer;
       Player* theEnemy;
+      Player* theNeutral;
+      std::set<Player*> _allies;
+      std::set<Player*> _enemies;
       Error lastError;
 
     public :
@@ -136,8 +139,8 @@ namespace BWAPI
       virtual bool canUpgrade(const Unit* unit, UpgradeType type);
       virtual std::set< TilePosition >& getStartLocations();
 
-      virtual void printf(const char* text, ...);
-      virtual void sendText(const char* text, ...);
+      virtual void printf(const char* format, ...);
+      virtual void sendText(const char* format, ...);
       virtual void sendTextEx(bool toAllies, const char *format, ...);
 
       virtual void changeRace(BWAPI::Race race);
@@ -155,14 +158,17 @@ namespace BWAPI
       virtual void  setLocalSpeed(int speed = -1);
       virtual bool issueCommand(const std::set<BWAPI::Unit*>& units, UnitCommand command);
       virtual std::set<BWAPI::Unit*>& getSelectedUnits();
-      virtual Player*  self();
-      virtual Player*  enemy();
+      virtual Player* self();
+      virtual Player* enemy();
+      virtual Player* neutral();
+      virtual std::set<BWAPI::Player*>& allies();
+      virtual std::set<BWAPI::Player*>& enemies();
 
       virtual void setTextSize(int size = 1);
-      virtual void drawText(int ctype, int x, int y, const char* text, ...);
-      virtual void drawTextMap(int x, int y, const char* text, ...);
-      virtual void drawTextMouse(int x, int y, const char* text, ...);
-      virtual void drawTextScreen(int x, int y, const char* text, ...);
+      virtual void drawText(int ctype, int x, int y, const char *format, ...);
+      virtual void drawTextMap(int x, int y, const char *format, ...);
+      virtual void drawTextMouse(int x, int y, const char *format, ...);
+      virtual void drawTextScreen(int x, int y, const char *format, ...);
 
       virtual void drawBox(int ctype, int left, int top, int right, int bottom, Color color, bool isSolid = false);
       virtual void drawBoxMap(int left, int top, int right, int bottom, Color color, bool isSolid = false);

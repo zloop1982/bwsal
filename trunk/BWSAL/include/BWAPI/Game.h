@@ -310,17 +310,26 @@ namespace BWAPI
       virtual Player* self() = 0;
 
       /** Returns a pointer to the enemy player. If there is more than one enemy, this returns a pointer to
-       * just one enemy (see getPlayers  and Player::isEnemy to get the other enemies). In replays this will
+       * just one enemy (see enemies to get all enemies still in game). In replays this will
        * return NULL. */
       virtual Player* enemy() = 0;
+
+      /** Returns a pointer to the neutral player. */
+      virtual Player* neutral() = 0;
+
+      /** Returns a set of all the ally players that have not left or been defeated. Does not include self. */
+      virtual std::set<BWAPI::Player*>& allies() = 0;
+
+      /** Returns a set of all the enemy players that have not left or been defeated. */
+      virtual std::set<BWAPI::Player*>& enemies() = 0;
 
       virtual void setTextSize(int size = 1) = 0;
       /** Draws text on the screen at the given position. Text can be drawn in different colors by using the
        * following control characters: TODO: add image from wiki.*/
-      virtual void drawText(int ctype, int x, int y, const char* text, ...) = 0;
-      virtual void drawTextMap(int x, int y, const char* text, ...) = 0;
-      virtual void drawTextMouse(int x, int y, const char* text, ...) = 0;
-      virtual void drawTextScreen(int x, int y, const char* text, ...) = 0;
+      virtual void drawText(int ctype, int x, int y, const char *format, ...) = 0;
+      virtual void drawTextMap(int x, int y, const char *format, ...) = 0;
+      virtual void drawTextMouse(int x, int y, const char *format, ...) = 0;
+      virtual void drawTextScreen(int x, int y, const char *format, ...) = 0;
 
       /** Draws a box on the screen, with the given color. If isSolid is true, the entire box will be
        * rendered, otherwise just the outline will be drawn. */
