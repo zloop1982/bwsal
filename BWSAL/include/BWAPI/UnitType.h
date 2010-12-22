@@ -5,6 +5,8 @@
 #include <BWAPI/Race.h>
 #include <BWAPI/UnitSizeType.h>
 
+#define BWAPI_UNIT_TYPE_MAX_COUNT 234
+
 namespace BWAPI
 {
   class TechType;
@@ -290,6 +292,9 @@ namespace BWAPI
 
     /** Returns the set of all the UnitTypes. */
     std::set<UnitType>& allUnitTypes();
+
+    /** Returns the set of all the MacroTypes. */
+    std::set<UnitType>& allMacroTypes();
     void init();
     extern const UnitType Terran_Marine;
     extern const UnitType Hero_Jim_Raynor_Marine;
@@ -471,6 +476,10 @@ namespace BWAPI
     extern const UnitType Powerup_Data_Disk;
     extern const UnitType Powerup_Khaydarin_Crystal;
     extern const UnitType None;
+    extern const UnitType AllUnits;
+    extern const UnitType Men;
+    extern const UnitType Buildings;
+    extern const UnitType Factories;
     extern const UnitType Unknown;
 
   }

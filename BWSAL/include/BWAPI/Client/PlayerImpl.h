@@ -42,6 +42,7 @@ namespace BWAPI
       virtual int supplyUsed(Race race) const;
 
       virtual int allUnitCount(UnitType unit) const;
+      virtual int visibleUnitCount(UnitType unit) const;
       virtual int completedUnitCount(UnitType unit) const;
       virtual int incompleteUnitCount(UnitType unit) const;
       virtual int deadUnitCount(UnitType unit) const;
@@ -62,5 +63,11 @@ namespace BWAPI
       virtual int sightRange(UnitType unit) const;
       virtual int groundWeaponDamageCooldown(UnitType unit) const;
       virtual int armor(UnitType unit) const;
+
+      virtual int getUnitScore() const;
+      virtual int getKillScore() const;
+      virtual int getBuildingScore() const;
+      virtual int getRazingScore() const;
+      virtual int getCustomScore() const;
   };
 };

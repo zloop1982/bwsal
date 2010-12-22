@@ -21,6 +21,7 @@ namespace BWAPI
     int resourceGroup;
 
     int killCount;
+    int acidSporeCount;
     int scarabCount;
     int spiderMineCount;
     int groundWeaponCooldown;
@@ -71,11 +72,12 @@ namespace BWAPI
     bool hasNuke;
     bool isAccelerating;
     bool isAttacking;
+    bool isAttackFrame;
     bool isBeingGathered;
     bool isBlind;
     bool isBraking;
     bool isBurrowed;
-    int carryResourceType;
+    int  carryResourceType;
     bool isCloaked;
     bool isCompleted;
     bool isConstructing;
@@ -84,6 +86,7 @@ namespace BWAPI
     bool isHallucination;
     bool isIdle;
     bool isInterruptible;
+    bool isInvincible;
     bool isLifted;
     bool isMorphing;
     bool isMoving;
@@ -95,5 +98,6 @@ namespace BWAPI
     bool isUnderStorm;
     bool isUnpowered;
     bool isVisible[9];
+    int  buttonset;
   };
 }

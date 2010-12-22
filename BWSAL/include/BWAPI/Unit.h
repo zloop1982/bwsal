@@ -96,8 +96,11 @@ namespace BWAPI
       /** Returns true if the unit is able to move to the target position */
       virtual bool hasPath(Position target) const = 0;
 
-      /** Retrieves the frame of the last successful order. Frame is comparable to Game::getFrameCount(). */
-      virtual int getLastOrderFrame() const = 0;
+      /** Returns the frame of the last successful command. Frame is comparable to Game::getFrameCount(). */
+      virtual int getLastCommandFrame() const = 0;
+
+      /** Returns the last successful command. */
+      virtual UnitCommand getLastCommand() const = 0;
 
       /** Returns the player's current upgrade level for the given upgrade, if the unit is affected by this
        * upgrade.*/
@@ -126,6 +129,9 @@ namespace BWAPI
 
       /** Returns the unit's current kill count. */
       virtual int getKillCount() const = 0;
+
+      /** Returns the unit's acid spore count. */
+      virtual int getAcidSporeCount() const = 0;
 
       /** Returns the number of interceptors the Protoss Carrier has. */
       virtual int getInterceptorCount() const = 0;
@@ -304,6 +310,8 @@ namespace BWAPI
       // TODO: add doc
       virtual bool isAttacking() const = 0;
 
+      virtual bool isAttackFrame() const = 0;
+
       /** Returns true if the unit is being constructed. Always true for incomplete Protoss and Zerg
        * buildings, and true for incomplete Terran buildings that have an SCV constructing them. If the SCV
        * halts construction, isBeingConstructed will return false.
@@ -385,6 +393,12 @@ namespace BWAPI
 
       /** Returns true if the unit can be interrupted. */
       virtual bool isInterruptible() const = 0;
+
+      /** Returns true if the unit is invincible. */
+      virtual bool isInvincible() const = 0;
+
+      /** Returns true if the unit can attack a specified target from its current position. */
+      virtual bool isInWeaponRange(Unit *target) const = 0;
 
       /** Returns true if the unit is being irradiated by a Terran Science Vessel.
        * \see Unit::getIrradiateTimer. */
@@ -662,5 +676,8 @@ namespace BWAPI
 
       /** Returns the unit's custom client info. The client is responsible for deallocation. */
       virtual void* getClientInfo() const = 0;
+
+      /** Moves a Flag Beacon to the target location. */
+      virtual bool placeCOP(TilePosition target) = 0;
   };
 }
