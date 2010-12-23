@@ -2,8 +2,8 @@
 #include <BasicTaskExecutor.h>
 #include <SpiralBuildingPlacer.h>
 #include <UnitPump.h>
-#include <TerminateIfWorkerLost.h>
-#include <TerminateIfEmpty.h>
+#include <DeleteWorkBenchIfWorkerLost.h>
+#include <TerminateIfFinished.h>
 #include <BasicWorkerFinder.h>
 #include <MacroManager.h>
 #include <MacroManager/UnitReadyTimeCalculator.h>
@@ -13,7 +13,13 @@ std::set<UnitType> requiresAddon;
 std::map<UnitType,UnitType> getRequiredAddon;
 UnitCompositionProducer::UnitCompositionProducer(BWAPI::UnitType workerType)
 {
+  /*
   this->workerType=workerType;
+  TaskStream* ts = new TaskStream();
+  TheMacroManager->taskStreams.push_back(ts);
+  ts->attach(BasicTaskExecutor::getInstance(),false);
+  ts->attach(this,false);
+  ts->attach(new DeleteWorkBenchIfWorkerLost(),true);
   if (requiresAddon.empty())
   {
     for each(UnitType t in UnitTypes::allUnitTypes())
@@ -28,17 +34,19 @@ UnitCompositionProducer::UnitCompositionProducer(BWAPI::UnitType workerType)
       }
     }
   }
+  */
 }
-void UnitCompositionProducer::attached(TaskStream* ts)
+void UnitCompositionProducer::onAttach(TaskStream* ts)
 {
   streams.insert(ts);
 }
-void UnitCompositionProducer::detached(TaskStream* ts)
+void UnitCompositionProducer::onDetach(TaskStream* ts)
 {
   streams.erase(ts);
 }
 void UnitCompositionProducer::update()
 {
+  /*
   std::set<Unit*> units=Broodwar->self()->getUnits();
   for each(Unit* u in units)
   {
@@ -48,10 +56,10 @@ void UnitCompositionProducer::update()
       {
         TaskStream* ts = new TaskStream();
         TheMacroManager->taskStreams.push_back(ts);
-        ts->setWorker(u);
+        ts->makeWorkBench(u);
         ts->attach(BasicTaskExecutor::getInstance(),false);
         ts->attach(this,false);
-        ts->attach(new TerminateIfWorkerLost(),true);
+        ts->attach(new DeleteWorkBenchIfWorkerLost(),true);
       }
     }
   }
@@ -67,16 +75,17 @@ void UnitCompositionProducer::update()
     {
       if (ts->getTask(i)==NULL || ts->getTask(i).getType() == TaskTypes::None)
       {
-        UnitType t=getNextUnitType(ts->getWorker());
+        UnitType t=getNextUnitType((*ts->workBenches.begin())->getWorker());
         if (t!=UnitTypes::None)
         {
-          ts->setTask(i,Task(t,ts->getWorker()->getTilePosition()));
+          ts->setTask(i,Task(t,(*ts->workBenches.begin())->getWorker()->getTilePosition()));
           actualUnitCounts[t]++;
         }
         break;
       }
     }
   }
+  */
 }
 UnitType UnitCompositionProducer::getNextUnitType(Unit* worker)
 {
@@ -89,7 +98,8 @@ UnitType UnitCompositionProducer::getNextUnitType(Unit* worker)
   if (t2 == -1) return UnitTypes::None;
 
   time = max(time,t2);
-  */
+  *
+
 
   double aTc = 0;
   double cTc = 0;
@@ -142,8 +152,10 @@ UnitType UnitCompositionProducer::getNextUnitType(Unit* worker)
     }
   }
   return nextType;
+  */
+  return UnitTypes::None;
 }
 void UnitCompositionProducer::setUnitWeight(BWAPI::UnitType t, double weight)
 {
-  unitCompositionWeights[t]=weight;
+  //unitCompositionWeights[t]=weight;
 }

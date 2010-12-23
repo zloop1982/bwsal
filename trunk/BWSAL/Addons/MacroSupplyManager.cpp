@@ -8,8 +8,7 @@
 #include <BFSBuildingPlacer.h>
 #include <PylonBuildingPlacer.h>
 #include <UnitPump.h>
-#include <TerminateIfWorkerLost.h>
-#include <TerminateIfEmpty.h>
+#include <TerminateIfFinished.h>
 #include <BasicWorkerFinder.h>
 #include <UnitCompositionProducer.h>
 using namespace BWAPI;
@@ -55,12 +54,13 @@ void MacroSupplyManager::update()
       {
         if (Broodwar->self()->supplyUsed()>=initialSupplyTotal-2*(1-initialSupplyProviderCount))
         {
-          Task s(Broodwar->self()->getRace().getSupplyProvider());
-          TaskStream* ts = new TaskStream(s);
+          TaskStream* ts = new TaskStream();
+          ts->queuedTasks.push_back(new Task(Broodwar->self()->getRace().getSupplyProvider()));
+          ts->makeWorkBench();
           TheMacroManager->taskStreams.push_front(ts);
           ts->attach(new BasicWorkerFinder(),true);
           ts->attach(BasicTaskExecutor::getInstance(),false);
-          ts->attach(new TerminateIfEmpty(),true);
+          ts->attach(new TerminateIfFinished(),true);
           if (Broodwar->self()->getRace()==Races::Protoss)
           {
             ts->attach(PylonBuildingPlacer::getInstance(),false);
@@ -78,14 +78,15 @@ void MacroSupplyManager::update()
         {
           if (TheMacroManager->rtl.getFinalSupplyTotal()<400)
           {
-            Task s(Broodwar->self()->getRace().getSupplyProvider());
+            Task* s = new Task(Broodwar->self()->getRace().getSupplyProvider());
             int frame = TheMacroManager->rtl.getFirstTimeWhenSupplyIsNoGreaterThan(0);
-            s.setEarliestStartTime(frame-334-supplyBuildTime);
+            s->setEarliestStartTime(frame-334-supplyBuildTime);
             TaskStream* ts = new TaskStream(s);
+            ts->makeWorkBench();
             TheMacroManager->taskStreams.push_front(ts);
             ts->attach(new BasicWorkerFinder(),true);
             ts->attach(BasicTaskExecutor::getInstance(),false);
-            ts->attach(new TerminateIfEmpty(),true);
+            ts->attach(new TerminateIfFinished(),true);
             if (Broodwar->self()->getRace()==Races::Protoss)
               ts->attach(PylonBuildingPlacer::getInstance(),false);
             else

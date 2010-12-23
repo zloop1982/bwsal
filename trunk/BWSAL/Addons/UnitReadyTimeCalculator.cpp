@@ -122,9 +122,10 @@ int UnitReadyTimeCalculator::getFirstFreeTime(BWAPI::Unit* unit, const Task &tas
     if (r.first.isAddon() && r.first.whatBuilds().first==task.getWorkerType())
     {
       //and if our worker doesn't have this add-on...
+      /* FIX FIX FIX
       if (unit && unit->exists() && unit->getAddon()==NULL && (unit->getBuildUnit()==NULL || unit->getBuildUnit()->getType().isAddon()==false))
       {
-        if (TheMacroManager->getTaskStreams(unit).empty())
+        if (TheMacroManager->getWorkBenches(unit).empty())
         {
           reason = UnitReadyTimeStatus::Error_Task_Requires_Addon;
           //since there is no plan to make this add-on, the unit will never be ready for this task
@@ -133,9 +134,9 @@ int UnitReadyTimeCalculator::getFirstFreeTime(BWAPI::Unit* unit, const Task &tas
         else
         {
           int firstFoundT = -1;
-          for each(TaskStream* ts in TheMacroManager->getTaskStreams(unit))
+          for each(WorkBench* wb in TheMacroManager->getWorkBenches(unit))
           {
-            int t3 = ts->getFinishTime(r.first); //then see if/when this add-on is planned to be built
+            int t3 = wb->getFinishTime(r.first); //then see if/when this add-on is planned to be built
             if (t3==-1) continue;
             if (t3<firstFoundT || firstFoundT==-1)
               firstFoundT = t3;
@@ -147,6 +148,7 @@ int UnitReadyTimeCalculator::getFirstFreeTime(BWAPI::Unit* unit, const Task &tas
           }
         }
       }
+      */
     }
     if (t==-1) return -1; //return never
   }

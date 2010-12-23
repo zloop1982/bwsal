@@ -2,10 +2,11 @@
 #include <BWAPI.h>
 #include <ResourceRates.h>
 #include <math.h>
+#include <MacroManager/WorkBench.h>
 using namespace BWAPI;
 using namespace std;
 MacroManager* TheMacroManager = NULL;
-std::set<TaskStream*> emptyTSSet;
+std::set<WorkBench*> emptyWBSet;
 
 MacroManager* MacroManager::create()
 {
@@ -32,7 +33,7 @@ void MacroManager::onOffer(std::set<BWAPI::Unit*> units)
 {
   for each(Unit* u in units)
   {
-    if (unitToTaskStreams.find(u)!=unitToTaskStreams.end() && !unitToTaskStreams[u].empty())
+    if (unitToWorkBenches.find(u)!=unitToWorkBenches.end() && !unitToWorkBenches[u].empty())
     {
       //The Arbitrator has offered us a worker our task streams want to use, so accept it
       TheArbitrator->accept(this,u);
@@ -50,15 +51,15 @@ void MacroManager::onOffer(std::set<BWAPI::Unit*> units)
 void MacroManager::onRevoke(BWAPI::Unit* unit, double bid)
 {
   ownedUnits.erase(unit);
-  if (unitToTaskStreams.find(unit)!=unitToTaskStreams.end())
+  if (unitToWorkBenches.find(unit)!=unitToWorkBenches.end())
   {
     //tell all task streams that were using this worker that it is no longer available.
-    for each(TaskStream* ts in unitToTaskStreams[unit])
+    for each(WorkBench* wb in unitToWorkBenches[unit])
     {
-      ts->onRevoke(unit);
+      wb->onRevoke(unit);
     }
   }
-  unitToTaskStreams.erase(unit);
+  unitToWorkBenches.erase(unit);
 }
 void MacroManager::update()
 {
@@ -66,12 +67,12 @@ void MacroManager::update()
   while (!done)
   {
     done=true;
-    for(std::map<BWAPI::Unit*, std::set<TaskStream*> >::iterator i=unitToTaskStreams.begin();i!=unitToTaskStreams.end();i++)
+    for(std::map<BWAPI::Unit*, std::set<WorkBench*> >::iterator i=unitToWorkBenches.begin();i!=unitToWorkBenches.end();i++)
     {
       if (i->second.empty())
       {
         TheArbitrator->removeBid(this,i->first);
-        unitToTaskStreams.erase(i);
+        unitToWorkBenches.erase(i);
         done = false;
         break;
       }
@@ -89,11 +90,14 @@ void MacroManager::update()
   plan.clear();
   for each(TaskStream* ts in killSet)
   {
-    Unit* worker = ts->getWorker();
-    if (worker!=NULL)
+    for each(WorkBench* wb in ts->workBenches)
     {
-      //remove the task stream from the worker's set in unitToTaskStreams
-      unitToTaskStreams[worker].erase(ts);
+      Unit* worker = wb->getWorker();
+      if (worker!=NULL)
+      {
+        //remove the task stream from the worker's set in unitToTaskStreams
+        unitToWorkBenches[worker].erase(wb);
+      }
     }
 
     //find and remove the task stream from the taskStreams list
@@ -212,8 +216,8 @@ void MacroManager::update()
         curFrame = *i_s;
         double x1=(prvFrame - currentFrameCount)*hscale;
         double x2=(curFrame - currentFrameCount)*hscale;
-        Broodwar->drawLineScreen(x1,280-larvaCount*20,x2,280-larvaCount*20,Colors::Green);
-        Broodwar->drawLineScreen(x2,280-larvaCount*20,x2,280-(larvaCount+1)*20,Colors::Green);
+        Broodwar->drawLineScreen((int)x1,280-larvaCount*20,(int)x2,280-larvaCount*20,Colors::Green);
+        Broodwar->drawLineScreen((int)x2,280-larvaCount*20,(int)x2,280-(larvaCount+1)*20,Colors::Green);
         larvaCount++;
         i_s++;
       }
@@ -222,15 +226,15 @@ void MacroManager::update()
         curFrame = *i_u;
         double x1=(prvFrame - currentFrameCount)*hscale;
         double x2=(curFrame - currentFrameCount)*hscale;
-        Broodwar->drawLineScreen(x1,280-larvaCount*20,x2,280-larvaCount*20,Colors::Green);
-        Broodwar->drawLineScreen(x2,280-larvaCount*20,x2,280-(larvaCount-1)*20,Colors::Green);
+        Broodwar->drawLineScreen((int)x1,280-larvaCount*20,(int)x2,280-larvaCount*20,Colors::Green);
+        Broodwar->drawLineScreen((int)x2,280-larvaCount*20,(int)x2,280-(larvaCount-1)*20,Colors::Green);
         larvaCount--;
         i_u++;
       }
       prvFrame = curFrame;
     }
     double x1=(prvFrame - currentFrameCount)*hscale;
-    Broodwar->drawLineScreen(x1,280-larvaCount*20,640,280-larvaCount*20,Colors::Green);
+    Broodwar->drawLineScreen((int)x1,280-larvaCount*20,640,280-larvaCount*20,Colors::Green);
     Broodwar->drawLineScreen(0,280-0*20,640,280-0*20,Colors::Red);
   }
   }
@@ -243,18 +247,16 @@ void MacroManager::update()
     }
   */
   //bid on all the workers our task streams want to use
-  for(std::map<BWAPI::Unit*, std::set<TaskStream*> >::iterator i=unitToTaskStreams.begin();i!=unitToTaskStreams.end();i++)
+  for(std::map<BWAPI::Unit*, std::set<WorkBench*> >::iterator i=unitToWorkBenches.begin();i!=unitToWorkBenches.end();i++)
   {
     if (!i->second.empty())
       TheArbitrator->setBid(this,i->first,100);
   }
   for each(Unit* u in ownedUnits)
   {
-    std::map<BWAPI::Unit*, std::set<TaskStream*> >::iterator i=unitToTaskStreams.find(u);
-    if (i==unitToTaskStreams.end() || i->second.empty())
+    std::map<BWAPI::Unit*, std::set<WorkBench*> >::iterator i=unitToWorkBenches.find(u);
+    if (i==unitToWorkBenches.end() || i->second.empty())
       TheArbitrator->removeBid(this,u);
-    if (i==unitToTaskStreams.end())
-      unitToTaskStreams.erase(u);
   }
 }
 std::string MacroManager::getName() const
@@ -316,14 +318,58 @@ bool MacroManager::swapTaskStreams(TaskStream* a, TaskStream* b)
   *b_iter = a;
   return true;
 }
-const std::set<TaskStream*>& MacroManager::getTaskStreams(BWAPI::Unit* unit) const
+const std::set<WorkBench*>& MacroManager::getWorkBenches(BWAPI::Unit* unit) const
 {
-  //returns the set of task streams that are using this worker
-  std::map<BWAPI::Unit*, std::set<TaskStream*> >::const_iterator i=unitToTaskStreams.find(unit);
+  //returns the set of work benches that are using this worker
+  std::map<BWAPI::Unit*, std::set<WorkBench*> >::const_iterator i=unitToWorkBenches.find(unit);
 
-  if (i==unitToTaskStreams.end()) //nothing is using this worker, so return an empty set
-    return emptyTSSet;
+  if (i==unitToWorkBenches.end()) //nothing is using this worker, so return an empty set
+    return emptyWBSet;
 
-  //return the set of tsak streams
+  //return the set of work benches
   return i->second;
+}
+
+void MacroManager::reserveResources(WorkBench* wb, Task* task)
+{
+  if (wb->isWorkerReady())
+  {
+    //protoss buildings don't take up worker time.
+    if (!(task->getType()==TaskTypes::Unit && task->getUnit().isBuilding() && task->getRace()==Races::Protoss))
+    {
+      if (task->getType() == TaskTypes::Unit && task->getUnit().whatBuilds().first == UnitTypes::Zerg_Larva && wb->getWorker()->getType().producesLarva())
+      {
+        if (!ltl.reserveLarva(wb->getWorker(),task->getStartTime()))
+          Broodwar->printf("Error: Unable to reserve larva for %s",task->getName().c_str());
+      }
+      else
+      {
+        if (!wttl.reserveTime(wb->getWorker(),task->getStartTime(),task))
+          Broodwar->printf("Error: Unable to reserve time for %s",task->getName().c_str());
+      }
+    }
+  }
+  //plan[first_valid_frame].push_back(std::make_pair(this,t));
+  if (!rtl.reserveResources(task->getStartTime(),task->getResources()))
+    Broodwar->printf("Error: Unable to reserve resources for %s",task->getName().c_str());
+  if (task->getType()==TaskTypes::Tech)
+    ttl.registerTechStart(task->getStartTime(),task->getTech());
+  task->setReservedResourcesThisFrame(true);
+}
+void MacroManager::reserveFinishData(Task* task)
+{
+  if (task->supplyProvided()>0)
+    rtl.registerSupplyIncrease(task->getFinishTime(), task->supplyProvided());
+  if (task->getType()==TaskTypes::Unit)
+  {
+    int count = 1;
+    if (task->getUnit().isTwoUnitsInOneEgg())
+      count = 2;
+    uctl.registerUnitCountChange(task->getFinishTime(), task->getUnit(), count);
+  }
+  if (task->getType()==TaskTypes::Tech)
+    ttl.registerTechFinish(task->getFinishTime(),task->getTech());
+  if (task->getType()==TaskTypes::Upgrade)
+    utl.registerUpgradeLevelIncrease(task->getFinishTime(),task->getUpgrade());
+  task->setReservedFinishDataThisFrame(true);
 }

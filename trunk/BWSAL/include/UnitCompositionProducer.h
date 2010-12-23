@@ -6,8 +6,8 @@ class UnitCompositionProducer : public TaskStreamObserver
 {
   public:
     UnitCompositionProducer(BWAPI::UnitType workerType);
-    virtual void attached(TaskStream* ts);
-    virtual void detached(TaskStream* ts);
+    virtual void onAttach(TaskStream* ts);
+    virtual void onDetach(TaskStream* ts);
     void update();
     void setUnitWeight(BWAPI::UnitType t, double weight);
     BWAPI::UnitType getNextUnitType(BWAPI::Unit* worker);

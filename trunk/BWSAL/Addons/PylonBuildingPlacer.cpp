@@ -14,80 +14,91 @@ PylonBuildingPlacer::PylonBuildingPlacer()
 {
   pylonDistance = 3;
 }
-void PylonBuildingPlacer::attached(TaskStream* ts)
+void PylonBuildingPlacer::onAttach(TaskStream* ts)
 {
-  if (ts->getTask(0).getTilePosition().isValid()==false)
-    ts->getTask(0).setTilePosition(Broodwar->self()->getStartLocation());
-  taskStreams[ts].isRelocatable   = true;
-  taskStreams[ts].buildDistance   = 1;
-  taskStreams[ts].reservePosition = ts->getTask(0).getTilePosition();
-  taskStreams[ts].reserveWidth    = 0;
-  taskStreams[ts].reserveHeight   = 0;
-}
-void PylonBuildingPlacer::detached(TaskStream* ts)
-{
-  taskStreams.erase(ts);
-}
-void PylonBuildingPlacer::newStatus(TaskStream* ts)
-{
-}
-void PylonBuildingPlacer::completedTask(TaskStream* ts, const Task &t)
-{
-  TheReservedMap->freeTiles(taskStreams[ts].reservePosition,taskStreams[ts].reserveWidth,taskStreams[ts].reserveHeight);
-  taskStreams[ts].reserveWidth  = 0;
-  taskStreams[ts].reserveHeight = 0;
-}
-void PylonBuildingPlacer::update(TaskStream* ts)
-{
-  if (ts->getTask(0).getType()!=TaskTypes::Unit) return;
-
-  int width = ts->getTask(0).getUnit().tileWidth();
-  UnitType type = ts->getTask(0).getUnit();
-  if (type.isAddon()) type=type.whatBuilds().first;
-  //don't look for a build location if this building requires power and we have no pylons
-  if (type.requiresPsi() && Broodwar->self()->completedUnitCount(UnitTypes::Protoss_Pylon)==0) return;
-  if (Broodwar->getFrameCount()%10!=0) return;
-
-  if (ts->getStatus()==TaskStream::Error_Location_Blocked || ts->getStatus()==TaskStream::Error_Location_Not_Specified)
+  taskStreamData[ts].isRelocatable   = true;
+  taskStreamData[ts].buildDistance   = 1;
+  for each(WorkBench* wb in ts->workBenches)
   {
-    if (ts->getTask(0).getTilePosition().isValid()==false)
-      ts->getTask(0).setTilePosition(Broodwar->self()->getStartLocation());
-    if (taskStreams[ts].isRelocatable)
+    if (wb->getCurrentTask() && wb->getCurrentTask()->getTilePosition().isValid() == false)
+      wb->getCurrentTask()->setTilePosition(Broodwar->self()->getStartLocation());
+    taskStreamData[ts].wbData[wb].reservePosition = Broodwar->self()->getStartLocation();
+    taskStreamData[ts].wbData[wb].reserveWidth    = 0;
+    taskStreamData[ts].wbData[wb].reserveHeight   = 0;
+  }
+}
+void PylonBuildingPlacer::onDetach(TaskStream* ts)
+{
+  taskStreamData.erase(ts);
+}
+void PylonBuildingPlacer::onNewStatus(TaskStream* ts)
+{
+}
+void PylonBuildingPlacer::onCompletedTask(TaskStream* ts, WorkBench* wb, const Task &t)
+{
+  TheReservedMap->freeTiles(taskStreamData[ts].wbData[wb].reservePosition,taskStreamData[ts].wbData[wb].reserveWidth,taskStreamData[ts].wbData[wb].reserveHeight);
+  taskStreamData[ts].wbData[wb].reserveWidth  = 0;
+  taskStreamData[ts].wbData[wb].reserveHeight = 0;
+}
+void PylonBuildingPlacer::onFrame(TaskStream* ts)
+{
+  /*
+  for each(WorkBench* wb in ts->workBenches)
+  {
+    if (wb->getTask().getType()!=TaskTypes::Unit) continue;
+    int width = wb->getTask().getUnit().tileWidth();
+    UnitType type = wb->getTask().getUnit();
+    if (type.isAddon()) type = type.whatBuilds().first;
+    //don't look for a build location if this building requires power and we have no pylons
+    if (type.requiresPsi() && Broodwar->self()->completedUnitCount(UnitTypes::Protoss_Pylon)==0) return;
+    if (Broodwar->getFrameCount()%10!=0) return;
+    if (wb->isLocationReady()==false)
     {
-      TilePosition tp(ts->getTask(0).getTilePosition());
-      
-      TilePosition newtp = TilePositions::None;
-      int bd = taskStreams[ts].buildDistance;
-      while ( newtp == TilePositions::None)
+      if (wb->getTask().getTilePosition().isValid()==false)
+        wb->getTask().setTilePosition(Broodwar->self()->getStartLocation());
+      if (taskStreamData[ts].isRelocatable)
       {
-        newtp = getBuildLocationNear(ts->getWorker(),tp,type,bd);
-        bd--;
+        TilePosition newtp = TilePositions::None;
+        int bd = taskStreamData[ts].buildDistance;
+        while ( newtp == TilePositions::None)
+        {
+          newtp = getBuildLocationNear(wb->getWorker(),wb->getTask().getTilePosition(),type,bd);
+          bd--;
+        }
+        wb->getTask().setTilePosition(newtp);
       }
-      ts->getTask(0).setTilePosition(newtp);
+    }
+    if (type==BWAPI::UnitTypes::Terran_Command_Center ||
+        type==BWAPI::UnitTypes::Terran_Factory || 
+        type==BWAPI::UnitTypes::Terran_Starport ||
+        type==BWAPI::UnitTypes::Terran_Science_Facility)
+    {
+      width+=2;
+    }
+    if (taskStreamData[ts].wbData[wb].reserveWidth    != width ||
+        taskStreamData[ts].wbData[wb].reserveHeight   != wb->getTask().getUnit().tileHeight() ||
+        taskStreamData[ts].wbData[wb].reservePosition != wb->getTask().getTilePosition())
+    {
+      TheReservedMap->freeTiles(taskStreamData[ts].wbData[wb].reservePosition,
+                                taskStreamData[ts].wbData[wb].reserveWidth,
+                                taskStreamData[ts].wbData[wb].reserveHeight);
+      taskStreamData[ts].wbData[wb].reserveWidth    = width;
+      taskStreamData[ts].wbData[wb].reserveHeight   = wb->getTask().getUnit().tileHeight();
+      taskStreamData[ts].wbData[wb].reservePosition = wb->getTask().getTilePosition();
+      TheReservedMap->reserveTiles(taskStreamData[ts].wbData[wb].reservePosition, type,
+                                   taskStreamData[ts].wbData[wb].reserveWidth,
+                                   taskStreamData[ts].wbData[wb].reserveHeight);
     }
   }
-  if (taskStreams[ts].reserveWidth    != width ||
-      taskStreams[ts].reserveHeight   != ts->getTask(0).getUnit().tileHeight() ||
-      taskStreams[ts].reservePosition != ts->getTask(0).getTilePosition())
-  {
-    TheReservedMap->freeTiles(taskStreams[ts].reservePosition,taskStreams[ts].reserveWidth,taskStreams[ts].reserveHeight);
-    taskStreams[ts].reserveWidth    = width;
-    taskStreams[ts].reserveHeight   = ts->getTask(0).getUnit().tileHeight();
-    taskStreams[ts].reservePosition = ts->getTask(0).getTilePosition();
-    TheReservedMap->reserveTiles(taskStreams[ts].reservePosition,type,taskStreams[ts].reserveWidth,taskStreams[ts].reserveHeight);
-  }
-}
-void PylonBuildingPlacer::setTilePosition(TaskStream* ts, BWAPI::TilePosition p)
-{
-  ts->getTask(0).setTilePosition(p);
+  */
 }
 void PylonBuildingPlacer::setRelocatable(TaskStream* ts, bool isRelocatable)
 {
-  taskStreams[ts].isRelocatable = isRelocatable;
+  taskStreamData[ts].isRelocatable = isRelocatable;
 }
 void PylonBuildingPlacer::setBuildDistance(TaskStream* ts, int distance)
 {
-  taskStreams[ts].buildDistance = distance;
+  taskStreamData[ts].buildDistance = distance;
 }
 void PylonBuildingPlacer::setPylonDistance(int pylonDistance)
 {

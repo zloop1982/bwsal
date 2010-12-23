@@ -304,6 +304,12 @@ int Task::getTime() const
     return UpgradeType(id).upgradeTimeBase()+UpgradeType(id).upgradeTimeFactor()*(level-1);
   return 0;
 }
+int Task::supplyProvided() const
+{
+  if (type == TaskTypes::Unit)
+    return UnitType(id).supplyProvided();
+  return 0;
+}
 std::string Task::getName() const
 {
   if (type == TaskTypes::Unit)
