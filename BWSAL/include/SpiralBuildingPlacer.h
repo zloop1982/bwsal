@@ -7,12 +7,11 @@ class SpiralBuildingPlacer : public TaskStreamObserver
   public:
     static SpiralBuildingPlacer* getInstance();
     SpiralBuildingPlacer();
-    virtual void attached(TaskStream* ts);
-    virtual void detached(TaskStream* ts);
-    virtual void newStatus(TaskStream* ts);
-    virtual void completedTask(TaskStream* ts, const Task &t);
-    virtual void update(TaskStream* ts);
-    void setTilePosition(TaskStream* ts, BWAPI::TilePosition p);
+    virtual void onAttach(TaskStream* ts);
+    virtual void onDetach(TaskStream* ts);
+    virtual void onNewStatus(TaskStream* ts);
+    virtual void onCompletedTask(TaskStream* ts, WorkBench* wb, const Task &t);
+    virtual void onFrame(TaskStream* ts);
     void setRelocatable(TaskStream* ts, bool isRelocatable);
     void setBuildDistance(TaskStream* ts, int distance);
   private:
@@ -20,14 +19,18 @@ class SpiralBuildingPlacer : public TaskStreamObserver
     bool canBuildHere(BWAPI::Unit* builder, BWAPI::TilePosition position, BWAPI::UnitType type) const;
     bool canBuildHereWithSpace(BWAPI::Unit* builder, BWAPI::TilePosition position, BWAPI::UnitType type, int buildDist) const;
     bool buildable(BWAPI::Unit* builder, int x, int y) const;
-    struct data
+    struct tsData
     {
       bool isRelocatable;
       int buildDistance;
-      BWAPI::TilePosition reservePosition;
-      int reserveWidth;
-      int reserveHeight;
+      struct wdata
+      {
+        BWAPI::TilePosition reservePosition;
+        int reserveWidth;
+        int reserveHeight;
+      };
+      std::map<WorkBench*, wdata> wbData;
     };
-    std::map< TaskStream*, data > taskStreams;
+    std::map< TaskStream*, tsData > taskStreamData;
 
 };
