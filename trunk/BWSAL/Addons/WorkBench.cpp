@@ -162,4 +162,19 @@ void WorkBench::update()
   {
     Broodwar->drawTextMap(worker->getPosition().x(),worker->getPosition().y(),"Task: %s",currentTask->getName().c_str());
   }
+  if (currentTask && currentTask->getType()==TaskTypes::Unit && currentTask->getTilePosition().isValid() && currentTask->getUnit().isBuilding())
+  {
+    UnitType ut = currentTask->getUnit();
+    TilePosition tp = currentTask->getTilePosition();
+    if (ut.isAddon())
+    {
+      tp.x()+=4;
+      tp.y()++;
+    }
+    if (isLocationReady())
+      Broodwar->drawBoxMap(tp.x()*32,tp.y()*32,tp.x()*32+ut.tileWidth()*32,tp.y()*32+ut.tileHeight()*32,Colors::Green);
+    else
+      Broodwar->drawBoxMap(tp.x()*32,tp.y()*32,tp.x()*32+ut.tileWidth()*32,tp.y()*32+ut.tileHeight()*32,Colors::Red);
+    Broodwar->drawTextMap(tp.x()*32,tp.y()*32,"%s",ut.getName().c_str());
+  }
 }

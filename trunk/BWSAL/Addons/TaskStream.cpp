@@ -44,23 +44,8 @@ void TaskStream::terminate()
 }
 void TaskStream::computeStatus()
 {
-  /*
-  if (task[0].getType()==TaskTypes::Unit && task[0].getTilePosition().isValid() && task[0].getUnit().isBuilding())
-  {
-    UnitType ut = task[0].getUnit();
-    TilePosition tp = task[0].getTilePosition();
-    if (ut.isAddon())
-    {
-      tp.x()+=4;
-      tp.y()++;
-    }
-    if (locationReady)
-      Broodwar->drawBoxMap(tp.x()*32,tp.y()*32,tp.x()*32+ut.tileWidth()*32,tp.y()*32+ut.tileHeight()*32,Colors::Green);
-    else
-      Broodwar->drawBoxMap(tp.x()*32,tp.y()*32,tp.x()*32+ut.tileWidth()*32,tp.y()*32+ut.tileHeight()*32,Colors::Red);
-    Broodwar->drawTextMap(tp.x()*32,tp.y()*32,"%s",ut.getName().c_str());
-  }
-  */
+
+  /* If we have no tasks in the queue, set the status and return */
   if (queuedTasks.empty())
   {
     if (executingTasks.empty())
@@ -69,61 +54,82 @@ void TaskStream::computeStatus()
       status = Task_Stream_Queue_Empty;
     return;
   }
-  /*
-  for(std::list<Task*>::iterator i=queuedTasks.begin();i!=queuedTasks.end();i++)
+
+  /* Otherwise we have tasks in the queue, so iterate over them and determine which work bench will execute each task and when */
+
+  std::list<Task*>::iterator j=queuedTasks.begin();
+  std::list<Task*>::iterator next_i=queuedTasks.begin(); next_i++;
+  for(std::list<Task*>::iterator i=queuedTasks.begin();i!=queuedTasks.end();j = i, i = next_i, next_i++)
   {
-    if (i>0 && task[i-1].getStartTime()==-1) break;
-    if (task[i].getType()==TaskTypes::None) break;
-    if (!task[i].hasReservedResourcesThisFrame())
+    /* If there are no work benches, or if it looks like we will never be able to execute the previous task then we will never be able to execute this task */
+    if (workBenches.empty() || (i!=queuedTasks.begin() && (*j)->getStartTime()==-1))
+    {
+      (*i)->setStartTime(-1);
+      continue;
+    }
+    /* Only reserve resources if we need to */
+    if (!(*i)->hasReservedResourcesThisFrame())
     {
       UnitReadyTimeStatus::Enum reason;
-      WorkBench* work_bench_for_this_task = &(*workBenches.begin());
-      int min_valid_time = -1;
-      for each(WorkBench wb in workBenches)
+
+      //choose some arbitrary work bench by default.
+      WorkBench* chosen_work_bench = *workBenches.begin();
+      int min_first_free_frame = -1;
+      //iterate over all work benches, seeing when each work bench will be able to execute this task
+      for each(WorkBench* wb in workBenches)
       {
-        int first_valid_frame = UnitReadyTimeCalculator::getFirstFreeTime(wb.getWorker(), task[i], reason,true,true);
-        if (first_valid_frame == Broodwar->getFrameCount() && !wb.isWorkerReady())
+        int wb_first_free_frame = UnitReadyTimeCalculator::getFirstFreeTime(wb->getWorker(), *i, reason,true,true);
+        if (wb_first_free_frame == Broodwar->getFrameCount() && !wb->isWorkerReady())
         {
+          //FIX FIX FIX
+          // need to set assumeSufficientWorkers somewhere.
+          // this variable Should be true if we expect to be able to find a worker immediately.
+          // this is usually the case if the worker needed is an SCV/Probe/Drone and a worker finder is attached
+          // but usually not the case if the worker is a Barracks/Gateway/etc or if a worker finder is not attached
           if (assumeSufficientWorkers)
           {
-            first_valid_frame = Broodwar->getFrameCount()+10;
-            reason = UnitReadyTimeStatus::Error_WorkerBench_Not_Ready;
+            wb_first_free_frame = Broodwar->getFrameCount()+10;
+            reason = UnitReadyTimeStatus::Waiting_For_Worker_To_Be_Ready;
           }
           else
-            first_valid_frame = -1;
+            wb_first_free_frame = -1;
         }
-        if (min_valid_time == -1 || first_valid_time<min_valid_time)
+        if (min_first_free_frame == -1 || wb_first_free_frame<min_first_free_frame)
         {
-          min_valid_time = first_valid_frame;
-          work_bench_for_this_task = &wb;
+          min_first_free_frame = wb_first_free_frame;
+          chosen_work_bench    = wb;
         }
       }
-      Unit* worker = work_bench_for_this_task->getWorker();
-      task[i].setStartTime(min_valid_time);
+      Unit* worker = chosen_work_bench->getWorker();
+      (*i)->setStartTime(min_first_free_frame);
+
+      //set the work benches likely next task so the basic worker finder, building placer, etc can get ready to execute it
+      if (chosen_work_bench->getLikelyNextTask()==NULL || chosen_work_bench->getLikelyNextTask()->getStartTime()>min_first_free_frame)
+        chosen_work_bench->setLikelyNextTask(*i);
+
       //if we need to wait to start the first task, compute the correct status
-      if (min_valid_time!=-1)
+      if (min_first_free_frame!=-1)
       {
-        if (!task[i].hasReservedFinishDataThisFrame())
-          TheMacroManager->reserveResources(work_bench_for_this_task,task[i]);
-        if (task[i].hasReservedResourcesThisFrame() && !task[i].hasReservedFinishDataThisFrame())
+        if (!(*i)->hasReservedFinishDataThisFrame())
+          TheMacroManager->reserveResources(chosen_work_bench,*i);
+        if ((*i)->hasReservedResourcesThisFrame() && !(*i)->hasReservedFinishDataThisFrame())
         {
-          TheMacroManager->reserveFinishData(task[i]);
+          TheMacroManager->reserveFinishData(*i);
           plannedAdditionalResources = true;
         }
       }
-      if ( i==0 ) //compute task stream status based on status of first unit
+      if ( i == queuedTasks.begin() ) //compute task stream status based on status of first unit
       {
-        if (task[0].getStartTime()!=-1 && task[0].getStartTime()<=Broodwar->getFrameCount() && work_bench_for_this_task->isWorkerReady())
+        if ((*i)->getStartTime()!=-1 && (*i)->getStartTime()<=Broodwar->getFrameCount() && chosen_work_bench->isWorkerReady())
         {
-          work_bench_for_this_task->setTask(task[0]);
-          task.erase(task.begin());
-          i--;
+          //this is where we move the task from the queuedTasks to executingTasks and tell the work bench to actually execute the task.
+          chosen_work_bench->setCurrentTask(*i);
+          queuedTasks.erase(queuedTasks.begin()); //note that i = i_next so this doesn't mess up our iterator (hopefully)
+          executingTasks.insert(*i);
         }
         else
         {
-          if (reason == UnitReadyTimeStatus::Error_Task_Requires_Addon)
-            status = Error_Task_Requires_Addon;
-          else if (reason == UnitReadyTimeStatus::Waiting_For_Worker_To_Be_Ready)
+          if (reason == UnitReadyTimeStatus::Waiting_For_Worker_To_Be_Ready)
             status = Waiting_For_Worker_To_Be_Ready;
           else if (reason == UnitReadyTimeStatus::Waiting_For_Free_Time)
             status = Waiting_For_Free_Time;
@@ -141,21 +147,10 @@ void TaskStream::computeStatus()
             status = Waiting_For_Gas;
           else if (reason == UnitReadyTimeStatus::Waiting_For_Minerals)
             status = Waiting_For_Minerals;
-          else if (reason == UnitReadyTimeStatus::Error_Worker_Not_Specified)
-            status = Error_Worker_Not_Specified;
-          else
-            status = Error_Worker_Not_Owned;
         }
       }
-      if (min_valid_time==-1) break;
     }
   }
-  for(int i=1;i<(int)(task.size());i++)
-  {
-    if (task[i-1].getStartTime()==-1)
-      task[i].setStartTime(-1);
-  }
-  */
 }
 void TaskStream::update()
 {
