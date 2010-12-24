@@ -148,3 +148,18 @@ bool WorkBench::isLocationReady()
     return false;
   return true;
 }
+
+void WorkBench::update()
+{
+  if (currentTask && currentTask->isCompleted())
+  {
+    ts->completeTask(this,currentTask);
+    Broodwar->printf("Completed Task %s!",currentTask->getName().c_str());
+    currentTask = NULL;
+    buildUnit = NULL;
+  }
+  if (isWorkerReady() && currentTask)
+  {
+    Broodwar->drawTextMap(worker->getPosition().x(),worker->getPosition().y(),"Task: %s",currentTask->getName().c_str());
+  }
+}

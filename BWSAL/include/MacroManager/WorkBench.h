@@ -23,6 +23,7 @@ class WorkBench
     bool isWorkerReady();
     bool isLocationReady();
     TaskStream* getTaskStream();
+    void update();
 
   private:
     Task* currentTask;

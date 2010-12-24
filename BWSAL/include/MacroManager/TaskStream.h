@@ -52,9 +52,9 @@ class TaskStream
     std::set<WorkBench*> workBenches;
     bool assumeSufficientWorkers;
     std::list<Task*> queuedTasks;
-    std::list<Task*> executingTasks;
-    std::list<Task*> completedTasks;
+    std::set<Task*> executingTasks;
     bool plannedAdditionalResources;
+    void completeTask(WorkBench* wb, Task* t);
   private:
     void notifyNewStatus();
     //void notifyCompletedTask();
