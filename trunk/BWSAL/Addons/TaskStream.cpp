@@ -159,30 +159,11 @@ void TaskStream::computeStatus()
 }
 void TaskStream::update()
 {
-  /*
   if (killSwitch) return;
-  if (status == Executing_Task)
-  {
-    if (task[0].isCompleted())
-    {
-      notifyCompletedTask();
-      status = None;
-      Broodwar->printf("Completed Task %s!",task[0].getName().c_str());
-      for(int i=0;i+1<(int)(task.size());i++)
-        task[i]=task[i+1];
-      task[task.size()-1] = Task();
-      buildUnit = NULL;
-    }
-    if (workerReady)
-    {
-      Broodwar->drawTextMap(worker->getPosition().x(),worker->getPosition().y(),"Task: %s",task[0].getName().c_str());
-    }
-  }
+  for each(WorkBench* wb in workBenches)
+    wb->update();
   for each(std::pair<TaskStreamObserver*, bool> obs in observers)
-  {
-    obs.first->update(this);
-  }
-  */
+    obs.first->onFrame(this);
 }
 bool TaskStream::updateStatus()
 {
@@ -217,16 +198,15 @@ void TaskStream::notifyNewStatus()
     obs.first->onNewStatus(this);
   }
 }
-/*
-void TaskStream::notifyCompletedTask(Task* task)
+void TaskStream::completeTask(WorkBench* wb, Task* task)
 {
+  executingTasks.erase(task);
   //notify all observers that we have completed a task
   for each(std::pair<TaskStreamObserver*, bool> obs in observers)
   {
-    obs.first->onCompletedTask(this,task[0]);
+    obs.first->onCompletedTask(this,wb,task);
   }
 }
-*/
 TaskStream::Status TaskStream::getStatus() const
 {
   return status;
