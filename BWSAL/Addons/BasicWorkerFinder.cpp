@@ -3,26 +3,27 @@
 #include <BWAPI.h>
 #include <MacroManager.h>
 using namespace BWAPI;
-void BasicWorkerFinder::onFrame(TaskStream* ts)
+void BasicWorkerFinder::update(TaskStream* ts)
 {
-  /*
-  for each(WorkBench* wb in ts->workBenches)
+  newStatus(ts);
+}
+void BasicWorkerFinder::attached(TaskStream* ts)
+{
+  this->ts = ts;
+  newStatus(ts);
+}
+void BasicWorkerFinder::newStatus(TaskStream* ts)
+{
+  if (ts->isWorkerReady()==false)
   {
-    //don't look for a worker if we already have one
-    if (wb->isWorkerReady())
-      continue;
-
     //don't look for a worker unless we have a build location (if needed)
-    if (wb->getTask().getType()==TaskTypes::Unit && wb->getTask().getUnit().isBuilding() && (!wb->isLocationReady()))
-      continue;
-
+    if (ts->getTask(0).getType()==TaskTypes::Unit && ts->getTask(0).getUnit().isBuilding() && (!ts->getTask(0).getTilePosition().isValid()))
+      return;
     //don't look for a worker if we have a build unit as protoss
-    if (wb->getBuildUnit()!=NULL && wb->getBuildUnit()->exists() && wb->getBuildUnit()->getType().isBuilding() && wb->getBuildUnit()->getType().getRace()==Races::Protoss)
-      continue;
-
-//Todo: translate into work benches
-//    if (wb->getStartTime()<0 || wb->getStartTime()>Broodwar->getFrameCount()+20*24)
-//      return;
+    if (ts->getBuildUnit()!=NULL && ts->getBuildUnit()->exists() && ts->getBuildUnit()->getType().isBuilding() && ts->getBuildUnit()->getType().getRace()==Races::Protoss)
+      return;
+    if (ts->getStartTime()<0 || ts->getStartTime()>Broodwar->getFrameCount()+20*24)
+      return;
 
     std::set<BWAPI::Unit*> units;
     for each(Unit* u in Broodwar->self()->getUnits())
@@ -30,18 +31,19 @@ void BasicWorkerFinder::onFrame(TaskStream* ts)
       if (u->exists() && u->isCompleted() && u->isLoaded()==false)
       {
         bool isCorrectType = false;
-        if (wb->getTask().getWorkerType()==UnitTypes::Zerg_Larva)
+        if (ts->getTask(0).getWorkerType()==UnitTypes::Zerg_Larva)
           isCorrectType = u->getType().producesLarva();
         else
-          isCorrectType = (u->getType()==wb->getTask().getWorkerType());
+          isCorrectType = (u->getType()==ts->getTask(0).getWorkerType());
         if (isCorrectType)
         {
-          if (wb->getTask().getType()==TaskTypes::Unit && wb->getTask().getUnit().isAddon() && u->getAddon()!=NULL)
+          if (ts->getTask(0).getType()==TaskTypes::Unit && ts->getTask(0).getUnit().isAddon() && u->getAddon()!=NULL)
             continue;
             if (TheArbitrator->hasBid(u) && TheArbitrator->getHighestBidder(u).second>=100.0 && TheArbitrator->getHighestBidder(u).first!=TheMacroManager)
             continue;
           if (TheMacroManager->getTaskStreams(u).empty()==false)
             continue;
+
           units.insert(u);
         }
       }
@@ -53,26 +55,28 @@ void BasicWorkerFinder::onFrame(TaskStream* ts)
         if (u->exists() && u->isCompleted() && u->isLoaded()==false)
         {
           bool isCorrectType = false;
-          if (wb->getTask().getWorkerType()==UnitTypes::Zerg_Larva)
+          if (ts->getTask(0).getWorkerType()==UnitTypes::Zerg_Larva)
             isCorrectType = u->getType().producesLarva();
           else
-            isCorrectType = (u->getType()==wb->getTask().getWorkerType());
+            isCorrectType = (u->getType()==ts->getTask(0).getWorkerType());
           if (isCorrectType)
           {
-            if (wb->getTask().getType()==TaskTypes::Unit && wb->getTask().getUnit().isAddon() && u->getAddon()!=NULL)
+            if (ts->getTask(0).getType()==TaskTypes::Unit && ts->getTask(0).getUnit().isAddon() && u->getAddon()!=NULL)
               continue;
             if (TheArbitrator->hasBid(u) && TheArbitrator->getHighestBidder(u).second>=100.0 && TheArbitrator->getHighestBidder(u).first!=TheMacroManager)
               continue;
+
             units.insert(u);
           }
         }
       }
+
     }
     Unit* chosenWorker = NULL;
-    if (wb->getTask().getTilePosition().isValid())
+    if (ts->getTask(0).getTilePosition().isValid())
     {
       //if the task has a tile position, choose the worker closest to it
-      Position p=Position(wb->getTask().getTilePosition());
+      Position p=Position(ts->getTask(0).getTilePosition());
       double minDist=-1;
       for each(Unit* u in units)
       {
@@ -92,17 +96,19 @@ void BasicWorkerFinder::onFrame(TaskStream* ts)
     }
     if (units.size()>0)
       chosenWorker = (*units.begin());
-    wb->setWorker(chosenWorker);
+    ts->setWorker(chosenWorker);
     if (chosenWorker!=NULL)
     {
-      if (wb->getTask().getType()==TaskTypes::Unit && wb->getTask().getUnit().isAddon())
-        wb->getTask().setTilePosition(chosenWorker->getTilePosition());
+      if (ts->getTask(0).getType()==TaskTypes::Unit && ts->getTask(0).getUnit().isAddon())
+        ts->getTask(0).setTilePosition(chosenWorker->getTilePosition());
     }
   }
-  */
 }
-void BasicWorkerFinder::onAttach(TaskStream* ts)
+std::string BasicWorkerFinder::getName() const
 {
-  this->ts = ts;
-  onFrame(ts);
+  return "Basic Worker Finder";
+}
+std::string BasicWorkerFinder::getShortName() const
+{
+  return "BWF";
 }

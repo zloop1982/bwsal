@@ -3,9 +3,8 @@
 #include <SpiralBuildingPlacer.h>
 #include <BFSBuildingPlacer.h>
 #include <UnitPump.h>
-#include <DeleteWorkBenchIfWorkerLost.h>
-#include <TerminateIfNoWorkBenches.h>
-#include <TerminateIfFinished.h>
+#include <TerminateIfWorkerLost.h>
+#include <TerminateIfEmpty.h>
 #include <BasicWorkerFinder.h>
 #include <UnitCompositionProducer.h>
 #include <MacroManager.h>
@@ -73,10 +72,10 @@ void MacroAIModule::onStart()
     if (u->getType().isResourceDepot())
       worker = u;
   }
-  ts->makeWorkBench(worker);
-  ts->makeWorkBenches(200);
+  ts->setWorker(worker);
   ts->attach(BasicTaskExecutor::getInstance(),false);
   ts->attach(new UnitPump(Broodwar->self()->getRace().getWorker()),true);
+  ts->attach(new TerminateIfWorkerLost(),true);
 
   if (Broodwar->self()->getRace()==Races::Terran)
   {
@@ -114,10 +113,10 @@ void MacroAIModule::onStart()
       if (u->getType().isResourceDepot())
         worker = u;
     }
-    ts->makeWorkBench(worker);
+    ts->setWorker(worker);
     ts->attach(BasicTaskExecutor::getInstance(),false);
     ts->attach(new UnitPump(UnitTypes::Zerg_Zergling),true);
-    ts->attach(new TerminateIfFinished(),true);
+    ts->attach(new TerminateIfWorkerLost(),true);
   }
 }
 void MacroAIModule::onEnd(bool isWinner)
@@ -261,11 +260,11 @@ void MacroAIModule::onSendText(std::string text)
   UnitType type=UnitTypes::getUnitType(text);
   if (type!=UnitTypes::Unknown)
   {
-    TaskStream* ts = new TaskStream(new Task(type));
+    TaskStream* ts = new TaskStream(Task(type));
     TheMacroManager->taskStreams.push_back(ts);
     ts->attach(new BasicWorkerFinder(),true);
     ts->attach(BasicTaskExecutor::getInstance(),false);
-    ts->attach(new TerminateIfFinished(),true);
+    ts->attach(new TerminateIfEmpty(),true);
     ts->attach(BFSBuildingPlacer::getInstance(),false);
   }
   else
@@ -273,11 +272,11 @@ void MacroAIModule::onSendText(std::string text)
     TechType type=TechTypes::getTechType(text);
     if (type!=TechTypes::Unknown)
     {
-      TaskStream* ts = new TaskStream(new Task(type));
+      TaskStream* ts = new TaskStream(Task(type));
       TheMacroManager->taskStreams.push_back(ts);
       ts->attach(new BasicWorkerFinder(),true);
       ts->attach(BasicTaskExecutor::getInstance(),false);
-      ts->attach(new TerminateIfFinished(),true);
+      ts->attach(new TerminateIfEmpty(),true);
       ts->attach(BFSBuildingPlacer::getInstance(),false);
     }
     else
@@ -285,11 +284,11 @@ void MacroAIModule::onSendText(std::string text)
       UpgradeType type=UpgradeTypes::getUpgradeType(text);
       if (type!=UpgradeTypes::Unknown)
       {
-        TaskStream* ts = new TaskStream(new Task(type));
+        TaskStream* ts = new TaskStream(Task(type));
         TheMacroManager->taskStreams.push_back(ts);
         ts->attach(new BasicWorkerFinder(),true);
         ts->attach(BasicTaskExecutor::getInstance(),false);
-        ts->attach(new TerminateIfFinished(),true);
+        ts->attach(new TerminateIfEmpty(),true);
         ts->attach(BFSBuildingPlacer::getInstance(),false);
       }
       else

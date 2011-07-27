@@ -6,7 +6,7 @@ class UnitPump : public TaskStreamObserver
 {
   public:
     UnitPump(BWAPI::UnitType t);
-    virtual void onFrame(TaskStream* ts);
+    virtual void update(TaskStream* ts);
   private:
     BWAPI::UnitType type;
 };

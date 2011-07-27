@@ -11,92 +11,79 @@ SpiralBuildingPlacer* SpiralBuildingPlacer::getInstance()
 SpiralBuildingPlacer::SpiralBuildingPlacer()
 {
 }
-void SpiralBuildingPlacer::onAttach(TaskStream* ts)
+void SpiralBuildingPlacer::attached(TaskStream* ts)
 {
-  taskStreamData[ts].isRelocatable   = true;
-  taskStreamData[ts].buildDistance   = 1;
-  for each(WorkBench* wb in ts->workBenches)
-  {
-    if (wb->getCurrentTask() && wb->getCurrentTask()->getTilePosition().isValid() == false)
-      wb->getCurrentTask()->setTilePosition(Broodwar->self()->getStartLocation());
-    taskStreamData[ts].wbData[wb].reservePosition = Broodwar->self()->getStartLocation();
-    taskStreamData[ts].wbData[wb].reserveWidth    = 0;
-    taskStreamData[ts].wbData[wb].reserveHeight   = 0;
-  }
+  if (ts->getTask(0).getTilePosition().isValid()==false)
+    ts->getTask(0).setTilePosition(Broodwar->self()->getStartLocation());
+  taskStreams[ts].isRelocatable   = true;
+  taskStreams[ts].buildDistance   = 1;
+  taskStreams[ts].reservePosition = ts->getTask(0).getTilePosition();
+  taskStreams[ts].reserveWidth    = 0;
+  taskStreams[ts].reserveHeight   = 0;
 }
-void SpiralBuildingPlacer::onDetach(TaskStream* ts)
+void SpiralBuildingPlacer::detached(TaskStream* ts)
 {
-  taskStreamData.erase(ts);
+  taskStreams.erase(ts);
 }
-void SpiralBuildingPlacer::onNewStatus(TaskStream* ts)
+void SpiralBuildingPlacer::newStatus(TaskStream* ts)
 {
 }
-void SpiralBuildingPlacer::onCompletedTask(TaskStream* ts, WorkBench* wb, const Task &t)
+void SpiralBuildingPlacer::completedTask(TaskStream* ts, const Task &t)
 {
-  TheReservedMap->freeTiles(taskStreamData[ts].wbData[wb].reservePosition,taskStreamData[ts].wbData[wb].reserveWidth,taskStreamData[ts].wbData[wb].reserveHeight);
-  taskStreamData[ts].wbData[wb].reserveWidth  = 0;
-  taskStreamData[ts].wbData[wb].reserveHeight = 0;
+  TheReservedMap->freeTiles(taskStreams[ts].reservePosition,taskStreams[ts].reserveWidth,taskStreams[ts].reserveHeight);
+  taskStreams[ts].reserveWidth  = 0;
+  taskStreams[ts].reserveHeight = 0;
 }
-void SpiralBuildingPlacer::onFrame(TaskStream* ts)
+void SpiralBuildingPlacer::update(TaskStream* ts)
 {
-  /*
-  for each(WorkBench* wb in ts->workBenches)
-  {
-    if (wb->getTask().getType()!=TaskTypes::Unit) continue;
+  if (ts->getTask(0).getType()!=TaskTypes::Unit) return;
 
-    int width = wb->getTask().getUnit().tileWidth();
-    UnitType type = wb->getTask().getUnit();
-    if (type.isAddon()) type = type.whatBuilds().first;
-    //don't look for a build location if this building requires power and we have no pylons
-    if (type.requiresPsi() && Broodwar->self()->completedUnitCount(UnitTypes::Protoss_Pylon)==0) return;
-    if (Broodwar->getFrameCount()%10!=0) return;
-    if (wb->isLocationReady()==false)
+  int width = ts->getTask(0).getUnit().tileWidth();
+  UnitType type = ts->getTask(0).getUnit();
+  if (type.isAddon()) type=type.whatBuilds().first;
+
+  if (ts->getStatus()==TaskStream::Error_Location_Blocked || ts->getStatus()==TaskStream::Error_Location_Not_Specified)
+  {
+    if (ts->getTask(0).getTilePosition().isValid()==false)
+      ts->getTask(0).setTilePosition(Broodwar->self()->getStartLocation());
+    if (taskStreams[ts].isRelocatable)
     {
-      if (wb->getTask().getTilePosition().isValid()==false)
-        wb->getTask().setTilePosition(Broodwar->self()->getStartLocation());
-      if (taskStreamData[ts].isRelocatable)
-      {
-        TilePosition newtp = TilePositions::None;
-        int bd = taskStreamData[ts].buildDistance;
-        while ( newtp == TilePositions::None)
-        {
-          newtp = getBuildLocationNear(wb->getWorker(),wb->getTask().getTilePosition(),type,bd);
-          bd--;
-        }
-        wb->getTask().setTilePosition(newtp);
-      }
-    }
-    if (type==BWAPI::UnitTypes::Terran_Command_Center ||
-        type==BWAPI::UnitTypes::Terran_Factory || 
-        type==BWAPI::UnitTypes::Terran_Starport ||
-        type==BWAPI::UnitTypes::Terran_Science_Facility)
-    {
-      width+=2;
-    }
-    if (taskStreamData[ts].wbData[wb].reserveWidth    != width ||
-        taskStreamData[ts].wbData[wb].reserveHeight   != wb->getTask().getUnit().tileHeight() ||
-        taskStreamData[ts].wbData[wb].reservePosition != wb->getTask().getTilePosition())
-    {
-      TheReservedMap->freeTiles(taskStreamData[ts].wbData[wb].reservePosition,
-                                taskStreamData[ts].wbData[wb].reserveWidth,
-                                taskStreamData[ts].wbData[wb].reserveHeight);
-      taskStreamData[ts].wbData[wb].reserveWidth    = width;
-      taskStreamData[ts].wbData[wb].reserveHeight   = wb->getTask().getUnit().tileHeight();
-      taskStreamData[ts].wbData[wb].reservePosition = wb->getTask().getTilePosition();
-      TheReservedMap->reserveTiles(taskStreamData[ts].wbData[wb].reservePosition, type,
-                                   taskStreamData[ts].wbData[wb].reserveWidth,
-                                   taskStreamData[ts].wbData[wb].reserveHeight);
+      TilePosition tp(ts->getTask(0).getTilePosition());
+      TilePosition newtp(getBuildLocationNear(ts->getWorker(),tp,type,taskStreams[ts].buildDistance));
+      Broodwar->printf("(%d,%d) -> (%d,%d)",tp.x(),tp.y(),newtp.x(),newtp.y());
+      ts->getTask(0).setTilePosition(newtp);
     }
   }
-  */
+  if (type==BWAPI::UnitTypes::Terran_Command_Center ||
+    type==BWAPI::UnitTypes::Terran_Factory || 
+    type==BWAPI::UnitTypes::Terran_Starport ||
+    type==BWAPI::UnitTypes::Terran_Science_Facility)
+  {
+    width+=2;
+  }
+
+  if (taskStreams[ts].reserveWidth    != width ||
+      taskStreams[ts].reserveHeight   != ts->getTask(0).getUnit().tileHeight() ||
+      taskStreams[ts].reservePosition != ts->getTask(0).getTilePosition())
+  {
+    TheReservedMap->freeTiles(taskStreams[ts].reservePosition,taskStreams[ts].reserveWidth,taskStreams[ts].reserveHeight);
+    taskStreams[ts].reserveWidth    = width;
+    taskStreams[ts].reserveHeight   = ts->getTask(0).getUnit().tileHeight();
+    taskStreams[ts].reservePosition = ts->getTask(0).getTilePosition();
+    TheReservedMap->reserveTiles(taskStreams[ts].reservePosition,type,taskStreams[ts].reserveWidth,taskStreams[ts].reserveHeight);
+  }
+}
+void SpiralBuildingPlacer::setTilePosition(TaskStream* ts, BWAPI::TilePosition p)
+{
+  ts->getTask(0).setTilePosition(p);
 }
 void SpiralBuildingPlacer::setRelocatable(TaskStream* ts, bool isRelocatable)
 {
-  taskStreamData[ts].isRelocatable = isRelocatable;
+  taskStreams[ts].isRelocatable = isRelocatable;
 }
 void SpiralBuildingPlacer::setBuildDistance(TaskStream* ts, int distance)
 {
-  taskStreamData[ts].buildDistance = distance;
+  taskStreams[ts].buildDistance = distance;
 }
 
 BWAPI::TilePosition SpiralBuildingPlacer::getBuildLocationNear(BWAPI::Unit* builder, BWAPI::TilePosition position, BWAPI::UnitType type, int buildDist) const

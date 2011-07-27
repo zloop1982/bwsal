@@ -2,9 +2,9 @@
 #include <MacroManager/TaskStreamObserver.h>
 #include <MacroManager/TaskStream.h>
 #include <BWAPI.h>
-class TerminateIfFinished : public TaskStreamObserver
+class TerminateIfEmpty : public TaskStreamObserver
 {
   public:
-    TerminateIfFinished();
-    virtual void onCompletedTask(TaskStream* ts);
+    TerminateIfEmpty();
+    virtual void newStatus(TaskStream* ts);
 };

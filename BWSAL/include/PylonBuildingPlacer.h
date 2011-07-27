@@ -7,11 +7,12 @@ class PylonBuildingPlacer : public TaskStreamObserver
   public:
     static PylonBuildingPlacer* getInstance();
     PylonBuildingPlacer();
-    virtual void onAttach(TaskStream* ts);
-    virtual void onDetach(TaskStream* ts);
-    virtual void onNewStatus(TaskStream* ts);
-    virtual void onCompletedTask(TaskStream* ts, WorkBench* wb, const Task &t);
-    virtual void onFrame(TaskStream* ts);
+    virtual void attached(TaskStream* ts);
+    virtual void detached(TaskStream* ts);
+    virtual void newStatus(TaskStream* ts);
+    virtual void completedTask(TaskStream* ts, const Task &t);
+    virtual void update(TaskStream* ts);
+    void setTilePosition(TaskStream* ts, BWAPI::TilePosition p);
     void setRelocatable(TaskStream* ts, bool isRelocatable);
     void setBuildDistance(TaskStream* ts, int distance);
     void setPylonDistance(int pylonDistance);
@@ -20,19 +21,15 @@ class PylonBuildingPlacer : public TaskStreamObserver
     bool canBuildHere(BWAPI::Unit* builder, BWAPI::TilePosition position, BWAPI::UnitType type) const;
     bool canBuildHereWithSpace(BWAPI::Unit* builder, BWAPI::TilePosition position, BWAPI::UnitType type, int buildDist) const;
     bool buildable(BWAPI::Unit* builder, int x, int y) const;
-    struct tsData
+    struct data
     {
       bool isRelocatable;
       int buildDistance;
-      struct wdata
-      {
-        BWAPI::TilePosition reservePosition;
-        int reserveWidth;
-        int reserveHeight;
-      };
-      std::map<WorkBench*, wdata> wbData;
+      BWAPI::TilePosition reservePosition;
+      int reserveWidth;
+      int reserveHeight;
     };
     int pylonDistance;
-    std::map< TaskStream*, tsData > taskStreamData;
+    std::map< TaskStream*, data > taskStreams;
 
 };

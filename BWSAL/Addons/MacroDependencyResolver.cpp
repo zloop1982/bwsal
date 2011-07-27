@@ -7,8 +7,8 @@
 #include <SpiralBuildingPlacer.h>
 #include <BFSBuildingPlacer.h>
 #include <UnitPump.h>
-#include <DeleteWorkBenchIfWorkerLost.h>
-#include <TerminateIfFinished.h>
+#include <TerminateIfWorkerLost.h>
+#include <TerminateIfEmpty.h>
 #include <BasicWorkerFinder.h>
 #include <UnitCompositionProducer.h>
 using namespace BWAPI;
@@ -35,7 +35,6 @@ MacroDependencyResolver::~MacroDependencyResolver()
 void MacroDependencyResolver::update()
 {
   //Warning: Doesn't handle terran add-ons correctly yet
-  /*
   if (Broodwar->getFrameCount()>lastFrameCheck+25)
   {
     lastFrameCheck=Broodwar->getFrameCount();
@@ -55,11 +54,10 @@ void MacroDependencyResolver::update()
           {
             finalCounts[Broodwar->self()->getRace().getRefinery()] = 1;
             TaskStream* nts = new TaskStream(Task(Broodwar->self()->getRace().getRefinery()));
-            nts->makeWorkBench();
             TheMacroManager->insertTaskStreamBelow(nts,ts);
             nts->attach(new BasicWorkerFinder(),true);
             nts->attach(BasicTaskExecutor::getInstance(),false);
-            nts->attach(new TerminateIfFinished(),true);
+            nts->attach(new TerminateIfEmpty(),true);
             nts->attach(BFSBuildingPlacer::getInstance(),false);
           }
           map<UnitType, int> requiredUnits = ts->getTask(i).getRequiredUnits();
@@ -73,11 +71,10 @@ void MacroDependencyResolver::update()
             {
               finalCounts[r.first]=1;
               TaskStream* nts = new TaskStream(Task(r.first));
-              nts->makeWorkBench();
               TheMacroManager->insertTaskStreamBelow(nts,ts);
               nts->attach(new BasicWorkerFinder(),true);
               nts->attach(BasicTaskExecutor::getInstance(),false);
-              nts->attach(new TerminateIfFinished(),true);
+              nts->attach(new TerminateIfEmpty(),true);
               nts->attach(BFSBuildingPlacer::getInstance(),false);
             }
           }
@@ -85,5 +82,4 @@ void MacroDependencyResolver::update()
       }
     }
   }
-    */
 }
