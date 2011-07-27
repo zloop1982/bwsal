@@ -9,8 +9,8 @@ class Base
   BWTA::BaseLocation* getBaseLocation() const;
   BWAPI::Unit* getResourceDepot() const;
   BWAPI::Unit* getRefinery() const;
-  std::set<BWAPI::Unit*> getMinerals() const;
-  std::set<BWAPI::Unit*> getGeysers() const;
+  const std::set<BWAPI::Unit*>& getMinerals() const;
+  const std::set<BWAPI::Unit*>& getGeysers() const;
   bool isActive() const;
   bool isActiveGas() const;
   bool isBeingConstructed() const;
