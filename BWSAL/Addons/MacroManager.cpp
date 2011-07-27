@@ -212,8 +212,8 @@ void MacroManager::update()
         curFrame = *i_s;
         double x1=(prvFrame - currentFrameCount)*hscale;
         double x2=(curFrame - currentFrameCount)*hscale;
-        Broodwar->drawLineScreen(x1,280-larvaCount*20,x2,280-larvaCount*20,Colors::Green);
-        Broodwar->drawLineScreen(x2,280-larvaCount*20,x2,280-(larvaCount+1)*20,Colors::Green);
+        Broodwar->drawLineScreen((int)x1,280-larvaCount*20,(int)x2,280-larvaCount*20,Colors::Green);
+        Broodwar->drawLineScreen((int)x2,280-larvaCount*20,(int)x2,280-(larvaCount+1)*20,Colors::Green);
         larvaCount++;
         i_s++;
       }
@@ -222,15 +222,15 @@ void MacroManager::update()
         curFrame = *i_u;
         double x1=(prvFrame - currentFrameCount)*hscale;
         double x2=(curFrame - currentFrameCount)*hscale;
-        Broodwar->drawLineScreen(x1,280-larvaCount*20,x2,280-larvaCount*20,Colors::Green);
-        Broodwar->drawLineScreen(x2,280-larvaCount*20,x2,280-(larvaCount-1)*20,Colors::Green);
+        Broodwar->drawLineScreen((int)x1,280-larvaCount*20,(int)x2,280-larvaCount*20,Colors::Green);
+        Broodwar->drawLineScreen((int)x2,280-larvaCount*20,(int)x2,280-(larvaCount-1)*20,Colors::Green);
         larvaCount--;
         i_u++;
       }
       prvFrame = curFrame;
     }
     double x1=(prvFrame - currentFrameCount)*hscale;
-    Broodwar->drawLineScreen(x1,280-larvaCount*20,640,280-larvaCount*20,Colors::Green);
+    Broodwar->drawLineScreen((int)x1,280-larvaCount*20,640,280-larvaCount*20,Colors::Green);
     Broodwar->drawLineScreen(0,280-0*20,640,280-0*20,Colors::Red);
   }
   }
