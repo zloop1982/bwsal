@@ -33,6 +33,10 @@ InformationManager::InformationManager()
     enemyBases.insert(*startLocationCouldContainEnemy.begin());
     scoutedAnEnemyBase = true;
   }
+  for each(Unit* u in Broodwar->getAllUnits())
+  {
+    onUnitDiscover(u);
+  }
 }
 InformationManager::~InformationManager()
 {

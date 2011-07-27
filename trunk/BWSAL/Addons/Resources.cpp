@@ -28,8 +28,8 @@ Resources::Resources(BWAPI::TechType type)
 }
 Resources::Resources(BWAPI::UpgradeType type, int level)
 {
-  minerals = type.mineralPriceBase() + type.mineralPriceFactor()*(level-1);
-  gas      = type.gasPriceBase() + type.gasPriceFactor()*(level-1);
+  minerals = type.mineralPrice(level);
+  gas      = type.gasPrice(level);
   supply   = 0.0;
 }
 Resources& Resources::operator=(const Resources &r)

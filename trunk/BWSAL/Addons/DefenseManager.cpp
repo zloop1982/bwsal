@@ -67,7 +67,7 @@ void DefenseManager::update()
         i++;
         if (i>=(int)myBorderVector.size())
           i=0;
-        (*u).first->attackMove(chokePosition);
+        (*u).first->attack(chokePosition);
         (*u).second.mode = DefenseData::Moving;
       }
     }
