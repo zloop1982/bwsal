@@ -35,7 +35,7 @@ namespace Arbitrator
     std::map<Controller<_Tp,_Val>*, std::set<_Tp> > objects;
     std::set<_Tp> updatedObjects;
     std::set<_Tp> objectsCanIncreaseBid;
-    std::set<_Tp> unansweredObjected;
+    std::set<_Tp> unansweredObjects;
     bool inUpdate;
     bool inOnOffer;
     bool inOnRevoke;
@@ -108,7 +108,9 @@ namespace Arbitrator
   {
     if (objects.find(c)==objects.end())
       return false;
-    return removeBid(c,objects[c]);
+    bool result = removeBid(c,objects[c]);
+    objects.erase(c);
+    return result;
   }
 
   template <class _Tp,class _Val>
@@ -123,7 +125,7 @@ namespace Arbitrator
     if (bids[obj].top().first != c) //only the top bidder/controller can decline an object
       return false;
     updatedObjects.insert(obj);
-    unansweredObjected.erase(obj);
+    unansweredObjects.erase(obj);
 
     //must decrease bid via decline()
     if (bids[obj].contains(c) && bid>=bids[obj].get(c))
@@ -160,7 +162,7 @@ namespace Arbitrator
       return false;
     if (bids[obj].top().first != c) //only the top bidder/controller can accept an object
       return false;
-    unansweredObjected.erase(obj);
+    unansweredObjects.erase(obj);
     if (owner[obj]) //if someone else already own this object, take it away from them
     {
       inOnOffer=false;
@@ -332,14 +334,14 @@ namespace Arbitrator
       for(std::map< Controller<_Tp,_Val>*, std::set<_Tp> >::iterator i = objectsToOffer.begin(); i != objectsToOffer.end(); i++)
       {
         objectsCanIncreaseBid=i->second;
-        unansweredObjected=i->second;
+        unansweredObjects=i->second;
 
         inOnOffer=true;
         i->first->onOffer(i->second);
         inOnOffer=false;
 
         //decline all unanswered objects
-        for(std::set<_Tp>::iterator j=unansweredObjected.begin();j!=unansweredObjected.end();j++)
+        for(std::set<_Tp>::iterator j=unansweredObjects.begin();j!=unansweredObjects.end();j++)
           decline(i->first,*j,0);
       }
     }
