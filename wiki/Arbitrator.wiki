@@ -6,6 +6,7 @@ The Arbitrator facilitates cooperation between controllers (add-ons that order u
 
   * [#setBid setBid]
   * [#removeBid removeBid]
+  * [#removeAllBids removeAllBids]
   * [#accept accept]
   * [#decline decline]
   * [#hasBid hasBid]
@@ -31,6 +32,11 @@ bool removeBid(Controller<{{{_}}}Tp,{{{_}}}Val>{{{*}}} c, std::set<{{{_}}}Tp> ob
 
 Removes the bid for the given object or set of objects.
 
+== removeAllBids ==
+bool removeAllBids(Controller<_Tp,_Val>{{{*}}} c);
+
+Removes all bids for a given controller. Should be called when the controller doesn't need any objects any more (such as in the controller's destructor).
+
 == accept ==
 bool accept(Controller<{{{_}}}Tp,{{{_}}}Val>{{{*}}} c, {{{_}}}Tp obj);
 
@@ -52,7 +58,7 @@ Decline the given object or set of objects, with the specified new bid value. On
 == hasBid ==
 bool hasBid({{{_}}}Tp obj) const;
 
-Returns true if the given object has a bid.
+Returns true if the given object has at least one bid.
 
 == getHighestBidder ==
 const std::pair<Controller<{{{_}}}Tp,{{{_}}}Val>{{{*}}}, {{{_}}}Val>& getHighestBidder({{{_}}}Tp obj) const;
@@ -67,9 +73,9 @@ Returns a list of all the bidders for the given object.
 == getObjects ==
 const std::set<{{{_}}}Tp>& getObjects(Controller<{{{_}}}Tp,{{{_}}}Val>{{{*}}} c) const;
 
-Returns all the objects own by the given controller.
+Returns all the objects owned by the given controller.
 
-== onRemoveUnit ==
+== onRemoveObject ==
 void onRemoveObject({{{_}}}Tp obj);
 
 Must be called from AIModule::onUnitDestroy.
