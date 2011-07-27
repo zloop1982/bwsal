@@ -4,12 +4,9 @@ UnitPump::UnitPump(UnitType t)
 {
   type = t;
 }
-void UnitPump::onFrame(TaskStream* ts)
+void UnitPump::update(TaskStream* ts)
 {
-  if (ts==NULL) return;
-  int n = ts->workBenches.size()*4;
-  int l = ts->queuedTasks.size();
-  int d= n-l;
-  for(int i=0;i<d;i++)
-    ts->queuedTasks.push_back(new Task(type));
+  for (int i=0;i<4;i++)
+    if (ts->getTask(i)==Task())
+      ts->setTask(i,Task(type));
 }

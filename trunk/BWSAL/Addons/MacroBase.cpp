@@ -2,7 +2,7 @@
 #include <MacroManager.h>
 #include <BasicTaskExecutor.h>
 #include <BFSBuildingPlacer.h>
-#include <TerminateIfFinished.h>
+#include <TerminateIfEmpty.h>
 #include <BasicWorkerFinder.h>
 #include <Task.h>
 using namespace BWAPI;
@@ -10,12 +10,12 @@ std::set<Unit*> emptySet;
 MacroBase* MacroBase::CreateBaseNow(BWTA::BaseLocation* b, bool getGas)
 {
   MacroBase* mb = new MacroBase(b);
-  mb->depot_ts = new TaskStream(new Task(Broodwar->self()->getRace().getCenter(),b->getTilePosition()));
-  mb->depot_ts->makeWorkBench();
+  Task s(Broodwar->self()->getRace().getCenter(),b->getTilePosition());
+  mb->depot_ts = new TaskStream(s);
   TheMacroManager->taskStreams.push_front(mb->depot_ts);
   mb->depot_ts->attach(new BasicWorkerFinder(),true);
   mb->depot_ts->attach(BasicTaskExecutor::getInstance(),false);
-  mb->depot_ts->attach(new TerminateIfFinished(),true);
+  mb->depot_ts->attach(new TerminateIfEmpty(),true);
   mb->depot_ts->attach(BFSBuildingPlacer::getInstance(),false); 
   mb->depot_ts->attach(mb,false);
   BFSBuildingPlacer::getInstance()->setRelocatable(mb->depot_ts,false);
@@ -24,12 +24,12 @@ MacroBase* MacroBase::CreateBaseNow(BWTA::BaseLocation* b, bool getGas)
 MacroBase* MacroBase::CreateBaseWhenPossible(BWTA::BaseLocation* b, bool getGas)
 {
   MacroBase* mb = new MacroBase(b);
-  mb->depot_ts = new TaskStream(new Task(Broodwar->self()->getRace().getCenter(),b->getTilePosition()));
-  mb->depot_ts->makeWorkBench();
+  Task s(Broodwar->self()->getRace().getCenter(),b->getTilePosition());
+  mb->depot_ts = new TaskStream(s);
   TheMacroManager->taskStreams.push_back(mb->depot_ts);
   mb->depot_ts->attach(new BasicWorkerFinder(),true);
   mb->depot_ts->attach(BasicTaskExecutor::getInstance(),false);
-  mb->depot_ts->attach(new TerminateIfFinished(),true);
+  mb->depot_ts->attach(new TerminateIfEmpty(),true);
   mb->depot_ts->attach(BFSBuildingPlacer::getInstance(),false);
   mb->depot_ts->attach(mb,false);
   BFSBuildingPlacer::getInstance()->setRelocatable(mb->depot_ts,false);
@@ -40,12 +40,11 @@ MacroBase* MacroBase::CreateBaseAtFrame(BWTA::BaseLocation* b, int frame, bool g
   MacroBase* mb = new MacroBase(b);
   Task s(Broodwar->self()->getRace().getCenter(),b->getTilePosition());
   s.setEarliestStartTime(frame);
-  mb->depot_ts = new TaskStream(new Task(Broodwar->self()->getRace().getCenter(),b->getTilePosition()));
-  mb->depot_ts->makeWorkBench();
+  mb->depot_ts = new TaskStream(s);
   TheMacroManager->taskStreams.push_front(mb->depot_ts);
   mb->depot_ts->attach(new BasicWorkerFinder(),true);
   mb->depot_ts->attach(BasicTaskExecutor::getInstance(),false);
-  mb->depot_ts->attach(new TerminateIfFinished(),true);
+  mb->depot_ts->attach(new TerminateIfEmpty(),true);
   mb->depot_ts->attach(BFSBuildingPlacer::getInstance(),false);
   mb->depot_ts->attach(mb,false);
   BFSBuildingPlacer::getInstance()->setRelocatable(mb->depot_ts,false);
@@ -103,16 +102,16 @@ TaskStream* MacroBase::getRefineryTaskStream() const
 {
   return refinery_ts;
 }
-void MacroBase::onCompletedTask(TaskStream* ts, WorkBench* wb, Task* t)
+void MacroBase::completedTask(TaskStream* ts, const Task &t)
 {
   if (ts == depot_ts)
   {
-    resourceDepot = wb->getBuildUnit();
+    resourceDepot = ts->getBuildUnit();
     depot_ts = NULL;
   }
   else if (ts == refinery_ts)
   {
-    refinery = wb->getBuildUnit();
+    refinery = ts->getBuildUnit();
     refinery_ts = NULL;
   }
 }
@@ -139,12 +138,12 @@ void MacroBase::update()
   if (resourceDepot == NULL)
   {
     if (depot_ts!=NULL)
-      resourceDepot = (*depot_ts->workBenches.begin())->getBuildUnit();
+      resourceDepot = depot_ts->getBuildUnit();
   }
   if (refinery = NULL)
   {
     if (refinery_ts!=NULL)
-      refinery = (*refinery_ts->workBenches.begin())->getBuildUnit();
+      refinery = refinery_ts->getBuildUnit();
   }
   ready = (resourceDepot && resourceDepot->exists() && (resourceDepot->isCompleted() || resourceDepot->getRemainingBuildTime()<300));
 }

@@ -4,8 +4,11 @@
 class BasicWorkerFinder : public TaskStreamObserver
 {
   public:
-    virtual void onFrame(TaskStream* ts);
-    virtual void onAttach(TaskStream* ts);
+    virtual void update(TaskStream* ts);
+    virtual void attached(TaskStream* ts);
+    virtual void newStatus(TaskStream* ts);
+    virtual std::string getName() const;
+    virtual std::string getShortName() const;
   private:
     TaskStream* ts;
 };

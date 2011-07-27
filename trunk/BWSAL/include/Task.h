@@ -75,9 +75,6 @@ class Task
     /* Build Time, Research Time, or Upgrade Time (incl level) */
     int getTime() const;
 
-    /* Supply Provided */
-    int supplyProvided() const;
-
     /* Name of the UnitType, TechType, or UpgradeType */
     std::string getName() const;
 

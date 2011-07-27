@@ -69,17 +69,17 @@ int UnitReadyTimeCalculator::getReadyTime(BWAPI::Unit* unit, int duration)
 }
 
 //returns the frame when the unit will be ready to do the given task
-int UnitReadyTimeCalculator::getFirstFreeTime(BWAPI::Unit* unit, Task* task, UnitReadyTimeStatus::Enum &reason, bool considerResources, bool considerTasks)
+int UnitReadyTimeCalculator::getFirstFreeTime(BWAPI::Unit* unit, const Task &task, UnitReadyTimeStatus::Enum &reason, bool considerResources, bool considerTasks)
 {
   reason = UnitReadyTimeStatus::Waiting_For_Worker_To_Be_Ready;
   int t = Broodwar->getFrameCount();
-  if (!(task->getType()==TaskTypes::Unit && task->getUnit().whatBuilds().first == UnitTypes::Zerg_Larva && unit && unit->exists() && unit->getType().producesLarva()))
+  if (!(task.getType()==TaskTypes::Unit && task.getUnit().whatBuilds().first == UnitTypes::Zerg_Larva && unit && unit->exists() && unit->getType().producesLarva()))
   {
     t = getReadyTime(unit,considerTasks);
     if (t==-1) return -1; //frame -1 is never
   }
 
-  int t2 = task->getEarliestStartTime();
+  int t2 = task.getEarliestStartTime();
   if (t2==-1 || t2>t)
   {
     reason = UnitReadyTimeStatus::Waiting_For_Earliest_Start_Time;
@@ -90,7 +90,7 @@ int UnitReadyTimeCalculator::getFirstFreeTime(BWAPI::Unit* unit, Task* task, Uni
   if (considerResources)
   {
     //ask the resource time line when we will have enough resources for this task
-    int t2=TheMacroManager->rtl.getFirstValidTime(task->getResources());
+    int t2=TheMacroManager->rtl.getFirstValidTime(task.getResources());
     if (t2==-1 || t2>t)
     {
       //we need to wait for resources, so update reason and ready time
@@ -107,7 +107,7 @@ int UnitReadyTimeCalculator::getFirstFreeTime(BWAPI::Unit* unit, Task* task, Uni
   }
 
   //next we consider the required units for this task
-  std::map<UnitType, int> req_units = task->getRequiredUnits();
+  std::map<UnitType, int> req_units = task.getRequiredUnits();
   req_units.erase(UnitTypes::Zerg_Larva);
   for each(std::pair<UnitType, int> r in req_units) //iterate over every required unit
   {
@@ -119,13 +119,12 @@ int UnitReadyTimeCalculator::getFirstFreeTime(BWAPI::Unit* unit, Task* task, Uni
       t=t2;
     }
     // if r.first is an add-on type that also gets built by our worker type...
-    if (r.first.isAddon() && r.first.whatBuilds().first==task->getWorkerType())
+    if (r.first.isAddon() && r.first.whatBuilds().first==task.getWorkerType())
     {
       //and if our worker doesn't have this add-on...
-      /* FIX FIX FIX
       if (unit && unit->exists() && unit->getAddon()==NULL && (unit->getBuildUnit()==NULL || unit->getBuildUnit()->getType().isAddon()==false))
       {
-        if (TheMacroManager->getWorkBenches(unit).empty())
+        if (TheMacroManager->getTaskStreams(unit).empty())
         {
           reason = UnitReadyTimeStatus::Error_Task_Requires_Addon;
           //since there is no plan to make this add-on, the unit will never be ready for this task
@@ -134,9 +133,9 @@ int UnitReadyTimeCalculator::getFirstFreeTime(BWAPI::Unit* unit, Task* task, Uni
         else
         {
           int firstFoundT = -1;
-          for each(WorkBench* wb in TheMacroManager->getWorkBenches(unit))
+          for each(TaskStream* ts in TheMacroManager->getTaskStreams(unit))
           {
-            int t3 = wb->getFinishTime(r.first); //then see if/when this add-on is planned to be built
+            int t3 = ts->getFinishTime(r.first); //then see if/when this add-on is planned to be built
             if (t3==-1) continue;
             if (t3<firstFoundT || firstFoundT==-1)
               firstFoundT = t3;
@@ -148,13 +147,12 @@ int UnitReadyTimeCalculator::getFirstFreeTime(BWAPI::Unit* unit, Task* task, Uni
           }
         }
       }
-      */
     }
     if (t==-1) return -1; //return never
   }
 
   //lurkers are the only task with a required tech
-  if (task->getType()==TaskTypes::Unit && task->getUnit()==UnitTypes::Zerg_Lurker)
+  if (task.getType()==TaskTypes::Unit && task.getUnit()==UnitTypes::Zerg_Lurker)
   {
     int t2=TheMacroManager->ttl.getFinishTime(TechTypes::Lurker_Aspect);
     if (t2==-1 || t2>t)
@@ -165,10 +163,10 @@ int UnitReadyTimeCalculator::getFirstFreeTime(BWAPI::Unit* unit, Task* task, Uni
     if (t==-1) return -1; //return never
   }
   //Upgrading Attack Level 3 requires that Attack Level 2 is completed...
-  if (task->getType()==TaskTypes::Upgrade)
+  if (task.getType()==TaskTypes::Upgrade)
   {
     //ask the upgrade time line when we will have one less than the desired upgrade level
-    int t2=TheMacroManager->utl.getFirstTime(task->getUpgrade(),task->getLevel()-1);
+    int t2=TheMacroManager->utl.getFirstTime(task.getUpgrade(),task.getLevel()-1);
     if (t2==-1 || t2>t)
     {
       reason = UnitReadyTimeStatus::Waiting_For_Required_Upgrade;
@@ -180,12 +178,12 @@ int UnitReadyTimeCalculator::getFirstFreeTime(BWAPI::Unit* unit, Task* task, Uni
   {
     int t2 = Broodwar->getFrameCount();
     //Protoss buildings don't take up worker time.
-    if (!(task->getType()==TaskTypes::Unit && task->getUnit().isBuilding() && task->getRace()==Races::Protoss))
+    if (!(task.getType()==TaskTypes::Unit && task.getUnit().isBuilding() && task.getRace()==Races::Protoss))
     {
-      if (task->getType()==TaskTypes::Unit && task->getUnit().whatBuilds().first == UnitTypes::Zerg_Larva && unit->getType().producesLarva())
+      if (task.getType()==TaskTypes::Unit && task.getUnit().whatBuilds().first == UnitTypes::Zerg_Larva && unit->getType().producesLarva())
         t2 = TheMacroManager->ltl.getFirstFreeTime(unit,t);
       else
-        t2 = TheMacroManager->wttl.getFirstFreeInterval(unit,task,t).first;
+        t2 = TheMacroManager->wttl.getFirstFreeInterval(unit,&task,t).first;
       if (t2==-1 || t2>t)
       {
         reason = UnitReadyTimeStatus::Waiting_For_Free_Time;

@@ -2,9 +2,9 @@
 #include <MacroManager/TaskStreamObserver.h>
 #include <MacroManager/TaskStream.h>
 #include <BWAPI.h>
-class TerminateIfNoWorkBenches : public TaskStreamObserver
+class TerminateIfWorkerLost : public TaskStreamObserver
 {
   public:
-    TerminateIfNoWorkBenches();
-    virtual void onFrame(TaskStream* ts);
+    TerminateIfWorkerLost();
+    virtual void newStatus(TaskStream* ts);
 };

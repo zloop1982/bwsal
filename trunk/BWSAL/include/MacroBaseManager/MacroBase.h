@@ -19,7 +19,7 @@ class MacroBase : public TaskStreamObserver
   const std::set<BWAPI::Unit*>& getGeysers() const;
   TaskStream* getTaskStream() const;
   TaskStream* getRefineryTaskStream() const;
-  virtual void onCompletedTask(TaskStream* ts, WorkBench* wb, Task* t);
+  void completedTask(TaskStream* ts, const Task &t);
   void setPaused(bool paused);
   bool isPaused() const;
   bool isReady() const;

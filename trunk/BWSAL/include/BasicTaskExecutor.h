@@ -5,26 +5,21 @@ class BasicTaskExecutor : public TaskStreamObserver
 {
   public:
     static BasicTaskExecutor* getInstance();
-
-    virtual void onAttach(TaskStream* ts);
-    virtual void onDetach(TaskStream* ts);
-
-    virtual void onNewStatus(TaskStream* ts);
-    virtual void onFrame(TaskStream* ts);
-
-    virtual void onCompletedTask(TaskStream* ts, const Task &t);
-
+    virtual void attached(TaskStream* ts);
+    virtual void detached(TaskStream* ts);
+    virtual void newStatus(TaskStream* ts);
+    virtual void completedTask(TaskStream* ts, const Task &t);
+    virtual void update(TaskStream* ts);
     void computeIsExecuting(TaskStream* ts);
     void computeIsCompleted(TaskStream* ts);
     void computeIsReady(TaskStream* ts);
     void getReady(TaskStream* ts);
     void execute(TaskStream* ts);
-
   private:
     struct data
     {
       bool isReady;
       int targetLevel;
     };
-    std::map< TaskStream*, std::map<WorkBench*, data > > wbData;
+    std::map< TaskStream*, data > taskStreams;
 };

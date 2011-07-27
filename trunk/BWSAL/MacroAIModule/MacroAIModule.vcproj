@@ -274,14 +274,6 @@
 					>
 				</File>
 				<File
-					RelativePath="..\Addons\WorkBench.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\include\MacroManager\WorkBench.h"
-					>
-				</File>
-				<File
 					RelativePath="..\Addons\WorkerTaskTimeline.cpp"
 					>
 				</File>
@@ -317,14 +309,6 @@
 						>
 					</File>
 					<File
-						RelativePath="..\Addons\DeleteWorkBenchIfWorkerLost.cpp"
-						>
-					</File>
-					<File
-						RelativePath="..\include\DeleteWorkBenchIfWorkerLost.h"
-						>
-					</File>
-					<File
 						RelativePath="..\Addons\PylonBuildingPlacer.cpp"
 						>
 					</File>
@@ -341,19 +325,19 @@
 						>
 					</File>
 					<File
-						RelativePath="..\Addons\TerminateIfFinished.cpp"
+						RelativePath="..\Addons\TerminateIfEmpty.cpp"
 						>
 					</File>
 					<File
-						RelativePath="..\include\TerminateIfFinished.h"
+						RelativePath="..\include\TerminateIfEmpty.h"
 						>
 					</File>
 					<File
-						RelativePath="..\Addons\TerminateIfNoWorkBenches.cpp"
+						RelativePath="..\Addons\TerminateIfWorkerLost.cpp"
 						>
 					</File>
 					<File
-						RelativePath="..\include\TerminateIfNoWorkBenches.h"
+						RelativePath="..\include\TerminateIfWorkerLost.h"
 						>
 					</File>
 					<File

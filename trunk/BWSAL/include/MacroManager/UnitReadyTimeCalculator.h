@@ -29,5 +29,5 @@ class UnitReadyTimeCalculator
     /* Computes when a unit will be ready to start any task of a given duration */
     static int getReadyTime(BWAPI::Unit* unit, int duration);
     /* computes when a unit will be free to start a specific task */
-    static int getFirstFreeTime(BWAPI::Unit* unit, Task* task, UnitReadyTimeStatus::Enum &reason, bool considerResources = true, bool considerTasks = false);
+    static int getFirstFreeTime(BWAPI::Unit* unit, const Task &task, UnitReadyTimeStatus::Enum &reason, bool considerResources = true, bool considerTasks = false);
 };
