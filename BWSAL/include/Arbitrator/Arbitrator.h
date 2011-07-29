@@ -170,9 +170,7 @@ namespace Arbitrator
     {
       return false;
     }
-    bool result = removeBid(c,objectsBidOnIter->second);
-    objectsBidOn.erase(objectsBidOnIter);
-    return result;
+    return removeBid(c,objectsBidOnIter->second);
   }
 
   template <class _Tp,class _Val>
