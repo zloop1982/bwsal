@@ -299,7 +299,7 @@ namespace Arbitrator
     {
       return false;
     }
-    unansweredObjected.erase(obj);
+    unansweredObjects.erase(obj);
     inOnOffer=false;
     revokeOwnership(obj,bids[obj].top().second,c);
     inOnOffer=true;
