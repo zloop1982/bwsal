@@ -36,6 +36,7 @@ namespace BWSAL
   }
   TaskScheduler::TaskScheduler()
   {
+    resetSupplyBlockTime();
   }
   TaskScheduler::~TaskScheduler()
   {
@@ -254,13 +255,13 @@ namespace BWSAL
 
     if ( state.hasEnoughSupplyAndRequiredBuildTypes( buildType ) )
     {
-      if ( state.getMinerals() >= buildType.mineralPrice() && state.getGas() >= buildType.gasPrice() )
+      if ( state.getMinerals() >= buildType.mineralPrice() && state.getGas() >= buildType.gasPrice() && state.getTime() >= t->getEarliestStartTime() )
       {
         validBuildTypeSince = state.getTime();
       }
       else
       {
-        int nextSatisfiedTime = state.getNextTimeWithMinimumResources( buildType. mineralPrice(), buildType.gasPrice() );
+        int nextSatisfiedTime = max( t->getEarliestStartTime(), state.getNextTimeWithMinimumResources( buildType. mineralPrice(), buildType.gasPrice() ) );
         if ( nextEvent == m_timeline->end() || nextSatisfiedTime < nextEvent->first )
         {
           state.continueToTime( nextSatisfiedTime );
@@ -268,6 +269,15 @@ namespace BWSAL
         }
       }
     }
+    else
+    {
+      if ( state.getSupply() < buildType.supplyRequired() )
+      {
+        m_supplyBlockTime = min( m_supplyBlockTime, state.getTime() );
+      }
+    }
+
+
     if ( validBuildTypeSince != NEVER )
     {
       findCandidateMorphTimes( &hlhPlans, validBuildTypeSince );
@@ -298,20 +308,25 @@ namespace BWSAL
       nextEvent++;
       if ( !state.hasEnoughSupplyAndRequiredBuildTypes( buildType ) )
       {
+        if ( state.getSupply() < buildType.supplyRequired() )
+        {
+          m_supplyBlockTime = min( m_supplyBlockTime, state.getTime() );
+        }
         validBuildTypeSince = NEVER;
         // Throw away our candidate solutions
         resetCandidates( &hlhPlans, &state );
         continue;
       }
+
       // If we don't have enough minerals or gas on this event
-      if ( state.getMinerals() < buildType.mineralPrice() || state.getGas() < buildType.gasPrice() )
+      if ( state.getMinerals() < buildType.mineralPrice() || state.getGas() < buildType.gasPrice() || state.getTime() < t->getEarliestStartTime() )
       {
         validBuildTypeSince = NEVER;
         // Throw away our candidate solutions
         resetCandidates( &hlhPlans, &state );
 
         // See if we will have enough minerals and gas before the next event
-        int nextSatisfiedTime = state.getNextTimeWithMinimumResources( buildType.mineralPrice(), buildType.gasPrice() );
+        int nextSatisfiedTime = max( t->getEarliestStartTime(), state.getNextTimeWithMinimumResources( buildType.mineralPrice(), buildType.gasPrice() ) );
         if ( nextEvent == m_timeline->end() || nextSatisfiedTime < nextEvent->first )
         {
           if ( nextSatisfiedTime == NEVER )
@@ -398,18 +413,25 @@ namespace BWSAL
 
     if ( state.hasEnoughSupplyAndRequiredBuildTypes( buildType ) )
     {
-      if ( state.getMinerals() >= buildType.mineralPrice() && state.getGas() >= buildType.gasPrice() )
+      if ( state.getMinerals() >= buildType.mineralPrice() && state.getGas() >= buildType.gasPrice() && state.getTime() >= t->getEarliestStartTime() )
       {
         validBuildTypeSince = state.getTime();
       }
       else
       {
-        int nextSatisfiedTime = state.getNextTimeWithMinimumResources( buildType.mineralPrice(), buildType.gasPrice() );
+        int nextSatisfiedTime = max( t->getEarliestStartTime(), state.getNextTimeWithMinimumResources( buildType.mineralPrice(), buildType.gasPrice() ) );
         if ( nextEvent == m_timeline->end() || nextSatisfiedTime < nextEvent->first )
         {
           state.continueToTime( nextSatisfiedTime );
           validBuildTypeSince = state.getTime();
         }
+      }
+    }
+    else
+    {
+      if ( state.getSupply() < buildType.supplyRequired() )
+      {
+        m_supplyBlockTime = min( m_supplyBlockTime, state.getTime() );
       }
     }
     if ( validBuildTypeSince != NEVER )
@@ -437,6 +459,10 @@ namespace BWSAL
       nextEvent++;
       if ( !state.hasEnoughSupplyAndRequiredBuildTypes( buildType ) )
       {
+        if ( state.getSupply() < buildType.supplyRequired() )
+        {
+          m_supplyBlockTime = min( m_supplyBlockTime, state.getTime() );
+        }
         validBuildTypeSince = NEVER;
         candidateUnit = NULL;
         candidateTime = NEVER;
@@ -457,7 +483,7 @@ namespace BWSAL
         }
       }
       // If we don't have enough minerals or gas on this event
-      if ( candidateMinerals < buildType.mineralPrice() || state.getGas() < buildType.gasPrice() )
+      if ( candidateMinerals < buildType.mineralPrice() || state.getGas() < buildType.gasPrice() || state.getTime() < t->getEarliestStartTime() )
       {
         // Throw away our candidate unit
         candidateUnit = NULL;
@@ -465,7 +491,7 @@ namespace BWSAL
         validBuildTypeSince = NEVER;
 
         // See if we will have enough minerals and gas before the next event
-        int nextSatisfiedTime = state.getNextTimeWithMinimumResources( buildType.mineralPrice(), buildType.gasPrice() );
+        int nextSatisfiedTime = max( t->getEarliestStartTime(), state.getNextTimeWithMinimumResources( buildType.mineralPrice(), buildType.gasPrice() ) );
         if ( nextEvent == m_timeline->end() || nextSatisfiedTime < nextEvent->first )
         {
           if ( nextSatisfiedTime == NEVER )
@@ -519,5 +545,15 @@ namespace BWSAL
     {
       scheduleTask( t, candidateUnit, candidateTime );
     }
+  }
+
+  int TaskScheduler::getSupplyBlockTime() const
+  {
+    return m_supplyBlockTime;
+  }
+
+  void TaskScheduler::resetSupplyBlockTime()
+  {
+    m_supplyBlockTime = NEVER;
   }
 }

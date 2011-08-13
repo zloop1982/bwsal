@@ -36,6 +36,7 @@ class BasicAIModule : public BWAPI::AIModule
     BWSAL::ScoutManager*       m_scoutManager;
     BWSAL::DefenseManager*     m_defenseManager;
     BWSAL::BuildOrderManager*  m_buildOrderManager;
+    BWSAL::SupplyManager*      m_supplyManager;
     EnhancedUI*                m_enhancedUI;
     bool m_drawTasks;
     bool m_drawAssignments;

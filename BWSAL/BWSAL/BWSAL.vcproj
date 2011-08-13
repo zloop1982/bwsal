@@ -221,6 +221,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Source\SupplyManager.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\Source\Task.cpp"
 				>
 			</File>
@@ -336,6 +340,10 @@
 			</File>
 			<File
 				RelativePath="..\include\BWSAL\ScoutManager.h"
+				>
+			</File>
+			<File
+				RelativePath="..\include\BWSAL\SupplyManager.h"
 				>
 			</File>
 			<File

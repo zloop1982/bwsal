@@ -15,6 +15,8 @@ namespace BWSAL
       static TaskScheduler* getInstance();
       static void destroy();
       void scheduleTask( Task* t );
+      int getSupplyBlockTime() const;
+      void resetSupplyBlockTime();
     private:
       TaskScheduler();
       ~TaskScheduler();
@@ -38,6 +40,7 @@ namespace BWSAL
       void TaskScheduler::initializeHLHPlanData( std::map< BuildUnit*, HLHPlanData > *hlhPlans );
       void TaskScheduler::continueToTimeWithLarvaSpawns( BuildState* state, std::map< BuildUnit*, HLHPlanData > *hlhPlans, int time );
       void TaskScheduler::findCandidateMorphTimes( std::map< BuildUnit*, HLHPlanData > *hlhPlans, int validBuildTimeSince );
+      int m_supplyBlockTime;
       BuildEventTimeline* m_timeline;
       BuildUnitManager* m_buildUnitManager;
       static TaskScheduler* s_taskScheduler;

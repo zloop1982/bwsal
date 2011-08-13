@@ -24,6 +24,7 @@
 #include <BWSAL/RectangleArray.h>
 #include <BWSAL/ReservedMap.h>
 #include <BWSAL/ScoutManager.h>
+#include <BWSAL/SupplyManager.h>
 #include <BWSAL/Task.h>
 #include <BWSAL/TaskExecutor.h>
 #include <BWSAL/TaskScheduler.h>

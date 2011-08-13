@@ -13,6 +13,7 @@ namespace BWSAL
   int Task::s_nextFreeTaskID = 1;
   Task::Task( BuildType type )
   {
+    m_earliestStartTime = 0;
     m_runTime = NEVER;
     m_completionTime = NEVER;
     m_lastScheduledTime = NEVER;
@@ -124,6 +125,16 @@ namespace BWSAL
   void Task::setScheduledThisFrame()
   {
     m_lastScheduledTime = BWAPI::Broodwar->getFrameCount();
+  }
+
+  int Task::getEarliestStartTime() const
+  {
+    return m_earliestStartTime;
+  }
+
+  void Task::setEarliestStartTime( int time )
+  {
+    m_earliestStartTime = time;
   }
 
   int Task::getRunTime() const
