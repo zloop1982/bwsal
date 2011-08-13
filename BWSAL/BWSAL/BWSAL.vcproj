@@ -103,7 +103,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
-				AdditionalIncludeDirectories="T:\code\BWAPI_Addons\BWSAL\bwsal\BWSAL\Util\Source;T:\code\BWAPI_Addons\BWSAL\bwsal\BWSAL\include"
+				AdditionalIncludeDirectories="..\Util\Source;..\include"
 				PreprocessorDefinitions="_SECURE_SCL 0"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
