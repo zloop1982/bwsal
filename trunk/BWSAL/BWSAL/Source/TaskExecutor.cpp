@@ -63,6 +63,18 @@ namespace BWSAL
     m_timeline->m_initialState.reservedGas += t->getBuildType().gasPrice();
     m_runningTasks.push_back( t );
   }
+  int TaskExecutor::getRunningCount( BuildType type ) const
+  {
+    int count = 0;
+    foreach( Task* t, m_runningTasks )
+    {
+      if ( t->getBuildType() == type )
+      {
+        count++;
+      }
+    }
+    return count;
+  }
 
   void TaskExecutor::onFrame()
   {

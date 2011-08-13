@@ -48,7 +48,15 @@ namespace BWSAL
 
   void BuildOrderManager::onFrame()
   {
-    std::map< BWAPI::UnitType, int > plannedUnitCount;
+    std::map< BuildType, int > totalScheduledUnitCount;
+    for each( BuildType t in BuildTypes::allBuildTypes( BWAPI::Broodwar->self()->getRace() ) )
+    {
+      if ( t.isUnitType() )
+      {
+        totalScheduledUnitCount[t] = BWAPI::Broodwar->self()->completedUnitCount( t.getUnitType() ) + m_taskExecutor->getRunningCount( t );
+      }
+    }
+
     Heap< MacroTask*, int> macroTaskHeap;
     bool supplyIncrease = true;
     while ( supplyIncrease )
@@ -63,33 +71,31 @@ namespace BWSAL
             if ( t->isWaiting() && t->isScheduledThisFrame() == false )
             {
               m_taskScheduler->scheduleTask( t );
+              if ( t->getRunTime() <= BWAPI::Broodwar->getFrameCount() )
+              {
+                m_taskExecutor->run( t );
+              }
             }
           }
         }
+        macroTaskHeap.clear();
         foreach( MacroTask* mt, pmt->second.unitMacroTasks )
         {
-          mt->m_remainingCount = mt->getCount();
-          if ( mt->isAdditional() == false )
+          int unscheduledTaskCount = 0;
+          foreach( Task* t, mt->m_tasks )
           {
-            foreach( BuildUnit* bu, m_buildUnitManager->getUnits() )
+            if ( t->isWaiting() && !t->isScheduledThisFrame() )
             {
-              if ( bu->getType() == mt->getType() )
-              {
-                Task* t = bu->getTask();
-                if ( bu->isReal() || ( t != NULL && ( !t->isWaiting() || t->isScheduledThisFrame() ) ) )
-                {
-                  mt->m_remainingCount--;
-                }
-              }
+              unscheduledTaskCount++;
             }
-            int unscheduledTaskCount = 0;
-            foreach( Task* t, mt->m_tasks )
-            {
-              if ( t->isWaiting() && !t->isScheduledThisFrame() )
-              {
-                unscheduledTaskCount++;
-              }
-            }
+          }
+          if ( mt->isAdditional() )
+          {
+            mt->m_remainingCount = unscheduledTaskCount;
+          }
+          else
+          {
+            mt->m_remainingCount = mt->getCount() - totalScheduledUnitCount[mt->getType()];
             if ( unscheduledTaskCount > mt->m_remainingCount )
             {
               std::list< Task* >::iterator i = mt->m_tasks.begin();
@@ -119,7 +125,10 @@ namespace BWSAL
               }
             }
           }
-          macroTaskHeap.set( mt, mt->m_remainingCount );
+          if ( mt->m_remainingCount > 0 )
+          {
+            macroTaskHeap.set( mt, mt->m_remainingCount );
+          }
         }
         if ( macroTaskHeap.empty() == false )
         {
@@ -138,6 +147,10 @@ namespace BWSAL
             if ( st != NULL )
             {
               m_taskScheduler->scheduleTask( st );
+              if ( st->isScheduledThisFrame() )
+              {
+                totalScheduledUnitCount[ st->getBuildType() ]++;
+              }
               int newCount = macroTaskHeap.top().second - 1;
               macroTaskHeap.set( mt, newCount );
               if ( st->getRunTime() <= BWAPI::Broodwar->getFrameCount() )
@@ -167,7 +180,7 @@ namespace BWSAL
     {
       seedLocation = BWAPI::Broodwar->self()->getStartLocation();
     }
-    MacroTask* mt = new MacroTask( BuildType(t), priority, false, count, seedLocation );
+    MacroTask* mt = new MacroTask( BuildType( t ), priority, false, count, seedLocation );
     m_prioritizedMacroTasks[priority].unitMacroTasks.push_back( mt );
     return mt;
   }
@@ -178,21 +191,21 @@ namespace BWSAL
     {
       seedLocation = BWAPI::Broodwar->self()->getStartLocation();
     }
-    MacroTask* mt = new MacroTask( BuildType(t), priority, true, count, seedLocation );
+    MacroTask* mt = new MacroTask( BuildType( t ), priority, true, count, seedLocation );
     m_prioritizedMacroTasks[priority].unitMacroTasks.push_back( mt );
     return mt;
   }
 
   MacroTask* BuildOrderManager::research( BWAPI::TechType t, int priority )
   {
-    MacroTask* mt = new MacroTask( BuildType(t), priority, false, 1 );
+    MacroTask* mt = new MacroTask( BuildType( t ), priority, true, 1 );
     m_prioritizedMacroTasks[priority].techAndUpgradeMacroTasks.push_back( mt );
     return mt;
   }
 
   MacroTask* BuildOrderManager::upgrade( int level, BWAPI::UpgradeType t, int priority )
   {
-    MacroTask* mt = new MacroTask( BuildType(t), priority, false, 1 );
+    MacroTask* mt = new MacroTask( BuildType( t, level ), priority, true, 1 );
     m_prioritizedMacroTasks[priority].techAndUpgradeMacroTasks.push_back( mt );
     return mt;
   }
@@ -204,6 +217,7 @@ namespace BWSAL
     {
       return;
     }
+    // TODO: Implement
   }
 
   void BuildOrderManager::draw( int x, int y )

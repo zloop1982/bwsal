@@ -1,5 +1,6 @@
 #pragma once
 #include <BWSAL/Arbitrator.h>
+#include <BWSAL/BuildType.h>
 #include <BWAPI.h>
 namespace BWSAL
 {
@@ -19,6 +20,7 @@ namespace BWSAL
       virtual std::string getName() const;
       virtual void onFrame();
       void run( Task* t );
+      int getRunningCount( BuildType type ) const;
     private:
       TaskExecutor();
       ~TaskExecutor();
