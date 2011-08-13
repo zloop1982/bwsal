@@ -18,6 +18,7 @@ namespace BWAPI
 
       /** Returns the name of this bullet type. */
       std::string getName() const;
+      const char *c_str() const;
     private:
       int id;
   };
@@ -57,6 +58,7 @@ namespace BWAPI
     extern const BulletType Queen_Spell_Carrier;
     extern const BulletType Plague_Cloud;
     extern const BulletType Consume;
+    extern const BulletType Ensnare;
     extern const BulletType Needle_Spine_Hit;
     extern const BulletType Invisible;
     extern const BulletType Optical_Flare_Grenade;

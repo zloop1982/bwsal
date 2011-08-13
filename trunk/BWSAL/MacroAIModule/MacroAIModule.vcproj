@@ -61,7 +61,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="../lib/BWAPId.lib ../lib/BWTAd.lib ../lib/tinyxmld.lib ../lib/CGAL-vc90-mt-gd.lib ../lib/libboost_thread-vc90-mt-gd-1_40.lib ../lib/gmp-vc90-mt-gd.lib ../lib/mpfr-vc90-mt-gd.lib"
+				AdditionalDependencies="../lib/BWAPId.lib ../lib/BWTAd.lib ../lib/BWSALd.lib ../lib/tinyxmld.lib ../lib/CGAL-vc90-mt-gd.lib ../lib/libboost_thread-vc90-mt-gd-1_40.lib ../lib/gmp-vc90-mt-gd.lib ../lib/mpfr-vc90-mt-gd.lib"
 				OutputFile="$(OutDir)\$(ProjectName)d.dll"
 				LinkIncremental="2"
 				GenerateDebugInformation="true"
@@ -117,8 +117,8 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
-				AdditionalIncludeDirectories="../include"
-				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS"
+				AdditionalIncludeDirectories="../include;../Util/Source/"
+				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_SECURE_SCL 0"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
@@ -136,13 +136,14 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="../lib/BWAPI.lib ../lib/BWTA.lib ../lib/tinyxml.lib ../lib/CGAL-vc90-mt.lib ../lib/libboost_thread-vc90-mt-1_40.lib ../lib/gmp-vc90-mt.lib ../lib/mpfr-vc90-mt.lib"
+				AdditionalDependencies="../lib/BWAPI.lib ../lib/BWTA.lib ../lib/BWSAL.lib ../lib/tinyxml.lib ../lib/CGAL-vc90-mt.lib ../lib/libboost_thread-vc90-mt-1_40.lib ../lib/gmp-vc90-mt.lib ../lib/mpfr-vc90-mt.lib"
 				LinkIncremental="1"
 				GenerateDebugInformation="true"
 				SubSystem="2"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
 				TargetMachine="1"
+				Profile="true"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -176,19 +177,15 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath="..\Addons\BWSAL.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\Source\Dll.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\Source\MacroAIModule.cpp"
+				RelativePath=".\Source\EnhancedUI.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\Addons\Util.cpp"
+				RelativePath=".\Source\MacroAIModule.cpp"
 				>
 			</File>
 		</Filter>
@@ -198,15 +195,11 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath="..\include\BWSAL.h"
+				RelativePath=".\Source\EnhancedUI.h"
 				>
 			</File>
 			<File
 				RelativePath=".\Source\MacroAIModule.h"
-				>
-			</File>
-			<File
-				RelativePath="..\Addons\Util.h"
 				>
 			</File>
 		</Filter>
@@ -215,346 +208,6 @@
 			Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav"
 			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}"
 			>
-		</Filter>
-		<Filter
-			Name="Addons"
-			>
-			<File
-				RelativePath="..\Addons\Assignment.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\include\MacroManager.h"
-				>
-			</File>
-			<Filter
-				Name="MacroManager"
-				>
-				<File
-					RelativePath="..\Addons\LarvaTimeline.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\include\MacroManager\LarvaTimeline.h"
-					>
-				</File>
-				<File
-					RelativePath="..\Addons\MacroManager.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\include\MacroManager\MacroManager.h"
-					>
-				</File>
-				<File
-					RelativePath="..\Addons\Task.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\include\Task.h"
-					>
-				</File>
-				<File
-					RelativePath="..\Addons\TaskStream.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\include\MacroManager\TaskStream.h"
-					>
-				</File>
-				<File
-					RelativePath="..\include\MacroManager\TaskStreamObserver.h"
-					>
-				</File>
-				<File
-					RelativePath="..\Addons\UnitReadyTimeCalculator.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\include\MacroManager\UnitReadyTimeCalculator.h"
-					>
-				</File>
-				<File
-					RelativePath="..\Addons\WorkerTaskTimeline.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\include\MacroManager\WorkerTaskTimeline.h"
-					>
-				</File>
-				<Filter
-					Name="TaskStreamObservers"
-					>
-					<File
-						RelativePath="..\Addons\BasicTaskExecutor.cpp"
-						>
-					</File>
-					<File
-						RelativePath="..\include\BasicTaskExecutor.h"
-						>
-					</File>
-					<File
-						RelativePath="..\Addons\BasicWorkerFinder.cpp"
-						>
-					</File>
-					<File
-						RelativePath="..\include\BasicWorkerFinder.h"
-						>
-					</File>
-					<File
-						RelativePath="..\Addons\BFSBuildingPlacer.cpp"
-						>
-					</File>
-					<File
-						RelativePath="..\include\BFSBuildingPlacer.h"
-						>
-					</File>
-					<File
-						RelativePath="..\Addons\PylonBuildingPlacer.cpp"
-						>
-					</File>
-					<File
-						RelativePath="..\include\PylonBuildingPlacer.h"
-						>
-					</File>
-					<File
-						RelativePath="..\Addons\SpiralBuildingPlacer.cpp"
-						>
-					</File>
-					<File
-						RelativePath="..\include\SpiralBuildingPlacer.h"
-						>
-					</File>
-					<File
-						RelativePath="..\Addons\TerminateIfEmpty.cpp"
-						>
-					</File>
-					<File
-						RelativePath="..\include\TerminateIfEmpty.h"
-						>
-					</File>
-					<File
-						RelativePath="..\Addons\TerminateIfWorkerLost.cpp"
-						>
-					</File>
-					<File
-						RelativePath="..\include\TerminateIfWorkerLost.h"
-						>
-					</File>
-					<File
-						RelativePath="..\Addons\UnitCompositionProducer.cpp"
-						>
-					</File>
-					<File
-						RelativePath="..\include\UnitCompositionProducer.h"
-						>
-					</File>
-					<File
-						RelativePath="..\Addons\UnitPump.cpp"
-						>
-					</File>
-					<File
-						RelativePath="..\include\UnitPump.h"
-						>
-					</File>
-				</Filter>
-			</Filter>
-			<Filter
-				Name="Arbitrator"
-				>
-				<File
-					RelativePath="..\include\Arbitrator\Arbitrator.h"
-					>
-				</File>
-				<File
-					RelativePath="..\include\Arbitrator\Controller.h"
-					>
-				</File>
-				<File
-					RelativePath="..\include\Heap.h"
-					>
-				</File>
-			</Filter>
-			<Filter
-				Name="ResourceTimeline"
-				>
-				<File
-					RelativePath="..\Addons\Resources.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\include\Resources.h"
-					>
-				</File>
-				<File
-					RelativePath="..\Addons\ResourceTimeline.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\include\ResourceTimeline.h"
-					>
-				</File>
-			</Filter>
-			<Filter
-				Name="ResourceRates"
-				>
-				<File
-					RelativePath="..\Addons\ResourceRates.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\include\ResourceRates.h"
-					>
-				</File>
-			</Filter>
-			<Filter
-				Name="UnitCountTimeline"
-				>
-				<File
-					RelativePath="..\Addons\UnitCountTimeline.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\include\UnitCountTimeline.h"
-					>
-				</File>
-			</Filter>
-			<Filter
-				Name="TechTimeline"
-				>
-				<File
-					RelativePath="..\Addons\TechTimeline.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\include\TechTimeline.h"
-					>
-				</File>
-			</Filter>
-			<Filter
-				Name="UpgradeTimeline"
-				>
-				<File
-					RelativePath="..\Addons\UpgradeTimeline.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\include\UpgradeTimeline.h"
-					>
-				</File>
-			</Filter>
-			<Filter
-				Name="MacroSupplyManager"
-				>
-				<File
-					RelativePath="..\Addons\MacroSupplyManager.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\include\MacroSupplyManager.h"
-					>
-				</File>
-			</Filter>
-			<Filter
-				Name="UnitGroupManager"
-				>
-				<File
-					RelativePath="..\Addons\UnitGroup.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\include\UnitGroup.h"
-					>
-				</File>
-				<File
-					RelativePath="..\Addons\UnitGroupManager.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\include\UnitGroupManager.h"
-					>
-				</File>
-			</Filter>
-			<Filter
-				Name="MacroBaseManager"
-				>
-				<File
-					RelativePath="..\Addons\MacroBase.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\include\MacroBaseManager\MacroBase.h"
-					>
-				</File>
-				<File
-					RelativePath="..\Addons\MacroBaseManager.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\include\MacroBaseManager\MacroBaseManager.h"
-					>
-				</File>
-			</Filter>
-			<Filter
-				Name="MacroDependencyResolver"
-				>
-				<File
-					RelativePath="..\Addons\MacroDependencyResolver.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\include\MacroDependencyResolver.h"
-					>
-				</File>
-			</Filter>
-			<Filter
-				Name="BorderManager"
-				>
-				<File
-					RelativePath="..\Addons\BorderManager.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\include\BorderManager.h"
-					>
-				</File>
-			</Filter>
-			<Filter
-				Name="InformationManager"
-				>
-				<File
-					RelativePath="..\Addons\InformationManager.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\include\InformationManager.h"
-					>
-				</File>
-			</Filter>
-			<Filter
-				Name="MacroWorkerManager"
-				>
-				<File
-					RelativePath="..\Addons\MacroWorkerManager.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\include\MacroWorkerManager.h"
-					>
-				</File>
-			</Filter>
-			<Filter
-				Name="ReservedMap"
-				>
-				<File
-					RelativePath="..\Addons\ReservedMap.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\include\ReservedMap.h"
-					>
-				</File>
-			</Filter>
 		</Filter>
 	</Files>
 	<Globals>
