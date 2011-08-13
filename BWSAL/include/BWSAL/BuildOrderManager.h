@@ -16,6 +16,7 @@ namespace BWSAL
       static BuildOrderManager* getInstance();
       static void destroy();
       void onFrame();
+      void draw( int x, int y );
       MacroTask* build( int count, BWAPI::UnitType t, int priority, BWAPI::TilePosition seedLocation = BWAPI::TilePositions::None );
       MacroTask* buildAdditional( int count, BWAPI::UnitType t, int priority, BWAPI::TilePosition seedLocation = BWAPI::TilePositions::None );
       MacroTask* research( BWAPI::TechType t, int priority );
