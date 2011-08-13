@@ -78,6 +78,14 @@ void MacroAIModule::onStart()
   {
     // Send an overlord out if Zerg
     m_scoutManager->setScoutCount( 1 );
+
+    //12 pool
+    m_buildOrderManager->build( 12, UnitTypes::Zerg_Drone, 80 );
+    m_buildOrderManager->buildAdditional( 1, UnitTypes::Zerg_Overlord, 75 );
+    m_buildOrderManager->buildAdditional( 3, UnitTypes::Zerg_Zergling, 70 );
+    m_buildOrderManager->buildAdditional( 1, UnitTypes::Zerg_Spawning_Pool, 65 );
+    m_buildOrderManager->build( 40, UnitTypes::Zerg_Drone, 62 );
+    m_buildOrderManager->buildAdditional( 2, UnitTypes::Zerg_Overlord, 60 );
   }
   else if ( race == Races::Terran )
   {
@@ -135,20 +143,10 @@ void MacroAIModule::onFrame()
   int y = -16;
   Broodwar->drawTextScreen( 0, y += 16, "Time: %d, Minerals: %f, Gas: %f", m_buildEventTimeline->m_initialState.getTime(), m_buildEventTimeline->m_initialState.getMinerals(), m_buildEventTimeline->m_initialState.getGas() );
   y = 50 - 16;
-  /*
   if ( m_drawTasks )
   {
-    foreach( Task* t, tasks )
-    {
-      if ( t->getCompletionTime() >= Broodwar->getFrameCount() - 24 * 10 )
-      {
-        Broodwar->drawTextScreen( 0, y += 16, "Task: %s, S = %s, RT = %d",
-        t->getBuildType().getName().c_str(),
-        t->getState().getName().c_str(),
-        t->getRunTime() );
-      }
-    }
-  }*/
+    m_buildOrderManager->draw(20, y);
+  }
 
   std::set< Unit* > units = Broodwar->self()->getUnits();
   if ( m_drawAssignments )

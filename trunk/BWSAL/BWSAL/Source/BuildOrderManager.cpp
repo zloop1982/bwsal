@@ -205,4 +205,40 @@ namespace BWSAL
       return;
     }
   }
+
+  void BuildOrderManager::draw( int x, int y )
+  {
+    y -= 16;
+    for ( PMTMap::iterator pmt = m_prioritizedMacroTasks.begin(); pmt != m_prioritizedMacroTasks.end(); pmt++ )
+    {
+      foreach( MacroTask* mt, pmt->second.techAndUpgradeMacroTasks )
+      {
+        foreach( Task* t, mt->m_tasks)
+        {
+          if ( t->getCompletionTime() > BWAPI::Broodwar->getFrameCount() - 4 * 24 )
+          {
+            BWAPI::Broodwar->drawTextScreen( x, y += 16, "[ %d ] Task: %s, S = %s, RT = %d",
+            pmt->first,
+            t->getBuildType().getName().c_str(),
+            t->getState().getName().c_str(),
+            t->getRunTime() );
+          }
+        }
+      }
+      foreach( MacroTask* mt, pmt->second.unitMacroTasks )
+      {
+        foreach( Task* t, mt->m_tasks)
+        {
+          if ( t->getCompletionTime() > BWAPI::Broodwar->getFrameCount() - 4 * 24 )
+          {
+            BWAPI::Broodwar->drawTextScreen( x, y += 16, "[ %d ] Task: %s, S = %s, RT = %d",
+            pmt->first,
+            t->getBuildType().getName().c_str(),
+            t->getState().getName().c_str(),
+            t->getRunTime() );
+          }
+        }
+      }
+    }
+  }
 }
