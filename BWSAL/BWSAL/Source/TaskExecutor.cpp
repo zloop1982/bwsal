@@ -30,7 +30,7 @@ namespace BWSAL
 
   TaskExecutor* TaskExecutor::getInstance()
   {
-    s_taskExecutor;
+    return s_taskExecutor;
   }
 
   void TaskExecutor::destroy()

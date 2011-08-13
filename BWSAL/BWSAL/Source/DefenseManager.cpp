@@ -19,7 +19,7 @@ namespace BWSAL
 
   DefenseManager* DefenseManager::getInstance()
   {
-    s_defenseManager;
+    return s_defenseManager;
   }
 
   void DefenseManager::destroy()
