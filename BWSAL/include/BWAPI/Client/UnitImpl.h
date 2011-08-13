@@ -214,5 +214,8 @@ namespace BWAPI
 
       virtual bool          isUnderAttack() const;
       virtual BWAPI::Player *getLastAttackingPlayer() const;
+
+      virtual int getReplayID() const;
+      virtual BWAPI::Region *getRegion() const;
   };
 }

@@ -12,9 +12,9 @@ namespace BWAPI
   {
     public:
       TechType();
-      TechType(int id);
-      TechType(const TechType& other);
-      TechType& operator=(const TechType& other);
+      TechType( int id );
+      TechType( const TechType& other );
+      TechType& operator= ( const TechType& other );
       operator int() const;
 
       /** Returns the unique ID for this tech type. */
@@ -22,6 +22,7 @@ namespace BWAPI
 
       /** Returns the name of the tech type. */
       std::string getName() const;
+      const char *c_str() const;
 
       /** Returns the race that uses the TechType. For example, TechTypes::Scanner_Sweep?.getRace() will
        * return Races::Terran. */
@@ -40,7 +41,7 @@ namespace BWAPI
       int energyUsed() const;
 
       /** Returns the type of unit that researches this tech type. If this tech type is available for free
-       * (does not need to be researched), then this method will return UnitTypes::None. */
+       * ( does not need to be researched ), then this method will return UnitTypes::None. */
       UnitType whatResearches() const;
 
       /** Returns the corresponding weapon for this tech type, or TechTypes::None if no corresponding weapon
@@ -48,15 +49,15 @@ namespace BWAPI
        * WeaponTypes::Dark_Swarm. */
       WeaponType getWeapon() const;
 
-      /** Returns true if this tech type must be used on another unit (i.e. Irradiate) */
+      /** Returns true if this tech type must be used on another unit ( i.e. Irradiate ) */
       bool targetsUnit() const;
 
-      /** Returns true if this tech type must be specified a position (i.e. Dark Swarm) */
+      /** Returns true if this tech type must be specified a position ( i.e. Dark Swarm ) */
       bool targetsPosition() const;
 
       /** Returns the set of units that can use this tech type. Usually this will just be a set of one unit
        * type, however in some cases, such as TechTypes::Burrowing, several unit types will be returned. */
-      const std::set<UnitType>& whatUses() const;
+      const std::set< UnitType >& whatUses() const;
 
       /** Returns the order used to execute this tech type as an action. */
       Order getOrder() const;
@@ -67,10 +68,10 @@ namespace BWAPI
   namespace TechTypes
   {
     /** Given a string, this will return the tech type. */
-    TechType getTechType(std::string name);
+    TechType getTechType( std::string name );
 
     /** Returns the set of all the TechTypes. */
-    std::set<TechType>& allTechTypes();
+    std::set< TechType >& allTechTypes();
     void init();
     extern const TechType Stim_Packs;
     extern const TechType Lockdown;

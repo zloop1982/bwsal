@@ -1,324 +1,249 @@
 #include "MacroAIModule.h"
-#include <BasicTaskExecutor.h>
-#include <SpiralBuildingPlacer.h>
-#include <BFSBuildingPlacer.h>
-#include <UnitPump.h>
-#include <TerminateIfWorkerLost.h>
-#include <TerminateIfEmpty.h>
-#include <BasicWorkerFinder.h>
-#include <UnitCompositionProducer.h>
-#include <MacroManager.h>
-#include <ResourceRates.h>
-#include <MacroSupplyManager.h>
-#include <MacroDependencyResolver.h>
-#include <InformationManager.h>
-#include <BorderManager.h>
-#include <MacroBaseManager.h>
-#include <UnitGroupManager.h>
-#include <MacroWorkerManager.h>
-#include <ReservedMap.h>
-
+#include <BWSAL/Util.h>
+#include <Util/Foreach.h>
+#include <algorithm>
+using namespace BWSAL;
 using namespace BWAPI;
-int drag_index = -1;
-bool lastMouseClick = false;
-UnitCompositionProducer* infantryProducer = NULL;
-UnitCompositionProducer* vehicleProducer = NULL;
-bool expanded1 = false;
-bool expanded2 = false;
-bool expanded3 = false;
-bool expanded4 = false;
+using namespace std;
 MacroAIModule::MacroAIModule()
 {
 }
+
 MacroAIModule::~MacroAIModule()
 {
-  MacroManager::destroy();
-  MacroSupplyManager::destroy();
-  MacroDependencyResolver::destroy();
-  ResourceRates::destroy();
-  InformationManager::destroy();
-  BorderManager::destroy();
-  MacroBaseManager::destroy();
-  UnitGroupManager::destroy();
-  MacroWorkerManager::destroy();
-  ReservedMap::destroy();
-  if (infantryProducer != NULL)
-    delete infantryProducer;
-  if (vehicleProducer != NULL)
-    delete vehicleProducer;
 }
+
 void MacroAIModule::onStart()
 {
-  Broodwar->enableFlag(Flag::UserInput);
+  Broodwar->enableFlag( Flag::UserInput );
   BWTA::readMap();
   BWTA::analyze();
-  TheArbitrator = &arbitrator;
-  MacroManager::create();
-  MacroSupplyManager::create();
-  MacroDependencyResolver::create();
-  ResourceRates::create();
-  InformationManager::create();
-  BorderManager::create();
-  MacroBaseManager::create();
-  UnitGroupManager::create();
-  MacroWorkerManager::create();
-  ReservedMap::create();
+  BWSAL::resetLog();
 
-  TaskStream* ts = new TaskStream();
-  TheMacroManager->taskStreams.push_back(ts);
-  Unit* worker = NULL;
-  for each(Unit* u in Broodwar->self()->getUnits())
-  {
-    if (u->getType().isResourceDepot())
-      worker = u;
-  }
-  ts->setWorker(worker);
-  ts->attach(BasicTaskExecutor::getInstance(),false);
-  ts->attach(new UnitPump(Broodwar->self()->getRace().getWorker()),true);
-  ts->attach(new TerminateIfWorkerLost(),true);
+  m_informationManager = InformationManager::create();
+  m_borderManager = BorderManager::create( m_informationManager );
+  m_baseManager = BaseManager::create( m_borderManager );
+  m_buildingPlacer = new BFSBuildingPlacer();
+  m_reservedMap = ReservedMap::create();
+  m_unitArbitrator = new UnitArbitrator();
+  m_unitGroupManager = UnitGroupManager::create();
+  m_buildUnitManager = BuildUnitManager::create();
+  m_buildEventTimeline = BuildEventTimeline::create( m_buildUnitManager );
+  m_taskScheduler = TaskScheduler::create( m_buildEventTimeline, m_buildUnitManager );
+  m_taskExecutor = TaskExecutor::create( m_unitArbitrator, m_buildEventTimeline, m_reservedMap, m_buildingPlacer );
+  m_workerManager = WorkerManager::create( m_unitArbitrator, m_baseManager );
+  m_scoutManager = ScoutManager::create( m_unitArbitrator, m_informationManager );
+  m_defenseManager = DefenseManager::create( m_unitArbitrator, m_borderManager );
+  m_buildOrderManager = BuildOrderManager::create( m_taskScheduler, m_taskExecutor, m_buildUnitManager );
+  m_enhancedUI = new EnhancedUI();
 
-  if (Broodwar->self()->getRace()==Races::Terran)
-  {
-    onSendText("Terran Barracks");
-    onSendText("Terran Refinery");
-    onSendText("Terran Barracks");
-    onSendText("Terran Academy");
-    infantryProducer = new UnitCompositionProducer(UnitTypes::Terran_Barracks);
-    infantryProducer->setUnitWeight(UnitTypes::Terran_Marine,2.0);
-    infantryProducer->setUnitWeight(UnitTypes::Terran_Medic,1.0);
-    infantryProducer->setUnitWeight(UnitTypes::Terran_Firebat,0.5);
+  m_buildEventTimeline->initialize();
+  m_scoutManager->initialize();
 
-    vehicleProducer = new UnitCompositionProducer(UnitTypes::Terran_Factory);
-    vehicleProducer->setUnitWeight(UnitTypes::Terran_Vulture,2.0);
-    vehicleProducer->setUnitWeight(UnitTypes::Terran_Siege_Tank_Tank_Mode,1.0);
-  }
-  else if (Broodwar->self()->getRace()==Races::Protoss)
+  m_modules.push_back( m_informationManager );
+  m_modules.push_back( m_borderManager );
+  m_modules.push_back( m_baseManager );
+  m_modules.push_back( m_buildEventTimeline );
+  m_modules.push_back( m_reservedMap );
+  m_modules.push_back( m_unitGroupManager );
+  m_modules.push_back( m_buildUnitManager );
+  m_modules.push_back( m_taskScheduler );
+  m_modules.push_back( m_taskExecutor );
+  m_modules.push_back( m_workerManager );
+  m_modules.push_back( m_scoutManager );
+  m_modules.push_back( m_defenseManager );
+
+  BWAPI::Race race = Broodwar->self()->getRace();
+  BWAPI::Race enemyRace = Broodwar->enemy()->getRace();
+  double minDist;
+  BWTA::BaseLocation* natural = NULL;
+  BWTA::BaseLocation* home = BWTA::getStartLocation( Broodwar->self() );
+  foreach( BWTA::BaseLocation* bl, BWTA::getBaseLocations() )
   {
-    onSendText("Protoss Gateway");
-    onSendText("Protoss Cybernetics Core");
-    onSendText("Protoss Assimilator");
-    onSendText("Protoss Gateway");
-    infantryProducer = new UnitCompositionProducer(UnitTypes::Protoss_Gateway);
-    infantryProducer->setUnitWeight(UnitTypes::Protoss_Dragoon,2.0);
-    infantryProducer->setUnitWeight(UnitTypes::Protoss_Zealot,1.0);
-  }
-  else if (Broodwar->self()->getRace()==Races::Zerg)
-  {
-    onSendText("Zerg Spawning Pool");
-    TaskStream* ts = new TaskStream();
-    TheMacroManager->taskStreams.push_front(ts);
-    Unit* worker = NULL;
-    for each(Unit* u in Broodwar->self()->getUnits())
+    if ( bl != home )
     {
-      if (u->getType().isResourceDepot())
-        worker = u;
+      double dist = home->getGroundDistance( bl );
+      if ( dist > 0 )
+      {
+        if ( natural == NULL || dist < minDist)
+        {
+          minDist = dist;
+          natural = bl;
+        }
+      }
     }
-    ts->setWorker(worker);
-    ts->attach(BasicTaskExecutor::getInstance(),false);
-    ts->attach(new UnitPump(UnitTypes::Zerg_Zergling),true);
-    ts->attach(new TerminateIfWorkerLost(),true);
   }
+
+  if ( race == Races::Zerg )
+  {
+    // Send an overlord out if Zerg
+    m_scoutManager->setScoutCount( 1 );
+  }
+  else if ( race == Races::Terran )
+  {
+    m_buildOrderManager->build( 20, UnitTypes::Terran_SCV, 80 );
+    m_buildOrderManager->buildAdditional( 1, UnitTypes::Terran_Barracks, 60 );
+    m_buildOrderManager->buildAdditional( 9, UnitTypes::Terran_Marine, 45 );
+    m_buildOrderManager->buildAdditional( 1, UnitTypes::Terran_Refinery, 42 );
+    m_buildOrderManager->buildAdditional( 1, UnitTypes::Terran_Barracks, 40 );
+    m_buildOrderManager->buildAdditional( 1, UnitTypes::Terran_Academy, 39 );
+    m_buildOrderManager->buildAdditional( 9, UnitTypes::Terran_Medic, 38 );
+    m_buildOrderManager->build( 3, UnitTypes::Terran_Supply_Depot, 30 );
+  }
+  m_drawTasks = true;
+  m_drawAssignments = true;
+  m_drawResources = true;
+  m_drawLarva = Broodwar->self()->getRace() == Races::Zerg;
 }
-void MacroAIModule::onEnd(bool isWinner)
+
+void MacroAIModule::onEnd( bool isWinner )
 {
 }
+
 void MacroAIModule::onFrame()
 {
-  if (expanded1 == false && Broodwar->self()->completedUnitCount(UnitTypes::Terran_Marine)>1)
+  if ( Broodwar->isPaused() )
   {
-    expanded1 = true;
-    TheMacroBaseManager->expandWhenPossible();
-    onSendText("Terran Barracks");
-    onSendText("Terran Factory");
+    return;
+  }
+  m_unitArbitrator->update();
+  m_buildEventTimeline->reset();
 
-  }
-  if (expanded1 && expanded2 == false && Broodwar->self()->completedUnitCount(UnitTypes::Terran_Command_Center)>1)
+  foreach( BWAPI::AIModule* m, m_modules )
   {
-    expanded2 = true;
-    TheMacroBaseManager->expandWhenPossible();
-    onSendText("Terran Factory");
-    onSendText("Terran Factory");
+    m->onFrame();
   }
-  if (expanded2 && expanded3 == false && Broodwar->self()->completedUnitCount(UnitTypes::Terran_Command_Center)>2)
+  m_enhancedUI->update();
+  m_borderManager->draw();
+  if ( Broodwar->getFrameCount() > 2 * 24 * 60 )
   {
-    expanded3 = true;
-    TheMacroBaseManager->expandWhenPossible();
-    onSendText("Terran Barracks");
-    onSendText("Terran Barracks");
-  }
-  if (expanded3 && expanded4 == false && Broodwar->self()->completedUnitCount(UnitTypes::Terran_Command_Center)>3)
-  {
-    expanded4 = true;
-    TheMacroBaseManager->expandWhenPossible();
-    onSendText("Terran Barracks");
-    onSendText("Terran Barracks");
-    onSendText("Terran Barracks");
-    onSendText("Terran Factory");
-    onSendText("Terran Factory");
+    m_scoutManager->setScoutCount( 1 );
   }
 
+  m_buildEventTimeline->m_initialState.createUnclaimedBuildUnits();
 
-  if (infantryProducer)
-    infantryProducer->update();
-  if (vehicleProducer)
-    vehicleProducer->update();
-  TheMacroSupplyManager->update();
-  //TheMacroDependencyResolver->update();
-  TheMacroManager->update();
-  TheResourceRates->update();
-  TheBorderManager->update();
-  TheMacroBaseManager->update();
-  TheMacroWorkerManager->update();
-  TheArbitrator->update();
-  std::set<Unit*> units=Broodwar->self()->getUnits();
-  for(std::set<Unit*>::iterator i=units.begin();i!=units.end();i++)
+  m_buildOrderManager->onFrame();
+
+  if ( m_drawResources )
   {
-    if (this->arbitrator.hasBid(*i))
+    m_buildEventTimeline->draw();
+  }
+  if ( m_drawLarva )
+  {
+    m_buildEventTimeline->drawLarvaCounts();
+  }
+  int y = -16;
+  Broodwar->drawTextScreen( 0, y += 16, "Time: %d, Minerals: %f, Gas: %f", m_buildEventTimeline->m_initialState.getTime(), m_buildEventTimeline->m_initialState.getMinerals(), m_buildEventTimeline->m_initialState.getGas() );
+  y = 50 - 16;
+  /*
+  if ( m_drawTasks )
+  {
+    foreach( Task* t, tasks )
     {
-      int x=(*i)->getPosition().x();
-      int y=(*i)->getPosition().y();
-      std::list< std::pair< Arbitrator::Controller<BWAPI::Unit*,double>*, double> > bids=this->arbitrator.getAllBidders(*i);
-      int y_off=0;
-      bool first = false;
-      const char activeColor = '\x07', inactiveColor = '\x16';
-      char color = activeColor;
-      for(std::list< std::pair< Arbitrator::Controller<BWAPI::Unit*,double>*, double> >::iterator j=bids.begin();j!=bids.end();j++)
+      if ( t->getCompletionTime() >= Broodwar->getFrameCount() - 24 * 10 )
       {
-        Broodwar->drawTextMap(x,y+y_off,"%c%s: %d",color,j->first->getShortName().c_str(),(int)j->second);
-        y_off+=15;
-        color = inactiveColor;
+        Broodwar->drawTextScreen( 0, y += 16, "Task: %s, S = %s, RT = %d",
+        t->getBuildType().getName().c_str(),
+        t->getState().getName().c_str(),
+        t->getRunTime() );
       }
     }
-  }
-  if (TheMacroManager->taskstream_list_visible)
+  }*/
+
+  std::set< Unit* > units = Broodwar->self()->getUnits();
+  if ( m_drawAssignments )
   {
-    if (drag_index<0)
+    foreach( Unit* i, units )
     {
-      if (Broodwar->getMouseState(M_LEFT) && !lastMouseClick)
+      if ( m_unitArbitrator->hasBid( i ) )
       {
-        drag_index = (Broodwar->getMousePosition().y()-25)/20;
-        if (drag_index<0) drag_index = 0;
-      }
-      if (drag_index>=(int)TheMacroManager->taskStreams.size())
-        drag_index=-1;
-    }
-    if (drag_index>=0)
-    {
-      int land_index = (Broodwar->getMousePosition().y()-30)/20;
-      if (land_index<0) land_index = 0;
-      if (land_index>=(int)TheMacroManager->taskStreams.size())
-        land_index=(int)TheMacroManager->taskStreams.size()-1;
-      if (land_index!=drag_index)
-      {
-        std::list<TaskStream*>::iterator td=TheMacroManager->taskStreams.end();
-        std::list<TaskStream*>::iterator tl=TheMacroManager->taskStreams.end();
-        TaskStream* tm=NULL;
-        int j=0;
-        for(std::list<TaskStream*>::iterator i=TheMacroManager->taskStreams.begin();i!=TheMacroManager->taskStreams.end();i++)
+        int x = i->getPosition().x();
+        int y = i->getPosition().y();
+        std::list< std::pair< UnitController*, double > > bids = m_unitArbitrator->getAllBidders( i );
+        int y_off = 0;
+        bool first = false;
+        const char activeColor = '\x07', inactiveColor = '\x16';
+        char color = activeColor;
+        for ( std::list< std::pair< UnitController*, double > >::iterator j = bids.begin(); j != bids.end(); j++ )
         {
-          if (j==drag_index)
-            td=i;
-          if (j==land_index)
-            tl=i;
-          j++;
+          Broodwar->drawTextMap( x, y + y_off, "%c%s: %d", color, j->first->getName().c_str(), (int)j->second );
+          y_off += 15;
+          color = inactiveColor;
         }
-        if (td!=TheMacroManager->taskStreams.end() && tl!=TheMacroManager->taskStreams.end())
-        {
-          tm=*td;
-          *td=*tl;
-          *tl=tm;
-        }
-        drag_index = land_index;
-      }
-      if (!Broodwar->getMouseState(M_LEFT) && lastMouseClick)
-      {
-        drag_index=-1;
       }
     }
   }
-  else
-  {
-    if (Broodwar->getMouseState(M_LEFT) && !lastMouseClick)
-    {
-      SelectAll()(Marine,Medic,Firebat,Vulture,Siege_Tank).attackMove(Broodwar->getMousePosition()+Broodwar->getScreenPosition());
-      SelectAll()(Barracks,Factory).setRallyPoint(Broodwar->getMousePosition()+Broodwar->getScreenPosition());
-    }
-  }
-  lastMouseClick = Broodwar->getMouseState(M_LEFT);
-}
-void MacroAIModule::onSendText(std::string text)
-{
-  Broodwar->sendText(text.c_str());
-  if (text=="hide")
-  {
-    TheMacroManager->taskstream_list_visible = false;
-  }
-  if (text=="show")
-  {
-    TheMacroManager->taskstream_list_visible = true;
-  }
-  UnitType type=UnitTypes::getUnitType(text);
-  if (type!=UnitTypes::Unknown)
-  {
-    TaskStream* ts = new TaskStream(Task(type));
-    TheMacroManager->taskStreams.push_back(ts);
-    ts->attach(new BasicWorkerFinder(),true);
-    ts->attach(BasicTaskExecutor::getInstance(),false);
-    ts->attach(new TerminateIfEmpty(),true);
-    ts->attach(BFSBuildingPlacer::getInstance(),false);
-  }
-  else
-  {
-    TechType type=TechTypes::getTechType(text);
-    if (type!=TechTypes::Unknown)
-    {
-      TaskStream* ts = new TaskStream(Task(type));
-      TheMacroManager->taskStreams.push_back(ts);
-      ts->attach(new BasicWorkerFinder(),true);
-      ts->attach(BasicTaskExecutor::getInstance(),false);
-      ts->attach(new TerminateIfEmpty(),true);
-      ts->attach(BFSBuildingPlacer::getInstance(),false);
-    }
-    else
-    {
-      UpgradeType type=UpgradeTypes::getUpgradeType(text);
-      if (type!=UpgradeTypes::Unknown)
-      {
-        TaskStream* ts = new TaskStream(Task(type));
-        TheMacroManager->taskStreams.push_back(ts);
-        ts->attach(new BasicWorkerFinder(),true);
-        ts->attach(BasicTaskExecutor::getInstance(),false);
-        ts->attach(new TerminateIfEmpty(),true);
-        ts->attach(BFSBuildingPlacer::getInstance(),false);
-      }
-      else
-        Broodwar->printf("You typed '%s'!",text.c_str());
-    }
-  }
-}
-void MacroAIModule::onUnitDiscover(BWAPI::Unit* unit)
-{
-  TheInformationManager->onUnitDiscover(unit);
-  TheUnitGroupManager->onUnitDiscover(unit);
-}
-void MacroAIModule::onUnitEvade(BWAPI::Unit* unit)
-{
-  TheInformationManager->onUnitEvade(unit);
-  TheUnitGroupManager->onUnitEvade(unit);
 }
 
-void MacroAIModule::onUnitDestroy(BWAPI::Unit* unit)
+void MacroAIModule::onSendText( std::string text )
 {
-  TheArbitrator->onRemoveObject(unit);
-  TheInformationManager->onUnitDestroy(unit);
-  TheMacroBaseManager->onUnitDestroy(unit);
-  TheMacroWorkerManager->onRemoveUnit(unit);
+  foreach( BWAPI::AIModule* m, m_modules )
+  {
+    m->onSendText( text );
+  }
+  if ( text == "t")
+  {
+    m_drawTasks = !m_drawTasks;
+  }
+  else if ( text == "a")
+  {
+    m_drawAssignments = !m_drawAssignments;
+  }
+  else if ( text == "r")
+  {
+    m_drawResources = !m_drawResources;
+  }
+  else if ( text == "l")
+  {
+    m_drawLarva = !m_drawLarva;
+  }
 }
-void MacroAIModule::onUnitMorph(BWAPI::Unit* unit)
+
+void MacroAIModule::onUnitDiscover( BWAPI::Unit* unit )
 {
-  TheUnitGroupManager->onUnitMorph(unit);
+  foreach( BWAPI::AIModule* m, m_modules )
+  {
+    m->onUnitDiscover( unit );
+  }
 }
-void MacroAIModule::onUnitRenegade(BWAPI::Unit* unit)
+
+void MacroAIModule::onUnitEvade( BWAPI::Unit* unit )
 {
-  TheUnitGroupManager->onUnitRenegade(unit);
+  foreach( BWAPI::AIModule* m, m_modules )
+  {
+    m->onUnitEvade( unit );
+  }
+}
+
+void MacroAIModule::onUnitDestroy( BWAPI::Unit* unit )
+{
+  m_unitArbitrator->onRemoveObject( unit );
+  foreach( BWAPI::AIModule* m, m_modules )
+  {
+    m->onUnitDestroy( unit );
+  }
+}
+
+void MacroAIModule::onUnitMorph( BWAPI::Unit* unit )
+{
+  foreach( BWAPI::AIModule* m, m_modules )
+  {
+    m->onUnitMorph( unit );
+  }
+}
+
+void MacroAIModule::onUnitRenegade( BWAPI::Unit* unit )
+{
+  foreach( BWAPI::AIModule* m, m_modules )
+  {
+    m->onUnitRenegade( unit );
+  }
+}
+
+void MacroAIModule::onUnitComplete( BWAPI::Unit* unit )
+{
+  foreach( BWAPI::AIModule* m, m_modules )
+  {
+    m->onUnitComplete( unit );
+  }
 }

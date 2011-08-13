@@ -36,7 +36,6 @@ void BasicAIModule::onStart()
   this->baseManager->setBuildOrderManager(this->buildOrderManager);
   this->baseManager->setBorderManager(this->borderManager);
   this->defenseManager->setBorderManager(this->borderManager);
-  this->scoutManager->setInformationManager(this->informationManager);
   
   BWAPI::Race race = Broodwar->self()->getRace();
   BWAPI::Race enemyRace = Broodwar->enemy()->getRace();

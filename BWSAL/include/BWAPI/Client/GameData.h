@@ -3,6 +3,7 @@
 #include "UnitCommand.h"
 #include "ForceData.h"
 #include "PlayerData.h"
+#include "RegionData.h"
 #include "UnitData.h"
 #include "BulletData.h"
 #include "Event.h"
@@ -67,6 +68,7 @@ namespace BWAPI
     int replayFrameCount;
     int frameCount;
     int elapsedTime;
+    int countdownTimer;
     int fps;
     double averageFPS;
 
@@ -89,7 +91,7 @@ namespace BWAPI
     char mapHash[41];
 
     //tile data
-    int getGroundHeight[256][256];
+    int  getGroundHeight[256][256];
     bool isWalkable[1024][1024]; 
     bool isBuildable[256][256];
     bool isVisible[256][256];
@@ -101,7 +103,9 @@ namespace BWAPI
     unsigned short mapSplitTilesMiniTileMask[5000];
     unsigned short mapSplitTilesRegion1[5000];
     unsigned short mapSplitTilesRegion2[5000];
-    unsigned short regionGroupIndex[5000];
+
+    int regionCount;
+    RegionData regions[5000];
 
     // start locations
     int startLocationCount;

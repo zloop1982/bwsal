@@ -13,15 +13,15 @@ namespace BWAPI
   class UpgradeType;
   class WeaponType;
 
-  /** The UnitType class is used to get information about a particular type of unit, such as the build time
-   * of a Lurker, or the mineral price of an Ultralisk. TODO Add the unittype table from the wiki*/
+  /** The UnitType class is used to get information about a particular type of unit,such as the build time
+   * of a Lurker,or the mineral price of an Ultralisk. TODO Add the unittype table from the wiki*/
   class UnitType
   {
     public:
       UnitType();
-      UnitType(int id);
-      UnitType(const UnitType& other);
-      UnitType& operator=(const UnitType& other);
+      UnitType( int id );
+      UnitType( const UnitType& other );
+      UnitType& operator = ( const UnitType& other );
       operator int() const;
 
       /** Returns a unique ID for this unit type. */
@@ -29,41 +29,42 @@ namespace BWAPI
 
       /** Returns the name of the unit. */
       std::string getName() const;
+      const char *c_str() const;
 
       /** Returns the race that the unit belongs to. For example UnitTypes::Terran_SCV.getRace() will return
        * Races::Terran. */
       Race getRace() const;
 
       /** Returns what builds this unit type. The second number will usually be 1 unless the unit type is
-       * Protoss_Archon or Protoss_Dark_Archon. Units that cannot be created, such as critters and mineral
-       * fields, will return a pair where the unit type is UnitTypes::None, and the second component is 0.
+       * Protoss_Archon or Protoss_Dark_Archon. Units that cannot be created,such as critters and mineral
+       * fields,will return a pair where the unit type is UnitTypes::None,and the second component is 0.
        *
-       * Example: UnitTypes::Terran_Marine.whatBuilds() will return an std::pair, where the first component
+       * Example: UnitTypes::Terran_Marine.whatBuilds() will return an std::pair,where the first component
        * is UnitTypes::Terran_Barracks. */
-      const std::pair< UnitType, int > whatBuilds() const;
+      const std::pair< UnitType,int > whatBuilds() const;
 
       /** Returns the units the player is required to have before it can train or build the given unit type.
        *
        * Example: UnitTypes::Terran_Battlecruiser.requiredUnits() will return a map of three keys:
-       * UnitTypes::Terran_Starport, UnitTypes::Terran_Control_Tower, and UnitTypes::Terran_Physics_Lab. */
-      const std::map< UnitType, int >& requiredUnits() const;
+       * UnitTypes::Terran_Starport,UnitTypes::Terran_Control_Tower,and UnitTypes::Terran_Physics_Lab. */
+      const std::map< UnitType,int >& requiredUnits() const;
 
-      /** Included in the API for completeness, since the only units that actually needs tech to be trained
+      /** Included in the API for completeness,since the only units that actually needs tech to be trained
        * are the Zerg_Lurker and Zerg_Lurker_Egg. The tech type needed is TechTypes::Lurker_Aspect. */
       TechType requiredTech() const;
 
-      /** Returns the tech used to cloak the unit, or TechTypes::None if the unit cannot cloak or is
+      /** Returns the tech used to cloak the unit,or TechTypes::None if the unit cannot cloak or is
           permanently cloaked */
       TechType cloakingTech() const;
 
-      /** Returns the set of tech types this unit can use, provided the tech types have been researched and
+      /** Returns the set of tech types this unit can use,provided the tech types have been researched and
        * the unit has enough energy. */
       const std::set< TechType >& abilities() const;
 
       /** Returns the set of upgrade types that can affect this unit. */
       const std::set< UpgradeType >& upgrades() const;
 
-      /** Returns the upgrade that increase's the unit's armor, or UpgradeTypes::None if no upgrade
+      /** Returns the upgrade that increase's the unit's armor,or UpgradeTypes::None if no upgrade
        * increase's this unit's armor. For example UnitTypes::Terran_Marine.armorUpgrade() will return a
        * pointer to UpgradeTypes::Terran_Infantry_Armor. */
       UpgradeType armorUpgrade() const;
@@ -77,7 +78,7 @@ namespace BWAPI
       /** Returns the maximum amount of energy the unit type can have. */
       int maxEnergy() const;
 
-      /** Returns the amount of armor the non-upgraded unit type has. */
+      /** Returns the amount of armor the non - upgraded unit type has. */
       int armor() const;
 
       /** Returns the mineral price of the unit.
@@ -92,12 +93,12 @@ namespace BWAPI
       int buildTime() const;
 
       /** Returns the amount of supply used by this unit. Supply counts returned by BWAPI are double what you
-       *  would expect to see from playing the game. This is because zerglings take up 0.5 in-game supply. */
+       *  would expect to see from playing the game. This is because zerglings take up 0.5 in - game supply. */
       int supplyRequired() const;
 
-      /** Returns the amount of supply produced by this unit (i.e. for a Protoss_Pylon). Supply counts
+      /** Returns the amount of supply produced by this unit ( i.e. for a Protoss_Pylon ). Supply counts
        * returned by BWAPI are double what you would expect to see from playing the game. This is because
-       * zerglings take up 0.5 in-game supply. */
+       * zerglings take up 0.5 in - game supply. */
       int supplyProvided() const;
 
       /** Returns the amount of space this unit type takes up inside a bunker or transport unit. */
@@ -106,13 +107,13 @@ namespace BWAPI
       /** Returns the amount of space this unit type provides. */
       int spaceProvided() const;
 
-      /** Returns the score which is used to determine the total scores in the after-game stats screen. */
+      /** Returns the score which is used to determine the total scores in the after - game stats screen. */
       int buildScore() const;
 
-      /** Returns the score which is used to determine the total scores in the after-game stats screen. */
+      /** Returns the score which is used to determine the total scores in the after - game stats screen. */
       int destroyScore() const;
 
-      /** Returns the size of the unit - either Small, Medium, Large, or Independent. */
+      /** Returns the size of the unit - either Small,Medium,Large,or Independent. */
       UnitSizeType size() const;
 
       /** Returns the tile width of the unit. Useful for determining the size of buildings. For example
@@ -123,22 +124,22 @@ namespace BWAPI
        * UnitTypes::Terran_Supply_Depot.tileHeight() will return 2. */
       int tileHeight() const;
 
-      /** Distance from the center of the unit to the left edge of the unit, measured in pixels. */
+      /** Distance from the center of the unit to the left edge of the unit,measured in pixels. */
       int dimensionLeft() const;
 
-      /** Distance from the center of the unit to the top edge of the unit, measured in pixels. */
+      /** Distance from the center of the unit to the top edge of the unit,measured in pixels. */
       int dimensionUp() const;
 
-      /** Distance from the center of the unit to the right edge of the unit, measured in pixels. */
+      /** Distance from the center of the unit to the right edge of the unit,measured in pixels. */
       int dimensionRight() const;
 
-      /** Distance from the center of the unit to the bottom edge of the unit, measured in pixels. */
+      /** Distance from the center of the unit to the bottom edge of the unit,measured in pixels. */
       int dimensionDown() const;
 
-      /** Returns the range at which the unit will start targeting enemy units, measured in pixels. */
+      /** Returns the range at which the unit will start targeting enemy units,measured in pixels. */
       int seekRange() const;
 
-      /** Returns how far the un-upgraded unit type can see into the fog of war, measured in pixels. */
+      /** Returns how far the un - upgraded unit type can see into the fog of war,measured in pixels. */
       int sightRange() const;
 
       /** Returns the unit's ground weapon. */
@@ -153,8 +154,8 @@ namespace BWAPI
       // TODO: add doc
       int maxAirHits() const;
 
-      /** Returns the unit's non-upgraded top speed in pixels per frame. For Terran buildings that can lift
-       * off and the Zerg Infested Command Center, this returns how fast the building moves when it is
+      /** Returns the unit's non - upgraded top speed in pixels per frame. For Terran buildings that can lift
+       * off and the Zerg Infested Command Center,this returns how fast the building moves when it is
        * lifted. */
       double topSpeed() const;
 
@@ -170,24 +171,24 @@ namespace BWAPI
        * unknown. */
       int turnRadius() const;
 
-      /** Returns true if the unit can train other units. For example, UnitTypes::Terran_Barracks.canProduce()
-       * will return true, while UnitTypes::Terran_Marine?.canProduce() will return false. This is also true
-       * for two non-building units: Protoss Carrier (can produce interceptors) and Protoss Reaver
-       * (can produce scarabs). */
+      /** Returns true if the unit can train other units. For example,UnitTypes::Terran_Barracks.canProduce()
+       * will return true,while UnitTypes::Terran_Marine?.canProduce() will return false. This is also true
+       * for two non - building units: Protoss Carrier ( can produce interceptors ) and Protoss Reaver
+       * ( can produce scarabs ). */
       bool canProduce() const;
 
-      /** Returns true if the unit can attack (either ground or air). Returns false for units that can only
-       * inflict damage via special abilities (such as Protoss High Templar). */
+      /** Returns true if the unit can attack ( either ground or air ). Returns false for units that can only
+       * inflict damage via special abilities ( such as Protoss High Templar ). */
       bool canAttack() const;
 
-      /** Returns true if the unit can move. Note that buildings will return false, even Terran buildings
+      /** Returns true if the unit can move. Note that buildings will return false,even Terran buildings
        * which can move once lifted. */
       bool canMove() const;
 
       /** Returns true for flying/air units. */
       bool isFlyer() const;
 
-      /** Returns true for units that regenerate health (i.e. zerg units). */
+      /** Returns true for units that regenerate health ( i.e. zerg units ). */
       bool regeneratesHP() const;
 
       /** Returns true if the unit type is capable of casting spells / using technology. */
@@ -197,36 +198,36 @@ namespace BWAPI
        * Templar. */
       bool hasPermanentCloak() const;
 
-      /** Returns true for units that cannot be destroyed (i.e. Terran Nuclear Missile, Mineral Field,
-       * Vespene Geyser, etc) */
+      /** Returns true for units that cannot be destroyed ( i.e. Terran Nuclear Missile,Mineral Field,
+       * Vespene Geyser,etc ) */
       bool isInvincible() const;
 
-      /** Returns true if the unit is organic, such as a Terran Marine. */
+      /** Returns true if the unit is organic,such as a Terran Marine. */
       bool isOrganic() const;
 
       /** Returns true if the unit is mechanical such as a Terran Vulture. */
       bool isMechanical() const;
 
-      /** Returns true for the four robotic Protoss units - Probe, Shuttle, Reaver, and Observer. */
+      /** Returns true for the four robotic Protoss units - Probe,Shuttle,Reaver,and Observer. */
       bool isRobotic() const;
 
-      /** Returns true for the seven units that can detect cloaked units - Terran Science Vessel, Spell
-       * Scanner Sweep, Zerg Overlord, Protoss Observer, Terran Missile Turret, Zerg Spore Colony, and Protoss
+      /** Returns true for the seven units that can detect cloaked units - Terran Science Vessel,Spell
+       * Scanner Sweep,Zerg Overlord,Protoss Observer,Terran Missile Turret,Zerg Spore Colony,and Protoss
        * Photon Cannon. */
       bool isDetector() const;
 
-      /** Returns true for the five units that hold resources - Mineral Field, Vespene Geyser,
-       * Terran Refinery, Zerg Extractor, and Protoss Assimilator. */
+      /** Returns true for the five units that hold resources - Mineral Field,Vespene Geyser,
+       * Terran Refinery,Zerg Extractor,and Protoss Assimilator. */
       bool isResourceContainer() const;
 
-      /** Returns true for the five units that can accept resources - Terran Command Center, Protoss Nexus,
-       * Zerg Hatchery, Zerg Lair, and Zerg Hive. */
+      /** Returns true for the five units that can accept resources - Terran Command Center,Protoss Nexus,
+       * Zerg Hatchery,Zerg Lair,and Zerg Hive. */
       bool isResourceDepot() const;
 
-      /** Returns true for Terran Refinery, Zerg Extractor, and Protoss Assimilator. */
+      /** Returns true for Terran Refinery,Zerg Extractor,and Protoss Assimilator. */
       bool isRefinery() const;
 
-      /** Returns true for Protoss Probe, Terran SCV, and Zerg Drone. */
+      /** Returns true for Protoss Probe,Terran SCV,and Zerg Drone. */
       bool isWorker() const;
 
       /** Returns true for buildings that must be near a pylon to be constructed. */
@@ -242,19 +243,19 @@ namespace BWAPI
       bool isBurrowable() const;
 
       /** Returns true for units that can be cloaked - Terran Ghost and Terran Wraith. Does not include units
-       * which have permanent cloak (Protoss Observer and Protoss Dark Templar). */
+       * which have permanent cloak ( Protoss Observer and Protoss Dark Templar ). */
       bool isCloakable() const;
 
-      /** Returns true if the unit is a building (also true for mineral field and vespene geyser). */
+      /** Returns true if the unit is a building ( also true for mineral field and vespene geyser ). */
       bool isBuilding() const;
 
-      /** Returns true if the unit is an add-on, such as a Terran Comsat Station. */
+      /** Returns true if the unit is an add - on,such as a Terran Comsat Station. */
       bool isAddon() const;
 
-      /** Returns true for Terran buildings that can lift off (i.e. Barracks). */
+      /** Returns true for Terran buildings that can lift off ( i.e. Barracks ). */
       bool isFlyingBuilding() const;
 
-      /** Returns true if the unit is neutral, such as a critter or mineral field. */
+      /** Returns true if the unit is neutral,such as a critter or mineral field. */
       bool isNeutral() const;
 
       /** Returns true if the unit is a Hero unit. */
@@ -287,15 +288,15 @@ namespace BWAPI
   namespace UnitTypes
   {
 
-    /** Given the name of a unit type, this function will return the unit type.
-     * For example, UnitTypes::getUnitType("Terran Marine") will return UnitTypes::Terran_Marine. */
-    UnitType getUnitType(std::string name);
+    /** Given the name of a unit type,this function will return the unit type.
+     * For example,UnitTypes::getUnitType( "Terran Marine" ) will return UnitTypes::Terran_Marine. */
+    UnitType getUnitType( std::string name );
 
     /** Returns the set of all the UnitTypes. */
-    std::set<UnitType>& allUnitTypes();
+    std::set< UnitType >& allUnitTypes();
 
     /** Returns the set of all the MacroTypes. */
-    std::set<UnitType>& allMacroTypes();
+    std::set< UnitType >& allMacroTypes();
     void init();
     extern const UnitType Terran_Marine;
     extern const UnitType Hero_Jim_Raynor_Marine;
