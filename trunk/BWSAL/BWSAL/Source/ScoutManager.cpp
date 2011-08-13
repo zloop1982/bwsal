@@ -21,7 +21,7 @@ namespace BWSAL
 
   ScoutManager* ScoutManager::getInstance()
   {
-    s_scoutManager;
+    return s_scoutManager;
   }
 
   void ScoutManager::destroy()

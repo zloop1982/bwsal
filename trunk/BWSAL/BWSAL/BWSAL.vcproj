@@ -40,7 +40,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="T:\code\BWAPI_Addons\BWSAL\bwsal\BWSAL\Util\Source;T:\code\BWAPI_Addons\BWSAL\bwsal\BWSAL\include"
+				AdditionalIncludeDirectories="..\Util\Source;..\include"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
