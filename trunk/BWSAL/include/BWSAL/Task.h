@@ -36,6 +36,8 @@ namespace BWSAL
       bool isCompleted() const;
       TaskState getState() const;
       void setState( TaskState state );
+      int getEarliestStartTime() const;
+      void setEarliestStartTime( int time );
       int getRunTime() const;
       void setRunTime( int time );
       int getExecuteTime() const;
@@ -55,6 +57,7 @@ namespace BWSAL
     protected:
       BuildType m_type;
       int m_lastScheduledTime;
+      int m_earliestStartTime;
       int m_runTime;
       int m_executeTime;
       int m_completionTime;

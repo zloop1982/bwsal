@@ -35,6 +35,7 @@ void BasicAIModule::onStart()
   m_scoutManager = ScoutManager::create( m_unitArbitrator, m_informationManager );
   m_defenseManager = DefenseManager::create( m_unitArbitrator, m_borderManager );
   m_buildOrderManager = BuildOrderManager::create( m_taskScheduler, m_taskExecutor, m_buildUnitManager );
+  m_supplyManager = SupplyManager::create( m_buildOrderManager, m_taskScheduler );
   m_enhancedUI = new EnhancedUI();
 
   m_buildEventTimeline->initialize();
@@ -89,7 +90,7 @@ void BasicAIModule::onStart()
   }
   else if ( race == Races::Terran )
   {
-    m_buildOrderManager->build( 10, UnitTypes::Terran_SCV, 80 );
+    m_buildOrderManager->build( 20, UnitTypes::Terran_SCV, 80 );
     m_buildOrderManager->buildAdditional( 1, UnitTypes::Terran_Barracks, 60 );
     m_buildOrderManager->buildAdditional( 9, UnitTypes::Terran_Marine, 45 );
     m_buildOrderManager->buildAdditional( 1, UnitTypes::Terran_Refinery, 42 );
@@ -97,7 +98,7 @@ void BasicAIModule::onStart()
     m_buildOrderManager->buildAdditional( 1, UnitTypes::Terran_Academy, 39 );
     m_buildOrderManager->buildAdditional( 9, UnitTypes::Terran_Medic, 38 );
     m_buildOrderManager->research( TechTypes::Stim_Packs, 35 );
-    m_buildOrderManager->build( 3, UnitTypes::Terran_Supply_Depot, 30 );
+    
   }
   m_drawTasks = true;
   m_drawAssignments = true;
@@ -132,6 +133,7 @@ void BasicAIModule::onFrame()
   m_buildEventTimeline->m_initialState.createUnclaimedBuildUnits();
 
   m_buildOrderManager->onFrame();
+  m_supplyManager->onFrame();
 
   if ( m_drawResources )
   {
