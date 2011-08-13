@@ -9,7 +9,7 @@ namespace BWSAL
 {
   void resetLog()
   {
-    remove( "bwapi - data\\logs\\BWSAL.log" );
+    remove( "bwapi-data\\logs\\BWSAL.log" );
   }
   char buffer[1024];
   void log( const char* text, ... )

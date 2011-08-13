@@ -80,22 +80,23 @@ void BasicAIModule::onStart()
     m_scoutManager->setScoutCount( 1 );
 
     //12 pool
-    m_buildOrderManager->build( 12, UnitTypes::Zerg_Drone, 80 );
+    m_buildOrderManager->build( 9, UnitTypes::Zerg_Drone, 80 );
     m_buildOrderManager->buildAdditional( 1, UnitTypes::Zerg_Overlord, 75 );
-    m_buildOrderManager->buildAdditional( 3, UnitTypes::Zerg_Zergling, 70 );
-    m_buildOrderManager->buildAdditional( 1, UnitTypes::Zerg_Spawning_Pool, 65 );
+    m_buildOrderManager->buildAdditional( 1, UnitTypes::Zerg_Spawning_Pool, 70 );
+    m_buildOrderManager->buildAdditional( 3, UnitTypes::Zerg_Zergling, 65 );
     m_buildOrderManager->build( 40, UnitTypes::Zerg_Drone, 62 );
     m_buildOrderManager->buildAdditional( 2, UnitTypes::Zerg_Overlord, 60 );
   }
   else if ( race == Races::Terran )
   {
-    m_buildOrderManager->build( 20, UnitTypes::Terran_SCV, 80 );
+    m_buildOrderManager->build( 10, UnitTypes::Terran_SCV, 80 );
     m_buildOrderManager->buildAdditional( 1, UnitTypes::Terran_Barracks, 60 );
     m_buildOrderManager->buildAdditional( 9, UnitTypes::Terran_Marine, 45 );
     m_buildOrderManager->buildAdditional( 1, UnitTypes::Terran_Refinery, 42 );
     m_buildOrderManager->buildAdditional( 1, UnitTypes::Terran_Barracks, 40 );
     m_buildOrderManager->buildAdditional( 1, UnitTypes::Terran_Academy, 39 );
     m_buildOrderManager->buildAdditional( 9, UnitTypes::Terran_Medic, 38 );
+    m_buildOrderManager->research( TechTypes::Stim_Packs, 35 );
     m_buildOrderManager->build( 3, UnitTypes::Terran_Supply_Depot, 30 );
   }
   m_drawTasks = true;

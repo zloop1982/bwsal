@@ -35,9 +35,9 @@ namespace BWSAL
           bool candidateMorphed;
       };
       void TaskScheduler::resetCandidates( std::map< BuildUnit*, HLHPlanData > *hlhPlans, BuildState* state );
-      void TaskScheduler::initializeHLHPlanData( BuildState* state, std::map< BuildUnit*, HLHPlanData > *hlhPlans );
+      void TaskScheduler::initializeHLHPlanData( std::map< BuildUnit*, HLHPlanData > *hlhPlans );
       void TaskScheduler::continueToTimeWithLarvaSpawns( BuildState* state, std::map< BuildUnit*, HLHPlanData > *hlhPlans, int time );
-      void TaskScheduler::findCandidateMorphTimes( BuildState* state, std::map< BuildUnit*, HLHPlanData > *hlhPlans, int validBuildTimeSince );
+      void TaskScheduler::findCandidateMorphTimes( std::map< BuildUnit*, HLHPlanData > *hlhPlans, int validBuildTimeSince );
       BuildEventTimeline* m_timeline;
       BuildUnitManager* m_buildUnitManager;
       static TaskScheduler* s_taskScheduler;

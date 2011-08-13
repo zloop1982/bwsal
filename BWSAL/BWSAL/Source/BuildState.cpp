@@ -138,7 +138,7 @@ namespace BWSAL
       e.m_useLarva->m_planningData.m_larvaCount--;
 
       // Set the next larva spawn time, if applicable
-      if ( e.m_useLarva->m_planningData.m_larvaCount == 3 )
+      if ( e.m_useLarva->m_planningData.m_larvaCount == 2 )
       {
         e.m_useLarva->m_planningData.m_nextLarvaSpawnTime = m_time + LARVA_SPAWN_TIME;
       }

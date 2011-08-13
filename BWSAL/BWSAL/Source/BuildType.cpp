@@ -1189,15 +1189,15 @@ namespace BWSAL
   {
     return buildTypeSet;
   }
-  std::set< BuildType >& allBuildTypes( BWAPI::Race r )
+  std::set< BuildType >& BuildTypes::allBuildTypes( BWAPI::Race r )
   {
     return buildTypeSetByRace[r];
   }
-  std::set< BuildType >& allRequiredBuildTypes()
+  std::set< BuildType >& BuildTypes::allRequiredBuildTypes()
   {
     return requiredBuildTypeSet;
   }
-  std::set< BuildType >& allRequiredBuildTypes( BWAPI::Race r )
+  std::set< BuildType >& BuildTypes::allRequiredBuildTypes( BWAPI::Race r )
   {
     return requiredBuildTypeSetByRace[r];
   }

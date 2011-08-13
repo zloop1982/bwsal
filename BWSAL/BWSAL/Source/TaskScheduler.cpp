@@ -121,7 +121,7 @@ namespace BWSAL
       h->second.candidateMorphed = false;
     }
   }
-  void TaskScheduler::initializeHLHPlanData( BuildState* state, std::map< BuildUnit*, HLHPlanData > *hlhPlans )
+  void TaskScheduler::initializeHLHPlanData(std::map< BuildUnit*, HLHPlanData > *hlhPlans )
   {
     // Initialize HLH data
     foreach( BuildUnit* bu, m_buildUnitManager->getUnits() )
@@ -195,7 +195,7 @@ namespace BWSAL
       }
     }
   }
-  void TaskScheduler::findCandidateMorphTimes( BuildState* state, std::map< BuildUnit*, HLHPlanData > *hlhPlans, int validBuildTimeSince )
+  void TaskScheduler::findCandidateMorphTimes( std::map< BuildUnit*, HLHPlanData > *hlhPlans, int validBuildTimeSince )
   {  
     for ( std::map< BuildUnit*, HLHPlanData >::iterator h = hlhPlans->begin(); h != hlhPlans->end(); h++ )
     {
@@ -246,7 +246,9 @@ namespace BWSAL
     }
     t->setRunTime( NEVER );
     std::map< BuildUnit*, HLHPlanData > hlhPlans;
-    initializeHLHPlanData( &state, &hlhPlans );
+
+    initializeHLHPlanData( &hlhPlans );
+
     int validBuildTypeSince = NEVER;
     std::list< std::pair< int, BuildEvent > >::iterator nextEvent = m_timeline->begin();
 
@@ -268,7 +270,7 @@ namespace BWSAL
     }
     if ( validBuildTypeSince != NEVER )
     {
-      findCandidateMorphTimes( &state, &hlhPlans, validBuildTypeSince );
+      findCandidateMorphTimes( &hlhPlans, validBuildTypeSince );
     }
     // Iterate over the timeline of events
     while ( nextEvent != m_timeline->end() )
@@ -332,7 +334,7 @@ namespace BWSAL
       {
         validBuildTypeSince = state.getTime();
       }
-      findCandidateMorphTimes( &state, &hlhPlans, validBuildTypeSince );
+      findCandidateMorphTimes( &hlhPlans, validBuildTypeSince );
     }
 
     // Pick the candidate with the earliest morph time to schedule with
