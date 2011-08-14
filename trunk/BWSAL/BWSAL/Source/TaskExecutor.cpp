@@ -396,11 +396,29 @@ namespace BWSAL
           }
         }
       }
+      if ( t->getBuildLocation() != BWAPI::TilePositions::None &&
+           !BWAPI::Broodwar->canBuildHere( BWAPI_builder, t->getBuildLocation(), buildType.getUnitType() ) &&
+           t->isRelocatable() )
+      {
+        if ( !buildType.requiresPsi() || BWAPI::Broodwar->self()->completedUnitCount( BWAPI::UnitTypes::Protoss_Pylon ) > 0 )
+        {
+          BWAPI::TilePosition buildLocation = placer->findBuildLocation( m_reservedMap, buildType.getUnitType(), t->getBuildLocation(), BWAPI_builder );
+          if ( buildLocation != BWAPI::TilePositions::None )
+          {
+            m_reservedMap->freeTiles( t->getBuildLocation(), buildType.getUnitType() );
+            t->setBuildLocation( buildLocation );
+            m_reservedMap->reserveTiles( buildLocation, buildType.getUnitType() );
+          }
+        }
+      }
       if ( !buildType.isBuilding( BWAPI_builder, BWAPI_secondBuilder, BWAPI_createdUnit ) )
       {
         if ( !buildType.needsBuildLocation() )
         {
-          buildType.build( BWAPI_builder, BWAPI_secondBuilder, t->getBuildLocation() );
+          if ((m_timeline->m_initialState.m_time - t->getRunTime()) % 3 == 0)
+          {
+            buildType.build( BWAPI_builder, BWAPI_secondBuilder, t->getBuildLocation() );
+          }
         }
         else
         {
@@ -452,6 +470,13 @@ namespace BWSAL
       int expectedCompletionTime = max( t->getExecuteTime() + buildType.buildUnitTime(), now + buildType.remainingTime( BWAPI_builder, BWAPI_secondBuilder, BWAPI_createdUnit ) );
       if ( builder != NULL )
       {
+        if (BWAPI_builder != NULL && BWAPI_builder->getTrainingQueue().size()>1 && (m_timeline->m_initialState.m_time - t->getExecuteTime()) % 5 == 0)
+        {
+          BWAPI::UnitType ut = BWAPI_builder->getTrainingQueue().back();
+          m_timeline->m_initialState.reservedMinerals += ut.mineralPrice();
+          m_timeline->m_initialState.reservedGas += ut.gasPrice();
+          BWAPI_builder->cancelTrain();
+        }
         m_arbitrator->setBid( this, BWAPI_builder, TaskExecutorBidLevel );
         if ( buildType.morphsBuilder() )
         {

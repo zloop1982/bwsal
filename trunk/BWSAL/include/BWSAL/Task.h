@@ -44,6 +44,8 @@ namespace BWSAL
       void setExecuteTime( int time );
       int getCompletionTime() const;
       void setCompletionTime( int time );
+      bool isRelocatable() const;
+      void setRelocatable( bool relocatable );
       // sets scheduled to true for the current frame
       void setScheduledThisFrame();
       void setBuildLocation( BWAPI::TilePosition buildLocation );
@@ -61,6 +63,7 @@ namespace BWSAL
       int m_runTime;
       int m_executeTime;
       int m_completionTime;
+      bool m_relocatable;
       int id;
       TaskState m_state;
       MetaUnitVariable* m_builder;

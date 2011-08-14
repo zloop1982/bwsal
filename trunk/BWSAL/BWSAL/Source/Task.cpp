@@ -18,6 +18,7 @@ namespace BWSAL
     m_executeTime = NEVER;
     m_completionTime = NEVER;
     m_lastScheduledTime = NEVER;
+    m_relocatable = true;
 
     m_state = TaskStates::Not_Scheduled;
     m_builder = new MetaUnitVariable();
@@ -166,6 +167,16 @@ namespace BWSAL
   void Task::setCompletionTime( int time )
   {
     m_completionTime = time;
+  }
+
+  bool Task::isRelocatable() const
+  {
+    return m_relocatable;
+  }
+
+  void Task::setRelocatable( bool relocatable )
+  {
+    m_relocatable = relocatable;
   }
 
   bool Task::isWaiting() const
