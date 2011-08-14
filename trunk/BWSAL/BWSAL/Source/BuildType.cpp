@@ -46,7 +46,7 @@ namespace BWSAL
           this->race = type.getRace();
           this->mineralPrice = type.mineralPrice();
           this->gasPrice = type.gasPrice();
-          this->builderTime = type.researchTime();
+          this->builderTime = this->buildUnitTime = type.researchTime();
           this->valid = true;
         }
       }
@@ -127,7 +127,7 @@ namespace BWSAL
           this->race = type.getRace();
           this->mineralPrice = type.mineralPrice( level );
           this->gasPrice = type.gasPrice( level );
-          this->builderTime = type.upgradeTime( level );
+          this->builderTime = this->buildUnitTime = type.upgradeTime( level );
           this->valid = true;
         }
       }

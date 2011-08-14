@@ -36,6 +36,7 @@ namespace BWSAL
   }
   TaskScheduler::TaskScheduler()
   {
+    m_debugLevel = 0;
     resetSupplyBlockTime();
   }
   TaskScheduler::~TaskScheduler()
@@ -48,6 +49,10 @@ namespace BWSAL
     t->setRunTime( runTime );
     t->setScheduledThisFrame();
     t->setState( TaskStates::Tentatively_Scheduled );
+    if ( m_debugLevel >= 1 )
+    {
+      logTask(t, " SCHEDULED------------" );
+    }
 
     int executeTime = runTime + t->getBuildType().prepTime();
     int builderReleaseTime = executeTime + t->getBuildType().builderTime();
@@ -249,6 +254,15 @@ namespace BWSAL
     std::map< BuildUnit*, HLHPlanData > hlhPlans;
 
     initializeHLHPlanData( &hlhPlans );
+    if ( m_debugLevel >= 5)
+    {
+      logTask(t, "scheduleLarvaUsingTask" );
+      for ( std::map<BuildUnit*, HLHPlanData>::iterator h = hlhPlans.begin(); h != hlhPlans.end(); h++ )
+      {
+        BuildUnit* bu = h->first;
+        log("[%d] AS=%d, LC=%d, NLST=%d",state.getTime(), bu->m_planningData.m_availableSince, bu->m_planningData.m_larvaCount, bu->m_planningData.m_nextLarvaSpawnTime );
+      }
+    }
 
     int validBuildTypeSince = NEVER;
     std::list< std::pair< int, BuildEvent > >::iterator nextEvent = m_timeline->begin();
@@ -271,7 +285,7 @@ namespace BWSAL
     }
     else
     {
-      if ( state.getSupply() < buildType.supplyRequired() )
+      if ( state.isSupplyBlocked( t ) )
       {
         m_supplyBlockTime = min( m_supplyBlockTime, state.getTime() );
       }
@@ -287,6 +301,15 @@ namespace BWSAL
     {
       continueToTimeWithLarvaSpawns( &state, &hlhPlans, nextEvent->first );
       state.doEvent( nextEvent->second );
+      if ( m_debugLevel >= 10)
+      {
+        log("[%d] m=%f, g=%f, s=%d", state.getTime(), state.getMinerals(), state.getGas(), state.getSupply() ); 
+        for ( std::map<BuildUnit*, HLHPlanData>::iterator h = hlhPlans.begin(); h != hlhPlans.end(); h++ )
+        {
+          BuildUnit* bu = h->first;
+          log("[%d] AS=%d, LC=%d, NLST=%d, CMT=%d",state.getTime(), bu->m_planningData.m_availableSince, bu->m_planningData.m_larvaCount, bu->m_planningData.m_nextLarvaSpawnTime,h->second.candidateMorphTime );
+        }
+      }
 
       // Handle use larva events
       if ( nextEvent->second.getUseLarva() != NULL )
@@ -299,7 +322,7 @@ namespace BWSAL
         hlhPlans[h].candidateLarvaCount--;
         if ( hlhPlans[h].candidateLarvaCount < 0 )
         {
-          hlhPlans[h].candidateMorphTime = h->m_planningData.m_larvaCount;
+          hlhPlans[h].candidateMorphTime = h->m_planningData.m_nextLarvaSpawnTime;
           hlhPlans[h].candidateNextLarvaSpawnTime = h->m_planningData.m_nextLarvaSpawnTime;
           hlhPlans[h].candidateLarvaCount = h->m_planningData.m_larvaCount;
           hlhPlans[h].candidateMorphed = false;
@@ -308,7 +331,7 @@ namespace BWSAL
       nextEvent++;
       if ( !state.hasEnoughSupplyAndRequiredBuildTypes( buildType ) )
       {
-        if ( state.getSupply() < buildType.supplyRequired() )
+        if ( state.isSupplyBlocked( t ) )
         {
           m_supplyBlockTime = min( m_supplyBlockTime, state.getTime() );
         }
@@ -429,7 +452,7 @@ namespace BWSAL
     }
     else
     {
-      if ( state.getSupply() < buildType.supplyRequired() )
+      if ( state.isSupplyBlocked( t ) )
       {
         m_supplyBlockTime = min( m_supplyBlockTime, state.getTime() );
       }
@@ -459,7 +482,7 @@ namespace BWSAL
       nextEvent++;
       if ( !state.hasEnoughSupplyAndRequiredBuildTypes( buildType ) )
       {
-        if ( state.getSupply() < buildType.supplyRequired() )
+        if ( state.isSupplyBlocked( t ) )
         {
           m_supplyBlockTime = min( m_supplyBlockTime, state.getTime() );
         }

@@ -36,6 +36,7 @@ namespace BWSAL
   {
     m_supplyProviderType = BuildType( BWAPI::Broodwar->self()->getRace().getSupplyProvider() );
     m_buildTime = m_supplyProviderType.buildUnitTime() + m_supplyProviderType.prepTime();
+    m_initialSupplyProviderCount = BWAPI::Broodwar->self()->completedUnitCount( m_supplyProviderType.getUnitType() );
   }
 
   SupplyManager::~SupplyManager()
@@ -44,43 +45,47 @@ namespace BWSAL
   }
   void SupplyManager::onFrame()
   {
-    if (BWAPI::Broodwar->getFrameCount()< 5) return;
-    std::list< MacroTask* >::iterator i = waitingTasks.begin();
-    std::list< MacroTask* >::iterator i2 = i;
-    for( ; i != waitingTasks.end(); i = i2 )
+    if ( BWAPI::Broodwar->self()->completedUnitCount( m_supplyProviderType.getUnitType() ) > m_initialSupplyProviderCount ||
+         BWAPI::Broodwar->getFrameCount() > 24 * 120 )
     {
-      i2++;
-      if ( (*i)->getTasks().front()->isWaiting() == false )
-      {
-        waitingTasks.erase( i );
-      }
-      else
-      {
-//        (*i)->getTasks().front()->setEarliestStartTime((*i)->getTasks().front()->getEarliestStartTime() + 1);
-      }
-    }
 
-    // State/Planning information is stored in BuildState and in the BuildUnits themselves
-    if ( m_taskScheduler->getSupplyBlockTime() != NEVER )
-    {
-      bool resolvedSupplyBlock = false;
-      foreach( MacroTask* mt, waitingTasks )
+      std::list< MacroTask* >::iterator i = waitingTasks.begin();
+      std::list< MacroTask* >::iterator i2 = i;
+      for( ; i != waitingTasks.end(); i = i2 )
       {
-        Task* t = mt->getTasks().front();
-        if ( t->getEarliestStartTime() > m_taskScheduler->getSupplyBlockTime() - m_buildTime )
+        i2++;
+        if ( (*i)->getTasks().front()->isWaiting() == false )
         {
-          t->setEarliestStartTime( m_taskScheduler->getSupplyBlockTime() - m_buildTime );
-          resolvedSupplyBlock = true;
-          break;
+          waitingTasks.erase( i );
+        }
+        else
+        {
+        //  (*i)->getTasks().front()->setEarliestStartTime( (*i)->getTasks().front()->getEarliestStartTime() + 1 );
         }
       }
-      if ( !resolvedSupplyBlock )
+
+      // State/Planning information is stored in BuildState and in the BuildUnits themselves
+      if ( m_taskScheduler->getSupplyBlockTime() != NEVER )
       {
-        MacroTask* mt = m_buildOrderManager->buildAdditional(1, BWAPI::Broodwar->self()->getRace().getSupplyProvider(), 10000);
-        (*mt->getTasks().begin())->setEarliestStartTime( m_taskScheduler->getSupplyBlockTime() - m_buildTime );
-        waitingTasks.push_back( mt );
+        bool resolvedSupplyBlock = false;
+        foreach( MacroTask* mt, waitingTasks )
+        {
+          Task* t = mt->getTasks().front();
+          if ( t->getEarliestStartTime() > m_taskScheduler->getSupplyBlockTime() - m_buildTime )
+          {
+            t->setEarliestStartTime( m_taskScheduler->getSupplyBlockTime() - m_buildTime );
+            resolvedSupplyBlock = true;
+            break;
+          }
+        }
+        if ( !resolvedSupplyBlock )
+        {
+          MacroTask* mt = m_buildOrderManager->buildAdditional(1, BWAPI::Broodwar->self()->getRace().getSupplyProvider(), 10000);
+          mt->getTasks().front()->setEarliestStartTime( m_taskScheduler->getSupplyBlockTime() - m_buildTime );
+          waitingTasks.push_back( mt );
+        }
       }
-      m_taskScheduler->resetSupplyBlockTime();
     }
+    m_taskScheduler->resetSupplyBlockTime();
   }
 }

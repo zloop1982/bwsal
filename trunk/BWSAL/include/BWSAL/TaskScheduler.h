@@ -41,6 +41,7 @@ namespace BWSAL
       void TaskScheduler::continueToTimeWithLarvaSpawns( BuildState* state, std::map< BuildUnit*, HLHPlanData > *hlhPlans, int time );
       void TaskScheduler::findCandidateMorphTimes( std::map< BuildUnit*, HLHPlanData > *hlhPlans, int validBuildTimeSince );
       int m_supplyBlockTime;
+      int m_debugLevel;
       BuildEventTimeline* m_timeline;
       BuildUnitManager* m_buildUnitManager;
       static TaskScheduler* s_taskScheduler;

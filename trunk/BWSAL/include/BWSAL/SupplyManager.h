@@ -22,6 +22,7 @@ namespace BWSAL
       TaskScheduler* m_taskScheduler;
       BuildType m_supplyProviderType;
       int m_buildTime;
+      int m_initialSupplyProviderCount;
       static SupplyManager* s_supplyManager;
   };
 }

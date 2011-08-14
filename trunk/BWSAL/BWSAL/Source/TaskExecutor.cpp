@@ -558,8 +558,7 @@ namespace BWSAL
       BWAPI::Unit* closestValidUnit = NULL;
       double closestDistance = 100000;
       // Not a perfect way of determining the build unit but good enough for now
-      BWAPI::Broodwar->getUnitsInRadius( builder->getPosition(), 100 );
-      for each ( BWAPI::Unit* u in BWAPI::Broodwar->getUnitsInRadius( builder->getPosition(), 100 ) )
+      for each ( BWAPI::Unit* u in BWAPI::Broodwar->getUnitsInRadius( builder->getPosition(), 200 ) )
       {
         if ( u->getType() == ut && u->exists() && u->isCompleted() && BuildUnit::getBuildUnitIfExists( u ) == NULL )
         {
