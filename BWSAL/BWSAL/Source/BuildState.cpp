@@ -3,6 +3,7 @@
 #include <BWSAL/BuildUnit.h>
 #include <BWSAL/BuildUnitManager.h>
 #include <BWSAL/WorkerManager.h>
+#include <BWSAL/Task.h>
 #include <BWSAL/Util.h>
 #include <BWAPI.h>
 #include <Util/Foreach.h>
@@ -83,6 +84,15 @@ namespace BWSAL
   bool BuildState::hasEnoughSupplyAndRequiredBuildTypes( BuildType buildType )
   {
     return ( m_supply >= buildType.supplyRequired() && ( ( buildType.getRequiredMask() & ~m_completedBuildTypes ) == 0 ) );
+  }
+
+  bool BuildState::isSupplyBlocked( Task* t )
+  {
+    return ( m_minerals >= t->getBuildType().mineralPrice() &&
+             m_gas >= t->getBuildType().gasPrice() &&
+             m_time >= t->getEarliestStartTime() &&
+             ( ( t->getBuildType().getRequiredMask() & ~m_completedBuildTypes ) == 0 ) &&
+             m_supply < t->getBuildType().supplyRequired() );
   }
 
   void BuildState::doEvent( BuildEvent& e )

@@ -15,6 +15,7 @@ namespace BWSAL
   {
     m_earliestStartTime = 0;
     m_runTime = NEVER;
+    m_executeTime = NEVER;
     m_completionTime = NEVER;
     m_lastScheduledTime = NEVER;
 

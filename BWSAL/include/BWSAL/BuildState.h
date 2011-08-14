@@ -8,6 +8,7 @@ namespace BWSAL
   class BuildUnit;
   class TaskExecutor;
   class TaskScheduler;
+  class Task;
   class BuildState
   {
     friend class TaskExecutor;
@@ -16,6 +17,7 @@ namespace BWSAL
       BuildState();
       int getNextTimeWithMinimumResources( int minerals, int gas );
       bool hasEnoughSupplyAndRequiredBuildTypes( BuildType buildType );
+      bool isSupplyBlocked( Task* t );
 
       void continueToTime( int time );
       void doEvent( BuildEvent& e );

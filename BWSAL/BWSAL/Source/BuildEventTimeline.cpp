@@ -208,7 +208,7 @@ namespace BWSAL
   {
     while ( i != m_events.end() )
     {
-      if ( ( *i ).first >= time )
+      if ( ( *i ).first > time )
       {
         return m_events.insert( i, std::make_pair( time, e ) );
       }
