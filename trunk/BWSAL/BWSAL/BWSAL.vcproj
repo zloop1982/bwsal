@@ -40,7 +40,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\Util\Source;..\include"
+				AdditionalIncludeDirectories="../Util/Source;../include;../../../vendors_external/BWAPI;../../../vendors_external/BWTA;"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -103,7 +103,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
-				AdditionalIncludeDirectories="..\Util\Source;..\include"
+				AdditionalIncludeDirectories="../Util/Source;../include;../../../vendors_external/BWAPI;../../../vendors_external/BWTA;"
 				PreprocessorDefinitions="_SECURE_SCL 0"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
