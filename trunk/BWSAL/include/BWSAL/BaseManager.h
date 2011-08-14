@@ -15,7 +15,12 @@ namespace BWSAL
       static void destroy();
       virtual void onFrame();
       virtual void onUnitDestroy( BWAPI::Unit* unit );
-      Base* getBase( BWTA::BaseLocation* location );
+      Base* getBase( BWTA::BaseLocation* location ) const;
+
+      Base* expandNow( BWTA::BaseLocation* location = NULL, bool getGas = true );
+      Base* expandWhenPossible( BWTA::BaseLocation* location = NULL, bool getGas = true );
+      Base* expandAtFrame( int frame, BWTA::BaseLocation* location = NULL, bool getGas = true );
+
       const std::set< Base* >& getActiveBases() const;
       const std::set< Base* >& getReadyBases() const;
       const std::set< Base* >& getAllBases() const;
@@ -23,6 +28,7 @@ namespace BWSAL
       std::string getName() const;
 
     private:
+      BWTA::BaseLocation* decideWhereToExpand() const;
       BaseManager();
       ~BaseManager();
       std::map< BWTA::BaseLocation*, Base* > m_location2base;
