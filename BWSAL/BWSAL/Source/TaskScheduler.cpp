@@ -23,10 +23,12 @@ namespace BWSAL
     s_taskScheduler->m_buildUnitManager = buildUnitManager;
     return s_taskScheduler;
   }
+
   TaskScheduler* TaskScheduler::getInstance()
   {
     return s_taskScheduler;
   }
+
   void TaskScheduler::destroy()
   {
     if ( s_taskScheduler )
@@ -34,15 +36,18 @@ namespace BWSAL
       delete s_taskScheduler;
     }
   }
+
   TaskScheduler::TaskScheduler()
   {
     m_debugLevel = 0;
     resetSupplyBlockTime();
   }
+
   TaskScheduler::~TaskScheduler()
   {
     s_taskScheduler = NULL;
   }
+
   void TaskScheduler::scheduleTask( Task* t, BuildUnit* builder, int runTime )
   {
     t->m_builder->assign( ( MetaUnit* )builder );
@@ -110,6 +115,7 @@ namespace BWSAL
     }
     return false;
   }
+
   TaskScheduler::HLHPlanData::HLHPlanData()
   {
     candidateNextLarvaSpawnTime = NEVER;
@@ -117,6 +123,7 @@ namespace BWSAL
     candidateMorphTime = NEVER;
     candidateMorphed = false;
   }
+
   void TaskScheduler::resetCandidates( std::map< BuildUnit*, HLHPlanData > *hlhPlans, BuildState* state )
   {
     for ( std::map< BuildUnit*, HLHPlanData >::iterator h = hlhPlans->begin(); h != hlhPlans->end(); h++ )
@@ -127,6 +134,7 @@ namespace BWSAL
       h->second.candidateMorphed = false;
     }
   }
+
   void TaskScheduler::initializeHLHPlanData(std::map< BuildUnit*, HLHPlanData > *hlhPlans )
   {
     // Initialize HLH data
@@ -139,6 +147,7 @@ namespace BWSAL
       }
     }
   }
+
   void TaskScheduler::continueToTimeWithLarvaSpawns( BuildState* state, std::map< BuildUnit*, HLHPlanData > *hlhPlans, int time )
   {
     // Continue build state to current time
@@ -201,6 +210,7 @@ namespace BWSAL
       }
     }
   }
+
   void TaskScheduler::findCandidateMorphTimes( std::map< BuildUnit*, HLHPlanData > *hlhPlans, int validBuildTimeSince )
   {  
     for ( std::map< BuildUnit*, HLHPlanData >::iterator h = hlhPlans->begin(); h != hlhPlans->end(); h++ )
@@ -391,6 +401,7 @@ namespace BWSAL
       scheduleTask( t, candidateUnit, candidateTime );
     }
   }
+
   void TaskScheduler::scheduleTask( Task* t )
   {
     // Sanity check

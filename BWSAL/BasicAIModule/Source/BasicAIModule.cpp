@@ -202,6 +202,10 @@ void BasicAIModule::onSendText( std::string text )
   {
     m_drawLarva = !m_drawLarva;
   }
+  else if ( text == "expand" )
+  {
+    m_baseManager->expandNow();
+  }
 }
 
 void BasicAIModule::onUnitDiscover( BWAPI::Unit* unit )

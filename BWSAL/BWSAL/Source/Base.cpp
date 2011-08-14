@@ -1,5 +1,8 @@
 #include <BWSAL/Base.h>
 #include <BWSAL/Util.h>
+#include <BWSAL/MacroTask.h>
+#include <BWSAL/BuildUnit.h>
+#include <BWSAL/BuildOrderManager.h>
 #include <BWAPI.h>
 namespace BWSAL
 {
@@ -11,6 +14,26 @@ namespace BWSAL
     m_refinery = NULL;
     m_ready = false;
     m_paused = false;
+    m_macroTask = NULL;
+  }
+  Base* Base::CreateBaseNow( BWTA::BaseLocation* bl, bool getGas )
+  {
+    Base* b = new Base( bl );
+    b->m_macroTask = BuildOrderManager::getInstance()->buildAdditional( 1, BWAPI::Broodwar->self()->getRace().getCenter(), 1000, bl->getTilePosition() );
+    return b;
+  }
+  Base* Base::CreateBaseWhenPossible( BWTA::BaseLocation* bl, bool getGas )
+  {
+    Base* b = new Base( bl );
+    b->m_macroTask = BuildOrderManager::getInstance()->buildAdditional( 1, BWAPI::Broodwar->self()->getRace().getCenter(), 1, bl->getTilePosition() );
+    return b;
+  }
+  Base* Base::CreateBaseAtFrame( BWTA::BaseLocation* bl, int frame, bool getGas )
+  {
+    Base* b = new Base( bl );
+    b->m_macroTask = BuildOrderManager::getInstance()->buildAdditional( 1, BWAPI::Broodwar->self()->getRace().getCenter(), 1000, bl->getTilePosition() );
+    b->m_macroTask->getTasks().front()->setEarliestStartTime( frame );
+    return b;
   }
 
   BWTA::BaseLocation* Base::getBaseLocation() const
@@ -68,6 +91,17 @@ namespace BWSAL
 
   void Base::update()
   {
+    if ( m_resourceDepot == NULL)
+    {
+      if ( m_macroTask != NULL )
+      {
+        Task* t = m_macroTask->getTasks().front();
+        if ( t->getCreatedUnit()->isReal() && t->getCreatedUnit()->getUnit()->exists() )
+        {
+          m_resourceDepot = t->getCreatedUnit()->getUnit();
+        }
+      }
+    }
     m_ready = ( m_resourceDepot != NULL &&
                 m_resourceDepot->exists() &&
                 ( resourceDepotIsCompleted( m_resourceDepot ) || m_resourceDepot->getRemainingBuildTime() < 300 ) );

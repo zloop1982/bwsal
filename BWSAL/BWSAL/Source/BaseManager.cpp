@@ -87,14 +87,84 @@ namespace BWSAL
     }
   }
 
-  Base* BaseManager::getBase( BWTA::BaseLocation* location )
+  Base* BaseManager::getBase( BWTA::BaseLocation* location ) const
   {
-    std::map< BWTA::BaseLocation*, Base* >::iterator i = m_location2base.find( location );
+    std::map< BWTA::BaseLocation*, Base* >::const_iterator i = m_location2base.find( location );
     if ( i == m_location2base.end() )
     {
       return NULL;
     }
     return i->second;
+  }
+  BWTA::BaseLocation* BaseManager::decideWhereToExpand() const
+  {
+    BWTA::BaseLocation* location = NULL;
+    BWTA::BaseLocation* home = BWTA::getStartLocation( BWAPI::Broodwar->self() );
+    double minDist = -1;
+    foreach( BWTA::BaseLocation* bl, BWTA::getBaseLocations() )
+    {
+      double dist = home->getGroundDistance( bl );
+      if (dist > 0 && getBase( bl ) == NULL )
+      {
+        if ( minDist == -1 || dist < minDist )
+        {
+          minDist = dist;
+          location = bl;
+        }
+      }
+    }
+    return location;
+  }
+  Base* BaseManager::expandNow(BWTA::BaseLocation* location, bool getGas)
+  {
+    if (location == NULL)
+    {
+      location = decideWhereToExpand();
+      if ( location == NULL )
+      {
+        // can't decide where to expand
+        return NULL;
+      }
+    }
+    Base* b = Base::CreateBaseNow( location, getGas );
+    m_location2base[location] = b;
+    m_allBases.insert( b );
+    m_borderManager->addMyBase(location);
+    return b;
+  }
+  Base* BaseManager::expandWhenPossible(BWTA::BaseLocation* location, bool getGas)
+  {
+    if (location == NULL)
+    {
+      location = decideWhereToExpand();
+      if ( location == NULL )
+      {
+        // can't decide where to expand
+        return NULL;
+      }
+    }
+    Base* b = Base::CreateBaseWhenPossible( location, getGas );
+    m_location2base[location] = b;
+    m_allBases.insert( b );
+    m_borderManager->addMyBase(location);
+    return b;
+  }
+  Base* BaseManager::expandAtFrame(int frame, BWTA::BaseLocation* location, bool getGas)
+  {
+    if (location == NULL)
+    {
+      location = decideWhereToExpand();
+      if ( location == NULL )
+      {
+        // can't decide where to expand
+        return NULL;
+      }
+    }
+    Base* b = Base::CreateBaseAtFrame( location, frame, getGas );
+    m_location2base[location] = b;
+    m_allBases.insert( b );
+    m_borderManager->addMyBase(location);
+    return b;
   }
 
   const std::set< Base* >& BaseManager::getActiveBases() const
