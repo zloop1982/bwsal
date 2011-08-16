@@ -4,6 +4,18 @@
 #include <BWSAL/Util.h>
 namespace BWSAL
 {
+  BFSBuildingPlacer::BFSBuildingPlacer()
+  {
+    m_reducedWalkability.resize( BWAPI::Broodwar->mapWidth(), BWAPI::Broodwar->mapHeight() );
+    m_reducedWalkability.setTo( true );
+    for ( int x = 0; x < BWAPI::Broodwar->mapWidth() * 4; x++ )
+    {
+      for ( int y = 0; y < BWAPI::Broodwar->mapHeight() * 4; y++ )
+      {
+        m_reducedWalkability[x/4][y/4] &= BWAPI::Broodwar->isWalkable( x, y );
+      }
+    }
+  }
   BWAPI::TilePosition BFSBuildingPlacer::findBuildLocation( ReservedMap *reserveMap, BWAPI::UnitType unitType, BWAPI::TilePosition seedLocation, BWAPI::Unit* builder )
   {
     return getBuildLocationNear( reserveMap, seedLocation, unitType, builder, 1 );
@@ -31,7 +43,6 @@ namespace BWSAL
         // We can build here with space so return this tile position
         return t;
       }
-      closed.insert( t );
       int tx = t.x();
       int ty = t.y();
       int minx = max( tx - 1, 0 );
@@ -43,7 +54,7 @@ namespace BWSAL
       {
         for ( int y = miny; y <= maxy; y++ )
         {
-          if ( BWAPI::Broodwar->isWalkable( x * 4 + 2, y * 4 + 2 ) )
+          if ( m_reducedWalkability[x][y] )
           {
             BWAPI::TilePosition t2( x, y );
             if ( closed.find( t2 ) == closed.end() )
@@ -53,6 +64,7 @@ namespace BWSAL
               {
                 ds = 14; // diagonal distance, approximation of 10*sqrt( 2 )
               }
+              closed.insert( t2);
               searchHeap.push( std::make_pair( t2, s + ds ) );
             }
           }
