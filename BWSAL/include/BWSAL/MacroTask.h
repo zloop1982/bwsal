@@ -8,36 +8,22 @@ namespace BWSAL
   class BuildOrderManager;
   class MacroTask
   {
-    friend class BuildOrderManager;
     public:
-      const std::list< Task* >& getTasks() const { return m_tasks; }
-      BuildType getType() const { return m_type; }
-      bool isAdditional() const { return m_isAdditional; }
-      bool isCompleted() const { return m_isCompleted; }
-      int getCount() const { return m_count; }
-      int getRemainingCount() const { return m_remainingCount; }
-      BWAPI::TilePosition getSeedLocation() const { return m_seedLocation; }
-      int getPriority() const { return m_priority; }
+      const std::list< Task* >& getTasks() const;
+      BuildType getType() const;
+      bool isAdditional() const;
+      bool isCompleted() const;
+      int getCount() const;
+      BWAPI::TilePosition getSeedLocation() const;
+      int getPriority() const;
+      int getRemainingCount() const;
+      int getWaitingCount() const;
+      int getIncompleteCount() const;
+      int computeRemainingCount();
+      void setRemainingCount( int remainingCount );
+      Task* getNextUnscheduledTask() const;
+      MacroTask(BuildType type, int priority, bool isAdditional, int count, BWAPI::TilePosition seedLocation = BWAPI::TilePositions::None );
     private:
-      MacroTask(BuildType type, int priority, bool isAdditional, int count, BWAPI::TilePosition seedLocation = BWAPI::TilePositions::None )
-        : m_type( type ),
-          m_priority( priority ),
-          m_isAdditional( isAdditional ),
-          m_count( count ),
-          m_isCompleted( false ),
-          m_seedLocation( seedLocation ),
-          m_remainingCount( count )
-      {
-        if ( isAdditional )
-        {
-          for( int i = 0; i < count; i++ )
-          {
-            Task* t = new Task( type );
-            t->setSeedLocation( seedLocation );
-            m_tasks.push_back( t );
-          }
-        }
-      }
       std::list< Task* > m_tasks;
       BuildType m_type;
       bool m_isAdditional;

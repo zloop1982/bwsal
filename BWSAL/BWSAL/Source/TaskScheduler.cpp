@@ -41,6 +41,8 @@ namespace BWSAL
   {
     m_debugLevel = 0;
     resetSupplyBlockTime();
+    resetLastMineralBlockTime();
+    resetLastGasBlockTime();
   }
 
   TaskScheduler::~TaskScheduler()
@@ -48,8 +50,15 @@ namespace BWSAL
     s_taskScheduler = NULL;
   }
 
-  void TaskScheduler::scheduleTask( Task* t, BuildUnit* builder, int runTime )
+  bool TaskScheduler::finalizeSchedule()
   {
+    Task* t = m_candidateTask;
+    BuildUnit* builder = m_candidatePlan.getBuilder();
+    if ( t == NULL || builder == NULL )
+    {
+      return false;
+    }
+    int runTime = m_candidatePlan.getRunTime();
     t->m_builder->assign( ( MetaUnit* )builder );
     t->setRunTime( runTime );
     t->setScheduledThisFrame();
@@ -79,6 +88,7 @@ namespace BWSAL
       timelineIter = m_timeline->addEvent( builderReleaseTime, t->getReleaseBuilderEvent(), timelineIter );
     }
     timelineIter = m_timeline->addEvent( completeTime, t->getCompleteBuildTypeEvent(), timelineIter );
+    return true;
   }
 
   inline bool TaskScheduler::canCompleteWithUnitBeforeNextEvent( int validBuildTypeSince,
@@ -241,17 +251,10 @@ namespace BWSAL
     }
   }
 
-  void TaskScheduler::scheduleLarvaUsingTask( Task* t )
+  TaskPlan TaskScheduler::scheduleLarvaUsingTask( Task* t )
   {
-    // Sanity check
-    if ( t == NULL || t->isScheduledThisFrame() )
-    {
-      return;
-    }
-
     // State/Planning information is stored in BuildState and in the BuildUnits themselves
     BuildState state = m_timeline->m_initialState;
-    m_buildUnitManager->resetPlanningData();
 
     BuildType buildType = t->getBuildType();
     // reset assignments and run time for this task
@@ -277,7 +280,9 @@ namespace BWSAL
     int validBuildTypeSince = NEVER;
     std::list< std::pair< int, BuildEvent > >::iterator nextEvent = m_timeline->begin();
 
-    if ( state.hasEnoughSupplyAndRequiredBuildTypes( buildType ) )
+    updateLastBlockTimes( &state, buildType );
+
+    if ( state.getInsufficientTypes( buildType ) == 0 )
     {
       if ( state.getMinerals() >= buildType.mineralPrice() && state.getGas() >= buildType.gasPrice() && state.getTime() >= t->getEarliestStartTime() )
       {
@@ -311,6 +316,7 @@ namespace BWSAL
     {
       continueToTimeWithLarvaSpawns( &state, &hlhPlans, nextEvent->first );
       state.doEvent( nextEvent->second );
+      updateLastBlockTimes( &state, buildType );
       if ( m_debugLevel >= 10)
       {
         log("[%d] m=%f, g=%f, s=%d", state.getTime(), state.getMinerals(), state.getGas(), state.getSupply() ); 
@@ -339,7 +345,7 @@ namespace BWSAL
         }
       }
       nextEvent++;
-      if ( !state.hasEnoughSupplyAndRequiredBuildTypes( buildType ) )
+      if ( state.getInsufficientTypes( buildType ) != 0 )
       {
         if ( state.isSupplyBlocked( t ) )
         {
@@ -398,28 +404,50 @@ namespace BWSAL
     }
     if ( candidateUnit != NULL )
     {
-      scheduleTask( t, candidateUnit, candidateTime );
+      m_candidateTask = t;
+      m_candidatePlan.m_builder = candidateUnit;
+      m_candidatePlan.m_runTime = candidateTime;
     }
+
+    if ( candidateTime == NEVER )
+    {
+      //We're going to return NEVER, record reason
+      m_insufficientTypes = state.getInsufficientTypes( buildType );
+    }
+
+    return m_candidatePlan;
   }
 
-  void TaskScheduler::scheduleTask( Task* t )
+  TaskPlan TaskScheduler::scheduleTask( Task* t )
   {
+    // Reset insufficient types bitfield
+    m_insufficientTypes = 0;
+    // Reset build unit planning data
+    m_buildUnitManager->resetPlanningData();
+    m_candidateTask = t;
+    m_candidatePlan.m_builder = NULL;
+    m_candidatePlan.m_runTime = NEVER;
+
     // Sanity check
-    if ( t == NULL || t->isScheduledThisFrame() )
+    if ( t == NULL )
     {
-      return;
+      return m_candidatePlan;
+    }
+
+    if ( t->isScheduledThisFrame() )
+    {
+      // Already scheduled, return the time
+      return m_candidatePlan;
     }
 
     // Tasks that use larva are very different from other tasks
     if ( t->getBuildType().requiresLarva() )
     {
-      scheduleLarvaUsingTask( t );
-      return;
+      return scheduleLarvaUsingTask( t );
     }
 
     // State/Planning information is stored in BuildState and in the BuildUnits themselves
     BuildState state = m_timeline->m_initialState;
-    m_buildUnitManager->resetPlanningData();
 
     BuildType buildType = t->getBuildType();
     BuildType builderType = buildType.whatBuilds().first;
@@ -444,8 +472,9 @@ namespace BWSAL
     BuildUnit* candidateUnit = NULL;
     int candidateTime = NEVER;
 
+    updateLastBlockTimes( &state, buildType );
 
-    if ( state.hasEnoughSupplyAndRequiredBuildTypes( buildType ) )
+    if ( state.getInsufficientTypes( buildType ) == 0 )
     {
       if ( state.getMinerals() >= buildType.mineralPrice() && state.getGas() >= buildType.gasPrice() && state.getTime() >= t->getEarliestStartTime() )
       {
@@ -490,8 +519,9 @@ namespace BWSAL
     {
       state.continueToTime( nextEvent->first );
       state.doEvent( nextEvent->second );
+      updateLastBlockTimes( &state, buildType );
       nextEvent++;
-      if ( !state.hasEnoughSupplyAndRequiredBuildTypes( buildType ) )
+      if ( state.getInsufficientTypes( buildType ) != 0 )
       {
         if ( state.isSupplyBlocked( t ) )
         {
@@ -574,11 +604,27 @@ namespace BWSAL
         }
       }
     }
+
     // Now that we've traversed the entire timeline we can safely schedule our task if we still have a candidate
     if ( candidateUnit != NULL )
     {
-      scheduleTask( t, candidateUnit, candidateTime );
+      m_candidateTask = t;
+      m_candidatePlan.m_builder = candidateUnit;
+      m_candidatePlan.m_runTime = candidateTime;
     }
+
+    if ( candidateTime == NEVER )
+    {
+      //We're going to return NEVER, record reason
+      m_insufficientTypes = state.getInsufficientTypes( buildType );
+    }
+
+    return m_candidatePlan;
+  }
+
+  int TaskScheduler::getInsufficientTypes()
+  {
+    return m_insufficientTypes;
   }
 
   int TaskScheduler::getSupplyBlockTime() const
@@ -589,5 +635,51 @@ namespace BWSAL
   void TaskScheduler::resetSupplyBlockTime()
   {
     m_supplyBlockTime = NEVER;
+  }
+
+  int TaskScheduler::getLastMineralBlockTime() const
+  {
+    return m_lastMineralBlockTime;
+  }
+
+  void TaskScheduler::resetLastMineralBlockTime()
+  {
+    m_lastMineralBlockTime = NEVER;
+  }
+
+  int TaskScheduler::getLastGasBlockTime() const
+  {
+    return m_lastGasBlockTime;
+  }
+
+  void TaskScheduler::resetLastGasBlockTime()
+  {
+    m_lastGasBlockTime = NEVER;
+  }
+
+  void TaskScheduler::updateLastBlockTimes( BuildState* state, BuildType type )
+  {
+    if ( state->getMinerals() < 50 && type.mineralPrice() > 0 )
+    {
+      if ( m_lastMineralBlockTime == NEVER )
+      {
+        m_lastMineralBlockTime = state->getTime();
+      }
+      else
+      {
+        m_lastMineralBlockTime = max( m_lastMineralBlockTime, state->getTime() );
+      }
+    }
+    if ( state->getGas() < 50 && type.gasPrice() > 0 )
+    {
+      if ( m_lastGasBlockTime == NEVER )
+      {
+        m_lastGasBlockTime = state->getTime();
+      }
+      else
+      {
+        m_lastGasBlockTime = max( m_lastGasBlockTime, state->getTime() );
+      }
+    }
   }
 }

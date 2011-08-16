@@ -61,7 +61,7 @@ namespace BWSAL
      * @param the new value for that object
      * @return boolean based on the success of the update
      */
-    bool set( _Tp& x, _Val& v );
+    bool set( _Tp& x, _Val v );
     /**
      * Looks up the given object and returns its value
      * @param object to look up
@@ -207,7 +207,7 @@ namespace BWSAL
 
   // ----------------------------------- SET--------------------------------------
   template < class _Tp, class _Val >
-  bool Heap< _Tp, _Val >::set( _Tp& x, _Val& v )
+  bool Heap< _Tp, _Val >::set( _Tp& x, _Val v )
   {
     std::map< _Tp, int >::iterator iter = mapping.find( x );
     if ( iter == mapping.end() )

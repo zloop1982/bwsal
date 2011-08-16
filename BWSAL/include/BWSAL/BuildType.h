@@ -72,6 +72,8 @@ namespace BWSAL
     void init();
     extern unsigned int WorkerMask;
     extern unsigned int RefineryMask;
+    extern unsigned int SupplyMask;
+    extern unsigned int CenterMask;
     extern const BuildType Terran_Marine;
     extern const BuildType Terran_Ghost;
     extern const BuildType Terran_Vulture;
