@@ -411,18 +411,20 @@ namespace BWSAL
           }
         }
       }
-      if ( ( m_timeline->m_initialState.m_time - t->getRunTime() ) % 3 == 0 )
+      if ( m_timeline->m_initialState.m_time > t->getLastOrderTime() + 6 )
       {
-        if ( !buildType.isBuilding( BWAPI_builder, BWAPI_secondBuilder, BWAPI_createdUnit ) )
+        if ( !buildType.isPreparing( BWAPI_builder, BWAPI_secondBuilder ) )
         {
           if ( !buildType.needsBuildLocation() )
           {
             buildType.build( BWAPI_builder, BWAPI_secondBuilder, t->getBuildLocation() );
+            t->setLastOrderTime();
           }
           else
           {
             if ( t->getBuildLocation() != BWAPI::TilePositions::None )
             {
+              t->setLastOrderTime();
               if ( buildType.build( BWAPI_builder, BWAPI_secondBuilder, t->getBuildLocation() ) == false )
               {
                 BWAPI::Position buildPosition( t->getBuildLocation() );

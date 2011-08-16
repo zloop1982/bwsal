@@ -19,6 +19,7 @@ namespace BWSAL
     m_completionTime = NEVER;
     m_lastScheduledTime = NEVER;
     m_relocatable = true;
+    m_lastOrderTime = -1;
 
     m_state = TaskStates::Not_Scheduled;
     m_builder = new MetaUnitVariable();
@@ -167,6 +168,16 @@ namespace BWSAL
   void Task::setCompletionTime( int time )
   {
     m_completionTime = time;
+  }
+
+  int Task::getLastOrderTime() const
+  {
+    return m_lastOrderTime;
+  }
+
+  void Task::setLastOrderTime()
+  {
+    m_lastOrderTime = BWAPI::Broodwar->getFrameCount();
   }
 
   bool Task::isRelocatable() const

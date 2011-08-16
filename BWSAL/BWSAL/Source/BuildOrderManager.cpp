@@ -344,13 +344,16 @@ namespace BWSAL
       {
         foreach( Task* t, mt->getTasks() )
         {
-          if ( t->getCompletionTime() > BWAPI::Broodwar->getFrameCount() - 4 * 24 )
+          if ( t->getRunTime() < NEVER )
           {
-            BWAPI::Broodwar->drawTextScreen( x, y += 16, "[ %d ] Task: %s, S = %s, RT = %d",
-            pmt->first,
-            t->getBuildType().getName().c_str(),
-            t->getState().getName().c_str(),
-            t->getRunTime() );
+            if ( t->getCompletionTime() > BWAPI::Broodwar->getFrameCount() - 4 * 24 )
+            {
+              BWAPI::Broodwar->drawTextScreen( x, y += 16, "[ %d ] Task: %s, S = %s, RT = %d",
+              pmt->first,
+              t->getBuildType().getName().c_str(),
+              t->getState().getName().c_str(),
+              t->getRunTime() );
+            }
           }
         }
       }
@@ -358,13 +361,16 @@ namespace BWSAL
       {
         foreach( Task* t, mt->getTasks() )
         {
-          if ( t->getCompletionTime() > BWAPI::Broodwar->getFrameCount() - 4 * 24 )
+          if ( t->getRunTime() < NEVER )
           {
-            BWAPI::Broodwar->drawTextScreen( x, y += 16, "[ %d ] Task: %s, S = %s, RT = %d",
-            pmt->first,
-            t->getBuildType().getName().c_str(),
-            t->getState().getName().c_str(),
-            t->getRunTime() );
+            if ( t->getCompletionTime() > BWAPI::Broodwar->getFrameCount() - 4 * 24 )
+            {
+              BWAPI::Broodwar->drawTextScreen( x, y += 16, "[ %d ] Task: %s, S = %s, RT = %d",
+              pmt->first,
+              t->getBuildType().getName().c_str(),
+              t->getState().getName().c_str(),
+              t->getRunTime() );
+            }
           }
         }
       }

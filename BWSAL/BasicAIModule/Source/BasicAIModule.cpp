@@ -173,10 +173,18 @@ void BasicAIModule::onFrame()
   }
   m_enhancedUI->update();
   m_borderManager->draw();
-  if ( Broodwar->getFrameCount() > 2 * 24 * 60 )
+  if ( m_informationManager->getEnemyBases().empty() )
   {
-    m_scoutManager->setScoutCount( 1 );
+    if ( Broodwar->getFrameCount() > 2 * 24 * 60 )
+    {
+      m_scoutManager->setScoutCount( 1 );
+    }
   }
+  else
+  {
+    m_scoutManager->setScoutCount( 0 );
+  }
+
 
   m_buildEventTimeline->m_initialState.createUnclaimedBuildUnits();
 
@@ -249,6 +257,15 @@ void BasicAIModule::onSendText( std::string text )
   else if ( text == "expand" )
   {
     m_baseManager->expandNow();
+  }
+  else if ( BuildTypes::getBuildType( text ) != BuildTypes::None )
+  {
+    m_buildOrderManager->buildAdditional( 1, BuildTypes::getBuildType( text ), 300 );
+  }
+  else
+  {
+    BWAPI::Broodwar->printf( "Unrecognized command: '%s'", text.c_str() );
+    BWAPI::Broodwar->sendText( text.c_str() );
   }
 }
 

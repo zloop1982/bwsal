@@ -44,6 +44,8 @@ namespace BWSAL
       void setExecuteTime( int time );
       int getCompletionTime() const;
       void setCompletionTime( int time );
+      int getLastOrderTime() const;
+      void setLastOrderTime();
       bool isRelocatable() const;
       void setRelocatable( bool relocatable );
       // sets scheduled to true for the current frame
@@ -63,6 +65,7 @@ namespace BWSAL
       int m_runTime;
       int m_executeTime;
       int m_completionTime;
+      int m_lastOrderTime;
       bool m_relocatable;
       int id;
       TaskState m_state;

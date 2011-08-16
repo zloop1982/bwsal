@@ -1044,6 +1044,35 @@ namespace BWSAL
     return false;
   }
 
+  bool BuildType::isPreparing( BWAPI::Unit* builder, BWAPI::Unit* secondBuilder ) const
+  {
+    // Sanity check
+    if ( builder == NULL )
+    {
+      return false;
+    }
+
+    if ( buildTypeData[this->id].techType != BWAPI::TechTypes::None )
+    {
+      return builder->isResearching() && builder->getTech() == buildTypeData[this->id].techType;
+    }
+
+    if ( buildTypeData[this->id].upgradeType != BWAPI::UpgradeTypes::None )
+    {
+      return builder->isUpgrading() && builder->getUpgrade() == buildTypeData[this->id].upgradeType;
+    }
+
+    if ( buildTypeData[this->id].unitType != BWAPI::UnitTypes::None )
+    {
+      return builder->isConstructing() ||
+             builder->isBeingConstructed() ||
+             builder->isMorphing() ||
+             builder->isTraining() ||
+             builder->getOrder() == BWAPI::Orders::ArchonWarp ||
+             builder->getOrder() == BWAPI::Orders::DarkArchonMeld;
+    }
+    return false;
+  }
   bool BuildType::isBuilding( BWAPI::Unit* builder, BWAPI::Unit* secondBuilder, BWAPI::Unit* createdUnit ) const
   {
     // Sanity check
