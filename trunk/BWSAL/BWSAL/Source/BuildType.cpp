@@ -223,8 +223,10 @@ namespace BWSAL
   BuildTypeInternal buildTypeData[203];
   namespace BuildTypes
   {
-    unsigned int WorkerMask = 1;
-    unsigned int RefineryMask = 2;
+    unsigned int WorkerMask   = 1 << 0;
+    unsigned int RefineryMask = 1 << 1;
+    unsigned int SupplyMask   = 1 << 2;
+    unsigned int CenterMask   = 1 << 3;
     const BuildType Terran_Marine( 0 );
     const BuildType Terran_Ghost( 1 );
     const BuildType Terran_Vulture( 2 );
@@ -685,16 +687,27 @@ namespace BWSAL
       // Give workers and refineries of different races the same bit masks
       foreach( BWAPI::Race r, races )
       {
-        buildTypeData[BuildType( r.getWorker() ).getID()].mask = WorkerMask;
+        requiredBuildTypeSet.insert( BuildType( r.getWorker() ) );
+        requiredBuildTypeSet.insert( BuildType( r.getRefinery() ) );
+        requiredBuildTypeSet.insert( BuildType( r.getSupplyProvider() ) );
+        requiredBuildTypeSet.insert( BuildType( r.getCenter() ) );
         requiredBuildTypeSetByRace[r].insert( BuildType( r.getWorker() ) );
-        buildTypeData[BuildType( r.getRefinery() ).getID()].mask = RefineryMask;
         requiredBuildTypeSetByRace[r].insert( BuildType( r.getRefinery() ) );
+        requiredBuildTypeSetByRace[r].insert( BuildType( r.getSupplyProvider() ) );
+        requiredBuildTypeSetByRace[r].insert( BuildType( r.getCenter() ) );
+        buildTypeData[BuildType( r.getWorker() )].mask = WorkerMask;
+        buildTypeData[BuildType( r.getRefinery() )].mask = RefineryMask;
+        buildTypeData[BuildType( r.getSupplyProvider() )].mask = SupplyMask;
+        buildTypeData[BuildType( r.getCenter() )].mask = CenterMask;
       }
 
       // Set masks for required build types, and generate required build type set by race
       foreach( BuildType i, requiredBuildTypeSet )
       {
-        if ( i.getUnitType().isWorker() || i.getUnitType().isRefinery() ) continue;
+        if ( buildTypeData[i.getID()].mask > 0 )
+        {
+          continue;
+        }
         buildTypeData[i.getID()].mask = 1 << requiredBuildTypeSetByRace[i.getRace()].size();
         requiredBuildTypeSetByRace[i.getRace()].insert( i );
       }

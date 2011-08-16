@@ -1,5 +1,6 @@
 #pragma once
 #include <BWAPI.h>
+#include <BWSAL/BuildType.h>
 #include <map>
 #include <list>
 namespace BWSAL
@@ -19,6 +20,7 @@ namespace BWSAL
       void draw( int x, int y );
       MacroTask* build( int count, BWAPI::UnitType t, int priority, BWAPI::TilePosition seedLocation = BWAPI::TilePositions::None );
       MacroTask* buildAdditional( int count, BWAPI::UnitType t, int priority, BWAPI::TilePosition seedLocation = BWAPI::TilePositions::None );
+      MacroTask* buildAdditional( int count, BuildType t, int priority, BWAPI::TilePosition seedLocation = BWAPI::TilePositions::None );
       MacroTask* research( BWAPI::TechType t, int priority );
       MacroTask* upgrade( int level, BWAPI::UpgradeType t, int priority );
       void deleteMacroTask( MacroTask* mt );
@@ -30,13 +32,19 @@ namespace BWSAL
           std::list< MacroTask* > techAndUpgradeMacroTasks;
           std::list< MacroTask* > unitMacroTasks;
       };
+      void resolveDependencies( int insufficientTypes, int priority );
+      void computeTotalPlannedCounts();
       BuildOrderManager();
       ~BuildOrderManager();
       typedef std::map< int, PriorityLevel, std::greater<int> > PMTMap;
+      std::map< BuildType, int > m_totalPlannedTypeCount;
+      std::map< BuildType, std::pair< int, int > > m_totalNeededTypeCount;
+      std::map< BuildType, int > m_totalScheduledTypeCount;
       PMTMap m_prioritizedMacroTasks;
       TaskScheduler* m_taskScheduler;
       TaskExecutor* m_taskExecutor;
       BuildUnitManager* m_buildUnitManager;
+      std::vector< MacroTask* > m_newMacroTasks;
       static BuildOrderManager* s_buildOrderManager;
   };
 }

@@ -209,6 +209,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Source\MacroTask.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\Source\MetaUnitVariable.cpp"
 				>
 			</File>

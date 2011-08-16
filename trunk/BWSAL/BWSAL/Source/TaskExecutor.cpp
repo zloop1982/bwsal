@@ -411,26 +411,23 @@ namespace BWSAL
           }
         }
       }
-      if ( !buildType.isBuilding( BWAPI_builder, BWAPI_secondBuilder, BWAPI_createdUnit ) )
+      if ( ( m_timeline->m_initialState.m_time - t->getRunTime() ) % 3 == 0 )
       {
-        if ( !buildType.needsBuildLocation() )
+        if ( !buildType.isBuilding( BWAPI_builder, BWAPI_secondBuilder, BWAPI_createdUnit ) )
         {
-          if ((m_timeline->m_initialState.m_time - t->getRunTime()) % 3 == 0)
+          if ( !buildType.needsBuildLocation() )
           {
             buildType.build( BWAPI_builder, BWAPI_secondBuilder, t->getBuildLocation() );
           }
-        }
-        else
-        {
-          if ( t->getBuildLocation() != BWAPI::TilePositions::None )
+          else
           {
-            if ( buildType.build( BWAPI_builder, BWAPI_secondBuilder, t->getBuildLocation() ) == false )
+            if ( t->getBuildLocation() != BWAPI::TilePositions::None )
             {
-              BWAPI::Position buildPosition( t->getBuildLocation() );
-              buildPosition.x() += buildType.getUnitType().tileWidth() * 16;
-              buildPosition.y() += buildType.getUnitType().tileHeight() * 16;
-              if ( BWAPI::Broodwar->getFrameCount()%5 == 0 )
+              if ( buildType.build( BWAPI_builder, BWAPI_secondBuilder, t->getBuildLocation() ) == false )
               {
+                BWAPI::Position buildPosition( t->getBuildLocation() );
+                buildPosition.x() += buildType.getUnitType().tileWidth() * 16;
+                buildPosition.y() += buildType.getUnitType().tileHeight() * 16;
                 // Tell the builder to move to the build location
                 BWAPI_builder->move( buildPosition );
               }

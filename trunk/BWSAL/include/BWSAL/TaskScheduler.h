@@ -8,20 +8,38 @@ namespace BWSAL
   class Task;
   class BuildUnit;
   class BuildUnitManager;
+  class TaskScheduler;
+  class TaskPlan
+  {
+    friend class TaskScheduler;
+    public:
+      int getRunTime() const { return m_runTime; }
+      BuildUnit* getBuilder() const { return m_builder; }
+      BuildUnit* getSecondBuilder() const { return m_secondBuilder; }
+    private:
+      int m_runTime;
+      BuildUnit* m_builder;
+      BuildUnit* m_secondBuilder; //not used yet (only needed for archon and dark archon)
+  };
   class TaskScheduler : public BWAPI::AIModule
   {
     public:
       static TaskScheduler* create( BuildEventTimeline* timeline, BuildUnitManager* buildUnitManager );
       static TaskScheduler* getInstance();
       static void destroy();
-      void scheduleTask( Task* t );
+      TaskPlan scheduleTask( Task* t );
+      bool finalizeSchedule();
+      int getInsufficientTypes();
       int getSupplyBlockTime() const;
       void resetSupplyBlockTime();
+      int getLastMineralBlockTime() const;
+      void resetLastMineralBlockTime();
+      int getLastGasBlockTime() const;
+      void resetLastGasBlockTime();
     private:
       TaskScheduler();
       ~TaskScheduler();
-      void scheduleLarvaUsingTask( Task* t );
-      void scheduleTask( Task* t, BuildUnit* builder, int startTime );
+      TaskPlan scheduleLarvaUsingTask( Task* t );
       bool canCompleteWithUnitBeforeNextEvent( int validBuildTypeSince,
                                                BuildUnit* unit,
                                                const Task* t,
@@ -36,12 +54,18 @@ namespace BWSAL
           int candidateMorphTime;
           bool candidateMorphed;
       };
-      void TaskScheduler::resetCandidates( std::map< BuildUnit*, HLHPlanData > *hlhPlans, BuildState* state );
-      void TaskScheduler::initializeHLHPlanData( std::map< BuildUnit*, HLHPlanData > *hlhPlans );
-      void TaskScheduler::continueToTimeWithLarvaSpawns( BuildState* state, std::map< BuildUnit*, HLHPlanData > *hlhPlans, int time );
-      void TaskScheduler::findCandidateMorphTimes( std::map< BuildUnit*, HLHPlanData > *hlhPlans, int validBuildTimeSince );
+      void resetCandidates( std::map< BuildUnit*, HLHPlanData > *hlhPlans, BuildState* state );
+      void initializeHLHPlanData( std::map< BuildUnit*, HLHPlanData > *hlhPlans );
+      void continueToTimeWithLarvaSpawns( BuildState* state, std::map< BuildUnit*, HLHPlanData > *hlhPlans, int time );
+      void findCandidateMorphTimes( std::map< BuildUnit*, HLHPlanData > *hlhPlans, int validBuildTimeSince );
+      void updateLastBlockTimes( BuildState* state, BuildType type );
       int m_supplyBlockTime;
+      int m_insufficientTypes;
       int m_debugLevel;
+      int m_lastMineralBlockTime;
+      int m_lastGasBlockTime;
+      TaskPlan m_candidatePlan;
+      Task* m_candidateTask;
       BuildEventTimeline* m_timeline;
       BuildUnitManager* m_buildUnitManager;
       static TaskScheduler* s_taskScheduler;

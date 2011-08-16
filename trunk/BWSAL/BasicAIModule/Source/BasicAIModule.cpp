@@ -91,23 +91,66 @@ void BasicAIModule::onStart()
   }
   else if ( race == Races::Terran )
   {
-    m_buildOrderManager->build( 9, UnitTypes::Terran_SCV, 90 );
-    m_buildOrderManager->buildAdditional( 1, UnitTypes::Terran_Supply_Depot, 85 );
-    m_buildOrderManager->build( 20, UnitTypes::Terran_SCV, 80 );
-    m_buildOrderManager->buildAdditional( 1, UnitTypes::Terran_Barracks, 60 );
-    m_buildOrderManager->buildAdditional( 9, UnitTypes::Terran_Marine, 45 );
-    m_buildOrderManager->buildAdditional( 1, UnitTypes::Terran_Refinery, 42 );
-    m_buildOrderManager->buildAdditional( 1, UnitTypes::Terran_Barracks, 40 );
-    m_buildOrderManager->buildAdditional( 1, UnitTypes::Terran_Academy, 39 );
-    m_buildOrderManager->buildAdditional( 9, UnitTypes::Terran_Medic, 38 );
-    m_buildOrderManager->buildAdditional( 9, UnitTypes::Terran_Marine, 38 );
-    m_buildOrderManager->research( TechTypes::Stim_Packs, 35 );
+    m_buildOrderManager->build(9,UnitTypes::Terran_SCV,90);
+    m_buildOrderManager->build(1,UnitTypes::Terran_Supply_Depot,85);
+    m_buildOrderManager->build(20,UnitTypes::Terran_SCV,80);
+    if (enemyRace == Races::Zerg)
+    {
+
+      m_buildOrderManager->buildAdditional(1,UnitTypes::Terran_Barracks,60);
+      m_buildOrderManager->buildAdditional(9,UnitTypes::Terran_Marine,45);
+ 
+      m_buildOrderManager->buildAdditional(1,UnitTypes::Terran_Refinery,42);
+      m_buildOrderManager->buildAdditional(1,UnitTypes::Terran_Barracks,40);
+      m_buildOrderManager->buildAdditional(1,UnitTypes::Terran_Academy,39);
+      m_buildOrderManager->buildAdditional(9,UnitTypes::Terran_Medic,38);
+
+
+      m_buildOrderManager->research(TechTypes::Stim_Packs,35);
+      m_buildOrderManager->research(TechTypes::Tank_Siege_Mode,35);
+      m_buildOrderManager->buildAdditional(3,UnitTypes::Terran_Siege_Tank_Tank_Mode,34);
+      m_buildOrderManager->buildAdditional(2,UnitTypes::Terran_Science_Vessel,30);
+      m_buildOrderManager->research(TechTypes::Irradiate,30);
+
+      m_buildOrderManager->upgrade(1,UpgradeTypes::Terran_Infantry_Weapons,20);
+      m_buildOrderManager->build(3,UnitTypes::Terran_Missile_Turret,13);
+      m_buildOrderManager->upgrade(3,UpgradeTypes::Terran_Infantry_Weapons,12);
+      m_buildOrderManager->upgrade(3,UpgradeTypes::Terran_Infantry_Armor,12);
+      m_buildOrderManager->build(1,UnitTypes::Terran_Engineering_Bay,11);
+      m_buildOrderManager->buildAdditional(40,UnitTypes::Terran_Marine,10);
+      m_buildOrderManager->build(6,UnitTypes::Terran_Barracks,8);
+      m_buildOrderManager->build(2,UnitTypes::Terran_Engineering_Bay,7);
+      m_buildOrderManager->buildAdditional(10,UnitTypes::Terran_Siege_Tank_Tank_Mode,5);
+
+
+    }
+    else
+    {
+      m_buildOrderManager->buildAdditional(2,BWAPI::UnitTypes::Terran_Machine_Shop,70);
+      m_buildOrderManager->buildAdditional(3,BWAPI::UnitTypes::Terran_Factory,60);
+      m_buildOrderManager->research(TechTypes::Spider_Mines,55);
+      m_buildOrderManager->research(TechTypes::Tank_Siege_Mode,55);
+      m_buildOrderManager->buildAdditional(20,BWAPI::UnitTypes::Terran_Vulture,40);
+      m_buildOrderManager->buildAdditional(20,BWAPI::UnitTypes::Terran_Siege_Tank_Tank_Mode,40);
+      m_buildOrderManager->upgrade(3,UpgradeTypes::Terran_Vehicle_Weapons,20);
+    }
     
+  }
+  else if (race == Races::Protoss)
+  {
+    m_buildOrderManager->build(8,UnitTypes::Protoss_Probe,90);
+    m_buildOrderManager->build(1,UnitTypes::Protoss_Pylon,85);
+    m_buildOrderManager->build(20,UnitTypes::Protoss_Probe,80);
+    m_buildOrderManager->buildAdditional(10,UnitTypes::Protoss_Dragoon,70);
+    m_buildOrderManager->buildAdditional(10,UnitTypes::Protoss_Zealot,70);
+    m_buildOrderManager->upgrade(1,UpgradeTypes::Singularity_Charge,61);
+    m_buildOrderManager->buildAdditional(20,UnitTypes::Protoss_Carrier,60);
   }
   m_drawTasks = true;
   m_drawAssignments = true;
   m_drawResources = true;
   m_drawLarva = Broodwar->self()->getRace() == Races::Zerg;
+
 }
 
 void BasicAIModule::onEnd( bool isWinner )
@@ -120,6 +163,7 @@ void BasicAIModule::onFrame()
   {
     return;
   }
+
   m_unitArbitrator->update();
   m_buildEventTimeline->reset();
 

@@ -15,20 +15,21 @@ namespace BWSAL
     friend class TaskScheduler;
     public:
       BuildState();
-      int getNextTimeWithMinimumResources( int minerals, int gas );
-      bool hasEnoughSupplyAndRequiredBuildTypes( BuildType buildType );
-      bool isSupplyBlocked( Task* t );
 
       void continueToTime( int time );
       void doEvent( BuildEvent& e );
       void updateWithCurrentGameState();
       void createUnclaimedBuildUnits();
+      int getNextTimeWithMinimumResources( int minerals, int gas ) const;
+      int getInsufficientTypes( BuildType buildType ) const;
+      bool isSupplyBlocked( Task* t ) const;
       int getTime() const;
       double getMinerals() const;
       double getGas() const;
       int getSupply() const;
       int getMineralWorkers() const;
       int getGasWorkers() const;
+
       int reservedMinerals;
       int reservedGas;
     private:

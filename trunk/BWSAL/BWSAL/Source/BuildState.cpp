@@ -57,7 +57,7 @@ namespace BWSAL
     }
   }
 
-  int BuildState::getNextTimeWithMinimumResources( int minerals, int gas )
+  int BuildState::getNextTimeWithMinimumResources( int minerals, int gas ) const
   {
     int time = m_time;
     if ( m_minerals < minerals )
@@ -81,12 +81,28 @@ namespace BWSAL
     return time;
   }
 
-  bool BuildState::hasEnoughSupplyAndRequiredBuildTypes( BuildType buildType )
+  int BuildState::getInsufficientTypes( BuildType buildType ) const
   {
-    return ( m_supply >= buildType.supplyRequired() && ( ( buildType.getRequiredMask() & ~m_completedBuildTypes ) == 0 ) );
+    int result = (buildType.getRequiredMask() & ~m_completedBuildTypes);
+    if ( m_supply < buildType.supplyRequired() )
+    {
+      result |= BuildTypes::SupplyMask;
+    }
+    if ( m_gas < buildType.gasPrice() && m_gasWorkers == 0 )
+    {
+      if ( (m_completedBuildTypes & BuildTypes::RefineryMask) == 0 )
+      {
+        result |= BuildTypes::RefineryMask;
+      }
+      else
+      {
+        result |= BuildTypes::WorkerMask;
+      }
+    }
+    return result;
   }
 
-  bool BuildState::isSupplyBlocked( Task* t )
+  bool BuildState::isSupplyBlocked( Task* t ) const
   {
     return ( m_minerals >= t->getBuildType().mineralPrice() &&
              m_gas >= t->getBuildType().gasPrice() &&
