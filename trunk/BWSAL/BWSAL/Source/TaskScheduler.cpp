@@ -96,6 +96,17 @@ namespace BWSAL
                                                                  const Task* t,
                                                                  const std::list< std::pair< int, BuildEvent > >::const_iterator nextEvent )
   {
+    BuildType type(t->getBuildType());
+    if ( type.requiredAddon() != BuildTypes::None && type.requiredAddon() != unit->m_planningData.m_addon )
+    {
+      // Builder doesn't have required addon
+      return false;
+    }
+    if ( type.getUnitType().isAddon() && unit->m_planningData.m_addon != BuildTypes::None )
+    {
+      // Builder already has addon
+      return false;
+    }
     bool found = t->m_useAnyBuilder;
     if ( !found )
     {
@@ -116,8 +127,8 @@ namespace BWSAL
     int availableSince = unit->m_planningData.m_availableSince;
     if ( availableSince != NEVER )
     {
-      int buildTime = max( t->getBuildType().builderTime(), t->getBuildType().buildUnitTime() );
-      int canBuildSince = max( availableSince, validBuildTypeSince - t->getBuildType().prepTime() );
+      int buildTime = max( type.builderTime(), type.buildUnitTime() );
+      int canBuildSince = max( availableSince, validBuildTypeSince - type.prepTime() );
       if ( nextEvent == m_timeline->end() || canBuildSince + buildTime < nextEvent->first )
       {
         return true;
@@ -413,6 +424,12 @@ namespace BWSAL
     {
       //We're going to return NEVER, record reason
       m_insufficientTypes = state.getInsufficientTypes( buildType );
+      if ( m_insufficientTypes == 0 )
+      {
+        // If we have enough build types, minerals, gas, and supply, but still can't build
+        // then we need a builder
+        m_insufficientTypes = buildType.whatBuilds().first.getMask();
+      }
     }
 
     return m_candidatePlan;
@@ -586,18 +603,14 @@ namespace BWSAL
         {
           if ( bu->m_planningData.m_type == t->getBuildType().whatBuilds().first )
           {
-            // Filter by addon if needed
-            if ( buildType.requiredAddon() == BWAPI::UnitTypes::None || buildType.requiredAddon() == bu->m_planningData.m_addon )
+            if ( canCompleteWithUnitBeforeNextEvent( validBuildTypeSince, bu, t, nextEvent ) )
             {
-              if ( canCompleteWithUnitBeforeNextEvent( validBuildTypeSince, bu, t, nextEvent ) )
+              int availableSince = bu->m_planningData.m_availableSince;
+              int canBuildSince = max( availableSince, validBuildTypeSince - t->getBuildType().prepTime() );
+              if ( canBuildSince < candidateTime && canBuildSince < NEVER )
               {
-                int availableSince = bu->m_planningData.m_availableSince;
-                int canBuildSince = max( availableSince, validBuildTypeSince - t->getBuildType().prepTime() );
-                if ( canBuildSince < candidateTime && canBuildSince < NEVER )
-                {
-                  candidateUnit = bu;
-                  candidateTime = canBuildSince;
-                }
+                candidateUnit = bu;
+                candidateTime = canBuildSince;
               }
             }
           }
@@ -617,6 +630,12 @@ namespace BWSAL
     {
       //We're going to return NEVER, record reason
       m_insufficientTypes = state.getInsufficientTypes( buildType );
+      if ( m_insufficientTypes == 0 )
+      {
+        // If we have enough build types, minerals, gas, and supply, but still can't build
+        // then we need a builder
+        m_insufficientTypes = buildType.whatBuilds().first.getMask();
+      }
     }
 
     return m_candidatePlan;
