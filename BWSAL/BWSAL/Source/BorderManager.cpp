@@ -113,38 +113,47 @@ namespace BWSAL
       canReachEnemy.insert( b->getRegion() );
     }
 
-    if ( !m_enemyBases.empty() )
+    if ( m_enemyBases.empty() )
     {
-      bool exploring = true;
-      while ( exploring )
+      foreach( BWTA::BaseLocation* b, BWTA::getBaseLocations() )
       {
-        exploring = false;
-
-        foreach( BWTA::Region* r, BWTA::getRegions() )
+        if ( m_myBases.find( b ) == m_myBases.end() )
         {
-          foreach( BWTA::Chokepoint* c, r->getChokepoints() )
+          m_enemyRegions.insert( b->getRegion() );
+          canReachEnemy.insert( b->getRegion() );
+        }
+      }
+    }
+
+    bool exploring = true;
+    while ( exploring )
+    {
+      exploring = false;
+
+      foreach( BWTA::Region* r, BWTA::getRegions() )
+      {
+        foreach( BWTA::Chokepoint* c, r->getChokepoints() )
+        {
+          BWTA::Region* r2 = c->getRegions().first;
+          if ( r == r2 )
           {
-            BWTA::Region* r2 = c->getRegions().first;
-            if ( r == r2 )
-            {
-              r2 = c->getRegions().second;
-            }
-
-            // If r can reach self, and r2 isn't an enemy region, then r2 can reach self
-            if ( canReachSelf.find( r ) != canReachSelf.end() && m_enemyRegions.find( r2 ) == m_enemyRegions.end() && canReachSelf.find( r2 ) == canReachSelf.end() )
-            {
-              canReachSelf.insert( r2 );
-              exploring = true;
-            }
-
-            // If r can reach enemy, and r2 isn't a self region, then r2 can reach enemy
-            if ( canReachEnemy.find( r ) != canReachEnemy.end() && m_myRegions.find( r2 ) == m_myRegions.end() && canReachEnemy.find( r2 ) == canReachEnemy.end() )
-            {
-              canReachEnemy.insert( r2 );
-              exploring = true;
-            }
-
+            r2 = c->getRegions().second;
           }
+
+          // If r can reach self, and r2 isn't an enemy region, then r2 can reach self
+          if ( canReachSelf.find( r ) != canReachSelf.end() && m_enemyRegions.find( r2 ) == m_enemyRegions.end() && canReachSelf.find( r2 ) == canReachSelf.end() )
+          {
+            canReachSelf.insert( r2 );
+            exploring = true;
+          }
+
+          // If r can reach enemy, and r2 isn't a self region, then r2 can reach enemy
+          if ( canReachEnemy.find( r ) != canReachEnemy.end() && m_myRegions.find( r2 ) == m_myRegions.end() && canReachEnemy.find( r2 ) == canReachEnemy.end() )
+          {
+            canReachEnemy.insert( r2 );
+            exploring = true;
+          }
+
         }
       }
     }

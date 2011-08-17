@@ -1164,6 +1164,10 @@ namespace BWSAL
           return false;
         }
       }
+      if ( buildTypeData[this->id].unitType.isAddon() && builder->getAddon() != createdUnit)
+      {
+        return false;
+      }
       return true;
     }
     return false;
