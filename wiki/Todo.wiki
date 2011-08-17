@@ -12,4 +12,4 @@ Some things to do:
  * Update the BuildOrderManager so that it handles all dependencies (currently handles most but not all (i.e. trying to build a Machine Shop when all Factories already have Machine Shops)
  * Update the Task Scheduler and Task Executor to handle Protoss Archon/Dark Archon
  * Implement a type of MacroTask that always tries to queue up as can be started in the next 60 seconds from a given unit Ratio ( Macro Mechanic principle 4)
- * Implement ProductionManager - builds new production buildings as needed, following a desired production type order or overall ratios, so that production rate == gather rate.
+ * Implement a Production Manager ( completely different from original ProductionManager ) - builds new production buildings as needed, following a desired production type order or overall ratios, so that production rate == gather rate.
