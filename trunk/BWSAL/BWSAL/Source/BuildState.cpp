@@ -14,7 +14,8 @@ namespace BWSAL
     m_time = 0;
     m_minerals = 0;
     m_gas = 0;
-    m_supply = 0;
+    m_supplyTotal = 0;
+    m_supplyUsed = 0;
     m_mineralWorkers = 0;
     m_gasWorkers = 0;
     reservedMinerals = 0;
@@ -84,20 +85,9 @@ namespace BWSAL
   int BuildState::getInsufficientTypes( BuildType buildType ) const
   {
     int result = (buildType.getRequiredMask() & ~m_completedBuildTypes);
-    if ( m_supply < buildType.supplyRequired() )
+    if ( m_supplyTotal < m_supplyUsed + buildType.supplyRequired() )
     {
       result |= BuildTypes::SupplyMask;
-    }
-    if ( m_gas < buildType.gasPrice() && m_gasWorkers == 0 )
-    {
-      if ( (m_completedBuildTypes & BuildTypes::RefineryMask) == 0 )
-      {
-        result |= BuildTypes::RefineryMask;
-      }
-      else
-      {
-        result |= BuildTypes::WorkerMask;
-      }
     }
     return result;
   }
@@ -108,14 +98,21 @@ namespace BWSAL
              m_gas >= t->getBuildType().gasPrice() &&
              m_time >= t->getEarliestStartTime() &&
              ( ( t->getBuildType().getRequiredMask() & ~m_completedBuildTypes ) == 0 ) &&
-             m_supply < t->getBuildType().supplyRequired() );
+             m_supplyTotal < m_supplyUsed + t->getBuildType().supplyRequired() );
   }
 
   void BuildState::doEvent( BuildEvent& e )
   {
     m_minerals += e.m_deltaMinerals;
     m_gas += e.m_deltaGas;
-    m_supply += e.m_deltaSupply;
+    if ( e.m_deltaSupply >= 0 )
+    {
+      m_supplyTotal += e.m_deltaSupply;
+    }
+    else
+    {
+      m_supplyUsed += -e.m_deltaSupply;
+    }
     if ( e.m_nowUnavailable1.second != NULL )
     {
       e.m_nowUnavailable1.second->m_planningData.m_type = e.m_nowUnavailable1.first;
@@ -158,6 +155,7 @@ namespace BWSAL
     }
     // Update the completed build types in the BuildState with the build types that are completing in this event
     m_completedBuildTypes |= e.m_completingBuildTypes;
+
     if ( e.m_useLarva != NULL )
     {
       // Event is using a larva owned by e.m_useLarva
@@ -184,7 +182,8 @@ namespace BWSAL
     m_time = BWAPI::Broodwar->getFrameCount();
     m_minerals = (double)( BWAPI::Broodwar->self()->gatheredMinerals() + BWAPI::Broodwar->self()->refundedMinerals() - BWAPI::Broodwar->self()->repairedMinerals() - reservedMinerals );
     m_gas = (double)( BWAPI::Broodwar->self()->gatheredGas() + BWAPI::Broodwar->self()->refundedGas() - BWAPI::Broodwar->self()->repairedGas() - reservedGas );
-    m_supply = BWAPI::Broodwar->self()->supplyTotal() - BWAPI::Broodwar->self()->supplyUsed();
+    m_supplyTotal = BWAPI::Broodwar->self()->supplyTotal();
+    m_supplyUsed = BWAPI::Broodwar->self()->supplyUsed();
     BWAPI::Race r = BWAPI::Broodwar->self()->getRace();
 
     // Update data for all existing build units
@@ -260,7 +259,6 @@ namespace BWSAL
     m_mineralWorkers = WorkerManager::getInstance()->mineralWorkerCount();
     m_gasWorkers = WorkerManager::getInstance()->gasWorkerCount();
     m_completedBuildTypes = 0;
-
     // Update completed build types
     foreach( BuildType t, BuildTypes::allBuildTypes() )
     {
@@ -284,6 +282,18 @@ namespace BWSAL
         {
           m_completedBuildTypes |= t.getMask();
         }
+      }
+    }
+    if ( BWAPI::Broodwar->self()->getRace() == BWAPI::Races::Zerg )
+    {
+      if ( BWAPI::Broodwar->self()->allUnitCount( BWAPI::UnitTypes::Zerg_Lair ) > 0 )
+      {
+        m_completedBuildTypes |= BuildTypes::Zerg_Hatchery.getMask();
+      }
+      if ( BWAPI::Broodwar->self()->allUnitCount( BWAPI::UnitTypes::Zerg_Hive ) > 0 )
+      {
+        m_completedBuildTypes |= BuildTypes::Zerg_Hatchery.getMask();
+        m_completedBuildTypes |= BuildTypes::Zerg_Lair.getMask();
       }
     }
   }
@@ -324,9 +334,19 @@ namespace BWSAL
     return m_gas;
   }
 
-  int BuildState::getSupply() const
+  int BuildState::getSupplyAvailable() const
   {
-    return m_supply;
+    return m_supplyTotal - m_supplyUsed;
+  }
+
+  int BuildState::getSupplyTotal() const
+  {
+    return m_supplyTotal;
+  }
+
+  int BuildState::getSupplyUsed() const
+  {
+    return m_supplyUsed;
   }
 
   int BuildState::getMineralWorkers() const
@@ -339,4 +359,8 @@ namespace BWSAL
     return m_gasWorkers;
   }
 
+  unsigned int BuildState::getCompletedBuildTypes() const
+  {
+    return m_completedBuildTypes;
+  }
 }

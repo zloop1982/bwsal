@@ -62,18 +62,17 @@ namespace BWSAL
     m_timeline->m_initialState.reservedMinerals += t->getBuildType().mineralPrice();
     m_timeline->m_initialState.reservedGas += t->getBuildType().gasPrice();
     m_runningTasks.push_back( t );
+    m_runningCount[t->getBuildType()]++;
   }
+
   int TaskExecutor::getRunningCount( BuildType type ) const
   {
-    int count = 0;
-    foreach( Task* t, m_runningTasks )
+    std::map<BuildType, int>::const_iterator i = m_runningCount.find(type);
+    if ( i != m_runningCount.end() )
     {
-      if ( t->getBuildType() == type )
-      {
-        count++;
-      }
+      return i->second;
     }
-    return count;
+    return 0;
   }
 
   void TaskExecutor::onFrame()
@@ -84,13 +83,11 @@ namespace BWSAL
     for (; i != m_runningTasks.end(); i = i2 )
     {
       i2++;
-      if ( ( *i )->isWaiting() || ( *i )->isCompleted() )
+      updateTask( *i );
+      if ( (*i)->isWaiting() || (*i)->isCompleted() )
       {
         m_runningTasks.erase( i );
-      }
-      else
-      {
-        updateTask( *i );
+        m_runningCount[(*i)->getBuildType()]--;
       }
     }
   }
@@ -103,6 +100,8 @@ namespace BWSAL
     BWAPI::Unit* BWAPI_secondBuilder = NULL;
     BuildUnit*         createdUnit = NULL;
     BWAPI::Unit* BWAPI_createdUnit = NULL;
+    BuildUnit*         secondCreatedUnit = NULL;
+    BWAPI::Unit* BWAPI_secondCreatedUnit = NULL;
 
     BuildType buildType = t->getBuildType();
 
@@ -132,9 +131,10 @@ namespace BWSAL
             builder->m_currentState.m_nextLarvaSpawnTime = m_timeline->m_initialState.getTime() + LARVA_SPAWN_TIME;
           }
           builder->m_currentState.m_larvaCount--;
-          builder = BuildUnit::getBuildUnit( u );
+          BuildUnit::setBuildUnit( u, t->m_createdUnit );
+          t->assignBuilder( t->m_createdUnit );
+          builder = t->getBuilder()->getBuildUnit();
           BWAPI_builder = builder->getUnit();
-          t->assignBuilder( builder );
           logTask( t, "Switching builder to larva" );
           break;
         }
@@ -175,12 +175,24 @@ namespace BWSAL
     }
     if ( buildType.createsUnit() )
     {
-      computeCreatedUnit( t );
+      if ( buildType.requiresLarva() )
+      {
+        computeSecondCreatedUnit( t );
+      }
+      else
+      {
+        computeCreatedUnit( t );
+      }
     }
     createdUnit = t->getCreatedUnit();
     if ( createdUnit != NULL )
     {
       BWAPI_createdUnit = createdUnit->getUnit();
+    }
+    secondCreatedUnit = t->getSecondCreatedUnit();
+    if ( secondCreatedUnit != NULL )
+    {
+      BWAPI_secondCreatedUnit = createdUnit->getUnit();
     }
 
     BWAPI::UnitType builderType = buildType.whatBuilds().first.getUnitType();
@@ -294,7 +306,7 @@ namespace BWSAL
         logTask( t, "-> Halted" );
         t->setState( TaskStates::Halted );
       }
-      else if ( buildType.isCompleted( BWAPI_builder, BWAPI_secondBuilder, BWAPI_createdUnit ) )
+      else if ( buildType.isCompleted( BWAPI_builder, BWAPI_secondBuilder, BWAPI_createdUnit, BWAPI_secondCreatedUnit ) )
       {
         // Task Complete! Release the builder( s ) and note the completion time
         logTask( t, "-> Completed" );
@@ -335,7 +347,7 @@ namespace BWSAL
         logTask( t, "-> Not Scheduled" );
         t->setState( TaskStates::Not_Scheduled );
       }
-      else if ( buildType.isCompleted( BWAPI_builder, BWAPI_secondBuilder, BWAPI_createdUnit ) )
+      else if ( buildType.isCompleted( BWAPI_builder, BWAPI_secondBuilder, BWAPI_createdUnit, BWAPI_secondCreatedUnit ) )
       {
         // Task Complete! Note the completion time ( builder is already released )
         logTask( t, "-> Completed" );
@@ -577,6 +589,36 @@ namespace BWSAL
       buildUnit = builder->getAddon();
     }
 
+    // check to see if the worker is the right type
+    // Zerg_Nydus_Canal is special since Zerg_Nydus_Canal can construct Zerg_Nydus_Canal
+    BuildUnit* currentBuildUnit = BuildUnit::getBuildUnitIfExists( buildUnit );
+    if ( currentBuildUnit == NULL )
+    {
+      BuildUnit::setBuildUnit( buildUnit, t->getCreatedUnit() );
+    }
+  }
+
+  void TaskExecutor::computeSecondCreatedUnit( Task* t )
+  {
+    // Sanity check
+    if ( t == NULL ||
+         t->getBuilder() == NULL ||
+         t->getBuilder()->getBuildUnit() == NULL ||
+         t->getBuilder()->getBuildUnit()->getUnit() == NULL ||
+         t->getSecondCreatedUnit() == NULL ||
+         t->getBuildType().createsUnit() == false )
+      return;
+
+    BWAPI::Unit* builder = t->getBuilder()->getBuildUnit()->getUnit();
+    BWAPI::UnitType ut = t->getBuildType().getUnitType();
+    BWAPI::Unit* buildUnit = t->getSecondCreatedUnit()->getUnit();
+
+    // If the building dies, or isn't the right type, set it to null
+    if ( !( buildUnit != NULL && buildUnit->exists() && ( buildUnit->getType() == ut || buildUnit->getBuildType() == ut ) ) )
+    {
+      buildUnit = NULL;
+    }
+
     if ( buildUnit == NULL && t->getBuildType().createsUnit() && t->getBuildType().requiresLarva() )
     {
       BWAPI::Unit* closestValidUnit = NULL;
@@ -606,7 +648,7 @@ namespace BWSAL
     BuildUnit* currentBuildUnit = BuildUnit::getBuildUnitIfExists( buildUnit );
     if ( currentBuildUnit == NULL )
     {
-      BuildUnit::setBuildUnit( buildUnit, t->getCreatedUnit() );
+      BuildUnit::setBuildUnit( buildUnit, t->getSecondCreatedUnit() );
     }
   }
 

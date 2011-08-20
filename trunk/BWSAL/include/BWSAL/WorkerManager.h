@@ -14,6 +14,7 @@ namespace BWSAL
       virtual void onOffer( std::set< BWAPI::Unit* > units );
       virtual void onRevoke( BWAPI::Unit* unit, double bid );
       virtual void onFrame();
+      virtual void onUnitComplete( BWAPI::Unit* unit );
       virtual std::string getName() const;
 
       void setWorkersPerGas( int count );

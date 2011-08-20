@@ -1,9 +1,11 @@
 #include <BWSAL/SupplyManager.h>
 #include <BWSAL/BuildOrderManager.h>
 #include <BWSAL/TaskScheduler.h>
+#include <BWSAL/BuildEventTimeline.h>
 #include <BWSAL/MacroTask.h>
 #include <BWSAL/Task.h>
 #include <Util/Foreach.h>
+#include <BWSAL/util.h>
 namespace BWSAL
 {
   SupplyManager* SupplyManager::s_supplyManager = NULL;
@@ -49,40 +51,51 @@ namespace BWSAL
          BWAPI::Broodwar->getFrameCount() > 24 * 120 )
     {
 
-      std::list< MacroTask* >::iterator i = waitingTasks.begin();
+      std::list< MacroTask* >::iterator i = m_incompleteTasks.begin();
       std::list< MacroTask* >::iterator i2 = i;
-      for( ; i != waitingTasks.end(); i = i2 )
+      for( ; i != m_incompleteTasks.end(); i = i2 )
       {
         i2++;
-        if ( (*i)->getTasks().front()->isWaiting() == false )
+        if ( (*i)->getTasks().front()->isCompleted() )
         {
-          waitingTasks.erase( i );
-        }
-        else
-        {
-        //  (*i)->getTasks().front()->setEarliestStartTime( (*i)->getTasks().front()->getEarliestStartTime() + 1 );
+          m_incompleteTasks.erase( i );
         }
       }
-
+      int supplyBlockTime = m_taskScheduler->getSupplyBlockTime();
       // State/Planning information is stored in BuildState and in the BuildUnits themselves
-      if ( m_taskScheduler->getSupplyBlockTime() != NEVER )
+      if ( supplyBlockTime != NEVER )
       {
         bool resolvedSupplyBlock = false;
-        foreach( MacroTask* mt, waitingTasks )
+        foreach( MacroTask* mt, m_incompleteTasks )
         {
           Task* t = mt->getTasks().front();
-          if ( t->getEarliestStartTime() > m_taskScheduler->getSupplyBlockTime() - m_buildTime )
+          if ( t->getEarliestStartTime() > supplyBlockTime - m_buildTime )
           {
-            t->setEarliestStartTime( m_taskScheduler->getSupplyBlockTime() - m_buildTime );
+            t->setEarliestStartTime( supplyBlockTime - m_buildTime );
             resolvedSupplyBlock = true;
             break;
           }
         }
+
         if ( !resolvedSupplyBlock )
         {
-          MacroTask* mt = m_buildOrderManager->buildAdditional(1, BWAPI::Broodwar->self()->getRace().getSupplyProvider(), 10000);
-          mt->getTasks().front()->setEarliestStartTime( m_taskScheduler->getSupplyBlockTime() - m_buildTime );
-          waitingTasks.push_back( mt );
+          bool allScheduledBefore = true;
+          foreach( MacroTask* mt, m_incompleteTasks )
+          {
+            Task* t = mt->getTasks().front();
+            if ( t->getRunTime() + m_buildTime >= supplyBlockTime )
+            {
+              allScheduledBefore = false;
+            }
+            logTask(t," ");
+          }
+          if ( allScheduledBefore )
+          {
+            log("[SupplyManager] Creating another supply provider to resolve supply block at time %d",m_taskScheduler->getSupplyBlockTime());
+            MacroTask* mt = m_buildOrderManager->buildAdditional(1, BWAPI::Broodwar->self()->getRace().getSupplyProvider(), 10000);
+            mt->getTasks().front()->setEarliestStartTime( m_taskScheduler->getSupplyBlockTime() - m_buildTime );
+            m_incompleteTasks.push_back( mt );
+          }
         }
       }
     }

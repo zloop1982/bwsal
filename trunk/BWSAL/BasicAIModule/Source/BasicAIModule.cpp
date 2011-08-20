@@ -74,29 +74,49 @@ void BasicAIModule::onStart()
       }
     }
   }
-
+  int buildID = 1;
   if ( race == Races::Zerg )
   {
     // Send an overlord out if Zerg
     m_scoutManager->setScoutCount( 1 );
 
-    //12 pool
-    m_buildOrderManager->build( 8, UnitTypes::Zerg_Drone, 90 );
-    m_buildOrderManager->buildAdditional( 1, UnitTypes::Zerg_Overlord, 85 );
-    m_buildOrderManager->build( 9, UnitTypes::Zerg_Drone, 80 );
-    m_buildOrderManager->buildAdditional( 1, UnitTypes::Zerg_Spawning_Pool, 70 );
-    m_buildOrderManager->buildAdditional( 3, UnitTypes::Zerg_Zergling, 65 );
-    m_buildOrderManager->build( 40, UnitTypes::Zerg_Drone, 62 );
-
+    if (buildID == 1)
+    {
+      //morph 5 lurkers (tests dependency resolver, task scheduler)
+      m_buildOrderManager->build( 8, UnitTypes::Zerg_Drone, 90 );
+      m_buildOrderManager->buildAdditional( 1, UnitTypes::Zerg_Overlord, 85 );
+      m_buildOrderManager->build( 12, UnitTypes::Zerg_Drone, 84 );
+      m_buildOrderManager->buildAdditional( 1, UnitTypes::Zerg_Lair, 82);
+      m_buildOrderManager->buildAdditional( 5, UnitTypes::Zerg_Lurker, 80);
+      m_buildOrderManager->build( 12, UnitTypes::Zerg_Drone, 30 );
+    }
+    else if (buildID >= 2)
+    {
+      //12 pool 6 lings (tests larva task scheduler)
+      m_buildOrderManager->build( 8, UnitTypes::Zerg_Drone, 90 );
+      m_buildOrderManager->buildAdditional( 1, UnitTypes::Zerg_Overlord, 85 );
+      m_buildOrderManager->build( 12, UnitTypes::Zerg_Drone, 84 );
+      m_buildOrderManager->buildAdditional( 1, UnitTypes::Zerg_Spawning_Pool, 70 );
+      m_buildOrderManager->buildAdditional( 3, UnitTypes::Zerg_Zergling, 65 );
+      m_buildOrderManager->build( 40, UnitTypes::Zerg_Drone, 62 );
+    }
   }
   else if ( race == Races::Terran )
   {
-    m_buildOrderManager->build(9,UnitTypes::Terran_SCV,90);
-    m_buildOrderManager->build(1,UnitTypes::Terran_Supply_Depot,85);
-    m_buildOrderManager->build(20,UnitTypes::Terran_SCV,80);
-    if (enemyRace == Races::Zerg)
+    if (buildID == 1)
     {
-
+      //build 3 comsat stations (tests dependency resolver)
+      m_buildOrderManager->build(9,UnitTypes::Terran_SCV,90);
+      m_buildOrderManager->build(1,UnitTypes::Terran_Supply_Depot,85);
+      m_buildOrderManager->build(20,UnitTypes::Terran_SCV,80);
+      m_buildOrderManager->buildAdditional(3,UnitTypes::Terran_Comsat_Station,60);
+    }
+    else if (buildID == 2)
+    {
+      //a complex build order
+      m_buildOrderManager->build(9,UnitTypes::Terran_SCV,90);
+      m_buildOrderManager->build(1,UnitTypes::Terran_Supply_Depot,85);
+      m_buildOrderManager->build(20,UnitTypes::Terran_SCV,80);
       m_buildOrderManager->buildAdditional(1,UnitTypes::Terran_Barracks,60);
       m_buildOrderManager->buildAdditional(9,UnitTypes::Terran_Marine,45);
  
@@ -121,11 +141,13 @@ void BasicAIModule::onStart()
       m_buildOrderManager->build(6,UnitTypes::Terran_Barracks,8);
       m_buildOrderManager->build(2,UnitTypes::Terran_Engineering_Bay,7);
       m_buildOrderManager->buildAdditional(10,UnitTypes::Terran_Siege_Tank_Tank_Mode,5);
-
-
     }
-    else
+    else if (buildID >= 3)
     {
+      //terran mech - tests task ordering with add-on requiring units
+      m_buildOrderManager->build(9,UnitTypes::Terran_SCV,90);
+      m_buildOrderManager->build(1,UnitTypes::Terran_Supply_Depot,85);
+      m_buildOrderManager->build(20,UnitTypes::Terran_SCV,80);
       m_buildOrderManager->buildAdditional(2,BWAPI::UnitTypes::Terran_Machine_Shop,70);
       m_buildOrderManager->buildAdditional(3,BWAPI::UnitTypes::Terran_Factory,60);
       m_buildOrderManager->research(TechTypes::Spider_Mines,55);
@@ -138,6 +160,7 @@ void BasicAIModule::onStart()
   }
   else if (race == Races::Protoss)
   {
+    //build 20 carriers - tests dependency resolver
     m_buildOrderManager->build(8,UnitTypes::Protoss_Probe,90);
     m_buildOrderManager->build(1,UnitTypes::Protoss_Pylon,85);
     m_buildOrderManager->build(20,UnitTypes::Protoss_Probe,80);
@@ -147,7 +170,7 @@ void BasicAIModule::onStart()
     m_buildOrderManager->buildAdditional(20,UnitTypes::Protoss_Carrier,60);
   }
   m_drawTasks = true;
-  m_drawAssignments = true;
+  m_drawAssignments = false;
   m_drawResources = true;
   m_drawLarva = Broodwar->self()->getRace() == Races::Zerg;
 

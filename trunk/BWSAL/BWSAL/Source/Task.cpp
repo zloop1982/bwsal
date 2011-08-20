@@ -31,13 +31,21 @@ namespace BWSAL
     {
       m_secondBuilder = NULL;
     }
-    if ( type.createsUnit() )
+    if ( type.createsUnit() || type.requiresLarva() )
     {
       m_createdUnit = new BuildUnit( this );
     }
     else
     {
       m_createdUnit = NULL;
+    }
+    if ( type.createsUnit() && type.requiresLarva() )
+    {
+      m_secondCreatedUnit = new BuildUnit( this );
+    }
+    else
+    {
+      m_secondCreatedUnit = NULL;
     }
     m_type = type;
     m_useAnyBuilder = true;
@@ -254,6 +262,11 @@ namespace BWSAL
     return m_createdUnit;
   }
 
+  BuildUnit* Task::getSecondCreatedUnit() const
+  {
+    return m_secondCreatedUnit;
+  }
+
   BuildEvent Task::getReserveBuilderEvent() const
   {
     BuildEvent e( m_type );
@@ -289,10 +302,15 @@ namespace BWSAL
     BuildEvent e( m_type, 0, 0, m_type.supplyProvided() );
     if ( m_type.morphsBuilder() )
     {
-      if ( m_type.createsUnit() )
+      if ( m_createdUnit != NULL )
+      {
+        e.setBuildUnitAvailable( m_type, m_createdUnit );
+        e.setCompletedBuildType( m_type );
+      }
+      if ( m_secondCreatedUnit != NULL )
       {
         // zerglings && sourge
-        e.setBuildUnitAvailable( m_type, m_createdUnit );
+        e.setBuildUnitAvailable( m_type, m_secondCreatedUnit );
         e.setCompletedBuildType( m_type );
       }
       e.setCompletedBuildType( m_type );
@@ -301,7 +319,7 @@ namespace BWSAL
     {
       // tech/research/construction/production
       e.setCompletedBuildType( m_type );
-      if ( m_type.createsUnit() )
+      if ( m_createdUnit != NULL )
       {
         // normal production/construction
         e.setBuildUnitAvailable( m_type, m_createdUnit );

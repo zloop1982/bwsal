@@ -4,6 +4,7 @@
 #include <BWSAL/Util.h>
 #include <Util/Foreach.h>
 #include <BWAPI.h>
+#include <sstream>
 namespace BWSAL
 {
   BuildEventTimeline* BuildEventTimeline::s_buildEventTimeline = NULL;
@@ -206,6 +207,14 @@ namespace BWSAL
 
   std::list< std::pair< int, BuildEvent > >::iterator BuildEventTimeline::addEvent( int time, BuildEvent &e, std::list< std::pair< int, BuildEvent > >::iterator i )
   {
+    if ( e.getDeltaSupply() > 0 )
+    {
+      m_finalSupplyTotal += e.getDeltaSupply();
+    }
+    else
+    {
+      m_finalSupplyUsed += -e.getDeltaSupply();
+    }
     while ( i != m_events.end() )
     {
       if ( ( *i ).first > time )
@@ -231,5 +240,17 @@ namespace BWSAL
   {
     m_initialState.updateWithCurrentGameState();
     m_events.clear();
+    m_finalSupplyUsed = m_initialState.getSupplyUsed();
+    m_finalSupplyTotal = m_initialState.getSupplyTotal();
+  }
+
+  std::string BuildEventTimeline::toString() const
+  {
+    std::stringstream ss;
+    for ( std::list< std::pair<int, BuildEvent> >::const_iterator i = m_events.begin(); i != m_events.end(); i++ )
+    {
+      ss << "  [" << i->first << "] " << i->second.toString() << "\n";
+    }
+    return ss.str();
   }
 }

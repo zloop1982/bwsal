@@ -2,6 +2,8 @@
 #include <BWSAL/Util.h>
 #include <BWSAL/MacroTask.h>
 #include <BWSAL/BuildUnit.h>
+#include <BWSAL/MetaUnitVariable.h>
+#include <BWSAL/MetaUnit.h>
 #include <BWSAL/BuildOrderManager.h>
 #include <BWAPI.h>
 namespace BWSAL
@@ -102,10 +104,19 @@ namespace BWSAL
       if ( m_macroTask != NULL )
       {
         Task* t = m_macroTask->getTasks().front();
-        if ( t->getCreatedUnit()->isReal() && t->getCreatedUnit()->getUnit()->exists() )
+        if ( t->getCreatedUnit() && t->getCreatedUnit()->isReal() && t->getCreatedUnit()->getUnit()->exists() )
         {
           m_resourceDepot = t->getCreatedUnit()->getUnit();
         }
+        else if ( t->getBuilder() &&
+                  t->getBuilder()->getBuildUnit() &&
+                  t->getBuilder()->getBuildUnit()->isReal() &&
+                  t->getBuilder()->getBuildUnit()->getUnit()->exists() &&
+                  t->getBuilder()->getBuildUnit()->getUnit()->getType().isResourceDepot() )
+        {
+          m_resourceDepot = t->getBuilder()->getBuildUnit()->getUnit();
+        }
+
       }
     }
     m_ready = ( m_resourceDepot != NULL &&
