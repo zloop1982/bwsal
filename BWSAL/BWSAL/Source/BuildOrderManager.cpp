@@ -1,5 +1,6 @@
 #include <BWSAL/BuildOrderManager.h>
 #include <BWSAL/BuildUnitManager.h>
+#include <BWSAL/BuildEventTimeline.h>
 #include <BWSAL/Task.h>
 #include <BWSAL/TaskScheduler.h>
 #include <BWSAL/TaskExecutor.h>
@@ -11,6 +12,7 @@
 namespace BWSAL
 {
   BuildOrderManager* BuildOrderManager::s_buildOrderManager = NULL;
+  int planDistance = 24*30;
   BuildOrderManager* BuildOrderManager::create( TaskScheduler* taskScheduler, TaskExecutor* taskExecutor, BuildUnitManager* buildUnitManager )
   {
     if ( s_buildOrderManager )
@@ -39,6 +41,7 @@ namespace BWSAL
 
   BuildOrderManager::BuildOrderManager()
   {
+    m_debugLevel = 0;
   }
 
   BuildOrderManager::~BuildOrderManager()
@@ -54,6 +57,10 @@ namespace BWSAL
       {
         m_totalNeededTypeCount[bt].first = max( m_totalNeededTypeCount[bt].first, m_totalScheduledTypeCount[bt] + 1 );
         m_totalNeededTypeCount[bt].second = max( m_totalNeededTypeCount[bt].second, priority + 1 );
+        if ( m_debugLevel >= 10 )
+        {
+          log( "I may need to build a %s. Current scheduled count: %d", bt.getName().c_str(), m_totalScheduledTypeCount[bt] );
+        }
       }
     }
   }
@@ -73,6 +80,7 @@ namespace BWSAL
       }
     }
     m_newMacroTasks.clear();
+    computeTotalPlannedCounts();
     for each( BuildType t in BuildTypes::allBuildTypes( BWAPI::Broodwar->self()->getRace() ) )
     {
       m_totalScheduledTypeCount[t] = BWAPI::Broodwar->self()->completedUnitCount( t.getUnitType() ) + m_taskExecutor->getRunningCount( t );
@@ -100,17 +108,29 @@ namespace BWSAL
               if ( t->isWaiting() && t->isScheduledThisFrame() == false )
               {
                 TaskPlan plan = m_taskScheduler->scheduleTask( t );
-                if ( plan.getRunTime() < BWAPI::Broodwar->getFrameCount() + 24*60)
+                if ( plan.getRunTime() < BWAPI::Broodwar->getFrameCount() + planDistance*2)
                 {
                   m_taskScheduler->finalizeSchedule();
                   m_totalScheduledTypeCount[t->getBuildType()]++;
                 }
                 else if ( plan.getRunTime() == NEVER )
                 {
-                  int insufficientTypes = ( m_taskScheduler->getInsufficientTypes() & ~BuildTypes::SupplyMask );
-                  resolveDependencies( insufficientTypes, pmt->first );
+                  int insufficientTypes = ( m_taskScheduler->getInsufficientTypes() & ~( BuildTypes::SupplyMask | BuildTypes::WorkerMask ) );
+                  if ( insufficientTypes != 0 )
+                  {
+                    if ( m_debugLevel >= 1 )
+                    {
+                      log( "Found dependencies while scheduling %s", t->getBuildType().getName().c_str() );
+                      if ( m_debugLevel >= 5 )
+                      {
+                        log( "Timeline:" );
+                        log( m_taskScheduler->getTimeline()->toString().c_str() );
+                      }
+                    }
+                    resolveDependencies( insufficientTypes, pmt->first );
+                  }
                 }
-                if ( (m_taskScheduler->getLastMineralBlockTime() > BWAPI::Broodwar->getFrameCount() + 24*30 &&
+                if ( (m_taskScheduler->getLastMineralBlockTime() > BWAPI::Broodwar->getFrameCount() + planDistance &&
                      m_taskScheduler->getLastMineralBlockTime() != NEVER) )
                 {
                   tooFarIntoTheFuture = true;
@@ -145,9 +165,17 @@ namespace BWSAL
               {
                 TaskPlan plan = m_taskScheduler->scheduleTask( t );
                 macroTaskHeap.set( mt, macroTaskHeap.top().second - 1 );
-                if ( plan.getRunTime() < BWAPI::Broodwar->getFrameCount() + 24*60 )
+                if ( m_debugLevel >= 10 )
+                {
+                  logTask( t, "Scheduling" );
+                }
+                if ( plan.getRunTime() < BWAPI::Broodwar->getFrameCount() + planDistance*2 || ( plan.getRunTime() != NEVER && t->getBuildType().supplyProvided() > 0 ) )
                 {
                   m_taskScheduler->finalizeSchedule();
+                  if ( m_debugLevel >= 10 )
+                  {
+                    logTask( t, "Finalizing Schedule" );
+                  }
                   m_totalScheduledTypeCount[t->getBuildType()]++;
                   if ( t->getBuildType().supplyProvided() > 0 )
                   {
@@ -157,11 +185,23 @@ namespace BWSAL
                 }
                 else if ( plan.getRunTime() == NEVER )
                 {
-                  int insufficientTypes = ( m_taskScheduler->getInsufficientTypes() & ~BuildTypes::SupplyMask );
-                  resolveDependencies( insufficientTypes, pmt->first );
+                  int insufficientTypes = ( m_taskScheduler->getInsufficientTypes() & ~( BuildTypes::SupplyMask | BuildTypes::WorkerMask ) );
+                  if ( insufficientTypes != 0 )
+                  {
+                    if ( m_debugLevel >= 1 )
+                    {
+                      log( "Found dependencies while scheduling %s", t->getBuildType().getName().c_str() );
+                      if ( m_debugLevel >= 5 )
+                      {
+                        log( "Timeline:" );
+                        log( m_taskScheduler->getTimeline()->toString().c_str() );
+                      }
+                    }
+                    resolveDependencies( insufficientTypes, pmt->first );
+                  }
                 }
-                if ( (m_taskScheduler->getLastMineralBlockTime() > BWAPI::Broodwar->getFrameCount() + 24*30 &&
-                     m_taskScheduler->getLastMineralBlockTime() != NEVER) )
+                if ( ( m_taskScheduler->getLastMineralBlockTime() > BWAPI::Broodwar->getFrameCount() + planDistance &&
+                       m_taskScheduler->getLastMineralBlockTime() != NEVER ) )
                 {
                   tooFarIntoTheFuture = true;
                   break;
@@ -177,7 +217,6 @@ namespace BWSAL
       }
     }
     // Plan dependencies
-    computeTotalPlannedCounts();
     for ( std::map< BuildType, std::pair< int, int > >::iterator i = m_totalNeededTypeCount.begin(); i != m_totalNeededTypeCount.end(); i++ )
     {
       BuildType bt = i->first;
@@ -185,6 +224,10 @@ namespace BWSAL
       int priority = i->second.second;
       if ( neededCount > 0 )
       {
+        if ( m_debugLevel >= 1 )
+        {
+          log( "I need %d %s but I have planned only %d. Building %d additional...", i->second.first, i->first.getName().c_str(), m_totalPlannedTypeCount[bt], neededCount );
+        }
         buildAdditional( neededCount, bt, priority );
       }
     }

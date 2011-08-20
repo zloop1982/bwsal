@@ -389,6 +389,14 @@ namespace BWSAL
     }
   }
 
+  void WorkerManager::onUnitComplete( BWAPI::Unit* unit )
+  {
+    if ( unit->getType().isRefinery() )
+    {
+      rebalanceWorkers();
+    }
+  }
+
   std::string WorkerManager::getName() const
   {
     return "Worker Manager";

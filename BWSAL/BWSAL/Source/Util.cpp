@@ -11,12 +11,11 @@ namespace BWSAL
   {
     remove( "bwapi-data\\logs\\BWSAL.log" );
   }
-  char buffer[1024];
+  const int BUFFER_SIZE = 100000;
+  char buffer[BUFFER_SIZE];
+  char taskBuffer[BUFFER_SIZE];
   void log( const char* text, ... )
   {
-    const int BUFFER_SIZE = 1024;
-    char buffer[BUFFER_SIZE];
-
     va_list ap;
     va_start( ap, text );
     vsnprintf_s( buffer, BUFFER_SIZE, BUFFER_SIZE, text, ap );
@@ -34,14 +33,11 @@ namespace BWSAL
   }
   void logTask( Task* t, const char* text, ... )
   {
-    const int BUFFER_SIZE = 1024;
-    char buffer[BUFFER_SIZE];
-
     va_list ap;
     va_start( ap, text );
-    vsnprintf_s( buffer, BUFFER_SIZE, BUFFER_SIZE, text, ap );
+    vsnprintf_s( taskBuffer, BUFFER_SIZE, BUFFER_SIZE, text, ap );
     va_end( ap );
-    log( "%s %s", t->toString().c_str(), buffer );
+    log( "%s %s", t->toString().c_str(), taskBuffer );
   }
   bool resourceDepotIsCompleted( BWAPI::Unit* u )
   {

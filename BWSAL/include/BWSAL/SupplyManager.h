@@ -17,7 +17,7 @@ namespace BWSAL
     private:
       SupplyManager();
       ~SupplyManager();
-      std::list< MacroTask* > waitingTasks;
+      std::list< MacroTask* > m_incompleteTasks;
       BuildOrderManager* m_buildOrderManager;
       TaskScheduler* m_taskScheduler;
       BuildType m_supplyProviderType;

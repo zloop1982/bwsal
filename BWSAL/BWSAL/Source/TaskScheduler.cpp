@@ -258,6 +258,17 @@ namespace BWSAL
           h->second.candidateNextLarvaSpawnTime = h->first->m_planningData.m_nextLarvaSpawnTime;
           h->second.candidateMorphed = false;
         }
+        if ( m_debugLevel >= 10)
+        {
+          log( "set candidate morph time to %d", h->second.candidateMorphTime );
+        }
+      }
+      else
+      {
+        if ( m_debugLevel >= 10)
+        {
+          log( "candidate morph time is already %d", h->second.candidateMorphTime );
+        }
       }
     }
   }
@@ -284,7 +295,7 @@ namespace BWSAL
       for ( std::map<BuildUnit*, HLHPlanData>::iterator h = hlhPlans.begin(); h != hlhPlans.end(); h++ )
       {
         BuildUnit* bu = h->first;
-        log("[%d] AS=%d, LC=%d, NLST=%d",state.getTime(), bu->m_planningData.m_availableSince, bu->m_planningData.m_larvaCount, bu->m_planningData.m_nextLarvaSpawnTime );
+        log("[%d] LC=%d, NLST=%d",state.getTime(), bu->m_planningData.m_larvaCount, bu->m_planningData.m_nextLarvaSpawnTime );
       }
     }
 
@@ -301,9 +312,29 @@ namespace BWSAL
       }
       else
       {
+        if ( m_debugLevel >= 10 )
+        {
+          if ( state.getMinerals() < buildType.mineralPrice() )
+          {
+            log( "resetting candidates because of insufficient minerals: %f < %d", state.getMinerals(), buildType.mineralPrice() );
+          }
+          else if ( state.getGas() < buildType.gasPrice() )
+          {
+            log( "resetting candidates because of insufficient gas: %f < %d", state.getGas(), buildType.gasPrice() );
+          }
+          else
+          {
+            log( "resetting candidates because too early: %d < %d", state.getTime(), t->getEarliestStartTime() );
+          }
+        }
         int nextSatisfiedTime = max( t->getEarliestStartTime(), state.getNextTimeWithMinimumResources( buildType. mineralPrice(), buildType.gasPrice() ) );
         if ( nextEvent == m_timeline->end() || nextSatisfiedTime < nextEvent->first )
         {
+          if ( m_debugLevel >= 10 )
+          {
+            log( "continuing to next satisfied time which is at %d", nextSatisfiedTime );
+          }
+
           state.continueToTime( nextSatisfiedTime );
           validBuildTypeSince = state.getTime();
         }
@@ -330,11 +361,11 @@ namespace BWSAL
       updateLastBlockTimes( &state, buildType );
       if ( m_debugLevel >= 10)
       {
-        log("[%d] m=%f, g=%f, s=%d", state.getTime(), state.getMinerals(), state.getGas(), state.getSupply() ); 
+        log( "[%d] m=%f, g=%f, s=%d", state.getTime(), state.getMinerals(), state.getGas(), state.getSupplyAvailable() ); 
         for ( std::map<BuildUnit*, HLHPlanData>::iterator h = hlhPlans.begin(); h != hlhPlans.end(); h++ )
         {
           BuildUnit* bu = h->first;
-          log("[%d] AS=%d, LC=%d, NLST=%d, CMT=%d",state.getTime(), bu->m_planningData.m_availableSince, bu->m_planningData.m_larvaCount, bu->m_planningData.m_nextLarvaSpawnTime,h->second.candidateMorphTime );
+          log( "[%d] AS=%d, LC=%d, NLST=%d, CMT=%d", state.getTime(), bu->m_planningData.m_availableSince, bu->m_planningData.m_larvaCount, bu->m_planningData.m_nextLarvaSpawnTime,h->second.candidateMorphTime );
         }
       }
 
@@ -365,6 +396,10 @@ namespace BWSAL
         validBuildTypeSince = NEVER;
         // Throw away our candidate solutions
         resetCandidates( &hlhPlans, &state );
+        if ( m_debugLevel >= 10)
+        {
+          log( "resetting candidates because of insufficient build types: %d", state.getInsufficientTypes( buildType ) );
+        }
         continue;
       }
 
@@ -374,6 +409,21 @@ namespace BWSAL
         validBuildTypeSince = NEVER;
         // Throw away our candidate solutions
         resetCandidates( &hlhPlans, &state );
+        if ( m_debugLevel >= 10 )
+        {
+          if ( state.getMinerals() < buildType.mineralPrice() )
+          {
+            log( "resetting candidates because of insufficient minerals: %f < %d", state.getMinerals(), buildType.mineralPrice() );
+          }
+          else if ( state.getGas() < buildType.gasPrice() )
+          {
+            log( "resetting candidates because of insufficient gas: %f < %d", state.getGas(), buildType.gasPrice() );
+          }
+          else
+          {
+            log( "resetting candidates because too early: %d < %d", state.getTime(), t->getEarliestStartTime() );
+          }
+        }
 
         // See if we will have enough minerals and gas before the next event
         int nextSatisfiedTime = max( t->getEarliestStartTime(), state.getNextTimeWithMinimumResources( buildType.mineralPrice(), buildType.gasPrice() ) );
@@ -383,13 +433,25 @@ namespace BWSAL
           {
             // Right now it doesn't look like we'll ever have enough resources
             // But continue to the next event. Who knows, maybe we've planned a worker or refinery
+            if ( m_debugLevel >= 10 )
+            {
+              log( "continuing to next event to find a satisfied time" );
+            }
             continue;
+          }
+          if ( m_debugLevel >= 10 )
+          {
+            log( "continuing to next satisfied time which is at %d", nextSatisfiedTime );
           }
           // If so, continue to that point and time and update validBuildTypeSince
           continueToTimeWithLarvaSpawns( &state, &hlhPlans, nextSatisfiedTime );
         }
         else
         {
+          if ( m_debugLevel >= 10 )
+          {
+            log( "nextSatisfiedTime occurs after next event: %d >= %d", nextSatisfiedTime, nextEvent->first );
+          }
           // Otherwise, we will need to continue processing events until we find a valid time
           continue;
         }
@@ -398,6 +460,11 @@ namespace BWSAL
       if ( validBuildTypeSince == NEVER )
       {
         validBuildTypeSince = state.getTime();
+      }
+      if ( m_debugLevel >= 10 )
+      {
+        log( "validBuildTypeSince = %d", validBuildTypeSince );
+        log( "findCandidateMorphTimes" );
       }
       findCandidateMorphTimes( &hlhPlans, validBuildTypeSince );
     }
@@ -413,18 +480,36 @@ namespace BWSAL
         candidateUnit = h->first;
       }
     }
+    if ( m_debugLevel >= 10 )
+    {
+     log( "final candidate morph time is %d", candidateTime );
+     log( "final candidate builder is %x", candidateUnit );
+    }
     if ( candidateUnit != NULL )
     {
       m_candidateTask = t;
       m_candidatePlan.m_builder = candidateUnit;
       m_candidatePlan.m_runTime = candidateTime;
     }
-
     if ( candidateTime == NEVER )
     {
       //We're going to return NEVER, record reason
       m_insufficientTypes = state.getInsufficientTypes( buildType );
-      if ( m_insufficientTypes == 0 )
+      if ( state.getGas() < buildType.gasPrice() && state.getGasWorkers() == 0 )
+      {
+        if ( ( state.getCompletedBuildTypes() & BuildTypes::RefineryMask ) == 0 )
+        {
+          m_insufficientTypes |= BuildTypes::RefineryMask;
+        }
+        else
+        {
+          m_insufficientTypes |= BuildTypes::WorkerMask;
+        }
+      }
+      if ( m_insufficientTypes == 0 &&
+           state.getMinerals() >= buildType.mineralPrice() &&
+           state.getGas() >= buildType.gasPrice() &&
+           state.getTime() >= t->getEarliestStartTime() )
       {
         // If we have enough build types, minerals, gas, and supply, but still can't build
         // then we need a builder
@@ -630,7 +715,21 @@ namespace BWSAL
     {
       //We're going to return NEVER, record reason
       m_insufficientTypes = state.getInsufficientTypes( buildType );
-      if ( m_insufficientTypes == 0 )
+      if ( state.getGas() < buildType.gasPrice() && state.getGasWorkers() == 0 )
+      {
+        if ( ( state.getCompletedBuildTypes() & BuildTypes::RefineryMask ) == 0 )
+        {
+          m_insufficientTypes |= BuildTypes::RefineryMask;
+        }
+        else
+        {
+          m_insufficientTypes |= BuildTypes::WorkerMask;
+        }
+      }
+      if ( m_insufficientTypes == 0 &&
+           state.getMinerals() >= buildType.mineralPrice() &&
+           state.getGas() >= buildType.gasPrice() &&
+           state.getTime() >= t->getEarliestStartTime() )
       {
         // If we have enough build types, minerals, gas, and supply, but still can't build
         // then we need a builder
@@ -674,6 +773,10 @@ namespace BWSAL
   void TaskScheduler::resetLastGasBlockTime()
   {
     m_lastGasBlockTime = NEVER;
+  }
+  BuildEventTimeline* TaskScheduler::getTimeline() const
+  {
+    return m_timeline;
   }
 
   void TaskScheduler::updateLastBlockTimes( BuildState* state, BuildType type )

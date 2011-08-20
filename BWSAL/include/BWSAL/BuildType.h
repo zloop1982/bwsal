@@ -57,7 +57,7 @@ namespace BWSAL
       bool build( BWAPI::Unit* builder, BWAPI::Unit* secondBuilder, BWAPI::TilePosition buildLocation ) const;
       bool isPreparing( BWAPI::Unit* builder, BWAPI::Unit* secondBuilder ) const;
       bool isBuilding( BWAPI::Unit* builder, BWAPI::Unit* secondBuilder, BWAPI::Unit* createdUnit ) const;
-      bool isCompleted( BWAPI::Unit* builder, BWAPI::Unit* secondBuilder, BWAPI::Unit* createdUnit ) const;
+      bool isCompleted( BWAPI::Unit* builder, BWAPI::Unit* secondBuilder, BWAPI::Unit* createdUnit, BWAPI::Unit* secondCreatedUnit ) const;
       int remainingTime( BWAPI::Unit* builder, BWAPI::Unit* secondBuilder, BWAPI::Unit* createdUnit ) const;
     private:
       int id;

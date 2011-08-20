@@ -22,6 +22,7 @@ namespace BWSAL
       MetaUnitVariable* getBuilder() const;
       MetaUnitVariable* getSecondBuilder() const;
       BuildUnit* getCreatedUnit() const;
+      BuildUnit* getSecondCreatedUnit() const;
       BWAPI::TilePosition getBuildLocation() const;
       BWAPI::TilePosition getSeedLocation() const;
       BuildEvent getReserveBuilderEvent() const;
@@ -70,8 +71,9 @@ namespace BWSAL
       int id;
       TaskState m_state;
       MetaUnitVariable* m_builder;
-      BuildUnit* m_createdUnit;
       MetaUnitVariable* m_secondBuilder;
+      BuildUnit* m_createdUnit;
+      BuildUnit* m_secondCreatedUnit;
       std::set< MetaUnit* > m_possibleBuilders;
       bool m_useAnyBuilder;
       BWAPI::TilePosition m_buildLocation;

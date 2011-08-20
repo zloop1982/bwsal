@@ -33,11 +33,13 @@ namespace BWSAL
       std::list< Task* > m_runningTasks;
 
       void computeCreatedUnit( Task* t );
+      void computeSecondCreatedUnit( Task* t );
       void computeIsExecuting( Task* t );
       void computeIsCompleted( Task* t );
       void computeIsReady( Task* t );
       void getReady( Task* t );
       void execute( Task* t );
       std::set< BWAPI::Unit* > m_builders;
+      std::map< BuildType, int > m_runningCount;
   };
 }

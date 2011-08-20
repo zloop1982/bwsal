@@ -26,9 +26,12 @@ namespace BWSAL
       int getTime() const;
       double getMinerals() const;
       double getGas() const;
-      int getSupply() const;
+      int getSupplyAvailable() const;
+      int getSupplyTotal() const;
+      int getSupplyUsed() const;
       int getMineralWorkers() const;
       int getGasWorkers() const;
+      unsigned int getCompletedBuildTypes() const;
 
       int reservedMinerals;
       int reservedGas;
@@ -37,7 +40,8 @@ namespace BWSAL
       int m_time;
       double m_minerals;
       double m_gas;
-      int m_supply;
+      int m_supplyTotal;
+      int m_supplyUsed;
       int m_mineralWorkers;
       int m_gasWorkers;
   };

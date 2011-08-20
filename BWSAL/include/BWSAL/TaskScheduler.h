@@ -36,6 +36,7 @@ namespace BWSAL
       void resetLastMineralBlockTime();
       int getLastGasBlockTime() const;
       void resetLastGasBlockTime();
+      BuildEventTimeline* getTimeline() const;
     private:
       TaskScheduler();
       ~TaskScheduler();
@@ -59,6 +60,7 @@ namespace BWSAL
       void continueToTimeWithLarvaSpawns( BuildState* state, std::map< BuildUnit*, HLHPlanData > *hlhPlans, int time );
       void findCandidateMorphTimes( std::map< BuildUnit*, HLHPlanData > *hlhPlans, int validBuildTimeSince );
       void updateLastBlockTimes( BuildState* state, BuildType type );
+      BuildEventTimeline* m_timeline;
       int m_supplyBlockTime;
       int m_insufficientTypes;
       int m_debugLevel;
@@ -66,7 +68,6 @@ namespace BWSAL
       int m_lastGasBlockTime;
       TaskPlan m_candidatePlan;
       Task* m_candidateTask;
-      BuildEventTimeline* m_timeline;
       BuildUnitManager* m_buildUnitManager;
       static TaskScheduler* s_taskScheduler;
   };

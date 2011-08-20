@@ -140,6 +140,10 @@ namespace BWSAL
             this->whatBuilds.first = BuildType( this->techType.whatResearches() );
             this->whatBuilds.second = 1;
             this->requiredBuildTypes.insert( this->whatBuilds );
+            if ( this->techType == BWAPI::TechTypes::Lurker_Aspect )
+            {
+              this->requiredBuildTypes.insert( std::make_pair( BuildTypes::Zerg_Lair, 1 ) );
+            }
           }
           else if ( this->unitType != BWAPI::UnitTypes::None )
           {
@@ -179,9 +183,10 @@ namespace BWSAL
           }
           else if ( this->upgradeType != BWAPI::UpgradeTypes::None )
           {
-            this->whatBuilds.first = this->upgradeType.whatUpgrades();
+            this->whatBuilds.first = BuildType( this->upgradeType.whatUpgrades() );
             this->whatBuilds.second = 1;
             this->requiredBuildTypes.insert( this->whatBuilds );
+            this->requiredBuildTypes.insert( std::make_pair( BuildType( this->upgradeType.whatsRequired() ), 1) );
             if ( this->upgradeLevel > 1 )
             {
               this->requiredBuildTypes.insert( std::make_pair( BuildType( this->upgradeType, this->upgradeLevel - 1 ), 1 ) );
@@ -1133,7 +1138,7 @@ namespace BWSAL
     return false;
   }
 
-  bool BuildType::isCompleted( BWAPI::Unit* builder, BWAPI::Unit* secondBuilder, BWAPI::Unit* createdUnit ) const
+  bool BuildType::isCompleted( BWAPI::Unit* builder, BWAPI::Unit* secondBuilder, BWAPI::Unit* createdUnit, BWAPI::Unit* secondCreatedUnit ) const
   {
     if ( buildTypeData[this->id].techType != BWAPI::TechTypes::None )
     {
@@ -1147,11 +1152,19 @@ namespace BWSAL
 
     if ( buildTypeData[this->id].unitType != BWAPI::UnitTypes::None )
     {
-      if ( buildTypeData[this->id].createsUnit &&
+      if ( ( buildTypeData[this->id].createsUnit || buildTypeData[this->id].requiresLarva ) &&
            !( createdUnit != NULL &&
               createdUnit->exists() &&
               createdUnit->isCompleted() &&
               createdUnit->getType() == buildTypeData[this->id].unitType ) )
+      {
+        return false;
+      }
+      if ( ( buildTypeData[this->id].createsUnit && buildTypeData[this->id].requiresLarva ) &&
+           !( secondCreatedUnit != NULL &&
+              secondCreatedUnit->exists() &&
+              secondCreatedUnit->isCompleted() &&
+              secondCreatedUnit->getType() == buildTypeData[this->id].unitType ) )
       {
         return false;
       }
@@ -1164,7 +1177,7 @@ namespace BWSAL
           return false;
         }
       }
-      if ( buildTypeData[this->id].unitType.isAddon() && builder->getAddon() != createdUnit)
+      if ( buildTypeData[this->id].unitType.isAddon() && builder->getAddon() != createdUnit )
       {
         return false;
       }

@@ -45,6 +45,7 @@ namespace BWSAL
       TaskExecutor* m_taskExecutor;
       BuildUnitManager* m_buildUnitManager;
       std::vector< MacroTask* > m_newMacroTasks;
+      int m_debugLevel;
       static BuildOrderManager* s_buildOrderManager;
   };
 }
